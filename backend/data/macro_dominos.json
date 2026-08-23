@@ -1,0 +1,88 @@
+[
+  {
+    "event": "Crude Oil +30%",
+    "depth": 4,
+    "steps": [
+      {
+        "order": 1,
+        "title": "Direct impact",
+        "description": "Crude oil rises 30% \u2014 jet fuel and refining input costs surge across all airlines & refiners."
+      },
+      {
+        "order": 2,
+        "title": "2nd-order effect",
+        "description": "IndiGo & SpiceJet operating margins compress by 180 to 260 bps."
+      },
+      {
+        "order": 3,
+        "title": "3rd-order effect",
+        "description": "Airlines pass fuel costs on \u2014 average airfares increase 8% to 12%."
+      },
+      {
+        "order": 4,
+        "title": "4th-order endpoint",
+        "description": "Domestic leisure travel demand softens 6%, causing secondary occupancy drag on hotel chains (Indian Hotels, Lemon Tree)."
+      }
+    ],
+    "affected_companies": [
+      {
+        "name": "IndiGo",
+        "type": "hit",
+        "impact": "Margins -220bps"
+      },
+      {
+        "name": "SpiceJet",
+        "type": "hit",
+        "impact": "High fuel vulnerability"
+      },
+      {
+        "name": "ONGC",
+        "type": "benefit",
+        "impact": "Net crude realization +$12/bbl"
+      },
+      {
+        "name": "Indian Hotels",
+        "type": "drag",
+        "impact": "Leisure travel elasticity"
+      }
+    ]
+  },
+  {
+    "event": "RBI Rate Cut 50bps",
+    "depth": 3,
+    "steps": [
+      {
+        "order": 1,
+        "title": "Direct impact",
+        "description": "Lending benchmark rates fall \u2014 bank borrowing costs ease immediately."
+      },
+      {
+        "order": 2,
+        "title": "2nd-order effect",
+        "description": "Retail home loan and auto loan credit demand expands by 14\u201318%."
+      },
+      {
+        "order": 3,
+        "title": "3rd-order endpoint",
+        "description": "Automotive OEMs (Tata Motors, Maruti) and real estate developers experience surge in pre-sales."
+      }
+    ],
+    "affected_companies": [
+      {
+        "name": "HDFC Bank",
+        "type": "benefit",
+        "impact": "Credit growth +16%"
+      },
+      {
+        "name": "Tata Motors",
+        "type": "benefit",
+        "impact": "Auto financing affordability"
+      },
+      {
+        "name": "Bajaj Finance",
+        "type": "benefit",
+        "impact": "AUM expansion"
+      }
+    ]
+  }
+]

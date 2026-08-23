@@ -1,0 +1,2216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarketMind AI — Intelligence Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:      #FAF6EC;
+    --cream-2:    #F3ECDD;
+    --paper:      #FFFEFB;
+    --ink:        #1E2433;
+    --ink-soft:   #5B5A4F;
+    --navy:       #101B33;
+    --navy-2:     #16274A;
+    --navy-3:     #1F3766;
+    --gold:       #B8935A;
+    --gold-light: #D9BC8B;
+    --gold-dim:   #EADFC7;
+    --teal:       #2F6F62;
+    --teal-light: #DCEAE5;
+    --rose:       #A14545;
+    --rose-light: #F3E1DE;
+    --line:       #E6DCC4;
+    --shadow:     0 18px 40px -20px rgba(16,27,51,.28);
+    --shadow-sm:  0 6px 16px -8px rgba(16,27,51,.18);
+    --radius:     16px;
+    --serif: 'EB Garamond', 'Cormorant Garamond', Georgia, serif;
+    --serif-deco: 'Cormorant Garamond', 'EB Garamond', serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow-x:hidden;}
+  html{width:100%;}
+  img,svg{max-width:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(184,147,90,.10), transparent 60%),
+      radial-gradient(900px 500px at -5% 10%, rgba(47,111,98,.08), transparent 55%),
+      var(--cream);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    min-height:100vh;
+  }
+  ::selection{background:var(--gold-dim);color:var(--navy);}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  /* ============ SIDEBAR ============ */
+  .sidebar{
+    width:250px;
+    flex-shrink:0;
+    background:linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
+    color:#EDE6D3;
+    display:flex;
+    flex-direction:column;
+    padding:28px 18px 20px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow:hidden;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    padding:0 6px 26px;border-bottom:1px solid rgba(216,188,139,.18);margin-bottom:22px;
+  }
+  .brand-mark{
+    width:38px;height:38px;border-radius:10px;
+    background:linear-gradient(135deg, var(--gold-light), var(--gold));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 12px rgba(184,147,90,.35);flex-shrink:0;
+  }
+  .brand-mark svg{width:20px;height:20px;stroke:var(--navy);}
+  .brand-text .name{font-family:var(--serif);font-weight:600;font-size:20px;letter-spacing:.3px;color:#FBF4E4;line-height:1.05;}
+  .brand-text .sub{font-size:9.5px;letter-spacing:2.2px;color:var(--gold-light);text-transform:uppercase;margin-top:2px;}
+
+  .nav-label{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#8B92A8;padding:16px 12px 8px;font-weight:600;}
+  .nav-scroll{
+    flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+    margin-right:-10px;padding-right:10px;
+  }
+  .nav-scroll::-webkit-scrollbar{width:5px;}
+  .nav-scroll::-webkit-scrollbar-thumb{background:rgba(216,188,139,.28);border-radius:6px;}
+  .nav-scroll::-webkit-scrollbar-track{background:transparent;}
+  nav.primary{display:flex;flex-direction:column;gap:2px;}
+  .nav-item{
+    display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;
+    font-size:13.5px;line-height:1.3;color:#CBD1E0;font-weight:500;
+    transition:background .15s ease, color .15s ease;position:relative;flex-wrap:wrap;
+  }
+  .nav-item svg{width:17px;height:17px;flex-shrink:0;opacity:.85;}
+  .nav-item > span:not(.nav-badge){flex:1;min-width:0;}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#F5EFDD;}
+  .nav-item.active{background:linear-gradient(90deg, rgba(184,147,90,.24), rgba(184,147,90,.06));color:#FBF4E4;}
+  .nav-item.active::before{content:"";position:absolute;left:-18px;top:8px;bottom:8px;width:3px;background:var(--gold-light);border-radius:2px;}
+  .nav-badge{margin-left:auto;font-size:10px;background:rgba(184,147,90,.22);color:var(--gold-light);padding:1px 7px;border-radius:20px;font-weight:600;}
+
+  .sidebar-foot{margin-top:auto;padding-top:16px;border-top:1px solid rgba(216,188,139,.14);flex-shrink:0;}
+  .plan-card{background:rgba(255,255,255,.04);border:1px solid rgba(216,188,139,.18);border-radius:12px;padding:13px 14px;margin-bottom:12px;}
+  .plan-card .t{font-family:var(--serif);font-size:14px;color:var(--gold-light);margin-bottom:3px;}
+  .plan-card .d{font-size:11.5px;color:#9AA1B5;line-height:1.4;}
+  .user-row{display:flex;align-items:center;gap:10px;padding:6px;}
+  .user-avatar{
+    width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3A5488,#1B2F52);
+    display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:600;color:var(--gold-light);font-size:14px;
+    border:1px solid rgba(216,188,139,.3);
+  }
+  .user-meta .n{font-size:13px;color:#F1EAD8;font-weight:600;}
+  .user-meta .r{font-size:11px;color:#8B92A8;}
+
+  /* ============ MAIN ============ */
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+  .topbar{display:flex;align-items:center;gap:18px;padding:22px 34px 14px;}
+  .page-heading{flex:1;min-width:0;}
+  .eyebrow{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:4px;}
+  .page-heading h1{font-family:var(--serif);font-weight:600;font-size:30px;color:var(--navy);letter-spacing:.2px;}
+  .search-box{
+    display:flex;align-items:center;gap:9px;background:var(--paper);border:1px solid var(--line);
+    border-radius:12px;padding:10px 14px;width:280px;box-shadow:var(--shadow-sm);
+  }
+  .search-box svg{width:15px;height:15px;stroke:var(--ink-soft);flex-shrink:0;}
+  .search-box input{border:none;outline:none;background:none;font-size:13.5px;color:var(--ink);width:100%;font-family:var(--sans);}
+  .search-box input::placeholder{color:#A7A190;}
+  .icon-btn{
+    width:40px;height:40px;border-radius:11px;background:var(--paper);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);position:relative;flex-shrink:0;
+  }
+  .icon-btn svg{width:17px;height:17px;stroke:var(--navy-3);}
+  .icon-btn .dot{position:absolute;top:9px;right:9px;width:7px;height:7px;background:var(--rose);border-radius:50%;border:1.5px solid var(--paper);}
+  .hamburger{
+    display:none;width:40px;height:40px;border-radius:11px;background:var(--paper);border:1px solid var(--line);
+    align-items:center;justify-content:center;box-shadow:var(--shadow-sm);flex-shrink:0;
+  }
+  .hamburger svg{width:19px;height:19px;stroke:var(--navy-3);}
+  .sidebar-close{display:none;margin-left:auto;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.08);align-items:center;justify-content:center;flex-shrink:0;}
+  .sidebar-close svg{width:14px;height:14px;stroke:#EDE6D3;}
+  .sidebar-overlay{
+    display:none;position:fixed;inset:0;background:rgba(16,27,51,.55);z-index:69;
+    opacity:0;pointer-events:none;transition:opacity .25s ease;backdrop-filter:blur(1px);
+  }
+  .sidebar-overlay.show{opacity:1;pointer-events:auto;}
+
+  .ticker-wrap{margin:6px 34px 8px;border-radius:12px;overflow:hidden;background:var(--navy);border:1px solid var(--navy-3);box-shadow:var(--shadow-sm);}
+  .ticker-track{display:flex;gap:34px;padding:9px 0;white-space:nowrap;animation:scroll-left 32s linear infinite;width:max-content;}
+  .ticker-wrap:hover .ticker-track{animation-play-state:paused;}
+  @keyframes scroll-left{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  .tick{display:inline-flex;align-items:baseline;gap:7px;font-size:12.5px;color:#CBD1E0;padding:0 10px;}
+  .tick b{font-family:var(--serif);color:#F1EAD8;font-size:13.5px;font-weight:600;}
+  .tick .up{color:#7FBFA1;font-weight:600;} .tick .down{color:#D98B8B;font-weight:600;}
+
+  .content{padding:14px 34px 140px;}
+  .page{display:none;}
+  .page.active{display:block;animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px;}
+  .card{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);
+    padding:22px 22px 20px;display:flex;flex-direction:column;position:relative;overflow:hidden;
+  }
+  .card::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg, var(--gold-light), var(--teal));opacity:.55;}
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;}
+  .card-eyebrow{display:flex;align-items:center;gap:8px;}
+  .card-num{
+    width:24px;height:24px;border-radius:50%;background:var(--navy);color:var(--gold-light);
+    font-family:var(--serif);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .card-eyebrow span{font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;}
+  .card h3{font-family:var(--serif);font-weight:600;font-size:20px;color:var(--navy);margin-top:2px;}
+  .card-icon{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--teal-light);}
+  .card-icon svg{width:20px;height:20px;stroke:var(--teal);}
+  .card p.desc{font-size:13px;color:var(--ink-soft);line-height:1.55;margin-bottom:16px;}
+  .card-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px;border-top:1px dashed var(--line);}
+  .pill-btn{
+    font-size:12.5px;font-weight:600;color:var(--navy);background:var(--gold-dim);padding:8px 15px;border-radius:20px;
+    display:inline-flex;align-items:center;gap:6px;transition:background .15s ease, transform .15s ease;
+  }
+  .pill-btn:hover{background:var(--gold-light);transform:translateY(-1px);}
+  .pill-btn svg{width:13px;height:13px;stroke:var(--navy);}
+  .pill-btn.ghost{background:var(--paper);border:1px solid var(--line);}
+  .pill-btn.danger{background:var(--rose-light);color:var(--rose);}
+  .pill-btn.danger svg{stroke:var(--rose);}
+  .link-btn{font-size:12.5px;font-weight:600;color:var(--teal);display:inline-flex;align-items:center;gap:4px;}
+  .link-btn svg{width:12px;height:12px;stroke:var(--teal);}
+  .tag{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:20px;letter-spacing:.3px;}
+  .tag.live{background:var(--teal-light);color:var(--teal);}
+  .tag.beta{background:var(--gold-dim);color:#8A6A32;}
+  .tag.new{background:var(--rose-light);color:var(--rose);}
+
+  .c3{grid-column:span 3;} .c4{grid-column:span 4;} .c5{grid-column:span 5;} .c6{grid-column:span 6;}
+  .c7{grid-column:span 7;} .c8{grid-column:span 8;} .c9{grid-column:span 9;} .c12{grid-column:span 12;}
+
+  .hero-card{background:linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 62%, #22406F 100%);color:#EFE9D8;border:1px solid var(--navy-3);}
+  .hero-card::after{display:none;}
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:10px;}
+  .hero-top .eyebrow{color:var(--gold-light);}
+  .hero-top h2{font-family:var(--serif);font-size:26px;font-weight:600;color:#FBF4E4;}
+  .hero-stats{display:flex;gap:34px;margin:14px 0 6px;flex-wrap:wrap;}
+  .hstat .v{font-family:var(--serif);font-size:30px;font-weight:600;color:#FBF4E4;}
+  .hstat .l{font-size:11px;color:#AFB6CC;letter-spacing:.5px;text-transform:uppercase;margin-top:2px;}
+  .hstat .v.pos{color:#8FD1AE;} .hstat .v.neg{color:#E3A0A0;}
+  .chart-wrap{margin:14px 0 4px;}
+  .hero-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .btn-gold{
+    background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-weight:700;font-size:13px;
+    padding:11px 20px;border-radius:11px;display:inline-flex;align-items:center;gap:8px;box-shadow:0 8px 20px -8px rgba(184,147,90,.55);
+  }
+  .btn-ghost{border:1px solid rgba(237,225,197,.35);color:#EDE6D3;font-size:13px;font-weight:600;padding:11px 18px;border-radius:11px;display:inline-flex;align-items:center;gap:8px;}
+  .btn-gold svg,.btn-ghost svg{width:14px;height:14px;}
+  .btn-gold svg{stroke:var(--navy);} .btn-ghost svg{stroke:#EDE6D3;}
+
+  .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+  .bar-row .lbl{width:96px;font-size:12.5px;color:var(--ink-soft);flex-shrink:0;}
+  .bar-track{flex:1;height:9px;background:var(--cream-2);border-radius:6px;overflow:hidden;position:relative;}
+  .bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg, var(--teal), #4E9683);}
+  .bar-fill.you{background:linear-gradient(90deg, var(--gold), var(--gold-light));}
+  .bar-fill.alt{background:linear-gradient(90deg, #7986B5, #A6AFD6);}
+  .bar-row .val{width:50px;text-align:right;font-size:12.5px;font-weight:600;color:var(--navy);}
+  .legend{display:flex;gap:16px;margin-top:6px;flex-wrap:wrap;}
+  .legend span{font-size:11.5px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;}
+  .legend i{width:9px;height:9px;border-radius:3px;display:inline-block;}
+
+  .watch-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--cream-2);}
+  .watch-row:last-child{border-bottom:none;}
+  .watch-id{display:flex;align-items:center;gap:10px;}
+  .watch-logo{width:34px;height:34px;border-radius:9px;background:var(--navy);color:var(--gold-light);font-family:var(--serif);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .watch-name{font-size:13.5px;font-weight:600;color:var(--navy);}
+  .watch-sub{font-size:11px;color:var(--ink-soft);}
+  .watch-right{text-align:right;}
+  .watch-price{font-size:13.5px;font-weight:600;color:var(--navy);}
+  .watch-change{font-size:11.5px;font-weight:600;}
+  .watch-change.up{color:var(--teal);} .watch-change.down{color:var(--rose);}
+  .alert-flag{font-size:10px;background:var(--rose-light);color:var(--rose);padding:2px 7px;border-radius:20px;margin-top:3px;display:inline-block;}
+  .alert-flag.ok{background:var(--teal-light);color:var(--teal);}
+
+  .pattern-flag{
+    display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--gold);
+    background:var(--gold-dim);padding:5px 11px;border-radius:20px;margin-bottom:12px;
+  }
+  .pattern-flag svg{width:12px;height:12px;stroke:var(--gold);}
+
+  .esg-wrap{display:flex;align-items:center;gap:22px;}
+  .gauge{position:relative;width:118px;height:118px;flex-shrink:0;}
+  .gauge.big{width:170px;height:170px;}
+  .gauge svg{transform:rotate(-90deg);}
+  .gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .gauge-center .n{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--navy);}
+  .gauge.big .gauge-center .n{font-size:40px;}
+  .gauge-center .l{font-size:9.5px;letter-spacing:1px;color:var(--ink-soft);text-transform:uppercase;}
+  .esg-list{flex:1;}
+  .esg-item{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-soft);padding:5px 0;}
+  .esg-item b{color:var(--navy);font-weight:600;}
+
+  .lesson{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--cream-2);}
+  .lesson:last-child{border-bottom:none;}
+  .lesson-ring{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;}
+  .lesson-ring svg{transform:rotate(-90deg);position:absolute;inset:0;}
+  .lesson-ring .pct{font-size:9.5px;font-weight:700;color:var(--navy);z-index:1;}
+  .lesson-name{font-size:13px;font-weight:600;color:var(--navy);}
+  .lesson-desc{font-size:11px;color:var(--ink-soft);}
+
+  .report-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--cream-2);}
+  .report-row:last-child{border-bottom:none;}
+  .report-icon{width:32px;height:32px;border-radius:8px;background:var(--rose-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .report-icon svg{width:15px;height:15px;stroke:var(--rose);}
+  .report-name{font-size:12.5px;font-weight:600;color:var(--navy);}
+  .report-meta{font-size:10.5px;color:var(--ink-soft);}
+
+  .voice-preview{background:linear-gradient(160deg, var(--teal-light), var(--paper) 60%);}
+  .wave-mini{display:flex;align-items:flex-end;gap:3px;height:34px;margin:6px 0 14px;}
+  .wave-mini i{width:3.5px;background:var(--teal);border-radius:3px;animation:wavey 1.1s ease-in-out infinite;}
+  @keyframes wavey{0%,100%{height:6px;}50%{height:28px;}}
+
+  .section-title{grid-column:span 12;display:flex;align-items:center;gap:14px;margin:8px 0 -4px;}
+  .section-title h2{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--navy);letter-spacing:.3px;white-space:nowrap;}
+  .section-title .rule{flex:1;height:1px;background:linear-gradient(90deg, var(--line), transparent);}
+
+  /* ---- generic page header banner ---- */
+  .page-banner{
+    grid-column:span 12;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;box-shadow:var(--shadow-sm);flex-wrap:wrap;
+  }
+  .page-banner p{font-size:13px;color:var(--ink-soft);max-width:560px;line-height:1.55;margin-top:4px;}
+  .page-banner h2{font-family:var(--serif);font-size:22px;color:var(--navy);font-weight:600;}
+
+  /* ---- chip tabs (timeframes / levels) ---- */
+  .chip-tabs{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip-tab{font-size:12px;font-weight:600;color:var(--ink-soft);background:var(--cream-2);padding:7px 14px;border-radius:18px;border:1px solid transparent;}
+  .chip-tab.active{background:var(--navy);color:#F1EAD8;}
+
+  /* ---- generic table ---- */
+  table.dtable{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .table-scroll table.dtable{min-width:520px;}
+  table.dtable th{
+    text-align:left;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);
+    padding:0 10px 10px;border-bottom:1px solid var(--line);font-weight:600;
+  }
+  table.dtable td{padding:12px 10px;border-bottom:1px solid var(--cream-2);color:var(--ink);vertical-align:middle;}
+  table.dtable tr:last-child td{border-bottom:none;}
+  table.dtable td.sym{font-weight:600;color:var(--navy);}
+  table.dtable td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .row-logo{width:28px;height:28px;border-radius:7px;background:var(--navy);color:var(--gold-light);font-family:var(--serif);font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-right:9px;vertical-align:middle;}
+
+  /* ---- forms ---- */
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+  .field label{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;}
+  .field input, .field select{
+    border:1px solid var(--line);background:var(--cream);border-radius:10px;padding:10px 13px;font-size:13px;
+    font-family:var(--sans);color:var(--ink);outline:none;
+  }
+  .field input:focus, .field select:focus{border-color:var(--gold);}
+  .toggle-pair{display:flex;background:var(--cream-2);border-radius:10px;padding:4px;gap:4px;margin-bottom:14px;}
+  .toggle-pair button{flex:1;padding:9px 0;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--ink-soft);}
+  .toggle-pair button.active.buy{background:var(--teal);color:#fff;}
+  .toggle-pair button.active.sell{background:var(--rose);color:#fff;}
+  .btn-block{width:100%;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-weight:700;font-size:13.5px;padding:12px 0;border-radius:11px;box-shadow:0 8px 20px -8px rgba(184,147,90,.55);}
+
+  /* ---- template / module cards ---- */
+  .mini-card{background:var(--cream);border:1px solid var(--line);border-radius:13px;padding:16px;display:flex;flex-direction:column;gap:8px;}
+  .mini-card .mi-icon{width:36px;height:36px;border-radius:9px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;}
+  .mini-card .mi-icon svg{width:17px;height:17px;stroke:#8A6A32;}
+  .mini-card h4{font-family:var(--serif);font-size:16px;color:var(--navy);font-weight:600;}
+  .mini-card p{font-size:12px;color:var(--ink-soft);line-height:1.5;}
+  .mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+
+  .doc-preview{background:var(--cream);border:1px solid var(--line);border-radius:13px;padding:18px;}
+  .doc-line{height:7px;background:var(--line);border-radius:4px;margin-bottom:9px;}
+  .doc-line.w60{width:60%;} .doc-line.w80{width:80%;} .doc-line.w40{width:40%;} .doc-line.w100{width:100%;}
+
+  .metric-strip{display:flex;gap:26px;flex-wrap:wrap;margin:6px 0 4px;}
+  /* .metric{} */
+  .metric .v{font-family:var(--serif);font-size:24px;font-weight:600;color:var(--navy);}
+  .metric .l{font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);margin-top:2px;}
+
+  .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+  .status-dot.on{background:var(--teal);} .status-dot.off{background:#C9C2AC;}
+
+  .pattern-lib-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--cream);margin-bottom:10px;}
+  .pattern-lib-card:last-child{margin-bottom:0;}
+  .pattern-lib-card svg{width:34px;height:44px;flex-shrink:0;}
+  .pattern-lib-card .pn{font-family:var(--serif);font-size:14.5px;font-weight:600;color:var(--navy);}
+  .pattern-lib-card .pd{font-size:11.5px;color:var(--ink-soft);}
+
+  /* ---- news feed ---- */
+  .news-card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px;}
+  .news-card:last-child{margin-bottom:0;}
+  .news-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;}
+  .news-title{font-family:var(--serif);font-size:17px;font-weight:600;color:var(--navy);line-height:1.35;}
+  .news-meta{font-size:11px;color:var(--ink-soft);margin-top:4px;}
+  .news-snippet{font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin:10px 0 14px;}
+  .news-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-top:13px;border-top:1px dashed var(--line);}
+  .news-tickers{display:flex;gap:6px;flex-wrap:wrap;}
+  .ticker-chip{font-size:11px;font-weight:600;background:var(--cream-2);color:var(--navy-3);padding:4px 10px;border-radius:14px;}
+  .impact-tag{font-size:11px;font-weight:700;padding:4px 11px;border-radius:16px;display:inline-flex;align-items:center;gap:5px;letter-spacing:.2px;}
+  .impact-tag.benefit{background:var(--teal-light);color:var(--teal);}
+  .impact-tag.loss{background:var(--rose-light);color:var(--rose);}
+  .impact-tag.neutral{background:var(--gold-dim);color:#8A6A32;}
+  .news-score{display:flex;align-items:center;gap:8px;}
+  .news-score .ring{width:38px;height:38px;position:relative;flex-shrink:0;}
+  .news-score .ring svg{transform:rotate(-90deg);}
+  .news-score .ring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:var(--navy);}
+  .news-score .lbl{font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);}
+  .prediction-box{
+    display:flex;align-items:flex-start;gap:9px;background:var(--cream);border:1px solid var(--line);
+    border-radius:10px;padding:10px 13px;margin-top:12px;font-size:12px;color:var(--ink-soft);line-height:1.5;
+  }
+  .prediction-box svg{width:15px;height:15px;stroke:var(--gold);flex-shrink:0;margin-top:1px;}
+  .prediction-box b{color:var(--navy);}
+  .news-source-logo{width:30px;height:30px;border-radius:8px;background:var(--navy);color:var(--gold-light);font-family:var(--serif);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+  /* ---- financial detective suite ---- */
+  .verdict-box{
+    background:linear-gradient(135deg, var(--navy), var(--navy-2));color:#EFE9D8;border-radius:14px;
+    padding:18px 20px;display:flex;align-items:center;gap:16px;margin:14px 0 4px;
+  }
+  .verdict-box .vi{width:44px;height:44px;border-radius:50%;background:rgba(217,188,139,.18);border:1px solid rgba(217,188,139,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .verdict-box .vi svg{width:20px;height:20px;stroke:var(--gold-light);}
+  .verdict-box .vl{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold-light);font-weight:700;margin-bottom:3px;}
+  .verdict-box .vt{font-family:var(--serif);font-size:17px;font-weight:600;color:#FBF4E4;}
+  .metric-flag-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--cream-2);}
+  .metric-flag-row:last-child{border-bottom:none;}
+  .metric-flag-row .ml{font-size:12.5px;color:var(--ink-soft);}
+  .metric-flag-row .mv{font-family:var(--serif);font-size:16px;font-weight:700;display:flex;align-items:center;gap:6px;}
+  .metric-flag-row .mv.good{color:var(--teal);} .metric-flag-row .mv.bad{color:var(--rose);}
+  .ghost-compare{display:flex;gap:18px;align-items:stretch;}
+  .ghost-block{flex:1;border-radius:14px;padding:20px;text-align:center;}
+  .ghost-block.real{background:var(--cream);border:1px solid var(--line);}
+  .ghost-block.ghost{background:linear-gradient(160deg,#EFE9F5,var(--cream));border:1px dashed var(--gold);}
+  .ghost-block .gl{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:8px;}
+  .ghost-block .gv{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--navy);}
+  .ghost-block .gd{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+  .ghost-vs{display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:15px;color:var(--gold);width:30px;flex-shrink:0;}
+  .risk-node-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--cream-2);}
+  .risk-node-row:last-child{border-bottom:none;}
+  .risk-node-icon{width:38px;height:38px;border-radius:10px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .risk-node-icon svg{width:18px;height:18px;stroke:#8A6A32;}
+  .risk-node-name{font-size:13.5px;font-weight:600;color:var(--navy);}
+  .risk-node-sub{font-size:11.5px;color:var(--ink-soft);}
+  .risk-node-count{margin-left:auto;font-family:var(--serif);font-size:20px;font-weight:700;color:var(--navy);}
+  .checklist-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cream-2);font-size:12.5px;color:var(--ink);}
+  .checklist-row:last-child{border-bottom:none;}
+  .checklist-row .ci{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .checklist-row .ci.hit{background:var(--rose-light);} .checklist-row .ci.hit svg{stroke:var(--rose);}
+  .checklist-row .ci.miss{background:var(--teal-light);} .checklist-row .ci.miss svg{stroke:var(--teal);}
+  .checklist-row .ci svg{width:11px;height:11px;}
+
+  /* ============ FLOATING ASSISTANT ============ */
+  .fab{
+    position:fixed;right:30px;bottom:30px;z-index:60;width:64px;height:64px;border-radius:50%;
+    background:linear-gradient(135deg, var(--gold-light), var(--gold));display:flex;align-items:center;justify-content:center;
+    box-shadow:0 14px 30px -8px rgba(184,147,90,.55), 0 0 0 6px rgba(184,147,90,.12);transition:transform .2s ease;
+  }
+  .fab:hover{transform:scale(1.05);}
+  .fab svg{width:25px;height:25px;stroke:var(--navy);}
+  .fab .ring{position:absolute;inset:-8px;border-radius:50%;border:1.5px solid var(--gold-light);animation:pulse-ring 2.6s ease-out infinite;}
+  @keyframes pulse-ring{0%{transform:scale(.85);opacity:.7;}100%{transform:scale(1.35);opacity:0;}}
+
+  .assistant-panel{
+    position:fixed;right:30px;bottom:108px;z-index:60;width:368px;max-height:74vh;
+    background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;overflow:hidden;
+    opacity:0;transform:translateY(16px) scale(.98);pointer-events:none;transition:opacity .22s ease, transform .22s ease;
+  }
+  .assistant-panel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+  .assist-head{background:linear-gradient(135deg, var(--navy), var(--navy-2));color:#EFE9D8;padding:16px 18px;display:flex;align-items:center;gap:11px;}
+  .assist-avatar{width:36px;height:36px;border-radius:50%;background:rgba(216,188,139,.2);border:1px solid rgba(216,188,139,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .assist-avatar svg{width:17px;height:17px;stroke:var(--gold-light);}
+  .assist-title{font-family:var(--serif);font-size:16px;font-weight:600;color:#FBF4E4;}
+  .assist-status{font-size:11px;color:#8FD1AE;display:flex;align-items:center;gap:5px;}
+  .assist-status i{width:6px;height:6px;border-radius:50%;background:#8FD1AE;display:inline-block;}
+  .assist-close{margin-left:auto;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);}
+  .assist-close svg{width:12px;height:12px;stroke:#EDE6D3;}
+  .assist-tabs{display:flex;background:var(--cream-2);border-bottom:1px solid var(--line);}
+  .assist-tab{flex:1;text-align:center;padding:10px 0;font-size:12.5px;font-weight:600;color:var(--ink-soft);position:relative;}
+  .assist-tab.active{color:var(--navy);}
+  .assist-tab.active::after{content:"";position:absolute;left:16px;right:16px;bottom:-1px;height:2px;background:var(--gold);}
+  .assist-body{flex:1;overflow-y:auto;padding:16px 16px;display:flex;flex-direction:column;gap:12px;background:var(--cream);min-height:220px;}
+  .msg{max-width:84%;font-size:13px;line-height:1.5;padding:10px 13px;border-radius:14px;}
+  .msg.bot{background:var(--paper);border:1px solid var(--line);color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px;}
+  .msg.user{background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#F1EAD8;align-self:flex-end;border-bottom-right-radius:4px;}
+  .msg .tag-sm{display:block;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
+  .msg.user .tag-sm{color:var(--gold-light);}
+  .assist-body.voice-mode{align-items:center;justify-content:center;}
+  .big-wave{display:flex;align-items:center;gap:5px;height:64px;}
+  .big-wave i{width:5px;border-radius:4px;background:linear-gradient(180deg,var(--gold),var(--teal));animation:wavey2 1.2s ease-in-out infinite;}
+  @keyframes wavey2{0%,100%{height:10px;}50%{height:52px;}}
+  .listen-label{font-size:12.5px;color:var(--ink-soft);text-align:center;}
+  .listen-transcript{font-family:var(--serif);font-size:16px;color:var(--navy);text-align:center;font-style:italic;padding:0 8px;}
+  .mic-big{
+    width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));
+    display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px -8px rgba(184,147,90,.6);flex-shrink:0;
+  }
+  .mic-big svg{width:26px;height:26px;stroke:var(--navy);}
+  .assist-input{display:flex;align-items:center;gap:9px;padding:12px 14px;border-top:1px solid var(--line);background:var(--paper);}
+  .assist-input input{flex:1;border:1px solid var(--line);border-radius:22px;padding:10px 15px;font-size:13px;font-family:var(--sans);outline:none;background:var(--cream);color:var(--ink);}
+  .assist-input input::placeholder{color:#A7A190;}
+  .send-btn,.mic-toggle{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .send-btn{background:var(--navy);} .send-btn svg{width:15px;height:15px;stroke:var(--gold-light);}
+  .mic-toggle{background:var(--gold-dim);} .mic-toggle svg{width:15px;height:15px;stroke:var(--navy);}
+  .mic-toggle.active{background:var(--rose);} .mic-toggle.active svg{stroke:#fff;}
+  .suggest-row{display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap;background:var(--cream);}
+  .suggest-chip{font-size:11px;font-weight:600;color:var(--navy-3);background:var(--paper);border:1px solid var(--line);padding:6px 11px;border-radius:16px;}
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 980px){
+    .sidebar{
+      display:flex;position:fixed;top:0;left:0;z-index:70;width:280px;max-width:82vw;
+      transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+      box-shadow:0 0 40px rgba(0,0,0,.35);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-close{display:flex;}
+    .sidebar-overlay{display:block;}
+    .hamburger{display:flex;}
+    .main{width:100%;}
+    .c3,.c4,.c5,.c6,.c7,.c8,.c9{grid-column:span 12;}
+    .mini-grid{grid-template-columns:1fr;}
+    .content{padding:14px 18px 150px;}
+    .topbar{padding:16px 18px 10px;flex-wrap:wrap;gap:12px;}
+    .page-heading h1{font-size:24px;}
+    .search-box{width:100%;order:3;}
+    .ticker-wrap{margin:6px 18px 8px;}
+    .assistant-panel{width:calc(100vw - 28px);right:14px;bottom:96px;max-height:70vh;}
+    .fab{right:20px;bottom:20px;}
+  }
+
+  @media (max-width: 640px){
+    .content{padding:12px 14px 150px;}
+    .topbar{padding:14px 14px 8px;}
+    .ticker-wrap{margin:6px 14px 8px;}
+    .page-heading h1{font-size:21px;}
+    .eyebrow{font-size:10px;}
+    .card{padding:18px 16px 16px;}
+    .hero-top h2{font-size:21px;}
+    .hero-stats{gap:20px;}
+    .hstat .v{font-size:24px;}
+    .grid{gap:14px;}
+    .esg-wrap{flex-direction:column;align-items:flex-start;gap:14px;}
+    .esg-wrap .gauge{align-self:center;}
+    .ghost-compare{flex-direction:column;}
+    .ghost-vs{width:auto;padding:2px 0;}
+    .mic-big{width:56px;height:56px;}
+    .mic-big svg{width:22px;height:22px;}
+    .assistant-panel{bottom:88px;}
+    .fab{width:56px;height:56px;bottom:16px;right:16px;}
+    .fab svg{width:22px;height:22px;}
+    .page-banner{flex-direction:column;align-items:flex-start;}
+    .card-head{flex-wrap:wrap;}
+  }
+
+  @media (max-width: 400px){
+    .hero-stats{gap:16px;}
+    .hstat .v{font-size:21px;}
+    .card{padding:16px 14px 14px;}
+    .page-heading h1{font-size:19px;}
+    .mini-card{padding:14px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 3a4 4 0 0 0-4 4c0 1.2.5 2 1 3-1.5.5-3 2-3 4.5A4.5 4.5 0 0 0 10.5 19H12"/><path d="M12 3a4 4 0 0 1 4 4c0 1.2-.5 2-1 3 1.5.5 3 2 3 4.5A4.5 4.5 0 0 1 13.5 19H12"/><path d="M12 8v11"/></svg>
+    </div>
+    <div class="brand-text">
+      <div class="name">MarketMind</div>
+      <div class="sub">Intelligence Terminal</div>
+    </div>
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close navigation">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="nav-scroll">
+  <div class="nav-label">Overview</div>
+  <nav class="primary" id="primaryNav">
+    <a class="nav-item active" data-page="dashboard" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" data-page="portfolio" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l3.5-4 3 3L20 7"/></svg>
+      Portfolio Simulator
+    </a>
+    <a class="nav-item" data-page="voice" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4M9 22h6"/></svg>
+      Voice Stock Assistant
+      <span class="nav-badge">Live</span>
+    </a>
+    <a class="nav-item" data-page="learning" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/></svg>
+      Learning Mode
+    </a>
+    <a class="nav-item" data-page="sector" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      Sector Comparison
+    </a>
+    <a class="nav-item" data-page="alerts" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      Smart Alerts
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item" data-page="reports" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg>
+      AI Report Generator
+    </a>
+    <a class="nav-item" data-page="candles" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l4-9 3 5 3-8 3 7 5-4"/></svg>
+      Candlestick Patterns
+    </a>
+    <a class="nav-item" data-page="esg" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7 7"/></svg>
+      ESG &amp; Sustainability
+    </a>
+  </nav>
+
+  <div class="nav-label">Advanced Intelligence</div>
+  <nav class="primary">
+    <a class="nav-item" data-page="news" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2z"/><path d="M19 9h2v10a2 2 0 0 1-2 2"/><path d="M8 8h6M8 12h6M8 16h3"/></svg>
+      Latest News
+      <span class="nav-badge">Live</span>
+    </a>
+    <a class="nav-item" data-page="domino" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="18" r="2.4"/><circle cx="12" cy="12" r="2.4"/><path d="M8 7l2.5 3M16 7l-2.5 3M8 17l2.5-3M16 17l-2.5-3"/></svg>
+      <span>Domino Predictor</span>
+      <span class="nav-badge">Flagship</span>
+    </a>
+    <a class="nav-item" data-page="trust" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+      Management Trust Meter
+    </a>
+    <a class="nav-item" data-page="thesis" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/><path d="M7 7l10 10M17 7 7 17" opacity=".0"/><circle cx="12" cy="12" r="9"/></svg>
+      Investment Thesis Breaker
+    </a>
+    <a class="nav-item" data-page="dna" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3c0 6 12 6 12 12M18 21c0-6-12-6-12-12"/><path d="M8 5h8M8 19h8M7 9h10M7 15h10"/></svg>
+      Stock DNA Fingerprint
+    </a>
+    <a class="nav-item" data-page="timemachine" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/></svg>
+      Decision Time Machine
+    </a>
+  </nav>
+
+  <div class="nav-label">Financial Detective</div>
+  <nav class="primary">
+    <a class="nav-item" data-page="autopsy" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5v3a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z"/><path d="M8 11v1a4 4 0 0 0 8 0v-1M12 16v4M9 21h6"/></svg>
+      <span>Stock Autopsy</span>
+    </a>
+    <a class="nav-item" data-page="accounting" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8.5 12l1.5 1.5 3-3" opacity=".0"/></svg>
+      <span>Accounting Reality Checker</span>
+    </a>
+    <a class="nav-item" data-page="redflag" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v20"/><path d="M6 3h11l-3 4 3 4H6"/></svg>
+      <span>Financial Red-Flag DNA</span>
+    </a>
+    <a class="nav-item" data-page="ghost" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7v11l2.5-2 2 2 2.5-2 2.5 2 2-2 2.5 2V9a7 7 0 0 0-7-7z"/><circle cx="9.5" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
+      <span>Ghost Portfolio</span>
+    </a>
+    <a class="nav-item" data-page="dependency" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="19" r="2.2"/><circle cx="19" cy="19" r="2.2"/><circle cx="12" cy="13" r="2.2"/><path d="M12 7.2V11M9.8 14.5 6.6 17.3M14.2 14.5l3.2 2.8"/></svg>
+      <span>Hidden Dependency Map</span>
+    </a>
+  </nav>
+  </div>
+
+  <div class="sidebar-foot">
+    <div class="plan-card">
+      <div class="t">Prototype Build</div>
+      <div class="d">All figures on this screen are illustrative sample data for demonstration purposes.</div>
+    </div>
+    <div class="user-row">
+      <div class="user-avatar">RU</div>
+      <div class="user-meta">
+        <div class="n">Random User</div>
+        <div class="r">Analyst Workspace</div>
+      </div>
+    </div>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ============ MAIN ============ -->
+<div class="main">
+
+  <div class="topbar">
+    <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div class="page-heading">
+      <div class="eyebrow" id="pgEyebrow">Good evening</div>
+      <h1 id="pgTitle">Market Overview</h1>
+    </div>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="text" placeholder="Search tickers, reports, sectors…">
+    </div>
+    <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot"></span></button>
+    <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- =================================================== -->
+    <!-- PAGE: DASHBOARD                                      -->
+    <!-- =================================================== -->
+    <div class="page active" data-page="dashboard">
+      <div class="grid">
+
+        <div class="card hero-card c8">
+          <div class="hero-top">
+            <div>
+              <div class="eyebrow">01 · Portfolio Simulator</div>
+              <h2>Virtual Portfolio — Risk-Free Sandbox</h2>
+            </div>
+            <span class="tag live" style="background:rgba(143,209,174,.16);color:#8FD1AE;">Simulated</span>
+          </div>
+          <p style="font-size:13px;color:#AFB6CC;max-width:480px;line-height:1.55;">Build and stress-test strategies with virtual capital before committing real money — full order book, slippage and P&amp;L modelling.</p>
+          <div class="hero-stats">
+            <div class="hstat"><div class="v pos">₹12,84,320</div><div class="l">Virtual NAV</div></div>
+            <div class="hstat"><div class="v pos">+18.6%</div><div class="l">Since Inception</div></div>
+            <div class="hstat"><div class="v">1.42</div><div class="l">Sharpe Ratio</div></div>
+            <div class="hstat"><div class="v">₹10,00,000</div><div class="l">Starting Capital</div></div>
+          </div>
+          <div class="chart-wrap">
+            <svg viewBox="0 0 560 120" width="100%" height="110" preserveAspectRatio="none">
+              <defs><linearGradient id="heroFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#D9BC8B" stop-opacity="0.45"/><stop offset="100%" stop-color="#D9BC8B" stop-opacity="0"/>
+              </linearGradient></defs>
+              <polyline points="0,90 40,84 80,88 120,70 160,74 200,58 240,64 280,46 320,52 360,34 400,40 440,24 480,30 520,14 560,20" fill="none" stroke="#D9BC8B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <polygon points="0,90 40,84 80,88 120,70 160,74 200,58 240,64 280,46 320,52 360,34 400,40 440,24 480,30 520,14 560,20 560,120 0,120" fill="url(#heroFill)"/>
+            </svg>
+          </div>
+          <div class="hero-actions">
+            <button class="btn-gold" onclick="goPage('portfolio')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Open Simulator</button>
+            <button class="btn-ghost" onclick="goPage('portfolio')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New Strategy</button>
+          </div>
+        </div>
+
+        <div class="card voice-preview c4">
+          <div class="card-head">
+            <div class="card-eyebrow"><div class="card-num">02</div><div><span>Voice-Based</span><h3 style="font-size:18px;">Stock Assistant</h3></div></div>
+            <div class="card-icon" style="background:var(--teal-light);"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4M9 22h6"/></svg></div>
+          </div>
+          <p class="desc">Ask about any ticker aloud and hear a spoken answer, powered by the assistant docked bottom-right.</p>
+          <div class="wave-mini">
+            <i style="animation-delay:0s"></i><i style="animation-delay:.1s"></i><i style="animation-delay:.2s"></i>
+            <i style="animation-delay:.3s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:.25s"></i>
+            <i style="animation-delay:.05s"></i><i style="animation-delay:.35s"></i>
+          </div>
+          <div class="card-foot" style="border-top:none;padding-top:0;">
+            <button class="pill-btn" onclick="openAssistant('voice')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/></svg>Try Speaking</button>
+            <span class="tag live">Live</span>
+          </div>
+        </div>
+
+        <div class="section-title"><h2>Financial Cause &amp; Effect Intelligence</h2><div class="rule"></div></div>
+
+        <div class="card hero-card c8" style="background:linear-gradient(135deg, #12213D 0%, #1B2F52 55%, #2B4A7E 100%);">
+          <div class="hero-top">
+            <div>
+              <div class="eyebrow">Flagship · Not just prediction — explanation</div>
+              <h2>Market Domino Predictor</h2>
+            </div>
+            <span class="tag" style="background:rgba(217,188,139,.18);color:var(--gold-light);">New</span>
+          </div>
+          <p style="font-size:13px;color:#AFB6CC;max-width:480px;line-height:1.55;">Give it one event — “Crude Oil +30%” — and watch 1st, 2nd, 3rd and 4th-order effects ripple through fuel costs, airline margins, ticket prices and tourism, with every affected company mapped.</p>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0 4px;font-size:12.5px;">
+            <span style="background:rgba(217,188,139,.16);color:var(--gold-light);padding:8px 14px;border-radius:20px;">Oil +30%</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#8B92A8" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <span style="background:rgba(255,255,255,.06);color:#CBD1E0;padding:8px 14px;border-radius:20px;">IndiGo fuel cost ↑</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#8B92A8" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <span style="background:rgba(255,255,255,.06);color:#CBD1E0;padding:8px 14px;border-radius:20px;">Ticket prices ↑</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#8B92A8" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <span style="background:rgba(255,255,255,.06);color:#CBD1E0;padding:8px 14px;border-radius:20px;">Tourism impact</span>
+          </div>
+          <div class="hero-actions">
+            <button class="btn-gold" onclick="goPage('domino')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Trace an Event</button>
+            <button class="btn-ghost" onclick="goPage('trust')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Check Management Trust</button>
+          </div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head">
+            <div class="card-eyebrow"><div class="card-num">★</div><div><span>Accountability</span><h3 style="font-size:18px;">Management Trust Meter</h3></div></div>
+          </div>
+          <p class="desc">Every promise made on an earnings call, checked against what actually happened.</p>
+          <div class="esg-wrap">
+            <div class="gauge"><svg width="118" height="118" viewBox="0 0 118 118"><circle cx="59" cy="59" r="50" fill="none" stroke="#F0E9D8" stroke-width="11"/><circle cx="59" cy="59" r="50" fill="none" stroke="#B8935A" stroke-width="11" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="88"/></svg><div class="gauge-center"><div class="n">72</div><div class="l">Trust Score</div></div></div>
+            <div class="esg-list"><div class="esg-item"><span>Kept</span><b>13</b></div><div class="esg-item"><span>Delayed</span><b>3</b></div><div class="esg-item"><span>Broken</span><b>2</b></div></div>
+          </div>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('trust')" style="cursor:pointer;">Open Trust Meter <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div class="card-num">★</div><div><span>Reasoning-first</span><h3 style="font-size:18px;">Investment Thesis Breaker</h3></div></div></div>
+          <p class="desc">Save WHY you bought — get alerted when that reason starts breaking, not just when price moves.</p>
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">RE</div><div><div class="watch-name">Reliance — "Revenue growth"</div><div class="watch-sub">22% → 14% YoY</div></div></div><div class="watch-right"><span class="alert-flag">Weakening</span></div></div>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('thesis')" style="cursor:pointer;">View my theses <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div class="card-num">★</div><div><span>Hidden similarities</span><h3 style="font-size:18px;">Stock DNA Fingerprint</h3></div></div></div>
+          <p class="desc">Growth, Debt, News Sensitivity, Management Reliability and Market Fear — reduced to a comparable DNA strand.</p>
+          <svg viewBox="0 0 160 60" width="100%" height="56"><polyline points="0,30 12,10 24,45 36,15 48,40 60,20 72,35 84,12 96,42 108,18 120,32 132,8 144,38 156,22" fill="none" stroke="#B8935A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('dna')" style="cursor:pointer;">Compare DNA <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div class="card-num">★</div><div><span>Learn from history</span><h3 style="font-size:18px;">Decision Time Machine</h3></div></div></div>
+          <p class="desc">Travel to a past date, decide with only the information available then, and see where your reasoning held up.</p>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('timemachine')" style="cursor:pointer;">Travel back <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="section-title"><h2>Financial Detective Suite</h2><div class="rule"></div></div>
+
+        <div class="card hero-card c8" style="background:linear-gradient(135deg,#1B2F52,#12213D 70%);">
+          <div class="hero-top">
+            <div><div class="eyebrow">Find what other investors don't see</div><h2>AI Stock Autopsy</h2></div>
+            <span class="tag" style="background:rgba(217,188,139,.18);color:var(--gold-light);">New</span>
+          </div>
+          <p style="font-size:13px;color:#AFB6CC;max-width:480px;line-height:1.55;">Reconstruct the hidden warning signs that appeared 6–12 months before real historical collapses — then scan your own holdings for the same disease.</p>
+          <div class="hero-actions">
+            <button class="btn-gold" onclick="goPage('autopsy')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Run an Autopsy</button>
+            <button class="btn-ghost" onclick="goPage('redflag')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M6 2v20"/><path d="M6 3h11l-3 4 3 4H6"/></svg>Check Red-Flag DNA</button>
+          </div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div class="card-num">★</div><div><span>Beyond profit</span><h3 style="font-size:18px;">Accounting Reality Checker</h3></div></div></div>
+          <p class="desc">Profit up, cash flow down — the AI flags when reported growth quality looks weak.</p>
+          <div class="verdict-box" style="margin:0;padding:14px 16px;">
+            <div class="vi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
+            <div><div class="vl">Verdict</div><div class="vt" style="font-size:14px;">Profit quality questionable</div></div>
+          </div>
+          <div class="card-foot" style="border-top:none;padding-top:12px;"><a class="link-btn" onclick="goPage('accounting')" style="cursor:pointer;">Open checker <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div class="card-num">★</div><div><span>Path not taken</span><h3 style="font-size:18px;">Ghost Portfolio</h3></div></div></div>
+          <div class="ghost-compare" style="gap:10px;">
+            <div class="ghost-block real" style="padding:12px;"><div class="gl" style="font-size:9px;">Real You</div><div class="gv" style="font-size:20px;">₹12.4L</div></div>
+            <div class="ghost-vs" style="width:20px;font-size:12px;">vs</div>
+            <div class="ghost-block ghost" style="padding:12px;"><div class="gl" style="font-size:9px;">👻 Ghost</div><div class="gv" style="font-size:20px;">₹13.1L</div></div>
+          </div>
+          <div class="card-foot" style="border-top:none;padding-top:12px;"><a class="link-btn" onclick="goPage('ghost')" style="cursor:pointer;">See what you missed <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div class="card-num">★</div><div><span>Hidden risk</span><h3 style="font-size:18px;">Dependency Map</h3></div></div></div>
+          <p class="desc">10 stocks can still share one hidden risk factor underneath.</p>
+          <div class="risk-node-row" style="border-bottom:none;padding:6px 0;"><div class="risk-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="risk-node-name">USD Exposure</div><div class="risk-node-sub">5 of 10 holdings</div></div><div class="risk-node-count">5</div></div>
+          <div class="card-foot" style="border-top:none;padding-top:4px;"><a class="link-btn" onclick="goPage('dependency')" style="cursor:pointer;">View full map <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+        <div class="card c8">
+          <div class="card-head"><div class="card-eyebrow"><div class="card-num">★</div><div><span>Collapse fingerprint</span><h3 style="font-size:18px;">Financial Red-Flag DNA</h3></div></div></div>
+          <p class="desc">Matched against historical failures like DHFL, Yes Bank and Satyam — one current holding shows elevated similarity.</p>
+          <div class="bar-row"><div class="lbl">SpiceJet</div><div class="bar-track"><div class="bar-fill" style="width:73%;background:linear-gradient(90deg,#A14545,#C97A7A);"></div></div><div class="val">73%</div></div>
+          <div class="bar-row"><div class="lbl">Reliance</div><div class="bar-track"><div class="bar-fill" style="width:21%"></div></div><div class="val">21%</div></div>
+        </div>
+
+        <div class="section-title"><h2>Portfolio &amp; Market Intelligence</h2><div class="rule"></div></div>
+
+        <div class="card c6">
+          <div class="card-head">
+            <div class="card-eyebrow"><div class="card-num">04</div><div><span>Comparative</span><h3>Sector Comparison Engine</h3></div></div>
+            <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+          </div>
+          <p class="desc">Reliance Industries measured side by side against its Energy &amp; Conglomerate sector peers.</p>
+          <div class="bar-row"><div class="lbl">Revenue Gr.</div><div class="bar-track"><div class="bar-fill you" style="width:78%"></div></div><div class="val">14.2%</div></div>
+          <div class="bar-row"><div class="lbl">Sector Avg</div><div class="bar-track"><div class="bar-fill" style="width:58%"></div></div><div class="val">9.8%</div></div>
+          <div class="bar-row"><div class="lbl">Net Margin</div><div class="bar-track"><div class="bar-fill you" style="width:64%"></div></div><div class="val">8.1%</div></div>
+          <div class="bar-row"><div class="lbl">Sector Avg</div><div class="bar-track"><div class="bar-fill" style="width:49%"></div></div><div class="val">6.4%</div></div>
+          <div class="legend"><span><i style="background:var(--gold);"></i>Reliance</span><span><i style="background:var(--teal);"></i>Sector Average</span></div>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('sector')" style="cursor:pointer;">Open full comparison <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c6">
+          <div class="card-head">
+            <div class="card-eyebrow"><div class="card-num">07</div><div><span>Chart Intelligence</span><h3>Candlestick Pattern Detection</h3></div></div>
+            <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 17l4-9 3 5 3-8 3 7 5-4"/></svg></div>
+          </div>
+          <span class="pattern-flag"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>Bullish Engulfing detected · TCS · 2h ago</span>
+          <svg viewBox="0 0 320 100" width="100%" height="96">
+            <line x1="0" y1="20" x2="320" y2="20" stroke="#EEE6D2" stroke-width="1"/><line x1="0" y1="50" x2="320" y2="50" stroke="#EEE6D2" stroke-width="1"/><line x1="0" y1="80" x2="320" y2="80" stroke="#EEE6D2" stroke-width="1"/>
+            <g stroke="#A14545" stroke-width="1.4"><line x1="20" y1="24" x2="20" y2="50"/><rect x="15" y="30" width="10" height="14" fill="#A14545"/><line x1="55" y1="30" x2="55" y2="58" stroke="#2F6F62"/><rect x="50" y="34" width="10" height="16" fill="#2F6F62"/><line x1="90" y1="20" x2="90" y2="46" stroke="#A14545"/><rect x="85" y="24" width="10" height="12" fill="#A14545"/></g>
+            <g stroke="#2F6F62" stroke-width="1.6"><line x1="130" y1="18" x2="130" y2="52"/><rect x="123" y="26" width="14" height="20" fill="#2F6F62"/><line x1="170" y1="10" x2="170" y2="46" stroke-width="2.4"/><rect x="161" y="16" width="18" height="24" fill="#2F6F62" stroke-width="2.4"/></g>
+            <g stroke="#A14545" stroke-width="1.4"><line x1="210" y1="22" x2="210" y2="50"/><rect x="205" y="27" width="10" height="14" fill="#A14545"/></g>
+            <g stroke="#2F6F62" stroke-width="1.4"><line x1="245" y1="18" x2="245" y2="44"/><rect x="239" y="22" width="12" height="16" fill="#2F6F62"/><line x1="280" y1="8" x2="280" y2="38" stroke-width="2"/><rect x="271" y="12" width="18" height="20" fill="#2F6F62" stroke-width="2"/></g>
+          </svg>
+          <div class="card-foot"><span style="font-size:11.5px;color:var(--ink-soft);">Auto-scan across 46 watchlisted tickers</span><a class="link-btn" onclick="goPage('candles')" style="cursor:pointer;">View all patterns <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head">
+            <div class="card-eyebrow"><div class="card-num">05</div><div><span>Watchlist</span><h3 style="font-size:18px;">Smart Alerts</h3></div></div>
+            <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
+          </div>
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">HD</div><div><div class="watch-name">HDFC Bank</div><div class="watch-sub">RSI crossed 72</div></div></div><div class="watch-right"><div class="watch-price">₹1,672.40</div><span class="alert-flag">Overbought</span></div></div>
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">IN</div><div><div class="watch-name">Infosys</div><div class="watch-sub">Price near target</div></div></div><div class="watch-right"><div class="watch-price">₹1,904.10</div><div class="watch-change up">+2.4%</div></div></div>
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">TA</div><div><div class="watch-name">Tata Motors</div><div class="watch-sub">Sentiment shift</div></div></div><div class="watch-right"><div class="watch-price">₹974.85</div><div class="watch-change down">−1.1%</div></div></div>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('alerts')" style="cursor:pointer;">Manage alerts <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head">
+            <div class="card-eyebrow"><div class="card-num">08</div><div><span>Sustainability</span><h3 style="font-size:18px;">ESG Score</h3></div></div>
+            <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7 7"/></svg></div>
+          </div>
+          <div class="esg-wrap">
+            <div class="gauge"><svg width="118" height="118" viewBox="0 0 118 118"><circle cx="59" cy="59" r="50" fill="none" stroke="#F0E9D8" stroke-width="11"/><circle cx="59" cy="59" r="50" fill="none" stroke="#2F6F62" stroke-width="11" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="72"/></svg><div class="gauge-center"><div class="n">77</div><div class="l">of 100</div></div></div>
+            <div class="esg-list"><div class="esg-item"><span>Environmental</span><b>81</b></div><div class="esg-item"><span>Social</span><b>74</b></div><div class="esg-item"><span>Governance</span><b>76</b></div></div>
+          </div>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('esg')" style="cursor:pointer;">Full ESG breakdown <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head">
+            <div class="card-eyebrow"><div class="card-num">03</div><div><span>Beginner-Friendly</span><h3 style="font-size:18px;">Learning Mode</h3></div></div>
+            <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+          </div>
+          <div class="lesson"><div class="lesson-ring"><svg width="36" height="36"><circle cx="18" cy="18" r="14" fill="none" stroke="#F0E9D8" stroke-width="4"/><circle cx="18" cy="18" r="14" fill="none" stroke="#B8935A" stroke-width="4" stroke-dasharray="88" stroke-dashoffset="20"/></svg><span class="pct">78%</span></div><div><div class="lesson-name">Understanding P/E Ratio</div><div class="lesson-desc">Valuation basics · 4 min</div></div></div>
+          <div class="lesson"><div class="lesson-ring"><svg width="36" height="36"><circle cx="18" cy="18" r="14" fill="none" stroke="#F0E9D8" stroke-width="4"/><circle cx="18" cy="18" r="14" fill="none" stroke="#2F6F62" stroke-width="4" stroke-dasharray="88" stroke-dashoffset="55"/></svg><span class="pct">38%</span></div><div><div class="lesson-name">What is RSI?</div><div class="lesson-desc">Momentum indicators · 6 min</div></div></div>
+          <div class="lesson"><div class="lesson-ring"><svg width="36" height="36"><circle cx="18" cy="18" r="14" fill="none" stroke="#F0E9D8" stroke-width="4"/><circle cx="18" cy="18" r="14" fill="none" stroke="#A14545" stroke-width="4" stroke-dasharray="88" stroke-dashoffset="80"/></svg><span class="pct">9%</span></div><div><div class="lesson-name">Reading Volatility</div><div class="lesson-desc">Risk fundamentals · 5 min</div></div></div>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('learning')" style="cursor:pointer;">Continue learning <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head">
+            <div class="card-eyebrow"><div class="card-num">06</div><div><span>One-Click</span><h3 style="font-size:18px;">AI Report Generator</h3></div></div>
+            <div class="card-icon" style="background:var(--rose-light);"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke="#A14545"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+          </div>
+          <div class="report-row"><div class="report-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div><div class="report-name">Reliance Industries — Q1 Summary</div><div class="report-meta">Generated 2 hrs ago · 6 pages</div></div></div>
+          <div class="report-row"><div class="report-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div><div class="report-name">Nifty Banking — Weekly Outlook</div><div class="report-meta">Generated yesterday · 4 pages</div></div></div>
+          <div class="card-foot" style="border-top:none;padding-top:6px;"><button class="pill-btn" onclick="goPage('reports')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Generate New PDF</button></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: PORTFOLIO SIMULATOR                             -->
+    <!-- =================================================== -->
+    <div class="page" data-page="portfolio">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Portfolio Simulator</h2><p>A risk-free sandbox to build, size and stress-test strategies with virtual capital before real money is on the line.</p></div>
+          <div class="chip-tabs"><div class="chip-tab active">1D</div><div class="chip-tab">1W</div><div class="chip-tab">1M</div><div class="chip-tab">1Y</div><div class="chip-tab">All</div></div>
+        </div>
+
+        <div class="card c8">
+          <div class="card-head">
+            <div class="card-eyebrow"><div><span>Equity Curve</span><h3>Virtual NAV Performance</h3></div></div>
+            <span class="tag live">+18.6% all-time</span>
+          </div>
+          <div class="metric-strip">
+            <div class="metric"><div class="v">₹12,84,320</div><div class="l">Net Asset Value</div></div>
+            <div class="metric"><div class="v" style="color:#2F6F62;">+₹41,860</div><div class="l">Today's P&amp;L</div></div>
+            <div class="metric"><div class="v">₹2,10,000</div><div class="l">Buying Power</div></div>
+            <div class="metric"><div class="v">6</div><div class="l">Open Positions</div></div>
+          </div>
+          <svg viewBox="0 0 560 160" width="100%" height="160" preserveAspectRatio="none">
+            <defs><linearGradient id="pfFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#B8935A" stop-opacity="0.35"/><stop offset="100%" stop-color="#B8935A" stop-opacity="0"/></linearGradient></defs>
+            <line x1="0" y1="40" x2="560" y2="40" stroke="#EEE6D2"/><line x1="0" y1="80" x2="560" y2="80" stroke="#EEE6D2"/><line x1="0" y1="120" x2="560" y2="120" stroke="#EEE6D2"/>
+            <polyline points="0,120 40,116 80,124 120,100 160,108 200,84 240,92 280,64 320,74 360,44 400,54 440,28 480,38 520,12 560,22" fill="none" stroke="#B8935A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <polygon points="0,120 40,116 80,124 120,100 160,108 200,84 240,92 280,64 320,74 360,44 400,54 440,28 480,38 520,12 560,22 560,160 0,160" fill="url(#pfFill)"/>
+          </svg>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Paper Trading</span><h3 style="font-size:18px;">Order Ticket</h3></div></div></div>
+          <div class="toggle-pair"><button class="active buy">Buy</button><button class="sell">Sell</button></div>
+          <div class="field"><label>Symbol</label><input type="text" value="RELIANCE" /></div>
+          <div class="field"><label>Quantity</label><input type="text" value="25" /></div>
+          <div class="field"><label>Order Type</label><select><option>Market</option><option>Limit</option><option>Stop-Loss</option></select></div>
+          <button class="btn-block" type="button">Place Simulated Order</button>
+        </div>
+
+        <div class="section-title"><h2>Holdings</h2><div class="rule"></div></div>
+        <div class="card c12">
+          <div class="table-scroll"><table class="dtable">
+            <thead><tr><th>Symbol</th><th>Qty</th><th>Avg. Price</th><th>LTP</th><th>P&amp;L</th><th>Weight</th><th></th></tr></thead>
+            <tbody>
+              <tr><td class="sym"><span class="row-logo">RE</span>Reliance</td><td class="num">40</td><td class="num">₹2,810.00</td><td class="num">₹2,946.10</td><td class="num" style="color:#2F6F62;">+₹5,444</td><td class="num">22%</td><td><button class="pill-btn ghost">Trade</button></td></tr>
+              <tr><td class="sym"><span class="row-logo">TC</span>TCS</td><td class="num">18</td><td class="num">₹4,020.00</td><td class="num">₹4,112.55</td><td class="num" style="color:#2F6F62;">+₹1,666</td><td class="num">15%</td><td><button class="pill-btn ghost">Trade</button></td></tr>
+              <tr><td class="sym"><span class="row-logo">HD</span>HDFC Bank</td><td class="num">60</td><td class="num">₹1,690.00</td><td class="num">₹1,672.40</td><td class="num" style="color:#A14545;">−₹1,056</td><td class="num">20%</td><td><button class="pill-btn ghost">Trade</button></td></tr>
+              <tr><td class="sym"><span class="row-logo">IN</span>Infosys</td><td class="num">30</td><td class="num">₹1,845.00</td><td class="num">₹1,904.10</td><td class="num" style="color:#2F6F62;">+₹1,773</td><td class="num">18%</td><td><button class="pill-btn ghost">Trade</button></td></tr>
+              <tr><td class="sym"><span class="row-logo">TA</span>Tata Motors</td><td class="num">55</td><td class="num">₹985.00</td><td class="num">₹974.85</td><td class="num" style="color:#A14545;">−₹558</td><td class="num">14%</td><td><button class="pill-btn ghost">Trade</button></td></tr>
+              <tr><td class="sym"><span class="row-logo">IT</span>ITC</td><td class="num">90</td><td class="num">₹452.00</td><td class="num">₹468.15</td><td class="num" style="color:#2F6F62;">+₹1,454</td><td class="num">11%</td><td><button class="pill-btn ghost">Trade</button></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: VOICE STOCK ASSISTANT                           -->
+    <!-- =================================================== -->
+    <div class="page" data-page="voice">
+      <div class="grid">
+        <div class="card hero-card c12" style="align-items:center;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:14px 0 6px;width:100%;">
+            <div class="eyebrow" style="color:var(--gold-light);">02 · Voice-Based Stock Assistant</div>
+            <h2 style="font-family:var(--serif);font-size:26px;color:#FBF4E4;text-align:center;">Ask about any stock, out loud.</h2>
+            <div class="mic-big" style="width:84px;height:84px;" onclick="openAssistant('voice')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="width:34px;height:34px;"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4M9 22h6"/></svg></div>
+            <div class="big-wave"><i style="animation-delay:0s"></i><i style="animation-delay:.1s"></i><i style="animation-delay:.2s"></i><i style="animation-delay:.3s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:.25s"></i><i style="animation-delay:.05s"></i></div>
+            <p style="font-size:13px;color:#AFB6CC;text-align:center;max-width:420px;">Tap the mic to speak a question — MarketMind listens, understands and replies with a spoken answer.</p>
+          </div>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Session</span><h3>Conversation</h3></div></div></div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="msg bot" style="max-width:100%;"><span class="tag-sm">Assistant</span>Good evening. Reliance is up 1.8% today and RSI is approaching overbought territory. Want a quick breakdown?</div>
+            <div class="msg user" style="max-width:80%;align-self:flex-end;">Yes — and how does it compare to the sector?</div>
+            <div class="msg bot" style="max-width:100%;"><span class="tag-sm">Assistant</span>Reliance is outpacing the sector average on revenue growth by roughly 4.4 points this quarter.</div>
+            <div class="msg user" style="max-width:80%;align-self:flex-end;">Read me the ESG score too.</div>
+            <div class="msg bot" style="max-width:100%;"><span class="tag-sm">Assistant</span>Reliance scores 77 out of 100 overall — Environmental 81, Social 74, Governance 76.</div>
+          </div>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Settings</span><h3 style="font-size:18px;">Voice Preferences</h3></div></div></div>
+          <div class="field"><label>Assistant Voice</label><select><option>Warm — Female (EN-IN)</option><option>Formal — Male (EN-IN)</option><option>Neutral — Female (EN-US)</option></select></div>
+          <div class="field"><label>Reply Language</label><select><option>English</option><option>Hindi</option><option>Gujarati</option></select></div>
+          <div class="field"><label>Response Style</label><select><option>Concise spoken summary</option><option>Detailed walkthrough</option></select></div>
+          <button class="pill-btn" style="align-self:flex-start;" onclick="openAssistant('voice')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/></svg>Start Talking</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: LEARNING MODE                                   -->
+    <!-- =================================================== -->
+    <div class="page" data-page="learning">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Personalized Learning Mode</h2><p>Beginner-friendly, bite-sized explanations of the terms and indicators used across your terminal.</p></div>
+          <div class="chip-tabs"><div class="chip-tab active">Beginner</div><div class="chip-tab">Intermediate</div><div class="chip-tab">Advanced</div></div>
+        </div>
+
+        <div class="card c12">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Your Path</span><h3>Continue Learning</h3></div></div><span class="tag beta">42% complete</span></div>
+          <div class="mini-grid">
+            <div class="mini-card">
+              <div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 15l3.5-4 3 3L20 7"/></svg></div>
+              <h4>Understanding P/E Ratio</h4><p>Why price-to-earnings matters when judging if a stock is cheap or expensive.</p>
+              <div class="lesson-ring" style="align-self:flex-start;"><svg width="36" height="36"><circle cx="18" cy="18" r="14" fill="none" stroke="#F0E9D8" stroke-width="4"/><circle cx="18" cy="18" r="14" fill="none" stroke="#B8935A" stroke-width="4" stroke-dasharray="88" stroke-dashoffset="20"/></svg><span class="pct">78%</span></div>
+            </div>
+            <div class="mini-card">
+              <div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 17l4-9 3 5 3-8 3 7 5-4"/></svg></div>
+              <h4>What is RSI?</h4><p>Reading momentum — spotting when a stock may be overbought or oversold.</p>
+              <div class="lesson-ring" style="align-self:flex-start;"><svg width="36" height="36"><circle cx="18" cy="18" r="14" fill="none" stroke="#F0E9D8" stroke-width="4"/><circle cx="18" cy="18" r="14" fill="none" stroke="#2F6F62" stroke-width="4" stroke-dasharray="88" stroke-dashoffset="55"/></svg><span class="pct">38%</span></div>
+            </div>
+            <div class="mini-card">
+              <div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7 7"/></svg></div>
+              <h4>Reading Volatility</h4><p>What a stock's swings tell you about risk — and how to size positions.</p>
+              <div class="lesson-ring" style="align-self:flex-start;"><svg width="36" height="36"><circle cx="18" cy="18" r="14" fill="none" stroke="#F0E9D8" stroke-width="4"/><circle cx="18" cy="18" r="14" fill="none" stroke="#A14545" stroke-width="4" stroke-dasharray="88" stroke-dashoffset="80"/></svg><span class="pct">9%</span></div>
+            </div>
+            <div class="mini-card">
+              <div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+              <h4>Sector Rotation Basics</h4><p>Why money moves between sectors across an economic cycle.</p>
+              <div class="lesson-ring" style="align-self:flex-start;"><svg width="36" height="36"><circle cx="18" cy="18" r="14" fill="none" stroke="#F0E9D8" stroke-width="4"/><circle cx="18" cy="18" r="14" fill="none" stroke="#B8935A" stroke-width="4" stroke-dasharray="88" stroke-dashoffset="70"/></svg><span class="pct">20%</span></div>
+            </div>
+            <div class="mini-card">
+              <div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+              <h4>Reading a Balance Sheet</h4><p>Assets, liabilities and equity — the three pillars of company health.</p>
+              <div class="lesson-ring" style="align-self:flex-start;"><svg width="36" height="36"><circle cx="18" cy="18" r="14" fill="none" stroke="#F0E9D8" stroke-width="4"/><circle cx="18" cy="18" r="14" fill="none" stroke="#2F6F62" stroke-width="4" stroke-dasharray="88" stroke-dashoffset="88"/></svg><span class="pct">0%</span></div>
+            </div>
+            <div class="mini-card">
+              <div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7 7"/></svg></div>
+              <h4>ESG Investing 101</h4><p>How environmental, social and governance scores shape modern portfolios.</p>
+              <div class="lesson-ring" style="align-self:flex-start;"><svg width="36" height="36"><circle cx="18" cy="18" r="14" fill="none" stroke="#F0E9D8" stroke-width="4"/><circle cx="18" cy="18" r="14" fill="none" stroke="#B8935A" stroke-width="4" stroke-dasharray="88" stroke-dashoffset="44"/></svg><span class="pct">50%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title"><h2>Glossary of the Day</h2><div class="rule"></div></div>
+        <div class="card c12">
+          <div class="mini-grid">
+            <div class="mini-card"><h4 style="font-size:15px;">Volatility</h4><p>The rate at which a stock's price rises or falls over a period of time.</p></div>
+            <div class="mini-card"><h4 style="font-size:15px;">Market Cap</h4><p>Total value of a company's shares — price per share × total shares.</p></div>
+            <div class="mini-card"><h4 style="font-size:15px;">Dividend Yield</h4><p>Annual dividend paid, shown as a percentage of the share price.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: SECTOR COMPARISON                               -->
+    <!-- =================================================== -->
+    <div class="page" data-page="sector">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Sector Comparison Engine</h2><p>Compare any company against peers in the same sector, side by side, across growth, margin and valuation metrics.</p></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <select style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:9px 12px;font-size:12.5px;"><option>Reliance Industries</option><option>TCS</option><option>HDFC Bank</option></select>
+            <select style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:9px 12px;font-size:12.5px;"><option>Energy &amp; Conglomerate</option><option>IT Services</option><option>Banking</option></select>
+            <button class="pill-btn">Compare</button>
+          </div>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Growth &amp; Margins</span><h3>Company vs. Sector Average</h3></div></div></div>
+          <div class="bar-row"><div class="lbl">Revenue Growth</div><div class="bar-track"><div class="bar-fill you" style="width:78%"></div></div><div class="val">14.2%</div></div>
+          <div class="bar-row"><div class="lbl">Sector Avg</div><div class="bar-track"><div class="bar-fill" style="width:58%"></div></div><div class="val">9.8%</div></div>
+          <div class="bar-row"><div class="lbl">Net Margin</div><div class="bar-track"><div class="bar-fill you" style="width:64%"></div></div><div class="val">8.1%</div></div>
+          <div class="bar-row"><div class="lbl">Sector Avg</div><div class="bar-track"><div class="bar-fill" style="width:49%"></div></div><div class="val">6.4%</div></div>
+          <div class="bar-row"><div class="lbl">ROE</div><div class="bar-track"><div class="bar-fill you" style="width:70%"></div></div><div class="val">11.6%</div></div>
+          <div class="bar-row"><div class="lbl">Sector Avg</div><div class="bar-track"><div class="bar-fill" style="width:52%"></div></div><div class="val">8.9%</div></div>
+          <div class="legend"><span><i style="background:var(--gold);"></i>Reliance</span><span><i style="background:var(--teal);"></i>Sector Average</span></div>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Multi-Metric</span><h3 style="font-size:18px;">Positioning Map</h3></div></div></div>
+          <svg viewBox="0 0 220 220" width="100%" height="220">
+            <polygon points="110,20 190,80 160,180 60,180 30,80" fill="none" stroke="#EEE6D2" stroke-width="1.5"/>
+            <polygon points="110,55 165,90 145,150 75,150 55,90" fill="none" stroke="#EEE6D2" stroke-width="1.5"/>
+            <line x1="110" y1="20" x2="110" y2="180" stroke="#F3ECDD"/><line x1="30" y1="80" x2="190" y2="80" stroke="#F3ECDD"/>
+            <polygon points="110,32 172,84 150,164 74,168 48,86" fill="#D9BC8B" fill-opacity="0.38" stroke="#B8935A" stroke-width="2"/>
+            <polygon points="110,70 148,96 132,140 92,142 72,98" fill="#2F6F62" fill-opacity="0.22" stroke="#2F6F62" stroke-width="1.6"/>
+            <circle cx="110" cy="20" r="2.5" fill="#101B33"/><circle cx="190" cy="80" r="2.5" fill="#101B33"/><circle cx="160" cy="180" r="2.5" fill="#101B33"/><circle cx="60" cy="180" r="2.5" fill="#101B33"/><circle cx="30" cy="80" r="2.5" fill="#101B33"/>
+          </svg>
+          <div class="legend"><span><i style="background:var(--gold);"></i>Reliance</span><span><i style="background:var(--teal);"></i>Sector Average</span></div>
+        </div>
+
+        <div class="section-title"><h2>Peer Table</h2><div class="rule"></div></div>
+        <div class="card c12">
+          <div class="table-scroll"><table class="dtable">
+            <thead><tr><th>Company</th><th>Revenue Gr.</th><th>Net Margin</th><th>ROE</th><th>P/E</th><th>Market Cap</th></tr></thead>
+            <tbody>
+              <tr><td class="sym"><span class="row-logo">RE</span>Reliance Industries</td><td class="num">14.2%</td><td class="num">8.1%</td><td class="num">11.6%</td><td class="num">24.8x</td><td class="num">₹19.9L Cr</td></tr>
+              <tr><td class="sym"><span class="row-logo">ON</span>ONGC</td><td class="num">9.4%</td><td class="num">12.2%</td><td class="num">14.1%</td><td class="num">8.6x</td><td class="num">₹3.1L Cr</td></tr>
+              <tr><td class="sym"><span class="row-logo">AD</span>Adani Enterprises</td><td class="num">11.1%</td><td class="num">4.7%</td><td class="num">9.8%</td><td class="num">61.4x</td><td class="num">₹3.6L Cr</td></tr>
+              <tr><td class="sym"><span class="row-logo">BP</span>BPCL</td><td class="num">6.8%</td><td class="num">5.4%</td><td class="num">18.3%</td><td class="num">7.9x</td><td class="num">₹1.4L Cr</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: SMART ALERTS & WATCHLIST                        -->
+    <!-- =================================================== -->
+    <div class="page" data-page="alerts">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Smart Alerts &amp; Watchlist</h2><p>Get notified the moment price, RSI or sentiment crosses a threshold you choose.</p></div>
+          <button class="pill-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Create Alert</button>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>New Rule</span><h3 style="font-size:18px;">Create Alert</h3></div></div></div>
+          <div class="field"><label>Symbol</label><input type="text" value="HDFC Bank" /></div>
+          <div class="field"><label>Condition</label><select><option>RSI crosses above</option><option>Price crosses above</option><option>Price crosses below</option><option>Sentiment shifts negative</option></select></div>
+          <div class="field"><label>Threshold</label><input type="text" value="70" /></div>
+          <button class="btn-block" type="button">Save Alert Rule</button>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Active Rules</span><h3>Alert Rules</h3></div></div></div>
+          <div class="table-scroll"><table class="dtable">
+            <thead><tr><th>Symbol</th><th>Condition</th><th>Threshold</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr><td class="sym">HDFC Bank</td><td>RSI crosses above</td><td class="num">70</td><td><span class="status-dot on"></span>Triggered</td><td><button class="pill-btn ghost">Edit</button></td></tr>
+              <tr><td class="sym">Infosys</td><td>Price crosses above</td><td class="num">₹1,900</td><td><span class="status-dot on"></span>Active</td><td><button class="pill-btn ghost">Edit</button></td></tr>
+              <tr><td class="sym">Tata Motors</td><td>Sentiment shifts negative</td><td class="num">—</td><td><span class="status-dot on"></span>Active</td><td><button class="pill-btn ghost">Edit</button></td></tr>
+              <tr><td class="sym">Wipro</td><td>Price crosses below</td><td class="num">₹500</td><td><span class="status-dot off"></span>Paused</td><td><button class="pill-btn ghost">Edit</button></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div class="section-title"><h2>Watchlist</h2><div class="rule"></div></div>
+        <div class="card c12">
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">HD</div><div><div class="watch-name">HDFC Bank</div><div class="watch-sub">RSI crossed 72</div></div></div><div class="watch-right"><div class="watch-price">₹1,672.40</div><span class="alert-flag">Overbought</span></div></div>
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">IN</div><div><div class="watch-name">Infosys</div><div class="watch-sub">Price near target</div></div></div><div class="watch-right"><div class="watch-price">₹1,904.10</div><div class="watch-change up">+2.4%</div></div></div>
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">TA</div><div><div class="watch-name">Tata Motors</div><div class="watch-sub">Sentiment shift</div></div></div><div class="watch-right"><div class="watch-price">₹974.85</div><div class="watch-change down">−1.1%</div></div></div>
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">WI</div><div><div class="watch-name">Wipro</div><div class="watch-sub">Alert paused</div></div></div><div class="watch-right"><div class="watch-price">₹512.90</div><span class="alert-flag ok">Stable</span></div></div>
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">IT</div><div><div class="watch-name">ITC</div><div class="watch-sub">No active alerts</div></div></div><div class="watch-right"><div class="watch-price">₹468.15</div><div class="watch-change up">+1.2%</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: AI REPORT GENERATOR                             -->
+    <!-- =================================================== -->
+    <div class="page" data-page="reports">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>AI Report Generator</h2><p>Generate a one-click PDF summary for any company, sector or your full portfolio.</p></div>
+        </div>
+
+        <div class="card c12">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Templates</span><h3>Choose a Report Type</h3></div></div></div>
+          <div class="mini-grid">
+            <div class="mini-card">
+              <div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 15l3.5-4 3 3L20 7"/></svg></div>
+              <h4>Company Snapshot</h4><p>Valuation, fundamentals, technicals and ESG for a single company.</p>
+              <button class="pill-btn" style="align-self:flex-start;">Generate</button>
+            </div>
+            <div class="mini-card">
+              <div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+              <h4>Sector Outlook</h4><p>A weekly view of leaders, laggards and rotation across a sector.</p>
+              <button class="pill-btn" style="align-self:flex-start;">Generate</button>
+            </div>
+            <div class="mini-card">
+              <div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 17l4-9 3 5 3-8 3 7 5-4"/></svg></div>
+              <h4>Portfolio Review</h4><p>Full performance, allocation and risk review of your holdings.</p>
+              <button class="pill-btn" style="align-self:flex-start;">Generate</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>History</span><h3>Generated Reports</h3></div></div></div>
+          <div class="report-row"><div class="report-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div style="flex:1;"><div class="report-name">Reliance Industries — Q1 Summary</div><div class="report-meta">Generated 2 hrs ago · 6 pages</div></div><button class="link-btn">Download</button></div>
+          <div class="report-row"><div class="report-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div style="flex:1;"><div class="report-name">Nifty Banking — Weekly Outlook</div><div class="report-meta">Generated yesterday · 4 pages</div></div><button class="link-btn">Download</button></div>
+          <div class="report-row"><div class="report-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div style="flex:1;"><div class="report-name">My Portfolio — Monthly Review</div><div class="report-meta">Generated 4 days ago · 9 pages</div></div><button class="link-btn">Download</button></div>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Preview</span><h3 style="font-size:18px;">Reliance — Q1 Summary</h3></div></div></div>
+          <div class="doc-preview">
+            <div class="doc-line w40" style="height:11px;background:var(--gold-dim);"></div>
+            <div class="doc-line w80"></div><div class="doc-line w100"></div><div class="doc-line w60"></div>
+            <div style="height:10px;"></div>
+            <div class="doc-line w40" style="height:11px;background:var(--gold-dim);"></div>
+            <div class="doc-line w100"></div><div class="doc-line w80"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: CANDLESTICK PATTERNS                            -->
+    <!-- =================================================== -->
+    <div class="page" data-page="candles">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Candlestick Pattern Detection</h2><p>Automatic scanning across your watchlist for classic reversal and continuation patterns.</p></div>
+        </div>
+
+        <div class="card c12">
+          <div class="card-head"><div class="card-eyebrow"><div><span>TCS · Daily</span><h3>Live Chart</h3></div></div></div>
+          <span class="pattern-flag"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>Bullish Engulfing detected · 2h ago</span>
+          <svg viewBox="0 0 720 200" width="100%" height="200">
+            <line x1="0" y1="40" x2="720" y2="40" stroke="#EEE6D2"/><line x1="0" y1="100" x2="720" y2="100" stroke="#EEE6D2"/><line x1="0" y1="160" x2="720" y2="160" stroke="#EEE6D2"/>
+            <g stroke="#A14545" stroke-width="1.6"><line x1="30" y1="50" x2="30" y2="100"/><rect x="22" y="62" width="16" height="26" fill="#A14545"/><line x1="80" y1="60" x2="80" y2="118" stroke="#2F6F62"/><rect x="72" y="70" width="16" height="30" fill="#2F6F62"/><line x1="130" y1="40" x2="130" y2="92" stroke="#A14545"/><rect x="122" y="48" width="16" height="24" fill="#A14545"/></g>
+            <g stroke="#2F6F62" stroke-width="1.8"><line x1="190" y1="36" x2="190" y2="104" /><rect x="178" y="52" width="24" height="40" fill="#2F6F62"/><line x1="250" y1="20" x2="250" y2="92" stroke-width="2.6"/><rect x="234" y="30" width="32" height="48" fill="#2F6F62" stroke-width="2.6"/></g>
+            <g stroke="#A14545" stroke-width="1.6"><line x1="320" y1="44" x2="320" y2="100"/><rect x="312" y="54" width="16" height="28" fill="#A14545"/></g>
+            <g stroke="#2F6F62" stroke-width="1.6"><line x1="370" y1="36" x2="370" y2="88" /><rect x="358" y="44" width="24" height="32" fill="#2F6F62"/><line x1="430" y1="16" x2="430" y2="76" stroke-width="2.4"/><rect x="416" y="22" width="28" height="40" fill="#2F6F62" stroke-width="2.4"/></g>
+            <g stroke="#A14545" stroke-width="1.6"><line x1="490" y1="30" x2="490" y2="86"/><rect x="482" y="38" width="16" height="30" fill="#A14545"/></g>
+            <g stroke="#2F6F62" stroke-width="1.6"><line x1="540" y1="24" x2="540" y2="70" /><rect x="528" y="30" width="24" height="28" fill="#2F6F62"/><line x1="600" y1="10" x2="600" y2="60" stroke-width="2.6"/><rect x="586" y="14" width="28" height="36" fill="#2F6F62" stroke-width="2.6"/></g>
+            <g stroke="#A14545" stroke-width="1.6"><line x1="660" y1="20" x2="660" y2="60"/><rect x="652" y="26" width="16" height="22" fill="#A14545"/></g>
+          </svg>
+        </div>
+
+        <div class="card c6">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Scanner</span><h3>Recent Detections</h3></div></div></div>
+          <div class="table-scroll"><table class="dtable">
+            <thead><tr><th>Symbol</th><th>Pattern</th><th>Confidence</th><th>Time</th></tr></thead>
+            <tbody>
+              <tr><td class="sym">TCS</td><td>Bullish Engulfing</td><td class="num">91%</td><td class="num">2h ago</td></tr>
+              <tr><td class="sym">Infosys</td><td>Morning Star</td><td class="num">84%</td><td class="num">5h ago</td></tr>
+              <tr><td class="sym">Tata Steel</td><td>Doji</td><td class="num">76%</td><td class="num">1d ago</td></tr>
+              <tr><td class="sym">Axis Bank</td><td>Hammer</td><td class="num">88%</td><td class="num">1d ago</td></tr>
+              <tr><td class="sym">Wipro</td><td>Bearish Engulfing</td><td class="num">80%</td><td class="num">2d ago</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div class="card c6">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Reference</span><h3 style="font-size:18px;">Pattern Library</h3></div></div></div>
+          <div class="pattern-lib-card">
+            <svg viewBox="0 0 40 50"><line x1="20" y1="6" x2="20" y2="44" stroke="#A14545" stroke-width="2"/><rect x="12" y="20" width="16" height="10" fill="#A14545"/></svg>
+            <div><div class="pn">Doji</div><div class="pd">Open and close nearly equal — signals indecision.</div></div>
+          </div>
+          <div class="pattern-lib-card">
+            <svg viewBox="0 0 40 50"><line x1="20" y1="8" x2="20" y2="20" stroke="#2F6F62" stroke-width="2"/><rect x="12" y="8" width="16" height="12" fill="#2F6F62"/><line x1="20" y1="20" x2="20" y2="44" stroke="#2F6F62" stroke-width="2"/></svg>
+            <div><div class="pn">Hammer</div><div class="pd">Small body, long lower wick — possible bullish reversal.</div></div>
+          </div>
+          <div class="pattern-lib-card">
+            <svg viewBox="0 0 40 50"><rect x="6" y="18" width="12" height="16" fill="#A14545"/><rect x="20" y="10" width="16" height="26" fill="#2F6F62"/></svg>
+            <div><div class="pn">Bullish Engulfing</div><div class="pd">A large green candle fully engulfs the prior red candle.</div></div>
+          </div>
+          <div class="pattern-lib-card" style="margin-bottom:0;">
+            <svg viewBox="0 0 40 50"><rect x="4" y="10" width="10" height="12" fill="#A14545"/><rect x="16" y="16" width="8" height="8" fill="#A14545"/><rect x="26" y="8" width="10" height="24" fill="#2F6F62"/></svg>
+            <div><div class="pn">Morning Star</div><div class="pd">Three-candle pattern signalling a bottom reversal.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: ESG & SUSTAINABILITY                            -->
+    <!-- =================================================== -->
+    <div class="page" data-page="esg">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>ESG &amp; Sustainability Score</h2><p>Environmental, social and governance insight for every holding — built for the modern, values-aligned investor.</p></div>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Reliance Industries</span><h3 style="font-size:18px;">Overall Score</h3></div></div></div>
+          <div class="esg-wrap" style="justify-content:center;">
+            <div class="gauge big"><svg width="170" height="170" viewBox="0 0 170 170"><circle cx="85" cy="85" r="72" fill="none" stroke="#F0E9D8" stroke-width="14"/><circle cx="85" cy="85" r="72" fill="none" stroke="#2F6F62" stroke-width="14" stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="104"/></svg><div class="gauge-center"><div class="n">77</div><div class="l">of 100 · Strong</div></div></div>
+          </div>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Breakdown</span><h3>Category Detail</h3></div></div></div>
+          <div class="bar-row"><div class="lbl">Environmental</div><div class="bar-track"><div class="bar-fill" style="width:81%"></div></div><div class="val">81</div></div>
+          <div class="bar-row"><div class="lbl">Social</div><div class="bar-track"><div class="bar-fill you" style="width:74%"></div></div><div class="val">74</div></div>
+          <div class="bar-row"><div class="lbl">Governance</div><div class="bar-track"><div class="bar-fill alt" style="width:76%"></div></div><div class="val">76</div></div>
+          <p style="font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-top:8px;">Strong marks on renewable energy investment and emissions reduction; social score held back by supply-chain labour disclosures.</p>
+        </div>
+
+        <div class="section-title"><h2>Peer Comparison</h2><div class="rule"></div></div>
+        <div class="card c6">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Sector</span><h3 style="font-size:18px;">ESG vs. Peers</h3></div></div></div>
+          <div class="bar-row"><div class="lbl">Reliance</div><div class="bar-track"><div class="bar-fill you" style="width:77%"></div></div><div class="val">77</div></div>
+          <div class="bar-row"><div class="lbl">ONGC</div><div class="bar-track"><div class="bar-fill" style="width:64%"></div></div><div class="val">64</div></div>
+          <div class="bar-row"><div class="lbl">Adani Ent.</div><div class="bar-track"><div class="bar-fill" style="width:58%"></div></div><div class="val">58</div></div>
+          <div class="bar-row"><div class="lbl">BPCL</div><div class="bar-track"><div class="bar-fill" style="width:69%"></div></div><div class="val">69</div></div>
+        </div>
+
+        <div class="card c6">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Portfolio</span><h3 style="font-size:18px;">Holdings ESG</h3></div></div></div>
+          <div class="table-scroll"><table class="dtable">
+            <thead><tr><th>Symbol</th><th>E</th><th>S</th><th>G</th><th>Overall</th></tr></thead>
+            <tbody>
+              <tr><td class="sym">Reliance</td><td class="num">81</td><td class="num">74</td><td class="num">76</td><td class="num">77</td></tr>
+              <tr><td class="sym">TCS</td><td class="num">72</td><td class="num">85</td><td class="num">88</td><td class="num">82</td></tr>
+              <tr><td class="sym">HDFC Bank</td><td class="num">68</td><td class="num">79</td><td class="num">83</td><td class="num">77</td></tr>
+              <tr><td class="sym">Tata Motors</td><td class="num">75</td><td class="num">70</td><td class="num">72</td><td class="num">72</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: LATEST NEWS                                     -->
+    <!-- =================================================== -->
+    <div class="page" data-page="news">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Latest News</h2><p>A live-style feed of market-moving headlines — each scored for portfolio impact, tagged Benefit or Loss, and paired with a short prediction.</p></div>
+          <div class="chip-tabs"><div class="chip-tab active">All</div><div class="chip-tab">Benefit</div><div class="chip-tab">Loss</div><div class="chip-tab">Neutral</div></div>
+        </div>
+
+        <div class="card c12">
+          <div class="news-head" style="margin-bottom:2px;">
+            <div style="display:flex;gap:12px;">
+              <div class="news-source-logo">RB</div>
+              <div>
+                <div class="news-title">RBI holds repo rate at 6.5%, signals cautious optimism on inflation</div>
+                <div class="news-meta">Economic Times · 22 minutes ago</div>
+              </div>
+            </div>
+            <span class="impact-tag benefit"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Benefit</span>
+          </div>
+          <p class="news-snippet">The Monetary Policy Committee kept rates unchanged for a fourth straight meeting, citing steady disinflation and resilient growth — easing pressure on bank funding costs.</p>
+          <div class="prediction-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 0-4 4c0 1.2.5 2 1 3-1.5.5-3 2-3 4.5A4.5 4.5 0 0 0 10.5 18h3A4.5 4.5 0 0 0 18 13.5c0-2.5-1.5-4-3-4.5.5-1 1-1.8 1-3a4 4 0 0 0-4-4z"/><path d="M9 21h6"/></svg><span><b>Prediction:</b> Rate-sensitive banking names could see a 1–2% uptick over the next 2 sessions as margin stability supports sentiment.</span></div>
+          <div class="news-foot">
+            <div class="news-tickers"><span class="ticker-chip">HDFC Bank</span><span class="ticker-chip">ICICI Bank</span><span class="ticker-chip">Nifty Bank</span></div>
+            <div class="news-score">
+              <div class="ring"><svg width="38" height="38" viewBox="0 0 38 38"><circle cx="19" cy="19" r="15" fill="none" stroke="#F0E9D8" stroke-width="4.5"/><circle cx="19" cy="19" r="15" fill="none" stroke="#2F6F62" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="94" stroke-dashoffset="17"/></svg><span>82</span></div>
+              <div class="lbl">Impact<br>Score</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card c12">
+          <div class="news-head" style="margin-bottom:2px;">
+            <div style="display:flex;gap:12px;">
+              <div class="news-source-logo">RT</div>
+              <div>
+                <div class="news-title">Crude oil jumps 6% on Middle East supply concerns</div>
+                <div class="news-meta">Reuters · 1 hour ago</div>
+              </div>
+            </div>
+            <span class="impact-tag loss"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Loss</span>
+          </div>
+          <p class="news-snippet">Brent crude touched a five-month high after fresh disruption reports near a key shipping corridor. Fuel-intensive sectors face immediate cost pressure, while upstream producers stand to benefit.</p>
+          <div class="prediction-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 0-4 4c0 1.2.5 2 1 3-1.5.5-3 2-3 4.5A4.5 4.5 0 0 0 10.5 18h3A4.5 4.5 0 0 0 18 13.5c0-2.5-1.5-4-3-4.5.5-1 1-1.8 1-3a4 4 0 0 0-4-4z"/><path d="M9 21h6"/></svg><span><b>Prediction:</b> Airline margins likely compressed next quarter; ONGC and upstream energy names may see modest outperformance.</span></div>
+          <div class="news-foot">
+            <div class="news-tickers"><span class="ticker-chip">IndiGo</span><span class="ticker-chip">SpiceJet</span><span class="ticker-chip">ONGC</span></div>
+            <div class="news-score">
+              <div class="ring"><svg width="38" height="38" viewBox="0 0 38 38"><circle cx="19" cy="19" r="15" fill="none" stroke="#F0E9D8" stroke-width="4.5"/><circle cx="19" cy="19" r="15" fill="none" stroke="#A14545" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="94" stroke-dashoffset="24"/></svg><span>74</span></div>
+              <div class="lbl">Impact<br>Score</div>
+            </div>
+          </div>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('domino')" style="cursor:pointer;">Trace full ripple effect <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c12">
+          <div class="news-head" style="margin-bottom:2px;">
+            <div style="display:flex;gap:12px;">
+              <div class="news-source-logo">BL</div>
+              <div>
+                <div class="news-title">TCS wins $1.2B multi-year cloud transformation deal</div>
+                <div class="news-meta">Business Line · 3 hours ago</div>
+              </div>
+            </div>
+            <span class="impact-tag benefit"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Benefit</span>
+          </div>
+          <p class="news-snippet">The deal, one of the company's largest this fiscal year, spans cloud migration and managed services for a European banking client — adding meaningful revenue visibility.</p>
+          <div class="prediction-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 0-4 4c0 1.2.5 2 1 3-1.5.5-3 2-3 4.5A4.5 4.5 0 0 0 10.5 18h3A4.5 4.5 0 0 0 18 13.5c0-2.5-1.5-4-3-4.5.5-1 1-1.8 1-3a4 4 0 0 0-4-4z"/><path d="M9 21h6"/></svg><span><b>Prediction:</b> Deal-win momentum has historically supported a 3–4% re-rating within the following week.</span></div>
+          <div class="news-foot">
+            <div class="news-tickers"><span class="ticker-chip">TCS</span><span class="ticker-chip">IT Services</span></div>
+            <div class="news-score">
+              <div class="ring"><svg width="38" height="38" viewBox="0 0 38 38"><circle cx="19" cy="19" r="15" fill="none" stroke="#F0E9D8" stroke-width="4.5"/><circle cx="19" cy="19" r="15" fill="none" stroke="#2F6F62" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="94" stroke-dashoffset="8"/></svg><span>91</span></div>
+              <div class="lbl">Impact<br>Score</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card c12">
+          <div class="news-head" style="margin-bottom:2px;">
+            <div style="display:flex;gap:12px;">
+              <div class="news-source-logo">MN</div>
+              <div>
+                <div class="news-title">Adani Enterprises faces fresh regulatory scrutiny over import valuations</div>
+                <div class="news-meta">Mint · 5 hours ago</div>
+              </div>
+            </div>
+            <span class="impact-tag loss"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Loss</span>
+          </div>
+          <p class="news-snippet">A regulatory body has sought clarifications on valuation practices tied to certain coal import contracts, reviving governance concerns flagged in prior reports.</p>
+          <div class="prediction-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 0-4 4c0 1.2.5 2 1 3-1.5.5-3 2-3 4.5A4.5 4.5 0 0 0 10.5 18h3A4.5 4.5 0 0 0 18 13.5c0-2.5-1.5-4-3-4.5.5-1 1-1.8 1-3a4 4 0 0 0-4-4z"/><path d="M9 21h6"/></svg><span><b>Prediction:</b> Elevated volatility likely near-term; further downside if the inquiry widens in scope.</span></div>
+          <div class="news-foot">
+            <div class="news-tickers"><span class="ticker-chip">Adani Enterprises</span></div>
+            <div class="news-score">
+              <div class="ring"><svg width="38" height="38" viewBox="0 0 38 38"><circle cx="19" cy="19" r="15" fill="none" stroke="#F0E9D8" stroke-width="4.5"/><circle cx="19" cy="19" r="15" fill="none" stroke="#A14545" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="94" stroke-dashoffset="30"/></svg><span>68</span></div>
+              <div class="lbl">Impact<br>Score</div>
+            </div>
+          </div>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('trust')" style="cursor:pointer;">Check management trust score <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c12">
+          <div class="news-head" style="margin-bottom:2px;">
+            <div style="display:flex;gap:12px;">
+              <div class="news-source-logo">MC</div>
+              <div>
+                <div class="news-title">Reliance Retail same-store sales growth slows to 6% in Q2</div>
+                <div class="news-meta">Moneycontrol · 8 hours ago</div>
+              </div>
+            </div>
+            <span class="impact-tag neutral"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M8 12h8"/></svg>Neutral</span>
+          </div>
+          <p class="news-snippet">Growth decelerated from 9% a year ago, which management attributed to a high base and softer discretionary spending in metro markets.</p>
+          <div class="prediction-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 0-4 4c0 1.2.5 2 1 3-1.5.5-3 2-3 4.5A4.5 4.5 0 0 0 10.5 18h3A4.5 4.5 0 0 0 18 13.5c0-2.5-1.5-4-3-4.5.5-1 1-1.8 1-3a4 4 0 0 0-4-4z"/><path d="M9 21h6"/></svg><span><b>Prediction:</b> Muted near-term price impact; festive-quarter numbers will be the confirming signal to watch.</span></div>
+          <div class="news-foot">
+            <div class="news-tickers"><span class="ticker-chip">Reliance Industries</span><span class="ticker-chip">Retail</span></div>
+            <div class="news-score">
+              <div class="ring"><svg width="38" height="38" viewBox="0 0 38 38"><circle cx="19" cy="19" r="15" fill="none" stroke="#F0E9D8" stroke-width="4.5"/><circle cx="19" cy="19" r="15" fill="none" stroke="#B8935A" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="94" stroke-dashoffset="52"/></svg><span>45</span></div>
+              <div class="lbl">Impact<br>Score</div>
+            </div>
+          </div>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('thesis')" style="cursor:pointer;">Track thesis impact <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c12">
+          <div class="news-head" style="margin-bottom:2px;">
+            <div style="display:flex;gap:12px;">
+              <div class="news-source-logo">ET</div>
+              <div>
+                <div class="news-title">Infosys raises FY guidance after strong Q2 beat</div>
+                <div class="news-meta">Economic Times · Yesterday</div>
+              </div>
+            </div>
+            <span class="impact-tag benefit"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Benefit</span>
+          </div>
+          <p class="news-snippet">Revenue and margins both beat estimates, prompting management to lift full-year revenue growth guidance for the second consecutive quarter.</p>
+          <div class="prediction-box"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 0-4 4c0 1.2.5 2 1 3-1.5.5-3 2-3 4.5A4.5 4.5 0 0 0 10.5 18h3A4.5 4.5 0 0 0 18 13.5c0-2.5-1.5-4-3-4.5.5-1 1-1.8 1-3a4 4 0 0 0-4-4z"/><path d="M9 21h6"/></svg><span><b>Prediction:</b> Guidance upgrades of this size have historically preceded a 2–5% rally within a week.</span></div>
+          <div class="news-foot">
+            <div class="news-tickers"><span class="ticker-chip">Infosys</span><span class="ticker-chip">IT Services</span></div>
+            <div class="news-score">
+              <div class="ring"><svg width="38" height="38" viewBox="0 0 38 38"><circle cx="19" cy="19" r="15" fill="none" stroke="#F0E9D8" stroke-width="4.5"/><circle cx="19" cy="19" r="15" fill="none" stroke="#2F6F62" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="94" stroke-dashoffset="11"/></svg><span>88</span></div>
+              <div class="lbl">Impact<br>Score</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: MARKET DOMINO PREDICTOR (flagship)              -->
+    <!-- =================================================== -->
+    <div class="page" data-page="domino">
+      <div class="grid">
+        <div class="page-banner" style="background:linear-gradient(135deg,#12213D,#1B2F52);border-color:var(--navy-3);">
+          <div><h2 style="color:#FBF4E4;">Market Domino Predictor</h2><p style="color:#AFB6CC;">We don't just predict which stock moves — we trace the chain of <em>why</em>. Give it one event and follow every ripple, order by order.</p></div>
+        </div>
+
+        <div class="card c12">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Simulation Input</span><h3>Trace an Event</h3></div></div></div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            <div class="field" style="flex:1;min-width:220px;margin-bottom:0;"><label>Event</label><input type="text" value="Crude Oil +30%"></div>
+            <div class="field" style="min-width:160px;margin-bottom:0;"><label>Depth</label><select><option>4th-order effects</option><option>3rd-order effects</option><option>2nd-order effects</option></select></div>
+            <button class="pill-btn" style="padding:11px 20px;">Run Simulation</button>
+          </div>
+        </div>
+
+        <div class="card c12">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Chain of Reasoning</span><h3>1st → 4th Order Effects</h3></div></div><span class="tag beta">Simulated</span></div>
+          <div style="display:flex;flex-direction:column;gap:0;">
+            <div style="display:flex;gap:16px;">
+              <div style="display:flex;flex-direction:column;align-items:center;">
+                <div style="width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;">1</div>
+                <div style="width:2px;flex:1;background:var(--line);margin:4px 0;"></div>
+              </div>
+              <div style="padding-bottom:22px;">
+                <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;">Direct impact</div>
+                <div style="font-family:var(--serif);font-size:17px;color:var(--navy);font-weight:600;">Crude oil rises 30% — jet fuel cost surges for all airlines</div>
+                <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">Fuel typically accounts for ~35–40% of an airline's operating cost.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:16px;">
+              <div style="display:flex;flex-direction:column;align-items:center;">
+                <div style="width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;">2</div>
+                <div style="width:2px;flex:1;background:var(--line);margin:4px 0;"></div>
+              </div>
+              <div style="padding-bottom:22px;">
+                <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;">2nd-order</div>
+                <div style="font-family:var(--serif);font-size:17px;color:var(--navy);font-weight:600;">IndiGo &amp; SpiceJet operating margins compress</div>
+                <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">Estimated margin impact: −180 to −260 bps this quarter.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:16px;">
+              <div style="display:flex;flex-direction:column;align-items:center;">
+                <div style="width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;">3</div>
+                <div style="width:2px;flex:1;background:var(--line);margin:4px 0;"></div>
+              </div>
+              <div style="padding-bottom:22px;">
+                <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;">3rd-order</div>
+                <div style="font-family:var(--serif);font-size:17px;color:var(--navy);font-weight:600;">Airlines pass costs on — average ticket prices rise 8–12%</div>
+                <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">Domestic leisure travel demand historically softens 5–7% per 10% fare rise.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:16px;">
+              <div style="display:flex;flex-direction:column;align-items:center;">
+                <div style="width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;">4</div>
+              </div>
+              <div>
+                <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;">4th-order · Endpoint</div>
+                <div style="font-family:var(--serif);font-size:17px;color:var(--navy);font-weight:600;">Hotel occupancy &amp; tourism-linked stocks face secondary drag</div>
+                <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">Indian Hotels, Thomas Cook and regional tourism boards flagged as watch-list candidates.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Network</span><h3>Affected Companies Graph</h3></div></div></div>
+          <svg viewBox="0 0 460 240" width="100%" height="240">
+            <line x1="80" y1="120" x2="200" y2="60" stroke="#E6DCC4" stroke-width="1.5"/>
+            <line x1="80" y1="120" x2="200" y2="120" stroke="#E6DCC4" stroke-width="1.5"/>
+            <line x1="80" y1="120" x2="200" y2="180" stroke="#E6DCC4" stroke-width="1.5"/>
+            <line x1="200" y1="60" x2="330" y2="40" stroke="#E6DCC4" stroke-width="1.5"/>
+            <line x1="200" y1="60" x2="330" y2="90" stroke="#E6DCC4" stroke-width="1.5"/>
+            <line x1="200" y1="120" x2="330" y2="120" stroke="#E6DCC4" stroke-width="1.5"/>
+            <line x1="200" y1="180" x2="330" y2="160" stroke="#E6DCC4" stroke-width="1.5"/>
+            <line x1="200" y1="180" x2="330" y2="205" stroke="#E6DCC4" stroke-width="1.5"/>
+            <circle cx="80" cy="120" r="26" fill="var(--navy)"/><text x="80" y="124" text-anchor="middle" fill="#EADFC7" font-size="10" font-family="Inter">Oil +30%</text>
+            <circle cx="200" cy="60" r="20" fill="#A14545" fill-opacity=".85"/><text x="200" y="64" text-anchor="middle" fill="#fff" font-size="9" font-family="Inter">IndiGo</text>
+            <circle cx="200" cy="120" r="20" fill="#A14545" fill-opacity=".85"/><text x="200" y="124" text-anchor="middle" fill="#fff" font-size="9" font-family="Inter">SpiceJet</text>
+            <circle cx="200" cy="180" r="20" fill="#B8935A"/><text x="200" y="184" text-anchor="middle" fill="#12213D" font-size="9" font-family="Inter">Fuel Cos.</text>
+            <circle cx="330" cy="40" r="16" fill="#D9BC8B"/><text x="330" y="44" text-anchor="middle" fill="#12213D" font-size="8.5" font-family="Inter">Fares ↑</text>
+            <circle cx="330" cy="90" r="16" fill="#D9BC8B"/><text x="330" y="94" text-anchor="middle" fill="#12213D" font-size="8.5" font-family="Inter">Demand ↓</text>
+            <circle cx="330" cy="120" r="16" fill="#2F6F62"/><text x="330" y="124" text-anchor="middle" fill="#fff" font-size="8.5" font-family="Inter">ONGC ↑</text>
+            <circle cx="330" cy="160" r="16" fill="#D9BC8B"/><text x="330" y="164" text-anchor="middle" fill="#12213D" font-size="8.5" font-family="Inter">Hotels ↓</text>
+            <circle cx="330" cy="205" r="16" fill="#D9BC8B"/><text x="330" y="209" text-anchor="middle" fill="#12213D" font-size="8.5" font-family="Inter">Tourism ↓</text>
+          </svg>
+          <div class="legend"><span><i style="background:#A14545;"></i>Direct hit</span><span><i style="background:#B8935A;"></i>Cost pass-through</span><span><i style="background:#2F6F62;"></i>Benefits</span><span><i style="background:#D9BC8B;"></i>Secondary drag</span></div>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Click-through</span><h3 style="font-size:18px;">What Did Management Say?</h3></div></div></div>
+          <p class="desc">Select any affected company to see whether leadership had already flagged this risk.</p>
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">IN</div><div><div class="watch-name">IndiGo</div><div class="watch-sub">FY24 call: "hedged 40% of fuel exposure"</div></div></div><div class="watch-right"><span class="alert-flag ok">Flagged risk</span></div></div>
+          <div class="watch-row"><div class="watch-id"><div class="watch-logo">SP</div><div><div class="watch-name">SpiceJet</div><div class="watch-sub">No mention of oil hedging in last 3 calls</div></div></div><div class="watch-right"><span class="alert-flag">Unaddressed</span></div></div>
+          <div class="card-foot" style="border-top:none;padding-top:10px;"><a class="link-btn" onclick="goPage('trust')" style="cursor:pointer;">Open Management Trust Meter <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: MANAGEMENT TRUST METER                          -->
+    <!-- =================================================== -->
+    <div class="page" data-page="trust">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Management Trust Meter</h2><p>Every claim management made on earnings calls and in annual reports, checked against what actually happened.</p></div>
+          <select style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:9px 12px;font-size:12.5px;"><option>IndiGo</option><option>Reliance Industries</option><option>Tata Motors</option></select>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div><span>IndiGo · FY22–FY25</span><h3 style="font-size:18px;">Trust Score</h3></div></div></div>
+          <div class="esg-wrap" style="justify-content:center;">
+            <div class="gauge big"><svg width="170" height="170" viewBox="0 0 170 170"><circle cx="85" cy="85" r="72" fill="none" stroke="#F0E9D8" stroke-width="14"/><circle cx="85" cy="85" r="72" fill="none" stroke="#B8935A" stroke-width="14" stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="126"/></svg><div class="gauge-center"><div class="n">72</div><div class="l">of 100</div></div></div>
+          </div>
+          <div class="metric-strip" style="justify-content:center;gap:22px;">
+            <div class="metric"><div class="v" style="color:#2F6F62;">13</div><div class="l">Kept</div></div>
+            <div class="metric"><div class="v" style="color:#B8935A;">3</div><div class="l">Delayed</div></div>
+            <div class="metric"><div class="v" style="color:#A14545;">2</div><div class="l">Broken</div></div>
+          </div>
+        </div>
+
+        <div class="card c8">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Timeline</span><h3>Promises vs. Outcomes</h3></div></div></div>
+          <div class="table-scroll"><table class="dtable">
+            <thead><tr><th>Promise</th><th>Made</th><th>Deadline</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Expand fleet to 400 aircraft</td><td class="num">Q1 FY23</td><td class="num">FY25</td><td><span class="tag live">Kept</span></td></tr>
+              <tr><td>Launch 6 new international routes</td><td class="num">Q3 FY23</td><td class="num">FY24</td><td><span class="tag beta">Delayed</span></td></tr>
+              <tr><td>Reduce cost per available seat km by 5%</td><td class="num">Q2 FY24</td><td class="num">FY25</td><td><span class="tag new">Broken</span></td></tr>
+              <tr><td>Hedge 40% of fuel exposure</td><td class="num">Q4 FY23</td><td class="num">Ongoing</td><td><span class="tag live">Kept</span></td></tr>
+              <tr><td>Turn profitable on international ops</td><td class="num">Q1 FY24</td><td class="num">FY25</td><td><span class="tag beta">Delayed</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div class="card c12">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Source Quotes</span><h3 style="font-size:18px;">What Was Actually Said</h3></div></div></div>
+          <div class="msg bot" style="max-width:100%;"><span class="tag-sm">FY23 Q3 Earnings Call</span>"We remain firmly on track to induct 30 new aircraft this fiscal, and we expect international capacity to double within 18 months."</div>
+          <div style="height:10px;"></div>
+          <div class="msg bot" style="max-width:100%;"><span class="tag-sm">FY24 Q2 Earnings Call</span>"International capacity growth has been slower than guided, largely due to engine supply constraints industry-wide."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: INVESTMENT THESIS BREAKER                       -->
+    <!-- =================================================== -->
+    <div class="page" data-page="thesis">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Investment Thesis Breaker</h2><p>Save the reason you bought — get alerted the moment that reason itself starts to break, not just when price moves.</p></div>
+          <button class="pill-btn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Log New Thesis</button>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>New Entry</span><h3 style="font-size:18px;">Log a Thesis</h3></div></div></div>
+          <div class="field"><label>Symbol</label><input type="text" value="Reliance Industries"></div>
+          <div class="field"><label>Your Reasoning</label><input type="text" value="Buying because revenue is growing fast (22% YoY)"></div>
+          <div class="field"><label>Metric to Track</label><select><option>Revenue growth rate</option><option>Net margin</option><option>Debt-to-equity</option><option>Management guidance</option></select></div>
+          <button class="btn-block" type="button">Save &amp; Start Tracking</button>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Tracked</span><h3>Active Theses</h3></div></div></div>
+          <div class="watch-row">
+            <div class="watch-id"><div class="watch-logo">RE</div><div><div class="watch-name">Reliance — "Revenue growth"</div><div class="watch-sub">Original: 22% YoY · Now: 14.2% YoY</div></div></div>
+            <div class="watch-right"><span class="alert-flag">Weakening</span></div>
+          </div>
+          <div class="bar-row" style="margin:4px 0 16px;"><div class="lbl">Thesis Health</div><div class="bar-track"><div class="bar-fill" style="width:56%;background:linear-gradient(90deg,#B8935A,#D9BC8B);"></div></div><div class="val">56%</div></div>
+
+          <div class="watch-row">
+            <div class="watch-id"><div class="watch-logo">TC</div><div><div class="watch-name">TCS — "Margin expansion"</div><div class="watch-sub">Original: 24% margin target · Now: 25.1%</div></div></div>
+            <div class="watch-right"><span class="alert-flag ok">Intact</span></div>
+          </div>
+          <div class="bar-row" style="margin:4px 0 16px;"><div class="lbl">Thesis Health</div><div class="bar-track"><div class="bar-fill" style="width:91%"></div></div><div class="val">91%</div></div>
+
+          <div class="watch-row">
+            <div class="watch-id"><div class="watch-logo">SP</div><div><div class="watch-name">SpiceJet — "Debt reduction"</div><div class="watch-sub">Original: D/E to fall below 1.5 · Now: 2.3</div></div></div>
+            <div class="watch-right"><span class="alert-flag">Broken</span></div>
+          </div>
+          <div class="bar-row" style="margin:4px 0 0;"><div class="lbl">Thesis Health</div><div class="bar-track"><div class="bar-fill" style="width:18%;background:linear-gradient(90deg,#A14545,#C97A7A);"></div></div><div class="val">18%</div></div>
+        </div>
+
+        <div class="section-title"><h2>Alert Log</h2><div class="rule"></div></div>
+        <div class="card c12">
+          <div class="report-row"><div class="report-icon" style="background:var(--gold-dim);"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke="#8A6A32"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div><div><div class="report-name">Reliance revenue growth thesis weakening — 22% → 14.2%</div><div class="report-meta">3 days ago</div></div></div>
+          <div class="report-row"><div class="report-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div><div><div class="report-name">SpiceJet debt-reduction thesis broken — D/E rose past 2.0</div><div class="report-meta">1 week ago</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: STOCK DNA FINGERPRINT                           -->
+    <!-- =================================================== -->
+    <div class="page" data-page="dna">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Stock DNA Fingerprint</h2><p>Growth, Debt, News Sensitivity, Management Reliability and Market Fear — reduced to a comparable genetic strand.</p></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <select style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:9px 12px;font-size:12.5px;"><option>Reliance Industries</option><option>TCS</option></select>
+            <select style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:9px 12px;font-size:12.5px;"><option>Adani Enterprises</option><option>Infosys</option></select>
+            <button class="pill-btn">Match DNA</button>
+          </div>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Similarity</span><h3 style="font-size:18px;">DNA Match Score</h3></div></div></div>
+          <div class="esg-wrap" style="justify-content:center;">
+            <div class="gauge big"><svg width="170" height="170" viewBox="0 0 170 170"><circle cx="85" cy="85" r="72" fill="none" stroke="#F0E9D8" stroke-width="14"/><circle cx="85" cy="85" r="72" fill="none" stroke="#2F6F62" stroke-width="14" stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="163"/></svg><div class="gauge-center"><div class="n">64%</div><div class="l">Match</div></div></div>
+          </div>
+          <p style="font-size:12.5px;color:var(--ink-soft);text-align:center;line-height:1.6;">Reliance and Adani Enterprises share high growth-ambition and news sensitivity, but diverge sharply on debt profile.</p>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Fingerprint</span><h3>Trait Comparison</h3></div></div></div>
+          <div class="bar-row"><div class="lbl">Growth</div><div class="bar-track"><div class="bar-fill you" style="width:82%"></div></div><div class="val">82</div></div>
+          <div class="bar-row"><div class="lbl">Debt Load</div><div class="bar-track"><div class="bar-fill alt" style="width:38%"></div></div><div class="val">38</div></div>
+          <div class="bar-row"><div class="lbl">News Sensitivity</div><div class="bar-track"><div class="bar-fill you" style="width:71%"></div></div><div class="val">71</div></div>
+          <div class="bar-row"><div class="lbl">Mgmt. Reliability</div><div class="bar-track"><div class="bar-fill you" style="width:76%"></div></div><div class="val">76</div></div>
+          <div class="bar-row"><div class="lbl">Market Fear</div><div class="bar-track"><div class="bar-fill alt" style="width:44%"></div></div><div class="val">44</div></div>
+          <div class="legend"><span><i style="background:var(--gold);"></i>Reliance</span><span><i style="background:#7986B5;"></i>Adani Enterprises</span></div>
+        </div>
+
+        <div class="section-title"><h2>DNA Strand Visualization</h2><div class="rule"></div></div>
+        <div class="card c12">
+          <svg viewBox="0 0 700 90" width="100%" height="90">
+            <polyline points="0,45 40,15 80,70 120,20 160,65 200,25 240,60 280,18 320,68 360,22 400,58 440,16 480,66 520,24 560,62 600,20 640,55 680,30" fill="none" stroke="#B8935A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,45 40,60 80,30 120,55 160,25 200,58 240,28 280,60 320,22 360,58 400,26 440,60 480,24 520,55 560,28 600,58 640,30 680,50" fill="none" stroke="#2F6F62" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: DECISION TIME MACHINE                           -->
+    <!-- =================================================== -->
+    <div class="page" data-page="timemachine">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Decision Time Machine</h2><p>Travel to a past date, decide with only the information available then, and see where your reasoning held up.</p></div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input type="text" value="15 Mar 2023" style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:9px 12px;font-size:12.5px;width:130px;">
+            <button class="pill-btn">Travel</button>
+          </div>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>15 March 2023</span><h3>What You Knew Then</h3></div></div></div>
+          <div class="metric-strip">
+            <div class="metric"><div class="v">₹2,145.00</div><div class="l">Reliance Price</div></div>
+            <div class="metric"><div class="v">18.4x</div><div class="l">P/E at the time</div></div>
+            <div class="metric"><div class="v">Neutral</div><div class="l">News Sentiment</div></div>
+          </div>
+          <div class="msg bot" style="max-width:100%;margin-top:10px;"><span class="tag-sm">Headline · 14 Mar 2023</span>"Reliance Retail reports steady but unspectacular Q3 growth; analysts split on near-term catalysts."</div>
+          <div style="height:10px;"></div>
+          <div class="msg bot" style="max-width:100%;"><span class="tag-sm">Headline · 10 Mar 2023</span>"Global banking jitters weigh on broader markets; Nifty down 1.2% for the week."</div>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Your Call</span><h3 style="font-size:18px;">Make a Decision</h3></div></div></div>
+          <p class="desc">Based only on what was known on 15 Mar 2023, what would you have done?</p>
+          <div class="toggle-pair" style="grid-template-columns:1fr 1fr 1fr;display:grid;">
+            <button class="active buy" style="border-radius:8px;">Buy</button>
+            <button style="border-radius:8px;">Hold</button>
+            <button class="sell" style="border-radius:8px;">Sell</button>
+          </div>
+          <div class="field"><label>Your Reasoning</label><input type="text" value="Retail growth steady, valuation reasonable despite market jitters"></div>
+          <button class="btn-block" type="button">Lock In Decision &amp; Reveal Future</button>
+        </div>
+
+        <div class="section-title"><h2>Outcome Revealed</h2><div class="rule"></div></div>
+        <div class="card c12">
+          <div class="card-head"><div class="card-eyebrow"><div><span>15 Mar 2023 → Today</span><h3>How It Played Out</h3></div></div><span class="tag live">+37.3% since decision</span></div>
+          <svg viewBox="0 0 700 110" width="100%" height="110" preserveAspectRatio="none">
+            <polyline points="0,80 60,78 120,84 180,70 240,74 300,58 360,64 420,44 480,50 540,30 600,36 660,16 700,22" fill="none" stroke="#2F6F62" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p style="font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-top:8px;">Your reasoning around steady retail growth held up — the segment re-accelerated over the following two quarters. The market-jitters concern proved short-lived and did not materially affect the thesis.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: AI STOCK AUTOPSY                                -->
+    <!-- =================================================== -->
+    <div class="page" data-page="autopsy">
+      <div class="grid">
+        <div class="page-banner" style="background:linear-gradient(135deg,#12213D,#1B2F52);border-color:var(--navy-3);">
+          <div><h2 style="color:#FBF4E4;">AI Stock Autopsy</h2><p style="color:#AFB6CC;">Reconstruct the hidden warning signs that appeared 6–12 months before a real collapse — then scan your own holdings for the same disease.</p></div>
+          <select style="border:1px solid rgba(217,188,139,.35);background:rgba(255,255,255,.06);color:#F1EAD8;border-radius:10px;padding:9px 12px;font-size:12.5px;"><option>Case Study: DHFL (2019 Collapse)</option><option>Case Study: Yes Bank (2020 Collapse)</option><option>Case Study: Satyam Computers (2009 Collapse)</option></select>
+        </div>
+
+        <div class="card c12">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Reconstructed Timeline</span><h3>Warning Signs Before Collapse</h3></div></div><span class="tag new">Historical case</span></div>
+          <div style="display:flex;flex-direction:column;">
+            <div style="display:flex;gap:16px;"><div style="display:flex;flex-direction:column;align-items:center;"><div style="width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:11px;">12m</div><div style="width:2px;flex:1;background:var(--line);margin:4px 0;"></div></div><div style="padding-bottom:20px;"><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;">Cash Flow</div><div style="font-family:var(--serif);font-size:16.5px;color:var(--navy);font-weight:600;">Operating cash flow turns negative despite reported profit growth</div></div></div>
+            <div style="display:flex;gap:16px;"><div style="display:flex;flex-direction:column;align-items:center;"><div style="width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:11px;">9m</div><div style="width:2px;flex:1;background:var(--line);margin:4px 0;"></div></div><div style="padding-bottom:20px;"><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;">Receivables</div><div style="font-family:var(--serif);font-size:16.5px;color:var(--navy);font-weight:600;">Receivables spike 38% faster than revenue growth</div></div></div>
+            <div style="display:flex;gap:16px;"><div style="display:flex;flex-direction:column;align-items:center;"><div style="width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:11px;">7m</div><div style="width:2px;flex:1;background:var(--line);margin:4px 0;"></div></div><div style="padding-bottom:20px;"><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;">Leverage</div><div style="font-family:var(--serif);font-size:16.5px;color:var(--navy);font-weight:600;">Short-term borrowings rise sharply to plug the cash gap</div></div></div>
+            <div style="display:flex;gap:16px;"><div style="display:flex;flex-direction:column;align-items:center;"><div style="width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:11px;">5m</div><div style="width:2px;flex:1;background:var(--line);margin:4px 0;"></div></div><div style="padding-bottom:20px;"><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;">Guidance</div><div style="font-family:var(--serif);font-size:16.5px;color:var(--navy);font-weight:600;">Management misses a publicly stated repayment / growth promise</div></div></div>
+            <div style="display:flex;gap:16px;"><div style="display:flex;flex-direction:column;align-items:center;"><div style="width:34px;height:34px;border-radius:50%;background:var(--navy);color:var(--gold-light);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:11px;">3m</div><div style="width:2px;flex:1;background:var(--line);margin:4px 0;"></div></div><div style="padding-bottom:20px;"><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;">Audit</div><div style="font-family:var(--serif);font-size:16.5px;color:var(--navy);font-weight:600;">Auditor raises a qualified opinion or flags going-concern language</div></div></div>
+            <div style="display:flex;gap:16px;"><div style="display:flex;flex-direction:column;align-items:center;"><div style="width:34px;height:34px;border-radius:50%;background:var(--rose);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:15px;">💥</div></div><div><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--rose);font-weight:600;">Collapse</div><div style="font-family:var(--serif);font-size:16.5px;color:var(--navy);font-weight:600;">Trading suspended; stock loses over 85% of its value within weeks</div></div></div>
+          </div>
+        </div>
+
+        <div class="card c12" style="align-items:center;">
+          <div class="card-head" style="width:100%;"><div class="card-eyebrow"><div><span>Diagnostic</span><h3>Scan My Portfolio For Same Disease</h3></div></div><button class="btn-gold" style="padding:11px 22px;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="stroke:var(--navy);width:14px;height:14px;"><path d="M11 4a7 7 0 1 0 4.9 12L20 20"/></svg>Run Scan</button></div>
+          <div class="table-scroll"><table class="dtable" style="width:100%;">
+            <thead><tr><th>Holding</th><th>Matched Warning Signs</th><th>Similarity</th><th>Risk</th></tr></thead>
+            <tbody>
+              <tr><td class="sym"><span class="row-logo">TC</span>TCS</td><td>0 of 6</td><td class="num">12%</td><td><span class="tag live">Low</span></td></tr>
+              <tr><td class="sym"><span class="row-logo">RE</span>Reliance</td><td>1 of 6</td><td class="num">21%</td><td><span class="tag live">Low</span></td></tr>
+              <tr><td class="sym"><span class="row-logo">HD</span>HDFC Bank</td><td>1 of 6</td><td class="num">19%</td><td><span class="tag live">Low</span></td></tr>
+              <tr><td class="sym"><span class="row-logo">SP</span>SpiceJet</td><td>4 of 6</td><td class="num">67%</td><td><span class="tag new">Elevated</span></td></tr>
+            </tbody>
+          </table></div>
+          <div class="card-foot" style="width:100%;border-top:none;padding-top:12px;"><span style="font-size:11.5px;color:var(--ink-soft);">SpiceJet shares 4 of 6 warning-sign markers with the DHFL case study</span><a class="link-btn" onclick="goPage('redflag')" style="cursor:pointer;">Open Red-Flag DNA <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: ACCOUNTING REALITY CHECKER                      -->
+    <!-- =================================================== -->
+    <div class="page" data-page="accounting">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Accounting Reality Checker</h2><p>Headline profit isn't the whole story. We cross-check it against cash flow, receivables and debt to see if growth quality holds up.</p></div>
+          <select style="border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:9px 12px;font-size:12.5px;"><option>Company X (illustrative)</option><option>Reliance Industries</option><option>TCS</option></select>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Signal Check</span><h3 style="font-size:18px;">Headline vs. Underlying</h3></div></div></div>
+          <div class="metric-flag-row"><div class="ml">Reported Profit</div><div class="mv good">+24% <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div></div>
+          <div class="metric-flag-row"><div class="ml">Operating Cash Flow</div><div class="mv bad">−17% <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div></div>
+          <div class="metric-flag-row"><div class="ml">Receivables Growth</div><div class="mv bad">+41% <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div></div>
+          <div class="metric-flag-row"><div class="ml">Total Debt</div><div class="mv bad">+22% <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div></div>
+          <div class="verdict-box">
+            <div class="vi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
+            <div><div class="vl">AI Verdict</div><div class="vt">Profit growth quality looks questionable.</div></div>
+          </div>
+          <div class="card-foot" style="border-top:none;padding-top:12px;"><a class="link-btn" onclick="goPage('trust')" style="cursor:pointer;">Investigate why <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Trend</span><h3>Profit vs. Cash Flow Divergence</h3></div></div></div>
+          <svg viewBox="0 0 560 150" width="100%" height="150" preserveAspectRatio="none">
+            <line x1="0" y1="40" x2="560" y2="40" stroke="#EEE6D2"/><line x1="0" y1="80" x2="560" y2="80" stroke="#EEE6D2"/><line x1="0" y1="120" x2="560" y2="120" stroke="#EEE6D2"/>
+            <polyline points="0,110 80,100 160,88 240,72 320,58 400,44 480,32 560,20" fill="none" stroke="#B8935A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,90 80,86 160,92 240,78 320,96 400,84 480,104 560,116" fill="none" stroke="#A14545" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4"/>
+          </svg>
+          <div class="legend"><span><i style="background:var(--gold);"></i>Reported Net Profit</span><span><i style="background:var(--rose);"></i>Operating Cash Flow</span></div>
+          <p style="font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-top:10px;">Profit and cash flow have moved in opposite directions for three consecutive quarters — a classic early signal of earnings that are booked faster than they are collected.</p>
+        </div>
+
+        <div class="section-title"><h2>Portfolio Quality Scan</h2><div class="rule"></div></div>
+        <div class="card c12">
+          <div class="table-scroll"><table class="dtable">
+            <thead><tr><th>Company</th><th>Profit Gr.</th><th>Cash Flow Gr.</th><th>Divergence</th><th>Quality Score</th></tr></thead>
+            <tbody>
+              <tr><td class="sym">TCS</td><td class="num">+11%</td><td class="num">+13%</td><td class="num">−2 pts</td><td><span class="tag live">92 · Strong</span></td></tr>
+              <tr><td class="sym">Reliance</td><td class="num">+14%</td><td class="num">+9%</td><td class="num">+5 pts</td><td><span class="tag beta">78 · Fair</span></td></tr>
+              <tr><td class="sym">Company X</td><td class="num">+24%</td><td class="num">−17%</td><td class="num">+41 pts</td><td><span class="tag new">34 · Weak</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: FINANCIAL RED-FLAG DNA                          -->
+    <!-- =================================================== -->
+    <div class="page" data-page="redflag">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Financial Red-Flag DNA</h2><p>The failure fingerprint of historical collapses like Satyam and Yes Bank, matched against companies you hold or watch today.</p></div>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>SpiceJet</span><h3 style="font-size:18px;">Historical Risk Similarity</h3></div></div></div>
+          <div class="esg-wrap" style="justify-content:center;">
+            <div class="gauge big"><svg width="170" height="170" viewBox="0 0 170 170"><circle cx="85" cy="85" r="72" fill="none" stroke="#F0E9D8" stroke-width="14"/><circle cx="85" cy="85" r="72" fill="none" stroke="#A14545" stroke-width="14" stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="122"/></svg><div class="gauge-center"><div class="n">73%</div><div class="l">vs. DHFL pattern</div></div></div>
+          </div>
+          <p style="font-size:12.5px;color:var(--ink-soft);text-align:center;line-height:1.6;">Matched on leverage trajectory, receivables growth and auditor commentary tone — diverges mainly on promoter shareholding stability.</p>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Marker-by-Marker</span><h3>Matched Red Flags</h3></div></div></div>
+          <div class="checklist-row"><div class="ci hit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>Operating cash flow negative for 2+ consecutive quarters</div>
+          <div class="checklist-row"><div class="ci hit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>Debt-to-equity rising faster than industry average</div>
+          <div class="checklist-row"><div class="ci hit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>Related-party transactions increasing as % of revenue</div>
+          <div class="checklist-row"><div class="ci hit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>Frequent auditor or CFO changes within 24 months</div>
+          <div class="checklist-row"><div class="ci miss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="m5 13 4 4L19 7"/></svg></div>Promoter pledge of shares above 50%</div>
+          <div class="checklist-row"><div class="ci miss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="m5 13 4 4L19 7"/></svg></div>Sudden auditor resignation without clear reason</div>
+        </div>
+
+        <div class="section-title"><h2>Failure Pattern Library</h2><div class="rule"></div></div>
+        <div class="card c12">
+          <div class="mini-grid">
+            <div class="mini-card"><div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 2v20"/><path d="M6 3h11l-3 4 3 4H6"/></svg></div><h4>DHFL (2019)</h4><p>Cash flow mismatch, aggressive receivables build-up, credit-rating downgrade cascade.</p></div>
+            <div class="mini-card"><div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 2v20"/><path d="M6 3h11l-3 4 3 4H6"/></svg></div><h4>Yes Bank (2020)</h4><p>Loan book concentration, delayed NPA recognition, governance red flags ignored.</p></div>
+            <div class="mini-card"><div class="mi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M6 2v20"/><path d="M6 3h11l-3 4 3 4H6"/></svg></div><h4>Satyam (2009)</h4><p>Fabricated cash balances, inflated revenue, whistleblower-triggered collapse.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: GHOST PORTFOLIO                                 -->
+    <!-- =================================================== -->
+    <div class="page" data-page="ghost">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Ghost Portfolio</h2><p>A parallel, imaginary portfolio of everything you rejected or sold too early — so you can see the decision, not just the price.</p></div>
+        </div>
+
+        <div class="card c12">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Since Inception</span><h3>Real You vs. Ghost You</h3></div></div></div>
+          <div class="ghost-compare">
+            <div class="ghost-block real">
+              <div class="gl">Real You</div>
+              <div class="gv">₹12.4L</div>
+              <div class="gd">₹10L invested · Actual decisions taken</div>
+            </div>
+            <div class="ghost-vs">vs</div>
+            <div class="ghost-block ghost">
+              <div class="gl">👻 Ghost You</div>
+              <div class="gv">₹13.1L</div>
+              <div class="gd">"If you'd bought the stocks you rejected"</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Insight</span><h3 style="font-size:18px;">Biggest Missed Decision</h3></div></div></div>
+          <div class="watch-row" style="border-bottom:none;"><div class="watch-id"><div class="watch-logo">DM</div><div><div class="watch-name">Divi's Labs</div><div class="watch-sub">Considered, not bought · Mar 2023</div></div></div><div class="watch-right"><div class="watch-change up">+64%</div></div></div>
+        </div>
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Insight</span><h3 style="font-size:18px;">Best Avoided Mistake</h3></div></div></div>
+          <div class="watch-row" style="border-bottom:none;"><div class="watch-id"><div class="watch-logo">YB</div><div><div class="watch-name">Yes Bank</div><div class="watch-sub">Considered, skipped · Jan 2020</div></div></div><div class="watch-right"><div class="watch-change down">−78%</div></div></div>
+        </div>
+        <div class="card c4">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Pattern</span><h3 style="font-size:18px;">Your Recurring Mistake</h3></div></div></div>
+          <p class="desc" style="margin-bottom:0;">Selling winners too early — in 6 of your last 9 exits, the stock continued rising an average of 18% in the following quarter.</p>
+        </div>
+
+        <div class="section-title"><h2>Decision Log</h2><div class="rule"></div></div>
+        <div class="card c12">
+          <div class="table-scroll"><table class="dtable">
+            <thead><tr><th>Stock</th><th>Your Decision</th><th>Date</th><th>Actual Outcome</th><th>Ghost Outcome</th></tr></thead>
+            <tbody>
+              <tr><td class="sym">Divi's Labs</td><td>Rejected</td><td class="num">Mar 2023</td><td class="num">—</td><td class="num" style="color:#2F6F62;">+64%</td></tr>
+              <tr><td class="sym">Yes Bank</td><td>Rejected</td><td class="num">Jan 2020</td><td class="num">—</td><td class="num" style="color:#A14545;">−78%</td></tr>
+              <tr><td class="sym">Tata Motors</td><td>Sold early</td><td class="num">Jun 2023</td><td class="num" style="color:#2F6F62;">+9%</td><td class="num" style="color:#2F6F62;">+31%</td></tr>
+              <tr><td class="sym">HDFC Bank</td><td>Held</td><td class="num">Ongoing</td><td class="num" style="color:#2F6F62;">+12%</td><td class="num">+12%</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PAGE: PORTFOLIO HIDDEN DEPENDENCY MAP                 -->
+    <!-- =================================================== -->
+    <div class="page" data-page="dependency">
+      <div class="grid">
+        <div class="page-banner">
+          <div><h2>Portfolio Hidden Dependency Map</h2><p>Your 10 holdings may look diversified on paper — until you see the common risk factors quietly running underneath all of them.</p></div>
+        </div>
+
+        <div class="card c7">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Network</span><h3>Shared Risk Exposure</h3></div></div></div>
+          <svg viewBox="0 0 460 260" width="100%" height="260">
+            <line x1="230" y1="130" x2="90" y2="50" stroke="#E6DCC4" stroke-width="1.5"/><line x1="230" y1="130" x2="90" y2="210" stroke="#E6DCC4" stroke-width="1.5"/>
+            <line x1="230" y1="130" x2="370" y2="50" stroke="#E6DCC4" stroke-width="1.5"/><line x1="230" y1="130" x2="370" y2="210" stroke="#E6DCC4" stroke-width="1.5"/>
+            <line x1="90" y1="50" x2="30" y2="30" stroke="#E6DCC4"/><line x1="90" y1="50" x2="30" y2="80" stroke="#E6DCC4"/>
+            <line x1="90" y1="210" x2="30" y2="190" stroke="#E6DCC4"/><line x1="90" y1="210" x2="30" y2="235" stroke="#E6DCC4"/>
+            <line x1="370" y1="50" x2="430" y2="30" stroke="#E6DCC4"/><line x1="370" y1="50" x2="430" y2="75" stroke="#E6DCC4"/>
+            <line x1="370" y1="210" x2="430" y2="190" stroke="#E6DCC4"/><line x1="370" y1="210" x2="430" y2="235" stroke="#E6DCC4"/>
+            <circle cx="230" cy="130" r="24" fill="var(--navy)"/><text x="230" y="134" text-anchor="middle" fill="#EADFC7" font-size="9.5" font-family="Inter">Your 10 Stocks</text>
+            <circle cx="90" cy="50" r="19" fill="#B8935A"/><text x="90" y="54" text-anchor="middle" fill="#12213D" font-size="9" font-family="Inter">USD Rate</text>
+            <circle cx="90" cy="210" r="19" fill="#2F6F62"/><text x="90" y="214" text-anchor="middle" fill="#fff" font-size="9" font-family="Inter">Crude Oil</text>
+            <circle cx="370" cy="50" r="19" fill="#A14545" fill-opacity=".85"/><text x="370" y="54" text-anchor="middle" fill="#fff" font-size="8.5" font-family="Inter">US IT Spend</text>
+            <circle cx="370" cy="210" r="19" fill="#7986B5"/><text x="370" y="214" text-anchor="middle" fill="#fff" font-size="9" font-family="Inter">Monsoon</text>
+            <circle cx="30" cy="30" r="12" fill="#D9BC8B"/><text x="30" y="34" text-anchor="middle" fill="#12213D" font-size="7.5" font-family="Inter">TCS</text>
+            <circle cx="30" cy="80" r="12" fill="#D9BC8B"/><text x="30" y="84" text-anchor="middle" fill="#12213D" font-size="7.5" font-family="Inter">Infosys</text>
+            <circle cx="30" cy="190" r="12" fill="#D9BC8B"/><text x="30" y="194" text-anchor="middle" fill="#12213D" font-size="7.5" font-family="Inter">IndiGo</text>
+            <circle cx="30" cy="235" r="12" fill="#D9BC8B"/><text x="30" y="239" text-anchor="middle" fill="#12213D" font-size="7.5" font-family="Inter">ONGC</text>
+            <circle cx="430" cy="30" r="12" fill="#D9BC8B"/><text x="430" y="34" text-anchor="middle" fill="#12213D" font-size="7.5" font-family="Inter">Wipro</text>
+            <circle cx="430" cy="75" r="12" fill="#D9BC8B"/><text x="430" y="79" text-anchor="middle" fill="#12213D" font-size="7.5" font-family="Inter">TechM</text>
+            <circle cx="430" cy="190" r="12" fill="#D9BC8B"/><text x="430" y="194" text-anchor="middle" fill="#12213D" font-size="7.5" font-family="Inter">ITC</text>
+            <circle cx="430" cy="235" r="12" fill="#D9BC8B"/><text x="430" y="239" text-anchor="middle" fill="#12213D" font-size="7.5" font-family="Inter">Tata Cons.</text>
+          </svg>
+        </div>
+
+        <div class="card c5">
+          <div class="card-head"><div class="card-eyebrow"><div><span>Concentration</span><h3 style="font-size:18px;">Risk Factors Found</h3></div></div></div>
+          <div class="risk-node-row"><div class="risk-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="risk-node-name">USD / INR Exchange Rate</div><div class="risk-node-sub">TCS, Infosys, Wipro, TechM, Tata Cons.</div></div><div class="risk-node-count">5</div></div>
+          <div class="risk-node-row"><div class="risk-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7 7"/></svg></div><div><div class="risk-node-name">Crude Oil Price</div><div class="risk-node-sub">IndiGo, ONGC, ITC, Tata Cons.</div></div><div class="risk-node-count">4</div></div>
+          <div class="risk-node-row"><div class="risk-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><div><div class="risk-node-name">US IT Spending Cycle</div><div class="risk-node-sub">TCS, Infosys, Wipro</div></div><div class="risk-node-count">3</div></div>
+          <div class="risk-node-row"><div class="risk-node-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 17l4-9 3 5 3-8 3 7 5-4"/></svg></div><div><div class="risk-node-name">Monsoon / Rural Demand</div><div class="risk-node-sub">ITC, Tata Consumer</div></div><div class="risk-node-count">2</div></div>
+          <div class="verdict-box" style="margin-top:16px;">
+            <div class="vi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
+            <div><div class="vl">AI Verdict</div><div class="vt">50% of your portfolio shares USD exposure — diversification is narrower than it looks.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ FLOATING ASSISTANT ============ -->
+<button class="fab" id="fabBtn" aria-label="Open MarketMind Assistant">
+  <span class="ring"></span>
+  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4M9 22h6"/></svg>
+</button>
+
+<div class="assistant-panel" id="assistPanel">
+  <div class="assist-head">
+    <div class="assist-avatar"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 3a4 4 0 0 0-4 4c0 1.2.5 2 1 3-1.5.5-3 2-3 4.5A4.5 4.5 0 0 0 10.5 19H12"/><path d="M12 3a4 4 0 0 1 4 4c0 1.2-.5 2-1 3 1.5.5 3 2 3 4.5A4.5 4.5 0 0 1 13.5 19H12"/></svg></div>
+    <div>
+      <div class="assist-title">MarketMind Assistant</div>
+      <div class="assist-status"><i></i>Online · Sample data mode</div>
+    </div>
+    <button class="assist-close" id="assistClose"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+
+  <div class="assist-tabs">
+    <div class="assist-tab active" id="tabChat" onclick="switchTab('chat')">Chat</div>
+    <div class="assist-tab" id="tabVoice" onclick="switchTab('voice')">Voice</div>
+  </div>
+
+  <div class="assist-body" id="chatBody">
+    <div class="msg bot"><span class="tag-sm">Assistant</span>Good evening. Reliance is up 1.8% today and RSI is approaching overbought territory. Want a quick breakdown?</div>
+    <div class="msg user">Yes — and how does it compare to the sector?</div>
+    <div class="msg bot"><span class="tag-sm">Assistant</span>Reliance is outpacing the sector average on revenue growth by roughly 4.4 points this quarter. I can generate a full one-page PDF if that helps.</div>
+  </div>
+
+  <div class="assist-body voice-mode" id="voiceBody" style="display:none;">
+    <div class="mic-big" id="micBig"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><path d="M12 18v4M9 22h6"/></svg></div>
+    <div class="big-wave">
+      <i style="animation-delay:0s"></i><i style="animation-delay:.1s"></i><i style="animation-delay:.2s"></i><i style="animation-delay:.3s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:.25s"></i><i style="animation-delay:.05s"></i>
+    </div>
+    <div class="listen-transcript" id="listenTranscript">"What's the outlook on Tata Motors this week?"</div>
+    <div class="listen-label">Listening… tap the mic below to speak</div>
+  </div>
+
+  <div class="suggest-row" id="suggestRow">
+    <span class="suggest-chip">Explain RSI</span>
+    <span class="suggest-chip">Compare TCS vs Infosys</span>
+    <span class="suggest-chip">Generate report</span>
+  </div>
+
+  <div class="assist-input">
+    <button class="mic-toggle" id="micToggle" title="Switch to voice">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/></svg>
+    </button>
+    <input type="text" id="chatInput" placeholder="Ask about a stock, sector or report…">
+    <button class="send-btn" id="sendBtn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+  </div>
+</div>
+
+<script>
+  // ---- ticker generation ----
+  const tickers = [
+    {s:"RELIANCE", p:"2,946.10", c:"+1.8%", up:true},
+    {s:"TCS", p:"4,112.55", c:"+0.6%", up:true},
+    {s:"HDFCBANK", p:"1,672.40", c:"−0.3%", up:false},
+    {s:"INFY", p:"1,904.10", c:"+2.4%", up:true},
+    {s:"TATAMOTORS", p:"974.85", c:"−1.1%", up:false},
+    {s:"ICICIBANK", p:"1,241.30", c:"+0.9%", up:true},
+    {s:"NIFTY 50", p:"24,812.65", c:"+0.42%", up:true},
+    {s:"SENSEX", p:"81,340.20", c:"+0.38%", up:true},
+    {s:"WIPRO", p:"512.90", c:"−0.7%", up:false},
+    {s:"ITC", p:"468.15", c:"+1.2%", up:true},
+  ];
+  const track = document.getElementById('tickerTrack');
+  function tickHTML(t){return `<span class="tick"><b>${t.s}</b> ₹${t.p} <span class="${t.up?'up':'down'}">${t.c}</span></span>`;}
+  track.innerHTML = tickers.map(tickHTML).join("") + tickers.map(tickHTML).join("");
+
+  // ---- page navigation ----
+  const pageMeta = {
+    dashboard: {eyebrow:"Good evening", title:"Market Overview"},
+    portfolio: {eyebrow:"01 · Sandbox trading", title:"Portfolio Simulator"},
+    voice:     {eyebrow:"02 · Speak to your terminal", title:"Voice Stock Assistant"},
+    learning:  {eyebrow:"03 · Beginner-friendly", title:"Learning Mode"},
+    sector:    {eyebrow:"04 · Side-by-side analysis", title:"Sector Comparison Engine"},
+    alerts:    {eyebrow:"05 · Stay ahead of moves", title:"Smart Alerts & Watchlist"},
+    reports:   {eyebrow:"06 · One-click summaries", title:"AI Report Generator"},
+    candles:   {eyebrow:"07 · Chart intelligence", title:"Candlestick Pattern Detection"},
+    esg:       {eyebrow:"08 · Values-aligned investing", title:"ESG & Sustainability Score"},
+    news:      {eyebrow:"Advanced · Market pulse, as it happens", title:"Latest News"},
+    domino:    {eyebrow:"Flagship · Cause & effect intelligence", title:"Market Domino Predictor"},
+    trust:     {eyebrow:"Advanced · Management accountability", title:"Management Trust Meter"},
+    thesis:    {eyebrow:"Advanced · Reasoning, not just price", title:"Investment Thesis Breaker"},
+    dna:       {eyebrow:"Advanced · Hidden similarities", title:"Stock DNA Fingerprint"},
+    timemachine:{eyebrow:"Advanced · Learn from past decisions", title:"Decision Time Machine"},
+    autopsy:    {eyebrow:"Financial Detective · Learn from failure", title:"AI Stock Autopsy"},
+    accounting: {eyebrow:"Financial Detective · Beyond headline profit", title:"Accounting Reality Checker"},
+    redflag:    {eyebrow:"Financial Detective · Pattern of collapse", title:"Financial Red-Flag DNA"},
+    ghost:      {eyebrow:"Financial Detective · The path not taken", title:"Ghost Portfolio"},
+    dependency: {eyebrow:"Financial Detective · Hidden common risk", title:"Portfolio Hidden Dependency Map"},
+  };
+  const navItems = document.querySelectorAll('.nav-item');
+  const pages = document.querySelectorAll('.page');
+  const pgEyebrow = document.getElementById('pgEyebrow');
+  const pgTitle = document.getElementById('pgTitle');
+
+  function goPage(key){
+    pages.forEach(p => p.classList.toggle('active', p.dataset.page === key));
+    navItems.forEach(n => n.classList.toggle('active', n.dataset.page === key));
+    if(pageMeta[key]){ pgEyebrow.textContent = pageMeta[key].eyebrow; pgTitle.textContent = pageMeta[key].title; }
+    document.querySelector('.content').scrollTop = 0;
+    window.scrollTo({top:0, behavior:'smooth'});
+    closeSidebar();
+  }
+  navItems.forEach(item=>{
+    item.addEventListener('click', e=>{
+      e.preventDefault();
+      goPage(item.dataset.page);
+    });
+  });
+
+  // ---- mobile sidebar drawer ----
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const sidebarClose = document.getElementById('sidebarClose');
+  function openSidebar(){
+    sidebar.classList.add('open');
+    sidebarOverlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar(){
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  hamburgerBtn.addEventListener('click', openSidebar);
+  sidebarClose.addEventListener('click', closeSidebar);
+  sidebarOverlay.addEventListener('click', closeSidebar);
+  window.addEventListener('resize', ()=>{ if(window.innerWidth > 980) closeSidebar(); });
+
+  // ---- assistant panel open/close ----
+  const fabBtn = document.getElementById('fabBtn');
+  const assistPanel = document.getElementById('assistPanel');
+  const assistClose = document.getElementById('assistClose');
+  function openAssistant(tab){
+    assistPanel.classList.add('open');
+    if(tab) switchTab(tab);
+  }
+  fabBtn.addEventListener('click', ()=>{ assistPanel.classList.toggle('open'); });
+  assistClose.addEventListener('click', ()=> assistPanel.classList.remove('open'));
+
+  // ---- tabs ----
+  const tabChat = document.getElementById('tabChat');
+  const tabVoice = document.getElementById('tabVoice');
+  const chatBody = document.getElementById('chatBody');
+  const voiceBody = document.getElementById('voiceBody');
+  const suggestRow = document.getElementById('suggestRow');
+  const micToggle = document.getElementById('micToggle');
+
+  function switchTab(which){
+    if(which === 'chat'){
+      tabChat.classList.add('active'); tabVoice.classList.remove('active');
+      chatBody.style.display='flex'; voiceBody.style.display='none';
+      suggestRow.style.display='flex'; micToggle.classList.remove('active');
+    } else {
+      tabVoice.classList.add('active'); tabChat.classList.remove('active');
+      chatBody.style.display='none'; voiceBody.style.display='flex';
+      suggestRow.style.display='none'; micToggle.classList.add('active');
+    }
+  }
+  tabChat.onclick = ()=>switchTab('chat');
+  tabVoice.onclick = ()=>switchTab('voice');
+  micToggle.addEventListener('click', ()=>{
+    const goingVoice = !micToggle.classList.contains('active');
+    switchTab(goingVoice ? 'voice' : 'chat');
+  });
+
+  document.querySelectorAll('.suggest-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=> sendMessage(chip.textContent));
+  });
+
+  const chatInput = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const sampleReplies = [
+    "Based on sample data, that shows steady momentum with support holding near its 20-day average.",
+    "Here's a quick read: valuation looks fair versus sector peers, with volatility slightly below average this month.",
+    "I've noted that — a detailed one-page PDF summary can be generated from the Report Generator panel.",
+    "Sentiment across recent filings and news mentions trends mildly positive this week."
+  ];
+  function addMsg(text, who){
+    const div = document.createElement('div');
+    div.className = 'msg ' + who;
+    div.innerHTML = (who==='bot' ? '<span class="tag-sm">Assistant</span>' : '') + text;
+    chatBody.appendChild(div);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+  function sendMessage(text){
+    if(!text) return;
+    switchTab('chat');
+    addMsg(text.replace(/</g,'&lt;'), 'user');
+    chatInput.value='';
+    setTimeout(()=>{
+      const r = sampleReplies[Math.floor(Math.random()*sampleReplies.length)];
+      addMsg(r, 'bot');
+    }, 600);
+  }
+  sendBtn.addEventListener('click', ()=> sendMessage(chatInput.value.trim()));
+  chatInput.addEventListener('keydown', e=>{ if(e.key === 'Enter') sendMessage(chatInput.value.trim()); });
+
+  const micBig = document.getElementById('micBig');
+  const listenTranscript = document.getElementById('listenTranscript');
+  const demoTranscripts = [
+    "\"What's the outlook on Tata Motors this week?\"",
+    "\"Compare Infosys and TCS margins.\"",
+    "\"Read me the ESG score for Reliance.\"",
+    "\"Any bullish patterns on my watchlist today?\""
+  ];
+  micBig.addEventListener('click', ()=>{
+    listenTranscript.textContent = demoTranscripts[Math.floor(Math.random()*demoTranscripts.length)];
+    micBig.style.transform = 'scale(0.92)';
+    setTimeout(()=> micBig.style.transform = 'scale(1)', 180);
+  });
+
+  // ---- chip-tab toggles (visual only, per group) ----
+  document.querySelectorAll('.chip-tabs').forEach(group=>{
+    group.querySelectorAll('.chip-tab').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        group.querySelectorAll('.chip-tab').forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+  });
+  // ---- buy/sell toggle ----
+  document.querySelectorAll('.toggle-pair').forEach(group=>{
+    const buy = group.querySelector('.buy'), sell = group.querySelector('.sell');
+    buy && buy.addEventListener('click', ()=>{ buy.classList.add('active'); sell.classList.remove('active'); });
+    sell && sell.addEventListener('click', ()=>{ sell.classList.add('active'); buy.classList.remove('active'); });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "symbol": "ADANIENT",
+  "name": "Adani Enterprises Ltd",
+  "sector": "Conglomerate & Incubator",
+  "price": 3120.0,
+  "change": "+2.2%",
+  "market_cap": "\u20b93.6L Cr",
+  "pe_ratio": 61.4,
+  "pb_ratio": 8.4,
+  "net_margin": 4.7,
+  "roe": 9.8,
+  "revenue_growth": 11.1,
+  "debt_to_equity": 1.6,
+  "rsi": 57.0,
+  "pattern": "High Beta Swing",
+  "esg": {
+    "overall": 58,
+    "environmental": 54,
+    "social": 60,
+    "governance": 60
+  },
+  "trust_meter": {
+    "score": 68,
+    "promises_kept": 9,
+    "promises_delayed": 4,
+    "promises_broken": 2,
+    "timeline": [],
+    "latest_quote": "Navi Mumbai Airport Phase 1 scheduled for commercial launch."
+  },
+  "forensic": {
+    "reported_profit_growth": "+15%",
+    "cash_flow_growth": "\u22128%",
+    "receivables_growth": "+26%",
+    "divergence_score": "Elevated Debt & Receivables Anomaly"
+  },
+  "dna": {
+    "growth": 92,
+    "debt": 78,
+    "news_sensitivity": 95,
+    "mgmt_reliability": 66,
+    "market_fear": 72
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "symbol": "MARUTI",
+  "name": "Maruti Suzuki India Ltd",
+  "sector": "Automotive & Passenger Cars",
+  "price": 12340.0,
+  "change": "\u22120.4%",
+  "market_cap": "\u20b93.8L Cr",
+  "pe_ratio": 28.1,
+  "pb_ratio": 4.5,
+  "net_margin": 9.8,
+  "roe": 16.8,
+  "revenue_growth": 14.5,
+  "debt_to_equity": 0.01,
+  "rsi": 53.0,
+  "pattern": "High Base Range",
+  "esg": {
+    "overall": 76,
+    "environmental": 74,
+    "social": 78,
+    "governance": 76
+  },
+  "trust_meter": {
+    "score": 83,
+    "promises_kept": 14,
+    "promises_delayed": 1,
+    "promises_broken": 0,
+    "timeline": [],
+    "latest_quote": "SUV market share surpassed 24% with strong hybrid demand."
+  },
+  "forensic": {
+    "reported_profit_growth": "+18%",
+    "cash_flow_growth": "+19%",
+    "receivables_growth": "+7%",
+    "divergence_score": "Cash Rich Quality"
+  },
+  "dna": {
+    "growth": 75,
+    "debt": 2,
+    "news_sensitivity": 56,
+    "mgmt_reliability": 89,
+    "market_fear": 35
+  }
+}

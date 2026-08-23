@@ -1,0 +1,43 @@
+{
+  "symbol": "SUNPHARMA",
+  "name": "Sun Pharmaceutical Industries",
+  "sector": "Pharma & Healthcare",
+  "price": 1790.0,
+  "change": "+1.1%",
+  "market_cap": "\u20b94.3L Cr",
+  "pe_ratio": 36.4,
+  "pb_ratio": 6.2,
+  "net_margin": 21.0,
+  "roe": 17.5,
+  "revenue_growth": 10.4,
+  "debt_to_equity": 0.04,
+  "rsi": 61.2,
+  "pattern": "Bullish Breakout",
+  "esg": {
+    "overall": 79,
+    "environmental": 78,
+    "social": 82,
+    "governance": 77
+  },
+  "trust_meter": {
+    "score": 83,
+    "promises_kept": 13,
+    "promises_delayed": 2,
+    "promises_broken": 0,
+    "timeline": [],
+    "latest_quote": "Global specialty pharma portfolio grew 19% YoY."
+  },
+  "forensic": {
+    "reported_profit_growth": "+15%",
+    "cash_flow_growth": "+16%",
+    "receivables_growth": "+8%",
+    "divergence_score": "Strong Cash Conversion"
+  },
+  "dna": {
+    "growth": 73,
+    "debt": 6,
+    "news_sensitivity": 55,
+    "mgmt_reliability": 87,
+    "market_fear": 32
+  }
+}

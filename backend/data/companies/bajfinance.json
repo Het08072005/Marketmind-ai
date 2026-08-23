@@ -1,0 +1,43 @@
+{
+  "symbol": "BAJFINANCE",
+  "name": "Bajaj Finance Ltd",
+  "sector": "NBFC & Consumer Credit",
+  "price": 6840.0,
+  "change": "\u22120.6%",
+  "market_cap": "\u20b94.2L Cr",
+  "pe_ratio": 28.5,
+  "pb_ratio": 5.4,
+  "net_margin": 26.2,
+  "roe": 21.8,
+  "revenue_growth": 24.2,
+  "debt_to_equity": 3.8,
+  "rsi": 47.1,
+  "pattern": "Support Zone",
+  "esg": {
+    "overall": 74,
+    "environmental": 62,
+    "social": 81,
+    "governance": 79
+  },
+  "trust_meter": {
+    "score": 81,
+    "promises_kept": 14,
+    "promises_delayed": 2,
+    "promises_broken": 1,
+    "timeline": [],
+    "latest_quote": "Omnichannel customer additions touched 4 million this quarter."
+  },
+  "forensic": {
+    "reported_profit_growth": "+22%",
+    "cash_flow_growth": "+20%",
+    "receivables_growth": "+21%",
+    "divergence_score": "High Quality NBFC"
+  },
+  "dna": {
+    "growth": 88,
+    "debt": 60,
+    "news_sensitivity": 66,
+    "mgmt_reliability": 85,
+    "market_fear": 46
+  }
+}

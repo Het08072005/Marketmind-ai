@@ -1,0 +1,59 @@
+{
+  "symbol": "TATAMOTORS",
+  "name": "Tata Motors Ltd",
+  "sector": "Automotive & EV",
+  "price": 974.85,
+  "change": "\u22121.1%",
+  "market_cap": "\u20b93.5L Cr",
+  "pe_ratio": 15.6,
+  "pb_ratio": 3.4,
+  "net_margin": 7.2,
+  "roe": 22.4,
+  "revenue_growth": 21.5,
+  "debt_to_equity": 1.1,
+  "rsi": 49.3,
+  "pattern": "Consolidation Flag",
+  "esg": {
+    "overall": 72,
+    "environmental": 75,
+    "social": 70,
+    "governance": 72
+  },
+  "trust_meter": {
+    "score": 74,
+    "promises_kept": 11,
+    "promises_delayed": 3,
+    "promises_broken": 1,
+    "timeline": [
+      {
+        "promise": "Achieve net zero automotive debt by FY25",
+        "made": "Q2 FY23",
+        "status": "Kept"
+      },
+      {
+        "promise": "Launch 10 new EV models by 2026",
+        "made": "Q4 FY23",
+        "status": "Kept"
+      },
+      {
+        "promise": "JLR EBIT margin above 8.5%",
+        "made": "Q1 FY25",
+        "status": "Kept"
+      }
+    ],
+    "latest_quote": "We continue to maintain domestic EV market leadership with over 68% volume share."
+  },
+  "forensic": {
+    "reported_profit_growth": "+28%",
+    "cash_flow_growth": "+22%",
+    "receivables_growth": "+15%",
+    "divergence_score": "De-leveraging Positive"
+  },
+  "dna": {
+    "growth": 86,
+    "debt": 52,
+    "news_sensitivity": 78,
+    "mgmt_reliability": 79,
+    "market_fear": 55
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "symbol": "LT",
+  "name": "Larsen & Toubro Ltd",
+  "sector": "Engineering & Infra",
+  "price": 3520.0,
+  "change": "+0.8%",
+  "market_cap": "\u20b94.8L Cr",
+  "pe_ratio": 34.2,
+  "pb_ratio": 4.8,
+  "net_margin": 6.8,
+  "roe": 14.9,
+  "revenue_growth": 18.4,
+  "debt_to_equity": 0.82,
+  "rsi": 53.4,
+  "pattern": "Symmetrical Triangle",
+  "esg": {
+    "overall": 75,
+    "environmental": 71,
+    "social": 76,
+    "governance": 78
+  },
+  "trust_meter": {
+    "score": 82,
+    "promises_kept": 13,
+    "promises_delayed": 2,
+    "promises_broken": 1,
+    "timeline": [],
+    "latest_quote": "Order book stands at all-time high of \u20b94.75 Lakh Crore."
+  },
+  "forensic": {
+    "reported_profit_growth": "+16%",
+    "cash_flow_growth": "+14%",
+    "receivables_growth": "+16%",
+    "divergence_score": "Fair (Working Capital Watch)"
+  },
+  "dna": {
+    "growth": 80,
+    "debt": 40,
+    "news_sensitivity": 58,
+    "mgmt_reliability": 86,
+    "market_fear": 40
+  }
+}

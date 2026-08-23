@@ -1,0 +1,54 @@
+{
+  "symbol": "TCS",
+  "name": "Tata Consultancy Services",
+  "sector": "IT Services",
+  "price": 4112.55,
+  "change": "+0.6%",
+  "market_cap": "\u20b914.9L Cr",
+  "pe_ratio": 29.4,
+  "pb_ratio": 13.2,
+  "net_margin": 25.1,
+  "roe": 48.2,
+  "revenue_growth": 11.0,
+  "debt_to_equity": 0.02,
+  "rsi": 58.2,
+  "pattern": "Bullish Engulfing",
+  "esg": {
+    "overall": 82,
+    "environmental": 72,
+    "social": 85,
+    "governance": 88
+  },
+  "trust_meter": {
+    "score": 88,
+    "promises_kept": 16,
+    "promises_delayed": 1,
+    "promises_broken": 0,
+    "timeline": [
+      {
+        "promise": "Maintain operating margin above 25%",
+        "made": "Q1 FY24",
+        "status": "Kept"
+      },
+      {
+        "promise": "Train 100,000+ engineers in Generative AI",
+        "made": "Q2 FY24",
+        "status": "Kept"
+      }
+    ],
+    "latest_quote": "Our deal pipeline remains solid with strong traction in enterprise AI and cloud modernization."
+  },
+  "forensic": {
+    "reported_profit_growth": "+11%",
+    "cash_flow_growth": "+13%",
+    "receivables_growth": "+8%",
+    "divergence_score": "Strong (Zero Anomaly)"
+  },
+  "dna": {
+    "growth": 74,
+    "debt": 5,
+    "news_sensitivity": 52,
+    "mgmt_reliability": 92,
+    "market_fear": 35
+  }
+}

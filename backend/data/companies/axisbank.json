@@ -1,0 +1,43 @@
+{
+  "symbol": "AXISBANK",
+  "name": "Axis Bank Ltd",
+  "sector": "Banking & Financials",
+  "price": 1180.0,
+  "change": "+0.5%",
+  "market_cap": "\u20b93.6L Cr",
+  "pe_ratio": 13.9,
+  "pb_ratio": 2.1,
+  "net_margin": 19.5,
+  "roe": 16.4,
+  "revenue_growth": 14.2,
+  "debt_to_equity": 6.4,
+  "rsi": 52.0,
+  "pattern": "Hammer Reversal",
+  "esg": {
+    "overall": 75,
+    "environmental": 67,
+    "social": 79,
+    "governance": 80
+  },
+  "trust_meter": {
+    "score": 78,
+    "promises_kept": 11,
+    "promises_delayed": 2,
+    "promises_broken": 1,
+    "timeline": [],
+    "latest_quote": "Citibank integration completed ahead of planned schedule."
+  },
+  "forensic": {
+    "reported_profit_growth": "+15%",
+    "cash_flow_growth": "+13%",
+    "receivables_growth": "+12%",
+    "divergence_score": "Healthy Quality"
+  },
+  "dna": {
+    "growth": 75,
+    "debt": 68,
+    "news_sensitivity": 64,
+    "mgmt_reliability": 81,
+    "market_fear": 44
+  }
+}

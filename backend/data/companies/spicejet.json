@@ -1,0 +1,54 @@
+{
+  "symbol": "SPICEJET",
+  "name": "SpiceJet Ltd",
+  "sector": "Aviation & Case Study",
+  "price": 54.2,
+  "change": "\u22123.4%",
+  "market_cap": "\u20b94,200 Cr",
+  "pe_ratio": -8.2,
+  "pb_ratio": -1.4,
+  "net_margin": -14.2,
+  "roe": -28.0,
+  "revenue_growth": -6.5,
+  "debt_to_equity": 2.3,
+  "rsi": 38.0,
+  "pattern": "Descending Breakdown",
+  "esg": {
+    "overall": 46,
+    "environmental": 48,
+    "social": 45,
+    "governance": 45
+  },
+  "trust_meter": {
+    "score": 42,
+    "promises_kept": 3,
+    "promises_delayed": 6,
+    "promises_broken": 7,
+    "timeline": [
+      {
+        "promise": "Induct 20 grounded aircraft by Q3",
+        "made": "Q1 FY24",
+        "status": "Broken"
+      },
+      {
+        "promise": "Clear lessor settlement payments",
+        "made": "Q2 FY24",
+        "status": "Delayed"
+      }
+    ],
+    "latest_quote": "Qualified Institutional Placement successfully closed to resolve grounded fleet."
+  },
+  "forensic": {
+    "reported_profit_growth": "\u221212%",
+    "cash_flow_growth": "\u221242%",
+    "receivables_growth": "+38%",
+    "divergence_score": "Critical Collapse Risk Similarity (73% DHFL Pattern)"
+  },
+  "dna": {
+    "growth": 45,
+    "debt": 92,
+    "news_sensitivity": 96,
+    "mgmt_reliability": 40,
+    "market_fear": 88
+  }
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "case": "DHFL (2019 Collapse)",
+    "year": 2019,
+    "timeline": [
+      {
+        "months_prior": "12m",
+        "category": "Cash Flow",
+        "warning": "Operating cash flow turned negative despite reported profit growth."
+      },
+      {
+        "months_prior": "9m",
+        "category": "Receivables",
+        "warning": "Receivables spiked 38% faster than top-line revenues."
+      },
+      {
+        "months_prior": "7m",
+        "category": "Leverage",
+        "warning": "Short-term borrowings surged by 45% to plug cash burn."
+      },
+      {
+        "months_prior": "5m",
+        "category": "Guidance",
+        "warning": "Management missed publicly stated debt repayment commitments."
+      },
+      {
+        "months_prior": "3m",
+        "category": "Audit",
+        "warning": "Auditor flagged serious going-concern qualifications."
+      },
+      {
+        "months_prior": "0m",
+        "category": "Collapse",
+        "warning": "Trading suspended; stock plummeted 88%."
+      }
+    ]
+  }
+]

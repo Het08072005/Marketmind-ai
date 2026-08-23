@@ -1,0 +1,43 @@
+{
+  "symbol": "NTPC",
+  "name": "NTPC Ltd",
+  "sector": "Power Generation & Green Energy",
+  "price": 395.1,
+  "change": "+1.4%",
+  "market_cap": "\u20b93.8L Cr",
+  "pe_ratio": 17.8,
+  "pb_ratio": 2.2,
+  "net_margin": 10.8,
+  "roe": 13.4,
+  "revenue_growth": 8.2,
+  "debt_to_equity": 1.4,
+  "rsi": 58.6,
+  "pattern": "Steady Upchannel",
+  "esg": {
+    "overall": 68,
+    "environmental": 58,
+    "social": 74,
+    "governance": 72
+  },
+  "trust_meter": {
+    "score": 77,
+    "promises_kept": 12,
+    "promises_delayed": 2,
+    "promises_broken": 1,
+    "timeline": [],
+    "latest_quote": "Renewable capacity target of 60GW by 2032 firmly on track."
+  },
+  "forensic": {
+    "reported_profit_growth": "+12%",
+    "cash_flow_growth": "+11%",
+    "receivables_growth": "+9%",
+    "divergence_score": "Regulated Utility Cash Quality"
+  },
+  "dna": {
+    "growth": 70,
+    "debt": 58,
+    "news_sensitivity": 50,
+    "mgmt_reliability": 80,
+    "market_fear": 34
+  }
+}

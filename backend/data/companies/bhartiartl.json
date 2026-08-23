@@ -1,0 +1,43 @@
+{
+  "symbol": "BHARTIARTL",
+  "name": "Bharti Airtel Ltd",
+  "sector": "Telecom & Digital",
+  "price": 1640.2,
+  "change": "+1.9%",
+  "market_cap": "\u20b99.8L Cr",
+  "pe_ratio": 48.0,
+  "pb_ratio": 8.1,
+  "net_margin": 9.4,
+  "roe": 18.2,
+  "revenue_growth": 14.8,
+  "debt_to_equity": 1.4,
+  "rsi": 66.5,
+  "pattern": "Bullish Trendline",
+  "esg": {
+    "overall": 78,
+    "environmental": 79,
+    "social": 78,
+    "governance": 77
+  },
+  "trust_meter": {
+    "score": 85,
+    "promises_kept": 14,
+    "promises_delayed": 1,
+    "promises_broken": 0,
+    "timeline": [],
+    "latest_quote": "ARPU reached \u20b9211 with continuous postpaid upgrades."
+  },
+  "forensic": {
+    "reported_profit_growth": "+22%",
+    "cash_flow_growth": "+19%",
+    "receivables_growth": "+10%",
+    "divergence_score": "Healthy Growth"
+  },
+  "dna": {
+    "growth": 84,
+    "debt": 48,
+    "news_sensitivity": 62,
+    "mgmt_reliability": 87,
+    "market_fear": 38
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "symbol": "INFY",
+  "name": "Infosys Ltd",
+  "sector": "IT Services",
+  "price": 1904.1,
+  "change": "+2.4%",
+  "market_cap": "\u20b97.9L Cr",
+  "pe_ratio": 27.6,
+  "pb_ratio": 8.9,
+  "net_margin": 20.8,
+  "roe": 31.5,
+  "revenue_growth": 9.2,
+  "debt_to_equity": 0.08,
+  "rsi": 64.0,
+  "pattern": "Morning Star",
+  "esg": {
+    "overall": 84,
+    "environmental": 86,
+    "social": 81,
+    "governance": 85
+  },
+  "trust_meter": {
+    "score": 82,
+    "promises_kept": 13,
+    "promises_delayed": 2,
+    "promises_broken": 1,
+    "timeline": [
+      {
+        "promise": "Achieve 4-7% constant currency guidance",
+        "made": "Q1 FY25",
+        "status": "Kept"
+      },
+      {
+        "promise": "Large deal total contract value > $10B",
+        "made": "Q2 FY24",
+        "status": "Kept"
+      }
+    ],
+    "latest_quote": "Our Topaz AI suite is driving large enterprise renewals across European and US banking clients."
+  },
+  "forensic": {
+    "reported_profit_growth": "+10%",
+    "cash_flow_growth": "+11%",
+    "receivables_growth": "+7%",
+    "divergence_score": "Strong Quality"
+  },
+  "dna": {
+    "growth": 72,
+    "debt": 8,
+    "news_sensitivity": 65,
+    "mgmt_reliability": 88,
+    "market_fear": 40
+  }
+}

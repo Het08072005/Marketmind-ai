@@ -1,0 +1,43 @@
+{
+  "symbol": "SBIN",
+  "name": "State Bank of India",
+  "sector": "Public Banking",
+  "price": 812.3,
+  "change": "+1.5%",
+  "market_cap": "\u20b97.2L Cr",
+  "pe_ratio": 10.4,
+  "pb_ratio": 1.7,
+  "net_margin": 14.8,
+  "roe": 17.2,
+  "revenue_growth": 16.1,
+  "debt_to_equity": 11.2,
+  "rsi": 59.0,
+  "pattern": "Breakout Retest",
+  "esg": {
+    "overall": 73,
+    "environmental": 64,
+    "social": 78,
+    "governance": 77
+  },
+  "trust_meter": {
+    "score": 79,
+    "promises_kept": 12,
+    "promises_delayed": 3,
+    "promises_broken": 1,
+    "timeline": [],
+    "latest_quote": "Credit costs remain well below guided levels."
+  },
+  "forensic": {
+    "reported_profit_growth": "+18%",
+    "cash_flow_growth": "+15%",
+    "receivables_growth": "+13%",
+    "divergence_score": "Stable Banking Quality"
+  },
+  "dna": {
+    "growth": 76,
+    "debt": 85,
+    "news_sensitivity": 70,
+    "mgmt_reliability": 82,
+    "market_fear": 45
+  }
+}
