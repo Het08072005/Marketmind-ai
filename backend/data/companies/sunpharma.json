@@ -2,42 +2,41 @@
   "symbol": "SUNPHARMA",
   "name": "Sun Pharmaceutical Industries",
   "sector": "Pharma & Healthcare",
-  "price": 1790.0,
-  "change": "+1.1%",
-  "market_cap": "\u20b94.3L Cr",
-  "pe_ratio": 36.4,
-  "pb_ratio": 6.2,
-  "net_margin": 21.0,
+  "price": 1902.4,
+  "change": "-0.08%",
+  "market_cap": "₹4.5L Cr",
+  "pe_ratio": 39.4,
+  "pb_ratio": 6.8,
+  "net_margin": 20.8,
   "roe": 17.5,
-  "revenue_growth": 10.4,
-  "debt_to_equity": 0.04,
-  "rsi": 61.2,
-  "pattern": "Bullish Breakout",
+  "revenue_growth": 13.5,
+  "debt_to_equity": 0.08,
+  "rsi": 66.5,
+  "pattern": "Global Specialty Leader",
   "esg": {
-    "overall": 79,
-    "environmental": 78,
-    "social": 82,
-    "governance": 77
+    "overall": 78,
+    "environmental": 74,
+    "social": 80,
+    "governance": 80
   },
   "trust_meter": {
-    "score": 83,
-    "promises_kept": 13,
+    "score": 87,
+    "promises_kept": 15,
     "promises_delayed": 2,
     "promises_broken": 0,
-    "timeline": [],
-    "latest_quote": "Global specialty pharma portfolio grew 19% YoY."
+    "latest_quote": "Global specialty business revenues reached $1.1 Billion."
   },
   "forensic": {
-    "reported_profit_growth": "+15%",
-    "cash_flow_growth": "+16%",
-    "receivables_growth": "+8%",
-    "divergence_score": "Strong Cash Conversion"
+    "reported_profit_growth": "+16%",
+    "cash_flow_growth": "+19%",
+    "receivables_growth": "+11%",
+    "divergence_score": "Strong Specialty Moat"
   },
   "dna": {
-    "growth": 73,
-    "debt": 6,
-    "news_sensitivity": 55,
-    "mgmt_reliability": 87,
-    "market_fear": 32
+    "growth": 86,
+    "debt": 10,
+    "news_sensitivity": 60,
+    "mgmt_reliability": 88,
+    "market_fear": 35
   }
 }

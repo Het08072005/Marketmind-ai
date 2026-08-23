@@ -1,0 +1,42 @@
+{
+  "symbol": "COALINDIA",
+  "name": "Coal India Ltd",
+  "sector": "Energy & Conglomerate",
+  "price": 490.0,
+  "change": "+0.65%",
+  "market_cap": "₹3.0L Cr",
+  "pe_ratio": 8.1,
+  "pb_ratio": 3.2,
+  "net_margin": 21.0,
+  "roe": 44.5,
+  "revenue_growth": 7.8,
+  "debt_to_equity": 0.1,
+  "rsi": 54.6,
+  "pattern": "High Dividend Yield",
+  "esg": {
+    "overall": 55,
+    "environmental": 42,
+    "social": 64,
+    "governance": 60
+  },
+  "trust_meter": {
+    "score": 78,
+    "promises_kept": 12,
+    "promises_delayed": 3,
+    "promises_broken": 1,
+    "latest_quote": "Production target of 838 MT on course with thermal demand."
+  },
+  "forensic": {
+    "reported_profit_growth": "+8%",
+    "cash_flow_growth": "+14%",
+    "receivables_growth": "+4%",
+    "divergence_score": "Strong Cash Pile"
+  },
+  "dna": {
+    "growth": 68,
+    "debt": 12,
+    "news_sensitivity": 65,
+    "mgmt_reliability": 78,
+    "market_fear": 45
+  }
+}

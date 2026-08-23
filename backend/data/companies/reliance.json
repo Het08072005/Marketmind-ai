@@ -2,9 +2,9 @@
   "symbol": "RELIANCE",
   "name": "Reliance Industries Ltd",
   "sector": "Energy & Conglomerate",
-  "price": 2946.1,
-  "change": "+1.8%",
-  "market_cap": "\u20b919.9L Cr",
+  "price": 1316.0,
+  "change": "+0.21%",
+  "market_cap": "₹19.9L Cr",
   "pe_ratio": 24.8,
   "pb_ratio": 2.1,
   "net_margin": 8.1,
@@ -20,28 +20,11 @@
     "governance": 76
   },
   "trust_meter": {
-    "score": 78,
+    "score": 79,
     "promises_kept": 14,
-    "promises_delayed": 2,
+    "promises_delayed": 3,
     "promises_broken": 1,
-    "timeline": [
-      {
-        "promise": "Commission 5G pan-India within 18 months",
-        "made": "Q2 FY23",
-        "status": "Kept"
-      },
-      {
-        "promise": "Double retail footprint across Tier 2/3 cities",
-        "made": "Q4 FY23",
-        "status": "Kept"
-      },
-      {
-        "promise": "Green Hydrogen Gigafactory Phase 1 commissioning",
-        "made": "Q1 FY24",
-        "status": "Delayed"
-      }
-    ],
-    "latest_quote": "We remain on track to achieve net carbon zero by 2035 with our new energy gigafactories."
+    "latest_quote": "Solar cell gigafactory in Jamnagar operational on schedule."
   },
   "forensic": {
     "reported_profit_growth": "+14%",
@@ -53,7 +36,7 @@
     "growth": 82,
     "debt": 38,
     "news_sensitivity": 71,
-    "mgmt_reliability": 76,
+    "mgmt_reliability": 79,
     "market_fear": 44
   }
 }

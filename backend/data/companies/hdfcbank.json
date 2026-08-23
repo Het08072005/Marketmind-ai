@@ -1,54 +1,42 @@
 {
   "symbol": "HDFCBANK",
   "name": "HDFC Bank Ltd",
-  "sector": "Banking & Financials",
-  "price": 1672.4,
-  "change": "\u22120.3%",
-  "market_cap": "\u20b912.7L Cr",
-  "pe_ratio": 18.2,
+  "sector": "Banking & Finance",
+  "price": 726.95,
+  "change": "+0.26%",
+  "market_cap": "₹12.8L Cr",
+  "pe_ratio": 18.6,
   "pb_ratio": 2.8,
-  "net_margin": 22.4,
+  "net_margin": 26.5,
   "roe": 16.8,
-  "revenue_growth": 15.4,
+  "revenue_growth": 24.2,
   "debt_to_equity": 6.8,
-  "rsi": 72.1,
-  "pattern": "Overbought Resistance",
+  "rsi": 72.4,
+  "pattern": "Breakout Retest",
   "esg": {
-    "overall": 77,
+    "overall": 79,
     "environmental": 68,
-    "social": 79,
-    "governance": 83
+    "social": 84,
+    "governance": 85
   },
   "trust_meter": {
-    "score": 80,
-    "promises_kept": 12,
+    "score": 88,
+    "promises_kept": 16,
     "promises_delayed": 2,
-    "promises_broken": 1,
-    "timeline": [
-      {
-        "promise": "Complete post-merger branch integration in 12 months",
-        "made": "Q2 FY24",
-        "status": "Kept"
-      },
-      {
-        "promise": "Bring credit-deposit ratio below 85%",
-        "made": "Q3 FY24",
-        "status": "Delayed"
-      }
-    ],
-    "latest_quote": "Deposit mobilization continues to outpace credit growth as we rebalance the merged balance sheet."
+    "promises_broken": 0,
+    "latest_quote": "Credit-deposit ratio smoothly normalizing post-merger integration."
   },
   "forensic": {
-    "reported_profit_growth": "+16%",
-    "cash_flow_growth": "+14%",
-    "receivables_growth": "+12%",
-    "divergence_score": "Healthy Banking Quality"
+    "reported_profit_growth": "+19%",
+    "cash_flow_growth": "+17%",
+    "receivables_growth": "+16%",
+    "divergence_score": "High Credit Quality"
   },
   "dna": {
-    "growth": 78,
+    "growth": 85,
     "debt": 65,
-    "news_sensitivity": 68,
-    "mgmt_reliability": 84,
-    "market_fear": 48
+    "news_sensitivity": 58,
+    "mgmt_reliability": 90,
+    "market_fear": 35
   }
 }

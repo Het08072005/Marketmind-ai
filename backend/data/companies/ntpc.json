@@ -1,43 +1,42 @@
 {
   "symbol": "NTPC",
   "name": "NTPC Ltd",
-  "sector": "Power Generation & Green Energy",
-  "price": 395.1,
-  "change": "+1.4%",
-  "market_cap": "\u20b93.8L Cr",
-  "pe_ratio": 17.8,
-  "pb_ratio": 2.2,
-  "net_margin": 10.8,
-  "roe": 13.4,
-  "revenue_growth": 8.2,
-  "debt_to_equity": 1.4,
-  "rsi": 58.6,
-  "pattern": "Steady Upchannel",
+  "sector": "Infrastructure & Metals",
+  "price": 412.0,
+  "change": "+0.18%",
+  "market_cap": "₹3.9L Cr",
+  "pe_ratio": 18.2,
+  "pb_ratio": 2.4,
+  "net_margin": 11.8,
+  "roe": 13.8,
+  "revenue_growth": 12.8,
+  "debt_to_equity": 1.45,
+  "rsi": 59.4,
+  "pattern": "Green Energy IPO",
   "esg": {
-    "overall": 68,
-    "environmental": 58,
-    "social": 74,
-    "governance": 72
+    "overall": 71,
+    "environmental": 62,
+    "social": 76,
+    "governance": 75
   },
   "trust_meter": {
-    "score": 77,
-    "promises_kept": 12,
+    "score": 84,
+    "promises_kept": 14,
     "promises_delayed": 2,
     "promises_broken": 1,
-    "timeline": [],
-    "latest_quote": "Renewable capacity target of 60GW by 2032 firmly on track."
+    "latest_quote": "Renewable capacity addition targeting 60 GW by 2032."
   },
   "forensic": {
-    "reported_profit_growth": "+12%",
-    "cash_flow_growth": "+11%",
-    "receivables_growth": "+9%",
-    "divergence_score": "Regulated Utility Cash Quality"
+    "reported_profit_growth": "+14%",
+    "cash_flow_growth": "+16%",
+    "receivables_growth": "+12%",
+    "divergence_score": "Stable Regulated Return"
   },
   "dna": {
-    "growth": 70,
-    "debt": 58,
-    "news_sensitivity": 50,
-    "mgmt_reliability": 80,
-    "market_fear": 34
+    "growth": 80,
+    "debt": 68,
+    "news_sensitivity": 55,
+    "mgmt_reliability": 85,
+    "market_fear": 36
   }
 }

@@ -1,0 +1,42 @@
+{
+  "symbol": "BAJAJ-AUTO",
+  "name": "Bajaj Auto Ltd",
+  "sector": "Automotive & Mobility",
+  "price": 9850.0,
+  "change": "+0.80%",
+  "market_cap": "₹2.7L Cr",
+  "pe_ratio": 34.2,
+  "pb_ratio": 8.9,
+  "net_margin": 16.5,
+  "roe": 26.2,
+  "revenue_growth": 23.0,
+  "debt_to_equity": 0.02,
+  "rsi": 60.2,
+  "pattern": "Export Recovery",
+  "esg": {
+    "overall": 76,
+    "environmental": 72,
+    "social": 78,
+    "governance": 79
+  },
+  "trust_meter": {
+    "score": 88,
+    "promises_kept": 15,
+    "promises_delayed": 1,
+    "promises_broken": 0,
+    "latest_quote": "Chetak electric scooter monthly volumes crossed 20,000 units."
+  },
+  "forensic": {
+    "reported_profit_growth": "+25%",
+    "cash_flow_growth": "+28%",
+    "receivables_growth": "+12%",
+    "divergence_score": "High Cash Return"
+  },
+  "dna": {
+    "growth": 86,
+    "debt": 6,
+    "news_sensitivity": 58,
+    "mgmt_reliability": 89,
+    "market_fear": 36
+  }
+}

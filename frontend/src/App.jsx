@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
 import Ticker from "./components/Ticker";
@@ -33,6 +33,117 @@ export default function App() {
   const { isOnline, latency } = useBackendStatus();
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [assistantInitialTab, setAssistantInitialTab] = useState("chat");
+  const [isMicMuted, setIsMicMuted] = useState(false);
+
+  // Global Autonomous Voice Action Listener
+  useEffect(() => {
+    const handleAutonomousVoiceAction = (e) => {
+      const action = e.detail;
+      if (!action) return;
+
+      console.log("⚡ App received autonomous voice action:", action);
+
+      if (action.target_page) {
+        goPage(action.target_page);
+      }
+
+      if (action.params?.symbol) {
+        window.__SELECTED_STOCK_SYMBOL = action.params.symbol;
+      }
+    };
+
+    window.addEventListener("marketmind:voice_action", handleAutonomousVoiceAction);
+    return () => {
+      window.removeEventListener("marketmind:voice_action", handleAutonomousVoiceAction);
+    };
+  }, [goPage]);
+
+  // Ambient Hands-Free Wake Word Detector ("Hey Alex", "Hey Alexa", "Hey MarketPulse", "Hey Pulse")
+  useEffect(() => {
+    if (assistantOpen || isMicMuted) return; // Release mic when assistant modal is active or mic is muted
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    let ambientRec = null;
+    let isStopped = false;
+
+    const startWakeWordListener = () => {
+      if (isStopped) return;
+      try {
+        ambientRec = new SpeechRecognition();
+        ambientRec.continuous = true;
+        ambientRec.interimResults = true;
+        ambientRec.lang = "en-IN";
+
+        ambientRec.onresult = (event) => {
+          let text = "";
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            text += event.results[i][0].transcript;
+          }
+          const lower = text.toLowerCase().trim();
+          const wakeKeywords = [
+            "hey alex",
+            "hey alexa",
+            "hey pulse",
+            "hey market pulse",
+            "hey marketpulse",
+            "alexa",
+            "alex",
+            "marketpulse",
+            "मार्केटपल्स"
+          ];
+
+          const foundWake = wakeKeywords.find((w) => lower.includes(w));
+          if (foundWake) {
+            console.log("🎙️ Ambient Wake Word Triggered:", text);
+            isStopped = true;
+            try {
+              ambientRec.stop();
+            } catch (e) {}
+
+            setAssistantOpen(true);
+            setAssistantInitialTab("chat");
+
+            // Extract query payload after the wake keyword
+            const remaining = lower.split(foundWake).pop().trim();
+            const finalQuery = remaining.length > 1 ? remaining : "hey alex";
+
+            setTimeout(() => {
+              window.dispatchEvent(
+                new CustomEvent("marketmind:voice_wake_query", { detail: finalQuery })
+              );
+            }, 300);
+          }
+        };
+
+        ambientRec.onerror = () => {
+          // Keep ambient listener silent on transient mic pauses
+        };
+
+        ambientRec.onend = () => {
+          if (!isStopped) {
+            setTimeout(startWakeWordListener, 1000);
+          }
+        };
+
+        ambientRec.start();
+      } catch (err) {
+        console.warn("Ambient mic status:", err);
+      }
+    };
+
+    startWakeWordListener();
+
+    return () => {
+      isStopped = true;
+      if (ambientRec) {
+        try {
+          ambientRec.stop();
+        } catch (e) {}
+      }
+    };
+  }, [assistantOpen]);
 
   const openAssistant = (tab = "chat") => {
     setAssistantInitialTab(tab);
@@ -65,6 +176,7 @@ export default function App() {
         return <DominoPage goPage={goPage} />;
       case "trust":
         return <TrustMeterPage />;
+      case "breaker":
       case "thesis":
         return <ThesisBreakerPage />;
       case "dna":
@@ -115,11 +227,13 @@ export default function App() {
         </div>
       </div>
 
-      {/* Floating AI & Voice Assistant */}
+      {/* Floating AI & Voice Assistant with Mute / Privacy controls */}
       <FloatingAssistant
         isOpen={assistantOpen}
         setIsOpen={setAssistantOpen}
         initialTab={assistantInitialTab}
+        isMicMuted={isMicMuted}
+        setIsMicMuted={setIsMicMuted}
       />
     </div>
   );

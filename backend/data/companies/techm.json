@@ -1,0 +1,42 @@
+{
+  "symbol": "TECHM",
+  "name": "Tech Mahindra Ltd",
+  "sector": "IT Services & Tech",
+  "price": 1530.0,
+  "change": "+0.32%",
+  "market_cap": "₹1.5L Cr",
+  "pe_ratio": 38.5,
+  "pb_ratio": 5.2,
+  "net_margin": 8.4,
+  "roe": 13.6,
+  "revenue_growth": 5.2,
+  "debt_to_equity": 0.12,
+  "rsi": 53.0,
+  "pattern": "Turnaround Breakout",
+  "esg": {
+    "overall": 75,
+    "environmental": 70,
+    "social": 78,
+    "governance": 78
+  },
+  "trust_meter": {
+    "score": 79,
+    "promises_kept": 11,
+    "promises_delayed": 3,
+    "promises_broken": 1,
+    "latest_quote": "Cost optimization Project Fortius targeting 15% EBIT margin by FY27."
+  },
+  "forensic": {
+    "reported_profit_growth": "+6%",
+    "cash_flow_growth": "+4%",
+    "receivables_growth": "+8%",
+    "divergence_score": "Improving Margins"
+  },
+  "dna": {
+    "growth": 70,
+    "debt": 16,
+    "news_sensitivity": 70,
+    "mgmt_reliability": 78,
+    "market_fear": 50
+  }
+}

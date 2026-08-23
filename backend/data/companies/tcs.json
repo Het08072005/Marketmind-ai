@@ -1,10 +1,10 @@
 {
   "symbol": "TCS",
   "name": "Tata Consultancy Services",
-  "sector": "IT Services",
-  "price": 4112.55,
-  "change": "+0.6%",
-  "market_cap": "\u20b914.9L Cr",
+  "sector": "IT Services & Tech",
+  "price": 2302.0,
+  "change": "+0.17%",
+  "market_cap": "₹14.9L Cr",
   "pe_ratio": 29.4,
   "pb_ratio": 13.2,
   "net_margin": 25.1,
@@ -20,23 +20,11 @@
     "governance": 88
   },
   "trust_meter": {
-    "score": 88,
-    "promises_kept": 16,
+    "score": 91,
+    "promises_kept": 18,
     "promises_delayed": 1,
     "promises_broken": 0,
-    "timeline": [
-      {
-        "promise": "Maintain operating margin above 25%",
-        "made": "Q1 FY24",
-        "status": "Kept"
-      },
-      {
-        "promise": "Train 100,000+ engineers in Generative AI",
-        "made": "Q2 FY24",
-        "status": "Kept"
-      }
-    ],
-    "latest_quote": "Our deal pipeline remains solid with strong traction in enterprise AI and cloud modernization."
+    "latest_quote": "Enterprise AI contracts expanded by 34% YoY."
   },
   "forensic": {
     "reported_profit_growth": "+11%",
@@ -45,10 +33,10 @@
     "divergence_score": "Strong (Zero Anomaly)"
   },
   "dna": {
-    "growth": 74,
-    "debt": 5,
+    "growth": 88,
+    "debt": 8,
     "news_sensitivity": 52,
-    "mgmt_reliability": 92,
-    "market_fear": 35
+    "mgmt_reliability": 94,
+    "market_fear": 36
   }
 }

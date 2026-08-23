@@ -1,0 +1,42 @@
+{
+  "symbol": "DIVISLAB",
+  "name": "Divi's Laboratories",
+  "sector": "Pharma & Healthcare",
+  "price": 5420.0,
+  "change": "+0.85%",
+  "market_cap": "₹1.4L Cr",
+  "pe_ratio": 68.0,
+  "pb_ratio": 10.5,
+  "net_margin": 21.5,
+  "roe": 13.5,
+  "revenue_growth": 16.2,
+  "debt_to_equity": 0.01,
+  "rsi": 62.8,
+  "pattern": "CDMO Revival",
+  "esg": {
+    "overall": 79,
+    "environmental": 76,
+    "social": 80,
+    "governance": 81
+  },
+  "trust_meter": {
+    "score": 88,
+    "promises_kept": 16,
+    "promises_delayed": 1,
+    "promises_broken": 0,
+    "latest_quote": "New custom synthesis contrast media contracts commencing commercial batches."
+  },
+  "forensic": {
+    "reported_profit_growth": "+18%",
+    "cash_flow_growth": "+22%",
+    "receivables_growth": "+10%",
+    "divergence_score": "High EBITDA Moat"
+  },
+  "dna": {
+    "growth": 85,
+    "debt": 2,
+    "news_sensitivity": 56,
+    "mgmt_reliability": 89,
+    "market_fear": 38
+  }
+}

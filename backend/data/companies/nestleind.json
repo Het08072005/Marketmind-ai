@@ -1,0 +1,42 @@
+{
+  "symbol": "NESTLEIND",
+  "name": "Nestle India Ltd",
+  "sector": "Consumer & FMCG",
+  "price": 2450.0,
+  "change": "+0.15%",
+  "market_cap": "₹2.3L Cr",
+  "pe_ratio": 72.0,
+  "pb_ratio": 58.0,
+  "net_margin": 15.8,
+  "roe": 105.2,
+  "revenue_growth": 10.4,
+  "debt_to_equity": 0.08,
+  "rsi": 50.4,
+  "pattern": "Premium Nutrition Base",
+  "esg": {
+    "overall": 78,
+    "environmental": 76,
+    "social": 78,
+    "governance": 80
+  },
+  "trust_meter": {
+    "score": 86,
+    "promises_kept": 14,
+    "promises_delayed": 2,
+    "promises_broken": 0,
+    "latest_quote": "Prepared dishes and coffee categories delivered strong double-digit growth."
+  },
+  "forensic": {
+    "reported_profit_growth": "+11%",
+    "cash_flow_growth": "+13%",
+    "receivables_growth": "+7%",
+    "divergence_score": "High Cash Conversion"
+  },
+  "dna": {
+    "growth": 76,
+    "debt": 6,
+    "news_sensitivity": 46,
+    "mgmt_reliability": 87,
+    "market_fear": 32
+  }
+}

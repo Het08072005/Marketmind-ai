@@ -1,43 +1,42 @@
 {
   "symbol": "HINDUNILVR",
   "name": "Hindustan Unilever Ltd",
-  "sector": "FMCG & Consumption",
-  "price": 2480.0,
-  "change": "+0.4%",
-  "market_cap": "\u20b95.8L Cr",
-  "pe_ratio": 54.1,
+  "sector": "Consumer & FMCG",
+  "price": 2015.0,
+  "change": "-0.64%",
+  "market_cap": "₹6.1L Cr",
+  "pe_ratio": 54.8,
   "pb_ratio": 11.2,
-  "net_margin": 17.2,
+  "net_margin": 17.5,
   "roe": 20.4,
-  "revenue_growth": 5.4,
+  "revenue_growth": 6.2,
   "debt_to_equity": 0.02,
   "rsi": 46.2,
-  "pattern": "Base Formation",
+  "pattern": "Rural Demand Recovery",
   "esg": {
     "overall": 85,
-    "environmental": 89,
+    "environmental": 88,
     "social": 84,
-    "governance": 82
+    "governance": 84
   },
   "trust_meter": {
-    "score": 83,
-    "promises_kept": 13,
+    "score": 87,
+    "promises_kept": 15,
     "promises_delayed": 2,
     "promises_broken": 0,
-    "timeline": [],
-    "latest_quote": "Rural volume growth is gradually recovering."
+    "latest_quote": "Rural volume growth outpaced urban growth across beauty and home care."
   },
   "forensic": {
-    "reported_profit_growth": "+6%",
-    "cash_flow_growth": "+7%",
-    "receivables_growth": "+4%",
-    "divergence_score": "High Quality"
+    "reported_profit_growth": "+7%",
+    "cash_flow_growth": "+9%",
+    "receivables_growth": "+6%",
+    "divergence_score": "High Quality Moat"
   },
   "dna": {
-    "growth": 58,
+    "growth": 70,
     "debt": 4,
-    "news_sensitivity": 42,
-    "mgmt_reliability": 91,
-    "market_fear": 30
+    "news_sensitivity": 48,
+    "mgmt_reliability": 88,
+    "market_fear": 35
   }
 }

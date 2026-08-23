@@ -1,54 +1,42 @@
 {
   "symbol": "ICICIBANK",
   "name": "ICICI Bank Ltd",
-  "sector": "Banking & Financials",
-  "price": 1241.3,
-  "change": "+0.9%",
-  "market_cap": "\u20b98.7L Cr",
-  "pe_ratio": 17.8,
+  "sector": "Banking & Finance",
+  "price": 1420.0,
+  "change": "+0.57%",
+  "market_cap": "₹8.8L Cr",
+  "pe_ratio": 17.4,
   "pb_ratio": 3.1,
-  "net_margin": 24.1,
-  "roe": 18.5,
-  "revenue_growth": 19.2,
-  "debt_to_equity": 7.1,
-  "rsi": 62.4,
-  "pattern": "Bullish Pennant",
+  "net_margin": 28.2,
+  "roe": 18.9,
+  "revenue_growth": 19.8,
+  "debt_to_equity": 6.2,
+  "rsi": 64.8,
+  "pattern": "Steady Uptrend",
   "esg": {
-    "overall": 76,
-    "environmental": 66,
-    "social": 80,
-    "governance": 82
+    "overall": 81,
+    "environmental": 70,
+    "social": 86,
+    "governance": 87
   },
   "trust_meter": {
-    "score": 86,
-    "promises_kept": 15,
+    "score": 90,
+    "promises_kept": 17,
     "promises_delayed": 1,
     "promises_broken": 0,
-    "timeline": [
-      {
-        "promise": "Keep net NPA below 0.50%",
-        "made": "Q1 FY24",
-        "status": "Kept"
-      },
-      {
-        "promise": "Grow retail lending at 18-20% sustainably",
-        "made": "Q3 FY24",
-        "status": "Kept"
-      }
-    ],
-    "latest_quote": "Asset quality remains robust across our corporate and SME portfolios."
+    "latest_quote": "Net NPA declined to record low 0.42% with strong retail CASA."
   },
   "forensic": {
-    "reported_profit_growth": "+19%",
-    "cash_flow_growth": "+17%",
+    "reported_profit_growth": "+18%",
+    "cash_flow_growth": "+19%",
     "receivables_growth": "+14%",
-    "divergence_score": "Strong Quality"
+    "divergence_score": "Industry Leading Asset Quality"
   },
   "dna": {
-    "growth": 80,
-    "debt": 70,
-    "news_sensitivity": 62,
-    "mgmt_reliability": 89,
-    "market_fear": 42
+    "growth": 90,
+    "debt": 62,
+    "news_sensitivity": 50,
+    "mgmt_reliability": 92,
+    "market_fear": 32
   }
 }

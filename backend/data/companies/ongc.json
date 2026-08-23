@@ -1,43 +1,42 @@
 {
   "symbol": "ONGC",
-  "name": "Oil & Natural Gas Corp Ltd",
-  "sector": "Energy & Oil Exploration",
-  "price": 310.4,
-  "change": "+3.1%",
-  "market_cap": "\u20b93.9L Cr",
+  "name": "Oil & Natural Gas Corporation",
+  "sector": "Energy & Conglomerate",
+  "price": 236.4,
+  "change": "-0.88%",
+  "market_cap": "₹3.1L Cr",
   "pe_ratio": 8.6,
-  "pb_ratio": 1.1,
+  "pb_ratio": 0.9,
   "net_margin": 12.2,
   "roe": 14.1,
   "revenue_growth": 9.4,
-  "debt_to_equity": 0.44,
-  "rsi": 67.2,
-  "pattern": "Multi-Year High Breakout",
+  "debt_to_equity": 0.42,
+  "rsi": 51.4,
+  "pattern": "Value Dividend Base",
   "esg": {
-    "overall": 64,
-    "environmental": 54,
-    "social": 70,
-    "governance": 68
+    "overall": 68,
+    "environmental": 62,
+    "social": 72,
+    "governance": 70
   },
   "trust_meter": {
-    "score": 71,
-    "promises_kept": 10,
-    "promises_delayed": 3,
+    "score": 76,
+    "promises_kept": 11,
+    "promises_delayed": 4,
     "promises_broken": 2,
-    "timeline": [],
-    "latest_quote": "KG-DWN-98/2 deepwater block production ramping up."
+    "latest_quote": "KG-DWN-98/2 deepwater block oil production ramped up."
   },
   "forensic": {
-    "reported_profit_growth": "+11%",
+    "reported_profit_growth": "+8%",
     "cash_flow_growth": "+12%",
-    "receivables_growth": "+7%",
-    "divergence_score": "High Cash Realization"
+    "receivables_growth": "+5%",
+    "divergence_score": "High Cash Flow Generative"
   },
   "dna": {
     "growth": 68,
-    "debt": 35,
-    "news_sensitivity": 88,
-    "mgmt_reliability": 73,
-    "market_fear": 50
+    "debt": 40,
+    "news_sensitivity": 82,
+    "mgmt_reliability": 76,
+    "market_fear": 55
   }
 }

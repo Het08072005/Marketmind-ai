@@ -1,0 +1,42 @@
+{
+  "symbol": "ADANIPORTS",
+  "name": "Adani Ports & SEZ",
+  "sector": "Energy & Conglomerate",
+  "price": 1700.0,
+  "change": "+0.24%",
+  "market_cap": "₹3.2L Cr",
+  "pe_ratio": 32.5,
+  "pb_ratio": 4.8,
+  "net_margin": 28.5,
+  "roe": 18.2,
+  "revenue_growth": 21.0,
+  "debt_to_equity": 0.98,
+  "rsi": 62.1,
+  "pattern": "Cargo Volume Leader",
+  "esg": {
+    "overall": 66,
+    "environmental": 62,
+    "social": 68,
+    "governance": 68
+  },
+  "trust_meter": {
+    "score": 81,
+    "promises_kept": 13,
+    "promises_delayed": 2,
+    "promises_broken": 1,
+    "latest_quote": "Cargo throughput exceeded 420 MMT landmark."
+  },
+  "forensic": {
+    "reported_profit_growth": "+20%",
+    "cash_flow_growth": "+22%",
+    "receivables_growth": "+15%",
+    "divergence_score": "High Cash Flow Margin"
+  },
+  "dna": {
+    "growth": 88,
+    "debt": 58,
+    "news_sensitivity": 78,
+    "mgmt_reliability": 81,
+    "market_fear": 50
+  }
+}

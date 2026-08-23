@@ -1,0 +1,42 @@
+{
+  "symbol": "ATGL",
+  "name": "Adani Total Gas Ltd",
+  "sector": "Energy & Conglomerate",
+  "price": 646.1,
+  "change": "-1.76%",
+  "market_cap": "₹71,060 Cr",
+  "pe_ratio": 92.4,
+  "pb_ratio": 16.8,
+  "net_margin": 14.2,
+  "roe": 21.5,
+  "revenue_growth": 16.8,
+  "debt_to_equity": 0.45,
+  "rsi": 44.5,
+  "pattern": "Distribution Channel",
+  "esg": {
+    "overall": 64,
+    "environmental": 68,
+    "social": 62,
+    "governance": 62
+  },
+  "trust_meter": {
+    "score": 74,
+    "promises_kept": 8,
+    "promises_delayed": 2,
+    "promises_broken": 1,
+    "latest_quote": "Targeting 100 CNG stations expansion this fiscal."
+  },
+  "forensic": {
+    "reported_profit_growth": "+12%",
+    "cash_flow_growth": "+8%",
+    "receivables_growth": "+14%",
+    "divergence_score": "Steady Gas Conversion"
+  },
+  "dna": {
+    "growth": 82,
+    "debt": 38,
+    "news_sensitivity": 88,
+    "mgmt_reliability": 74,
+    "market_fear": 65
+  }
+}

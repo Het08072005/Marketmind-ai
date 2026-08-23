@@ -11,10 +11,12 @@ from routes.domino import router as domino_router
 from routes.trust import router as trust_router
 from routes.forensic import router as forensic_router
 from routes.news import router as news_router
+from routes.portfolio import router as portfolio_router
+from routes.reports import reports_router
 
 app = FastAPI(
     title="MarketMind AI — Financial Intelligence Terminal Backend",
-    description="Autonomous FastAPI backend powered by Google Gemini 2.5 Flash, Deepgram Voice AI, and Top 20 Companies Repository.",
+    description="Autonomous FastAPI backend powered by Live NSE yfinance, Google News RSS, Gemini 2.5 Flash, and Deepgram Voice AI.",
     version="1.0.0"
 )
 
@@ -34,6 +36,8 @@ app.include_router(domino_router)
 app.include_router(trust_router)
 app.include_router(forensic_router)
 app.include_router(news_router)
+app.include_router(portfolio_router)
+app.include_router(reports_router, prefix="/api/reports", tags=["reports"])
 
 @app.get("/")
 def read_root():
@@ -54,7 +58,9 @@ def health_check():
             "voice_agent": "ready",
             "gemini_brain": "ready" if settings.GEMINI_API_KEY else "offline",
             "deepgram_voice": "ready" if settings.DEEPGRAM_API_KEY else "offline",
-            "top20_repository": "loaded"
+            "live_market_data": "active",
+            "live_news_feed": "active",
+            "virtual_portfolio": "active"
         },
         "timestamp": datetime.now().isoformat()
     }

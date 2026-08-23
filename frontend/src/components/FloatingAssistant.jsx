@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useVoiceAgent } from "../hooks/useVoiceAgent";
 
-export default function FloatingAssistant({ isOpen, setIsOpen }) {
+export default function FloatingAssistant({ isOpen, setIsOpen, isMicMuted = false, setIsMicMuted = () => {} }) {
   const [chatInput, setChatInput] = useState("");
   const [playingMsgId, setPlayingMsgId] = useState(null);
   const chatScrollRef = useRef(null);
@@ -10,6 +10,7 @@ export default function FloatingAssistant({ isOpen, setIsOpen }) {
     isListening,
     isProcessing,
     isPlayingAudio,
+    isContinuousMode,
     language,
     setLanguage,
     liveTranscript,
@@ -18,7 +19,7 @@ export default function FloatingAssistant({ isOpen, setIsOpen }) {
     stopListening,
     submitQuery,
     playMessageAudio,
-  } = useVoiceAgent();
+  } = useVoiceAgent(null, isMicMuted);
 
   // Auto-scroll on new message or live transcript
   useEffect(() => {
@@ -40,6 +41,11 @@ export default function FloatingAssistant({ isOpen, setIsOpen }) {
   };
 
   const handleToggleMic = () => {
+    if (isMicMuted) {
+      setIsMicMuted(false);
+      startListening();
+      return;
+    }
     if (isListening) {
       stopListening();
     } else {
@@ -57,33 +63,104 @@ export default function FloatingAssistant({ isOpen, setIsOpen }) {
 
   return (
     <>
-      {/* Floating Action Button with Clean Microphone Logo */}
-      <button
-        className="fab"
-        title="Open MarketPulse AI Terminal"
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "linear-gradient(135deg, var(--gold-light), var(--gold))",
-          boxShadow: "0 8px 24px -4px rgba(184,147,90,.6)",
-          cursor: "pointer",
-        }}
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ width: "24px", height: "24px", stroke: "var(--navy)" }}
+      {/* Floating Action Controls with Mute/Privacy Switch */}
+      <div style={{ position: "fixed", bottom: "24px", right: "24px", display: "flex", alignItems: "center", gap: "10px", zIndex: 999 }}>
+        {/* Quick Mic Mute / Privacy Pill */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            const nextState = !isMicMuted;
+            setIsMicMuted(nextState);
+            if (nextState && isListening) {
+              stopListening();
+            }
+          }}
+          title={isMicMuted ? "Microphone is MUTED (Privacy Active). Click to Unmute." : "Microphone is ACTIVE. Click to MUTE."}
+          style={{
+            height: "38px",
+            padding: "0 12px",
+            borderRadius: "20px",
+            background: isMicMuted ? "rgba(161,69,69,.92)" : "rgba(16,27,51,.85)",
+            backdropFilter: "blur(8px)",
+            color: "#FFF",
+            border: isMicMuted ? "1px solid #E65C5C" : "1px solid rgba(216,188,139,.35)",
+            boxShadow: isMicMuted ? "0 4px 14px rgba(161,69,69,.45)" : "0 4px 14px rgba(0,0,0,.25)",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            cursor: "pointer",
+            fontSize: "11.5px",
+            fontWeight: 600,
+            transition: "all .2s ease",
+          }}
         >
-          <rect x="9" y="2" width="6" height="12" rx="3" fill="rgba(16,27,51,.15)" />
-          <path d="M5 10v1a7 7 0 0 0 14 0v-1" />
-          <path d="M12 18v4M9 22h6" />
-        </svg>
-      </button>
+          {isMicMuted ? (
+            <>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round">
+                <line x1="1" y1="1" x2="23" y2="23" stroke="#fff" />
+                <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+                <line x1="8" y1="23" x2="16" y2="23" />
+              </svg>
+              <span>Mic Muted</span>
+            </>
+          ) : (
+            <>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--gold-light)" strokeWidth="2.2" strokeLinecap="round">
+                <rect x="9" y="2" width="6" height="12" rx="3" />
+                <path d="M5 10v1a7 7 0 0 0 14 0v-1" />
+                <path d="M12 18v4M9 22h6" />
+              </svg>
+              <span>Mic Active</span>
+            </>
+          )}
+        </button>
+
+        {/* Floating Action Button (FAB) */}
+        <button
+          className="fab"
+          title="Open MarketPulse AI Terminal"
+          onClick={() => setIsOpen(!isOpen)}
+          style={{
+            position: "static",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: isMicMuted 
+              ? "linear-gradient(135deg, #4A5568, #2D3748)"
+              : "linear-gradient(135deg, var(--gold-light), var(--gold))",
+            boxShadow: isMicMuted
+              ? "0 8px 24px -4px rgba(0,0,0,.5)"
+              : "0 8px 24px -4px rgba(184,147,90,.6)",
+            cursor: "pointer",
+          }}
+        >
+          {isMicMuted ? (
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#E2E8F0" strokeWidth="2.2" strokeLinecap="round">
+              <line x1="2" y1="2" x2="22" y2="22" />
+              <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
+              <path d="M5 10v2a7 7 0 0 0 12 5" />
+              <path d="M15 9.34V4a3 3 0 0 0-5.94-.6" />
+              <line x1="12" y1="19" x2="12" y2="22" />
+            </svg>
+          ) : (
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ width: "24px", height: "24px", stroke: "var(--navy)" }}
+            >
+              <rect x="9" y="2" width="6" height="12" rx="3" fill="rgba(16,27,51,.15)" />
+              <path d="M5 10v1a7 7 0 0 0 14 0v-1" />
+              <path d="M12 18v4M9 22h6" />
+            </svg>
+          )}
+        </button>
+      </div>
 
       {/* Slide-Up Assistant Panel (MarketPulse AI) */}
       <div className={`assistant-panel ${isOpen ? "open" : ""}`} id="assistantPanel">
@@ -124,27 +201,61 @@ export default function FloatingAssistant({ isOpen, setIsOpen }) {
             </div>
 
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontFamily: "var(--serif)", fontSize: "15px", fontWeight: 600, color: "#FBF4E4", lineHeight: 1.15, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "flex", alignItems: "center", gap: "5px" }}>
+              <div style={{ fontFamily: "var(--serif)", fontSize: "15px", fontWeight: 600, color: "#FBF4E4", lineHeight: 1.15, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "flex", alignItems: "center", gap: "6px" }}>
                 <span>MarketPulse</span>
                 <span style={{ fontSize: "9.5px", background: "rgba(217,188,139,.22)", color: "var(--gold-light)", padding: "1px 5px", borderRadius: "4px", fontWeight: 600, letterSpacing: ".5px" }}>
                   AI
                 </span>
+                {isContinuousMode && (
+                  <span style={{ fontSize: "9px", background: "rgba(47,111,98,.35)", color: "#80D4C5", padding: "1px 6px", borderRadius: "10px", border: "1px solid rgba(47,111,98,.5)", fontWeight: 600 }}>
+                    🟢 Hands-Free Loop
+                  </span>
+                )}
               </div>
               <div style={{ fontSize: "10.5px", color: isListening ? "#E65C5C" : isPlayingAudio ? "#D9BC8B" : "#8FD1AE", display: "flex", alignItems: "center", gap: "4px", marginTop: "2px" }}>
                 <i style={{ width: "5px", height: "5px", borderRadius: "50%", background: isListening ? "#E65C5C" : isPlayingAudio ? "#D9BC8B" : "#8FD1AE", display: "inline-block", animation: "pulse-dot 1.5s infinite" }}></i>
                 {isListening
-                  ? "Listening to you..."
+                  ? "Listening... (Speak naturally)"
                   : isProcessing
                   ? "Analyzing signals..."
                   : isPlayingAudio
                   ? "MarketPulse Speaking..."
+                  : isContinuousMode
+                  ? "Hands-Free Active"
                   : "Real-Time Terminal"}
               </div>
             </div>
           </div>
 
-          {/* Right: Clean English & Hindi Language Dropdown */}
+          {/* Right: Mute Privacy Pill + Language Dropdown + Close */}
           <div style={{ display: "flex", alignItems: "center", gap: "7px", flexShrink: 0 }}>
+            {/* Direct Mute / Privacy Switch */}
+            <button
+              type="button"
+              onClick={() => {
+                const nextMute = !isMicMuted;
+                setIsMicMuted(nextMute);
+                if (nextMute && isListening) stopListening();
+              }}
+              title={isMicMuted ? "Unmute Microphone (Enable Voice)" : "Mute Microphone (Privacy On)"}
+              style={{
+                background: isMicMuted ? "rgba(161,69,69,.45)" : "rgba(255,255,255,.09)",
+                border: isMicMuted ? "1px solid #E65C5C" : "1px solid rgba(217,188,139,.35)",
+                borderRadius: "16px",
+                padding: "4px 9px",
+                fontSize: "11px",
+                fontWeight: 600,
+                color: isMicMuted ? "#FFA4A4" : "#FBF4E4",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                lineHeight: 1.2
+              }}
+            >
+              {isMicMuted ? "🔇 Muted" : "🎙️ On"}
+            </button>
+
             <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
               <select
                 value={language}
@@ -256,9 +367,9 @@ export default function FloatingAssistant({ isOpen, setIsOpen }) {
 
           {/* Thinking / Analyzing Indicator */}
           {isProcessing && (
-            <div className="msg-wrapper bot">
+            <div className="msg-wrapper bot" style={{ opacity: 0.7 }}>
               <div className="msg bot" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span className="tag-sm" style={{ margin: 0 }}>Thinking</span>
+                <span className="live-pulse" style={{ width: "8px", height: "8px" }}></span>
                 <span style={{ fontSize: "12px", color: "var(--ink-soft)" }}>MarketPulse is analyzing live signals...</span>
               </div>
             </div>
@@ -286,17 +397,17 @@ export default function FloatingAssistant({ isOpen, setIsOpen }) {
           <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
             <input
               type="text"
-              placeholder={isListening ? "🎙️ Speak now, MarketPulse is listening..." : `Ask MarketPulse in ${language === "hindi" ? "Hindi" : "English"}...`}
+              placeholder={isMicMuted ? "🔒 Mic is muted (Privacy Active). Type here..." : isListening ? "🎙️ Speak now, MarketPulse is listening..." : `Ask MarketPulse in ${language === "hindi" ? "Hindi" : "English"}...`}
               value={isListening ? liveTranscript : chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSendChat()}
               style={{
                 width: "100%",
-                background: isListening ? "rgba(161,69,69,.08)" : "var(--cream)",
-                borderColor: isListening ? "var(--rose)" : "var(--line)",
+                background: isMicMuted ? "rgba(16,27,51,.04)" : isListening ? "rgba(161,69,69,.08)" : "var(--cream)",
+                borderColor: isMicMuted ? "var(--line)" : isListening ? "var(--rose)" : "var(--line)",
               }}
             />
-            {isListening && (
+            {isListening && !isMicMuted && (
               <span
                 style={{
                   position: "absolute",
@@ -318,19 +429,37 @@ export default function FloatingAssistant({ isOpen, setIsOpen }) {
           {/* WhatsApp-style Mic Button on Right */}
           <button
             type="button"
-            className={`assist-mic-btn ${isListening ? "active" : ""}`}
-            title={isListening ? "Tap to send voice message" : "Tap to speak to MarketPulse"}
+            className={`assist-mic-btn ${isListening && !isMicMuted ? "active" : ""}`}
+            title={isMicMuted ? "Microphone is muted. Click to unmute and speak." : isListening ? "Tap to pause voice" : "Tap to speak to MarketPulse"}
             onClick={handleToggleMic}
             style={{
-              background: isListening ? "var(--rose)" : "linear-gradient(135deg, var(--gold), var(--gold-light))",
-              boxShadow: isListening ? "0 0 16px rgba(161,69,69,.6)" : "0 2px 8px rgba(184,147,90,.3)",
+              background: isMicMuted
+                ? "linear-gradient(135deg, #718096, #4A5568)"
+                : isListening
+                ? "var(--rose)"
+                : "linear-gradient(135deg, var(--gold), var(--gold-light))",
+              boxShadow: isMicMuted
+                ? "0 2px 8px rgba(0,0,0,.2)"
+                : isListening
+                ? "0 0 16px rgba(161,69,69,.6)"
+                : "0 2px 8px rgba(184,147,90,.3)",
             }}
           >
-            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round">
-              <rect x="9" y="2" width="6" height="12" rx="3" stroke={isListening ? "#fff" : "var(--navy)"} />
-              <path d="M5 10v1a7 7 0 0 0 14 0v-1" stroke={isListening ? "#fff" : "var(--navy)"} />
-              <path d="M12 18v4M9 22h6" stroke={isListening ? "#fff" : "var(--navy)"} />
-            </svg>
+            {isMicMuted ? (
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round">
+                <line x1="2" y1="2" x2="22" y2="22" />
+                <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
+                <path d="M5 10v2a7 7 0 0 0 12 5" />
+                <path d="M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                <line x1="12" y1="19" x2="12" y2="22" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round">
+                <rect x="9" y="2" width="6" height="12" rx="3" stroke={isListening ? "#fff" : "var(--navy)"} />
+                <path d="M5 10v1a7 7 0 0 0 14 0v-1" stroke={isListening ? "#fff" : "var(--navy)"} />
+                <path d="M12 18v4M9 22h6" stroke={isListening ? "#fff" : "var(--navy)"} />
+              </svg>
+            )}
           </button>
 
           {/* Send Button if text is typed manually */}

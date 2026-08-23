@@ -1,0 +1,42 @@
+{
+  "symbol": "JSWSTEEL",
+  "name": "JSW Steel Ltd",
+  "sector": "Infrastructure & Metals",
+  "price": 965.0,
+  "change": "+0.40%",
+  "market_cap": "₹2.3L Cr",
+  "pe_ratio": 26.5,
+  "pb_ratio": 2.9,
+  "net_margin": 6.1,
+  "roe": 12.8,
+  "revenue_growth": 11.2,
+  "debt_to_equity": 1.25,
+  "rsi": 55.2,
+  "pattern": "Capacity Expansion",
+  "esg": {
+    "overall": 70,
+    "environmental": 64,
+    "social": 74,
+    "governance": 72
+  },
+  "trust_meter": {
+    "score": 82,
+    "promises_kept": 13,
+    "promises_delayed": 2,
+    "promises_broken": 1,
+    "latest_quote": "Targeting 38.5 MTPA crude steel capacity by FY25."
+  },
+  "forensic": {
+    "reported_profit_growth": "+12%",
+    "cash_flow_growth": "+15%",
+    "receivables_growth": "+10%",
+    "divergence_score": "Strong Domestic Realization"
+  },
+  "dna": {
+    "growth": 82,
+    "debt": 60,
+    "news_sensitivity": 82,
+    "mgmt_reliability": 82,
+    "market_fear": 58
+  }
+}

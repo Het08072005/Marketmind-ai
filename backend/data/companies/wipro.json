@@ -1,0 +1,42 @@
+{
+  "symbol": "WIPRO",
+  "name": "Wipro Ltd",
+  "sector": "IT Services & Tech",
+  "price": 180.79,
+  "change": "-0.12%",
+  "market_cap": "₹2.6L Cr",
+  "pe_ratio": 21.2,
+  "pb_ratio": 3.4,
+  "net_margin": 15.6,
+  "roe": 15.4,
+  "revenue_growth": 4.8,
+  "debt_to_equity": 0.15,
+  "rsi": 49.8,
+  "pattern": "Consolidation Range",
+  "esg": {
+    "overall": 76,
+    "environmental": 74,
+    "social": 78,
+    "governance": 76
+  },
+  "trust_meter": {
+    "score": 75,
+    "promises_kept": 10,
+    "promises_delayed": 4,
+    "promises_broken": 2,
+    "latest_quote": "Capco consulting business stabilizing across European banking accounts."
+  },
+  "forensic": {
+    "reported_profit_growth": "+4%",
+    "cash_flow_growth": "+3%",
+    "receivables_growth": "+7%",
+    "divergence_score": "Moderate (Low Risk)"
+  },
+  "dna": {
+    "growth": 64,
+    "debt": 18,
+    "news_sensitivity": 68,
+    "mgmt_reliability": 75,
+    "market_fear": 52
+  }
+}

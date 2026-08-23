@@ -1,43 +1,42 @@
 {
   "symbol": "AXISBANK",
   "name": "Axis Bank Ltd",
-  "sector": "Banking & Financials",
-  "price": 1180.0,
-  "change": "+0.5%",
-  "market_cap": "\u20b93.6L Cr",
-  "pe_ratio": 13.9,
+  "sector": "Banking & Finance",
+  "price": 1245.8,
+  "change": "-0.42%",
+  "market_cap": "₹3.8L Cr",
+  "pe_ratio": 14.5,
   "pb_ratio": 2.1,
-  "net_margin": 19.5,
-  "roe": 16.4,
-  "revenue_growth": 14.2,
-  "debt_to_equity": 6.4,
-  "rsi": 52.0,
-  "pattern": "Hammer Reversal",
+  "net_margin": 22.0,
+  "roe": 17.1,
+  "revenue_growth": 16.4,
+  "debt_to_equity": 7.4,
+  "rsi": 54.2,
+  "pattern": "Channel Support",
   "esg": {
-    "overall": 75,
-    "environmental": 67,
-    "social": 79,
+    "overall": 76,
+    "environmental": 68,
+    "social": 80,
     "governance": 80
   },
   "trust_meter": {
-    "score": 78,
-    "promises_kept": 11,
+    "score": 82,
+    "promises_kept": 13,
     "promises_delayed": 2,
     "promises_broken": 1,
-    "timeline": [],
-    "latest_quote": "Citibank integration completed ahead of planned schedule."
+    "latest_quote": "Citi consumer portfolio migration achieved with zero customer attrition."
   },
   "forensic": {
     "reported_profit_growth": "+15%",
-    "cash_flow_growth": "+13%",
+    "cash_flow_growth": "+14%",
     "receivables_growth": "+12%",
-    "divergence_score": "Healthy Quality"
+    "divergence_score": "Clean Retail Portfolio"
   },
   "dna": {
-    "growth": 75,
+    "growth": 80,
     "debt": 68,
     "news_sensitivity": 64,
-    "mgmt_reliability": 81,
-    "market_fear": 44
+    "mgmt_reliability": 83,
+    "market_fear": 46
   }
 }

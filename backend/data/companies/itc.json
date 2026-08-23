@@ -1,54 +1,42 @@
 {
   "symbol": "ITC",
   "name": "ITC Ltd",
-  "sector": "Conglomerate & FMCG",
-  "price": 468.15,
-  "change": "+1.2%",
-  "market_cap": "\u20b95.8L Cr",
-  "pe_ratio": 26.2,
-  "pb_ratio": 7.8,
-  "net_margin": 27.5,
-  "roe": 30.1,
-  "revenue_growth": 7.8,
+  "sector": "Consumer & FMCG",
+  "price": 269.4,
+  "change": "-0.83%",
+  "market_cap": "₹5.8L Cr",
+  "pe_ratio": 27.5,
+  "pb_ratio": 7.4,
+  "net_margin": 27.8,
+  "roe": 28.5,
+  "revenue_growth": 8.9,
   "debt_to_equity": 0.01,
-  "rsi": 54.8,
-  "pattern": "Ascending Channel",
+  "rsi": 62.4,
+  "pattern": "Hotels Demerger Catalyst",
   "esg": {
-    "overall": 80,
-    "environmental": 88,
-    "social": 76,
-    "governance": 77
+    "overall": 86,
+    "environmental": 92,
+    "social": 84,
+    "governance": 82
   },
   "trust_meter": {
-    "score": 84,
-    "promises_kept": 14,
-    "promises_delayed": 2,
+    "score": 89,
+    "promises_kept": 16,
+    "promises_delayed": 1,
     "promises_broken": 0,
-    "timeline": [
-      {
-        "promise": "Complete demerger of Hotels business",
-        "made": "Q2 FY24",
-        "status": "Kept"
-      },
-      {
-        "promise": "Grow non-cigarette FMCG EBITDA margins to double digits",
-        "made": "Q3 FY24",
-        "status": "Kept"
-      }
-    ],
-    "latest_quote": "FMCG revenue crossed landmark figures driven by packaged foods and personal care."
+    "latest_quote": "Non-cigarette FMCG EBITDA margins expanded 110 bps YoY."
   },
   "forensic": {
-    "reported_profit_growth": "+9%",
-    "cash_flow_growth": "+10%",
+    "reported_profit_growth": "+10%",
+    "cash_flow_growth": "+15%",
     "receivables_growth": "+5%",
-    "divergence_score": "High Cash Quality"
+    "divergence_score": "Exceptional FCF"
   },
   "dna": {
-    "growth": 65,
+    "growth": 74,
     "debt": 2,
-    "news_sensitivity": 48,
+    "news_sensitivity": 44,
     "mgmt_reliability": 90,
-    "market_fear": 28
+    "market_fear": 30
   }
 }

@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Query
-from services.news_service import get_all_scored_news, fetch_live_rss_news
+from services.live_news_service import fetch_live_financial_news
 
-router = APIRouter(prefix="/api/news", tags=["News & Impact Predictions"])
+router = APIRouter(prefix="/api/news", tags=["Financial News"])
 
 @router.get("")
-async def get_news(filter: str = Query("All")):
-    return get_all_scored_news(filter_tag=filter)
+async def get_news_feed(filter: str = Query("All")):
+    return fetch_live_financial_news(filter_category=filter)
 
 @router.get("/live")
-async def get_live_news(query: str = Query("Indian stock market NSE")):
-    return fetch_live_rss_news(query=query)
+async def get_live_news(query: str = Query("")):
+    return fetch_live_financial_news(filter_category=query or "All")

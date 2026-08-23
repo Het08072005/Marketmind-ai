@@ -1,43 +1,42 @@
 {
   "symbol": "MARUTI",
-  "name": "Maruti Suzuki India Ltd",
-  "sector": "Automotive & Passenger Cars",
-  "price": 12340.0,
-  "change": "\u22120.4%",
-  "market_cap": "\u20b93.8L Cr",
-  "pe_ratio": 28.1,
-  "pb_ratio": 4.5,
-  "net_margin": 9.8,
+  "name": "Maruti Suzuki India",
+  "sector": "Automotive & Mobility",
+  "price": 13565.0,
+  "change": "-1.77%",
+  "market_cap": "₹4.1L Cr",
+  "pe_ratio": 28.5,
+  "pb_ratio": 4.6,
+  "net_margin": 9.4,
   "roe": 16.8,
-  "revenue_growth": 14.5,
+  "revenue_growth": 19.8,
   "debt_to_equity": 0.01,
-  "rsi": 53.0,
-  "pattern": "High Base Range",
+  "rsi": 58.6,
+  "pattern": "SUV Market Share Surge",
   "esg": {
     "overall": 76,
-    "environmental": 74,
+    "environmental": 72,
     "social": 78,
-    "governance": 76
+    "governance": 78
   },
   "trust_meter": {
-    "score": 83,
-    "promises_kept": 14,
+    "score": 89,
+    "promises_kept": 16,
     "promises_delayed": 1,
     "promises_broken": 0,
-    "timeline": [],
-    "latest_quote": "SUV market share surpassed 24% with strong hybrid demand."
+    "latest_quote": "SUV segment market share reached 26% with strong hybrid push."
   },
   "forensic": {
-    "reported_profit_growth": "+18%",
-    "cash_flow_growth": "+19%",
-    "receivables_growth": "+7%",
-    "divergence_score": "Cash Rich Quality"
+    "reported_profit_growth": "+24%",
+    "cash_flow_growth": "+26%",
+    "receivables_growth": "+10%",
+    "divergence_score": "Robust Zero Debt Balance"
   },
   "dna": {
-    "growth": 75,
-    "debt": 2,
+    "growth": 84,
+    "debt": 4,
     "news_sensitivity": 56,
-    "mgmt_reliability": 89,
-    "market_fear": 35
+    "mgmt_reliability": 90,
+    "market_fear": 38
   }
 }

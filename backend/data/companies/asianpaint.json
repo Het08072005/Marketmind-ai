@@ -1,0 +1,42 @@
+{
+  "symbol": "ASIANPAINT",
+  "name": "Asian Paints Ltd",
+  "sector": "Consumer & FMCG",
+  "price": 2880.0,
+  "change": "-0.50%",
+  "market_cap": "₹2.7L Cr",
+  "pe_ratio": 51.2,
+  "pb_ratio": 16.5,
+  "net_margin": 14.8,
+  "roe": 29.4,
+  "revenue_growth": 8.2,
+  "debt_to_equity": 0.06,
+  "rsi": 47.8,
+  "pattern": "Crude Price Margin Relief",
+  "esg": {
+    "overall": 80,
+    "environmental": 82,
+    "social": 78,
+    "governance": 80
+  },
+  "trust_meter": {
+    "score": 85,
+    "promises_kept": 14,
+    "promises_delayed": 2,
+    "promises_broken": 0,
+    "latest_quote": "Decorative paints volume growth maintained in double-digits."
+  },
+  "forensic": {
+    "reported_profit_growth": "+9%",
+    "cash_flow_growth": "+12%",
+    "receivables_growth": "+8%",
+    "divergence_score": "Strong Moat"
+  },
+  "dna": {
+    "growth": 78,
+    "debt": 8,
+    "news_sensitivity": 68,
+    "mgmt_reliability": 86,
+    "market_fear": 42
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "symbol": "POWERGRID",
+  "name": "Power Grid Corporation",
+  "sector": "Infrastructure & Metals",
+  "price": 338.0,
+  "change": "+0.30%",
+  "market_cap": "₹3.1L Cr",
+  "pe_ratio": 19.5,
+  "pb_ratio": 3.4,
+  "net_margin": 32.5,
+  "roe": 19.2,
+  "revenue_growth": 9.5,
+  "debt_to_equity": 1.35,
+  "rsi": 56.8,
+  "pattern": "High Margin Monopoly",
+  "esg": {
+    "overall": 79,
+    "environmental": 75,
+    "social": 82,
+    "governance": 80
+  },
+  "trust_meter": {
+    "score": 89,
+    "promises_kept": 16,
+    "promises_delayed": 1,
+    "promises_broken": 0,
+    "latest_quote": "Inter-state transmission system availability sustained at 99.8%."
+  },
+  "forensic": {
+    "reported_profit_growth": "+10%",
+    "cash_flow_growth": "+18%",
+    "receivables_growth": "+6%",
+    "divergence_score": "High Cash Generation"
+  },
+  "dna": {
+    "growth": 78,
+    "debt": 62,
+    "news_sensitivity": 42,
+    "mgmt_reliability": 90,
+    "market_fear": 28
+  }
+}

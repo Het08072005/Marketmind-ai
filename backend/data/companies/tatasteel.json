@@ -1,43 +1,42 @@
 {
   "symbol": "TATASTEEL",
   "name": "Tata Steel Ltd",
-  "sector": "Metals & Mining",
-  "price": 152.8,
-  "change": "+0.7%",
-  "market_cap": "\u20b91.9L Cr",
-  "pe_ratio": 22.4,
+  "sector": "Infrastructure & Metals",
+  "price": 183.0,
+  "change": "+0.55%",
+  "market_cap": "₹2.2L Cr",
+  "pe_ratio": 28.4,
   "pb_ratio": 2.1,
-  "net_margin": 4.8,
-  "roe": 9.2,
-  "revenue_growth": 6.8,
-  "debt_to_equity": 0.88,
-  "rsi": 51.5,
-  "pattern": "Doji Indecision",
+  "net_margin": 5.2,
+  "roe": 8.4,
+  "revenue_growth": 7.4,
+  "debt_to_equity": 0.85,
+  "rsi": 53.8,
+  "pattern": "UK Green Transition",
   "esg": {
-    "overall": 71,
-    "environmental": 62,
-    "social": 78,
+    "overall": 72,
+    "environmental": 68,
+    "social": 75,
     "governance": 74
   },
   "trust_meter": {
-    "score": 75,
-    "promises_kept": 11,
+    "score": 80,
+    "promises_kept": 12,
     "promises_delayed": 3,
     "promises_broken": 1,
-    "timeline": [],
-    "latest_quote": "Port Talbot transition to electric arc furnace underway."
+    "latest_quote": "Kalinganagar Phase 2 blast furnace commissioning completed."
   },
   "forensic": {
-    "reported_profit_growth": "+7%",
-    "cash_flow_growth": "+6%",
-    "receivables_growth": "+8%",
-    "divergence_score": "Cyclical Margin Watch"
+    "reported_profit_growth": "+6%",
+    "cash_flow_growth": "+11%",
+    "receivables_growth": "+7%",
+    "divergence_score": "Cyclical FCF"
   },
   "dna": {
-    "growth": 72,
-    "debt": 55,
-    "news_sensitivity": 82,
-    "mgmt_reliability": 81,
-    "market_fear": 58
+    "growth": 74,
+    "debt": 54,
+    "news_sensitivity": 85,
+    "mgmt_reliability": 80,
+    "market_fear": 60
   }
 }

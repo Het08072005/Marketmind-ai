@@ -1,0 +1,42 @@
+{
+  "symbol": "HCLTECH",
+  "name": "HCL Technologies Ltd",
+  "sector": "IT Services & Tech",
+  "price": 1642.0,
+  "change": "+0.45%",
+  "market_cap": "₹4.4L Cr",
+  "pe_ratio": 25.6,
+  "pb_ratio": 6.8,
+  "net_margin": 18.9,
+  "roe": 26.5,
+  "revenue_growth": 12.4,
+  "debt_to_equity": 0.05,
+  "rsi": 61.2,
+  "pattern": "Bullish Continuation",
+  "esg": {
+    "overall": 79,
+    "environmental": 75,
+    "social": 82,
+    "governance": 80
+  },
+  "trust_meter": {
+    "score": 86,
+    "promises_kept": 15,
+    "promises_delayed": 2,
+    "promises_broken": 0,
+    "latest_quote": "Software products division engineering revenue up 8.2%."
+  },
+  "forensic": {
+    "reported_profit_growth": "+12%",
+    "cash_flow_growth": "+14%",
+    "receivables_growth": "+9%",
+    "divergence_score": "Strong"
+  },
+  "dna": {
+    "growth": 84,
+    "debt": 10,
+    "news_sensitivity": 55,
+    "mgmt_reliability": 88,
+    "market_fear": 40
+  }
+}

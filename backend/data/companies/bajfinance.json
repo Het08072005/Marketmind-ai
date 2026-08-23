@@ -1,43 +1,42 @@
 {
   "symbol": "BAJFINANCE",
   "name": "Bajaj Finance Ltd",
-  "sector": "NBFC & Consumer Credit",
-  "price": 6840.0,
-  "change": "\u22120.6%",
-  "market_cap": "\u20b94.2L Cr",
-  "pe_ratio": 28.5,
+  "sector": "Banking & Finance",
+  "price": 1095.0,
+  "change": "+0.00%",
+  "market_cap": "₹4.6L Cr",
+  "pe_ratio": 31.8,
   "pb_ratio": 5.4,
-  "net_margin": 26.2,
-  "roe": 21.8,
-  "revenue_growth": 24.2,
+  "net_margin": 24.6,
+  "roe": 22.4,
+  "revenue_growth": 28.5,
   "debt_to_equity": 3.8,
-  "rsi": 47.1,
-  "pattern": "Support Zone",
+  "rsi": 57.8,
+  "pattern": "Growth Channel",
   "esg": {
-    "overall": 74,
-    "environmental": 62,
-    "social": 81,
-    "governance": 79
+    "overall": 75,
+    "environmental": 64,
+    "social": 80,
+    "governance": 81
   },
   "trust_meter": {
-    "score": 81,
-    "promises_kept": 14,
+    "score": 87,
+    "promises_kept": 15,
     "promises_delayed": 2,
-    "promises_broken": 1,
-    "timeline": [],
-    "latest_quote": "Omnichannel customer additions touched 4 million this quarter."
+    "promises_broken": 0,
+    "latest_quote": "AUM crossed ₹3.5 Lakh Crore with consumer app downloads exceeding 50M."
   },
   "forensic": {
     "reported_profit_growth": "+22%",
     "cash_flow_growth": "+20%",
-    "receivables_growth": "+21%",
-    "divergence_score": "High Quality NBFC"
+    "receivables_growth": "+24%",
+    "divergence_score": "High Growth FinTech Engine"
   },
   "dna": {
-    "growth": 88,
-    "debt": 60,
-    "news_sensitivity": 66,
-    "mgmt_reliability": 85,
-    "market_fear": 46
+    "growth": 94,
+    "debt": 55,
+    "news_sensitivity": 65,
+    "mgmt_reliability": 89,
+    "market_fear": 48
   }
 }

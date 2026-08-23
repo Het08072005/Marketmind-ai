@@ -1,0 +1,42 @@
+{
+  "symbol": "KOTAKBANK",
+  "name": "Kotak Mahindra Bank",
+  "sector": "Banking & Finance",
+  "price": 402.8,
+  "change": "+1.37%",
+  "market_cap": "₹3.5L Cr",
+  "pe_ratio": 20.4,
+  "pb_ratio": 2.7,
+  "net_margin": 26.8,
+  "roe": 14.8,
+  "revenue_growth": 14.2,
+  "debt_to_equity": 4.8,
+  "rsi": 52.1,
+  "pattern": "Base Reversal",
+  "esg": {
+    "overall": 78,
+    "environmental": 70,
+    "social": 82,
+    "governance": 83
+  },
+  "trust_meter": {
+    "score": 85,
+    "promises_kept": 14,
+    "promises_delayed": 2,
+    "promises_broken": 0,
+    "latest_quote": "Tech infrastructure investments fully compliant with regulatory standards."
+  },
+  "forensic": {
+    "reported_profit_growth": "+12%",
+    "cash_flow_growth": "+11%",
+    "receivables_growth": "+10%",
+    "divergence_score": "Strong Capital Adequacy"
+  },
+  "dna": {
+    "growth": 78,
+    "debt": 52,
+    "news_sensitivity": 62,
+    "mgmt_reliability": 88,
+    "market_fear": 44
+  }
+}

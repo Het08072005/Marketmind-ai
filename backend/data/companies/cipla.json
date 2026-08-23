@@ -1,0 +1,42 @@
+{
+  "symbol": "CIPLA",
+  "name": "Cipla Ltd",
+  "sector": "Pharma & Healthcare",
+  "price": 1580.0,
+  "change": "+0.25%",
+  "market_cap": "₹1.2L Cr",
+  "pe_ratio": 29.5,
+  "pb_ratio": 4.5,
+  "net_margin": 16.4,
+  "roe": 16.8,
+  "revenue_growth": 11.8,
+  "debt_to_equity": 0.04,
+  "rsi": 55.2,
+  "pattern": "Respiratory Franchise Moat",
+  "esg": {
+    "overall": 80,
+    "environmental": 78,
+    "social": 82,
+    "governance": 80
+  },
+  "trust_meter": {
+    "score": 86,
+    "promises_kept": 15,
+    "promises_delayed": 1,
+    "promises_broken": 0,
+    "latest_quote": "One-India business grew 10% with chronic therapies leading."
+  },
+  "forensic": {
+    "reported_profit_growth": "+13%",
+    "cash_flow_growth": "+15%",
+    "receivables_growth": "+9%",
+    "divergence_score": "Clean Balance Sheet"
+  },
+  "dna": {
+    "growth": 82,
+    "debt": 6,
+    "news_sensitivity": 52,
+    "mgmt_reliability": 87,
+    "market_fear": 36
+  }
+}

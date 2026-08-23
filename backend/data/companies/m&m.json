@@ -1,0 +1,42 @@
+{
+  "symbol": "M&M",
+  "name": "Mahindra & Mahindra",
+  "sector": "Automotive & Mobility",
+  "price": 3120.0,
+  "change": "+1.15%",
+  "market_cap": "₹3.8L Cr",
+  "pe_ratio": 29.8,
+  "pb_ratio": 5.8,
+  "net_margin": 8.9,
+  "roe": 19.8,
+  "revenue_growth": 21.4,
+  "debt_to_equity": 0.52,
+  "rsi": 64.5,
+  "pattern": "SUV Order Backlog",
+  "esg": {
+    "overall": 77,
+    "environmental": 74,
+    "social": 80,
+    "governance": 78
+  },
+  "trust_meter": {
+    "score": 87,
+    "promises_kept": 15,
+    "promises_delayed": 2,
+    "promises_broken": 0,
+    "latest_quote": "Open bookings for XUV700, Thar and Scorpio-N exceeding 2.2 Lakh units."
+  },
+  "forensic": {
+    "reported_profit_growth": "+21%",
+    "cash_flow_growth": "+24%",
+    "receivables_growth": "+14%",
+    "divergence_score": "Strong Auto Cash Flows"
+  },
+  "dna": {
+    "growth": 90,
+    "debt": 36,
+    "news_sensitivity": 62,
+    "mgmt_reliability": 88,
+    "market_fear": 42
+  }
+}

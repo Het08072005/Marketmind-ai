@@ -1,10 +1,26 @@
 import { useState, useEffect } from "react";
 import { pageMeta } from "../data/mockData";
 
+const PAGE_ALIASES = {
+  breaker: "thesis",
+  thesisbreaker: "thesis",
+  candlestick: "candles",
+  time_machine: "timemachine",
+  stock_autopsy: "autopsy",
+  hidden_dependency: "dependency",
+  ghost_portfolio: "ghost",
+};
+
 export function useNavigation() {
+  const resolvePageKey = (rawKey) => {
+    if (!rawKey) return "dashboard";
+    const cleaned = rawKey.replace("#", "").toLowerCase().trim();
+    const resolved = PAGE_ALIASES[cleaned] || cleaned;
+    return pageMeta[resolved] ? resolved : "dashboard";
+  };
+
   const getInitialPage = () => {
-    const hash = window.location.hash.replace("#", "");
-    return pageMeta[hash] ? hash : "dashboard";
+    return resolvePageKey(window.location.hash);
   };
 
   const [currentPage, setCurrentPage] = useState(getInitialPage);
@@ -12,9 +28,9 @@ export function useNavigation() {
 
   useEffect(() => {
     const handleHashChange = () => {
-      const hash = window.location.hash.replace("#", "");
-      if (pageMeta[hash]) {
-        setCurrentPage(hash);
+      const target = resolvePageKey(window.location.hash);
+      if (pageMeta[target]) {
+        setCurrentPage(target);
       }
     };
     window.addEventListener("hashchange", handleHashChange);
@@ -22,9 +38,10 @@ export function useNavigation() {
   }, []);
 
   const goPage = (key) => {
-    if (pageMeta[key]) {
-      setCurrentPage(key);
-      window.location.hash = key;
+    const target = resolvePageKey(key);
+    if (pageMeta[target]) {
+      setCurrentPage(target);
+      window.location.hash = target;
       setSidebarOpen(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
