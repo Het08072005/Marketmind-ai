@@ -378,17 +378,17 @@ export default function FloatingAssistant({ isOpen, setIsOpen, isMicMuted = fals
 
         {/* Quick Suggestion Chips */}
         <div className="suggest-chips-row">
-          <span className="suggest-pill" onClick={() => handlePromptClick(language === "hindi" ? "रिलायंस की समरी और आरएसआई कैसा है?" : "What is the summary and RSI of Reliance?")}>
-            {language === "hindi" ? "रिलायंस समरी" : "Reliance Summary"}
+          <span className="suggest-pill" onClick={() => handlePromptClick(language === "hindi" ? "रिलायंस का 20-दिन वीडब्ल्यूपी, वीएआर और ऑर्डर बुक इम्बैलेंस कैसा है?" : "What is the VWAP, 95% VaR, and Order Book Imbalance for Reliance?")}>
+            {language === "hindi" ? "रिलायंस क्वांट रिस्क & VWAP" : "Reliance Quant & VWAP"}
           </span>
-          <span className="suggest-pill" onClick={() => handlePromptClick(language === "hindi" ? "क्रूड ऑयल 30% बढ़ने का डोमिनो इफेक्ट क्या होगा?" : "What is the domino effect if Crude Oil rises 30%?")}>
-            {language === "hindi" ? "ऑयल डोमिनो इफेक्ट" : "Oil Domino Chain"}
+          <span className="suggest-pill" onClick={() => handlePromptClick(language === "hindi" ? "क्या टाटा मोटर्स को मौजूदा स्तर पर खरीदना चाहिए और रिस्क-रिवॉर्ड कैसा है?" : "Should I buy or sell Tata Motors at current levels and what is the risk-reward ratio?")}>
+            {language === "hindi" ? "टाटा मोटर्स Buy/Sell फैसला" : "Tata Motors Buy/Sell Verdict"}
           </span>
-          <span className="suggest-pill" onClick={() => handlePromptClick(language === "hindi" ? "टाटा मोटर्स का मैनेजमेंट ट्रस्ट स्कोर क्या है?" : "What is Tata Motors Trust Score?")}>
-            {language === "hindi" ? "टाटा मोटर्स ट्रस्ट" : "Tata Motors Trust"}
+          <span className="suggest-pill" onClick={() => handlePromptClick(language === "hindi" ? "क्रूड ऑयल 30% बढ़ने का पेंट और एविएशन सेक्टर पर क्या डोमिनो इफेक्ट होगा?" : "What is the domino ripple effect on Paint and Aviation if Crude Oil surges 30%?")}>
+            {language === "hindi" ? "क्रूड 30% डोमिनो रिपल" : "Crude 30% Domino Ripple"}
           </span>
-          <span className="suggest-pill" onClick={() => handlePromptClick(language === "hindi" ? "आज का ओवरऑल मार्केट कंडीशन कैसा है?" : "What is the market condition today?")}>
-            {language === "hindi" ? "मार्केट कंडीशन" : "Market Condition"}
+          <span className="suggest-pill" onClick={() => handlePromptClick(language === "hindi" ? "क्या किसी कंपनी में कैश फ्लो डाइवर्जेंस या फॉरेंसिक रेड फ्लैग है?" : "Does Reliance or Adani show any forensic cash flow divergence or red flags?")}>
+            {language === "hindi" ? "फॉरेंसिक रेड फ्लैग ऑडिट" : "Forensic Audit & Red Flags"}
           </span>
         </div>
 

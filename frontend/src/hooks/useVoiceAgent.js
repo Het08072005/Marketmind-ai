@@ -7,16 +7,10 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isContinuousMode, setIsContinuousMode] = useState(false);
   const [language, setLanguageState] = useState("english"); // Default English
+  const [voiceGender, setVoiceGender] = useState("female");
+  const [autoPlayAudio, setAutoPlayAudio] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState("");
-  const [messages, setMessages] = useState([
-    {
-      id: "msg-1",
-      sender: "bot",
-      text: "Hello! I am MarketPulse AI — your hands-free financial intelligence assistant. Say 'Hey Alex' anytime to start talking.",
-      time: "Just now",
-      isVoice: false,
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -205,8 +199,8 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
       utterance.lang = currentLang === "hindi" ? "hi-IN" : "en-IN";
     }
 
-    utterance.pitch = 0.74;
-    utterance.rate = 0.96;
+    utterance.pitch = 1.0;
+    utterance.rate = 1.02;
 
     utterance.onstart = () => {
       setIsPlayingAudio(true);
@@ -357,7 +351,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
       const response = await apiClient.sendVoiceChat({
         message: cleanText,
         language: currentLang,
-        voice_gender: "male",
+        voice_gender: voiceGender || "female",
         ticker: currentContextTicker,
         history: historyPayload,
       });
@@ -386,11 +380,13 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
         setIsContinuousMode(true);
       }
 
-      // Play Deepgram Orion male audio directly
-      if (response.audio_base64) {
-        playBase64Audio(response.audio_base64, response.reply);
-      } else {
-        speakText(response.reply, currentLang);
+      // Play audio if enabled or if initiated via voice
+      if (autoPlayAudio || isVoice) {
+        if (response.audio_base64) {
+          playBase64Audio(response.audio_base64, response.reply);
+        } else {
+          speakText(response.reply, currentLang);
+        }
       }
 
       // Execute Autonomous Action if returned by Gemini Brain
@@ -419,7 +415,9 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
         isVoice: isVoice,
       };
       setMessages((prev) => [...prev, fallbackMsg]);
-      speakText(fallbackText, currentLang);
+      if (isVoice || autoPlayAudio) {
+        speakText(fallbackText, currentLang);
+      }
     } finally {
       setIsProcessing(false);
       setTimeout(() => {
@@ -659,8 +657,23 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
     isPlayingAudio,
     isContinuousMode,
     language,
+    voiceGender,
+    setVoiceGender,
+    autoPlayAudio,
+    setAutoPlayAudio,
     liveTranscript,
     messages,
+    setMessages,
+    clearMessages: () =>
+      setMessages([
+        {
+          id: "msg-1",
+          sender: "bot",
+          text: "Hello! I am MarketMind Copilot — your autonomous financial intelligence partner. Ask me any question about Indian stocks, quantitative metrics, forensic red flags, or macro ripple effects.",
+          time: "Just now",
+          isVoice: false,
+        },
+      ]),
     setLanguage,
     startListening,
     stopListening,

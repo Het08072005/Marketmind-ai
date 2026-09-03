@@ -10,17 +10,10 @@ export default function Topbar({ eyebrow, title, onOpenSidebar, backendOnline, b
       </button>
 
       <div className="page-heading">
-        <div className="eyebrow" id="pgEyebrow">{eyebrow}</div>
+        {eyebrow ? <div className="eyebrow" id="pgEyebrow">{eyebrow}</div> : null}
         <h1 id="pgTitle">{title}</h1>
       </div>
 
-      {/* Live Backend Connection Indicator */}
-      <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800/80 border border-slate-700/60 shadow-sm">
-        <span className={`w-2 h-2 rounded-full ${backendOnline ? "bg-emerald-400" : "bg-amber-400 animate-pulse"}`}></span>
-        <span className="text-slate-300 font-mono">
-          FastAPI: {backendOnline ? `Port 8000 (${backendLatency || 12}ms)` : "Connecting..."}
-        </span>
-      </div>
 
       <div className="search-box">
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round">

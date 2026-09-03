@@ -36,6 +36,12 @@ export const apiClient = {
   },
 
   // Live Stock Quotes & 30-Day Historical Candles
+  async getMarketRadarRecommendations() {
+    const res = await fetch(`${API_BASE_URL}/api/stocks/radar/recommendations`);
+    if (!res.ok) throw new Error("Failed to fetch market radar");
+    return await res.json();
+  },
+
   async getStocks() {
     const res = await fetch(`${API_BASE_URL}/api/stocks`);
     return await res.json();
@@ -81,6 +87,32 @@ export const apiClient = {
     const res = await fetch(`${API_BASE_URL}/api/portfolio/reset`, {
       method: "POST",
     });
+    return await res.json();
+  },
+
+  async simulatePortfolio({
+    symbol = "ADANIENT",
+    investment = 100000,
+    startDate = "2026-08-03",
+    endDate = "2026-09-03",
+    investmentType = "lumpsum",
+    benchmark = "NIFTY 50",
+    reinvestDividend = false,
+  } = {}) {
+    const res = await fetch(`${API_BASE_URL}/api/portfolio/simulate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        symbol,
+        investment,
+        start_date: startDate,
+        end_date: endDate,
+        investment_type: investmentType,
+        benchmark,
+        reinvest_dividend: reinvestDividend,
+      }),
+    });
+    if (!res.ok) throw new Error("Simulation failed");
     return await res.json();
   },
 

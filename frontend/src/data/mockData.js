@@ -1,5 +1,5 @@
 export const pageMeta = {
-  dashboard: { eyebrow: "Good evening", title: "Market Overview" },
+  dashboard: { eyebrow: "", title: "Market Overview" },
   portfolio: { eyebrow: "01 · Sandbox trading", title: "Portfolio Simulator" },
   voice: { eyebrow: "02 · Speak to your terminal", title: "Voice Stock Assistant" },
   learning: { eyebrow: "03 · Beginner-friendly", title: "Learning Mode" },

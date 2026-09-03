@@ -43,7 +43,8 @@ export default function App() {
 
       console.log("⚡ App received autonomous voice action:", action);
 
-      if (action.target_page) {
+      // Do NOT navigate away if user is in the Voice Stock Assistant & Copilot research terminal
+      if (action.target_page && currentPage !== "voice" && window.location.hash !== "#voice") {
         goPage(action.target_page);
       }
 
@@ -56,7 +57,7 @@ export default function App() {
     return () => {
       window.removeEventListener("marketmind:voice_action", handleAutonomousVoiceAction);
     };
-  }, [goPage]);
+  }, [goPage, currentPage]);
 
   // Ambient Hands-Free Wake Word Detector ("Hey Alex", "Hey Alexa", "Hey MarketPulse", "Hey Pulse")
   useEffect(() => {
@@ -197,6 +198,23 @@ export default function App() {
         return <DashboardPage goPage={goPage} openAssistant={openAssistant} />;
     }
   };
+
+  // If in learning mode, provide full immersive screen (hide app sidebar, topbar, ticker)
+  if (currentPage === "learning") {
+    return (
+      <div className="learning-fullscreen-view">
+        <LearningPage onBack={() => goPage("dashboard")} />
+        {/* Floating AI & Voice Assistant accessible if needed */}
+        <FloatingAssistant
+          isOpen={assistantOpen}
+          setIsOpen={setAssistantOpen}
+          initialTab={assistantInitialTab}
+          isMicMuted={isMicMuted}
+          setIsMicMuted={setIsMicMuted}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">

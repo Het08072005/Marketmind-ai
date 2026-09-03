@@ -4,6 +4,11 @@ from services.stock_service import get_sector_peers
 
 router = APIRouter(prefix="/api/stocks", tags=["Stocks & Intelligence"])
 
+@router.get("/radar/recommendations")
+async def get_market_radar_recommendations():
+    from services.recommendations_service import get_ai_market_radar_recommendations
+    return get_ai_market_radar_recommendations()
+
 @router.get("")
 async def list_stocks():
     return get_all_live_companies()
