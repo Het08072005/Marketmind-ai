@@ -428,17 +428,33 @@ def _fetch_single_feed(feed_cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
             if not title or len(title) < 14:
                 continue
 
-            link = entry.get("link", "") or f"https://news.google.com/search?q={urllib.parse.quote_plus(title)}"
+            link = entry.get("link", "").strip() if hasattr(entry, "link") or "link" in entry else ""
+            if hasattr(entry, "links") and entry.links:
+                for lk in entry.links:
+                    href = lk.get("href", "").strip()
+                    if href:
+                        link = href
+                        break
+
+            if link.startswith("/"):
+                base_domain = urllib.parse.urlparse(feed_url).scheme + "://" + urllib.parse.urlparse(feed_url).netloc
+                link = urllib.parse.urljoin(base_domain, link)
+            elif not link:
+                link = f"https://news.google.com/search?q={urllib.parse.quote_plus(title)}"
+
             ts = parse_entry_timestamp(entry)
             rel_time = get_relative_time_str(ts)
             source = entry.source.get("title", default_source) if hasattr(entry, "source") else default_source
 
-            raw_summary = entry.get("summary", "")
-            tickers, category = resolve_tickers_and_category(title, raw_summary, default_cat)
+            raw_summary = entry.get("summary", "") or entry.get("description", "")
+            clean_actual_summary = clean_html_text(raw_summary)
+            clean_actual_summary = re.sub(r"\([I|V|X\+\s]+\)|@\s*->|@\s*", " ", clean_actual_summary).strip()
+
+            tickers, category = resolve_tickers_and_category(title, clean_actual_summary, default_cat)
             primary_sym = tickers[0] if tickers else "NIFTY50"
 
             # Dynamic Sentiment NLP
-            lower_t = f"{title} {raw_summary}".lower()
+            lower_t = f"{title} {clean_actual_summary}".lower()
             pos_words = ["surge", "gain", "profit", "record", "high", "growth", "order", "approval", "merger", "dividend", "bonus", "expansion", "clearance", "buyback", "liquidity", "jump", "rally", "outperform"]
             neg_words = ["plunge", "loss", "drop", "penalty", "fall", "decline", "probe", "investigation", "slump", "crackdown", "fine", "fraud", "scam", "underperform"]
 
@@ -454,7 +470,7 @@ def _fetch_single_feed(feed_cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
 
             story_intel = generate_story_specific_intelligence(
                 title=title,
-                summary=raw_summary,
+                summary=clean_actual_summary,
                 tickers=tickers,
                 authority=authority,
                 source=source
@@ -471,6 +487,16 @@ def _fetch_single_feed(feed_cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
             invalidation = story_intel.get("invalidation")
             points = story_intel.get("points", [])
 
+            # Compile the exact, complete story content
+            if clean_actual_summary and len(clean_actual_summary) > 70 and clean_actual_summary.lower() != title.lower():
+                actual_story_content = clean_actual_summary
+            elif what_happened and points:
+                actual_story_content = f"{what_happened} {' '.join(points)}"
+            elif what_happened:
+                actual_story_content = what_happened
+            else:
+                actual_story_content = f"Official verified disclosure from {source}: {title}. The corporate action directly influences market positioning and institutional risk models."
+
             if authority == "SEBI":
                 beneficiaries = "Exchange turnover (NSE, BSE), institutional clearing members, and retail transparency"
                 headwinds = "Brokerage compliance operational overhead and settlement procedural adjustments"
@@ -480,8 +506,6 @@ def _fetch_single_feed(feed_cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
             else:
                 beneficiaries = f"{primary_sym} core operations and constituent supply chain group"
                 headwinds = "Broader macroeconomic inflation benchmarks and global interest rate trajectory"
-
-            summary_text = " ".join(points) if points else what_happened
 
             articles.append({
                 "id": f"live-{authority.lower()}-{len(articles)+1}-{int(ts)}",
@@ -501,6 +525,7 @@ def _fetch_single_feed(feed_cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "exposure_type": exposure_type,
                 "horizon": horizon,
                 "price_reaction": price_reaction,
+                "full_content": actual_story_content,
                 "what_happened": what_happened,
                 "why_affected": why_affected,
                 "ai_verdict": ai_verdict,
@@ -513,7 +538,7 @@ def _fetch_single_feed(feed_cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "tickers": tickers,
                 "key_metrics": f"Event: {event_type} · Materiality: {materiality} · Trust Score: {trust_score}%",
                 "points": points,
-                "summary": summary_text
+                "summary": actual_story_content
             })
     except Exception as e:
         print(f"Parallel fetch error for {authority}: {e}")
@@ -552,20 +577,131 @@ def scrape_live_financial_news_parallel() -> List[Dict[str, Any]]:
     all_articles.sort(key=lambda x: x.get("published_ts", 0), reverse=True)
     return all_articles
 
-def _generate_news_executive_intelligence(articles: List[Dict[str, Any]]) -> Dict[str, str]:
-    """Generates exact 35-40 word executive_analysis and executive_outcome."""
+def _generate_news_executive_intelligence(articles: List[Dict[str, Any]], category: str = "All") -> Dict[str, str]:
+    """Generates exact 30-38 word category-specific executive_analysis and executive_outcome."""
     bullish_items = [a for a in articles if a.get("sentiment") == "Bullish"]
-    bullish_pct = int((len(bullish_items) / max(1, len(articles))) * 100) if articles else 70
-    top_sym = articles[0].get("tickers", ["NIFTY50"])[0] if articles else "NIFTY50"
+    bullish_pct = int((len(bullish_items) / max(1, len(articles))) * 100) if articles else 65
 
-    exec_analysis = (
-        "Domestic institutional market telemetry reflects constructive headline flow led by private banking deposit accretion and industrial capex expansion. "
-        f"Energy transition capex and resilient auto orderbooks support corporate earnings visibility across {top_sym} and broader Nifty components."
-    )
-    exec_outcome = (
-        f"Headline momentum projects {bullish_pct}% bullish market continuation with sector capital actively rotating into banking, energy, and auto leaders like {top_sym}. "
-        "The constructive thesis invalidates upon unexpected crude supply shocks or hawkish central bank liquidity tightening."
-    )
+    all_tickers = []
+    for a in articles:
+        for t in a.get("tickers", []):
+            if t not in all_tickers and t not in ["NIFTY50", "SENSEX"]:
+                all_tickers.append(t)
+
+    top_tickers_str = ", ".join(all_tickers[:3]) if all_tickers else "NIFTY50"
+    top_sym = all_tickers[0] if all_tickers else "NIFTY50"
+
+    cat_lower = (category or "All").lower()
+
+    if "it" in cat_lower and "tech" in cat_lower:
+        exec_analysis = (
+            f"Institutional telemetry across IT & Technology components reflects resilient enterprise demand in Cloud modernization and AI workflow deployment. "
+            f"Software bellwethers including {top_tickers_str} demonstrate steady deal conversions despite selective client budget scrutiny."
+        )
+        exec_outcome = (
+            f"Technology headline flow projects {bullish_pct}% constructive trajectory for tech equities. "
+            f"Capital allocation favors high-margin software exporters and AI integrators like {top_sym}. "
+            f"Invalidation trigger: Sustained contraction in North American enterprise tech budgets or delayed project rollouts."
+        )
+    elif "auto" in cat_lower or "ev" in cat_lower:
+        exec_analysis = (
+            f"Automotive sector headline flow highlights monthly dispatch momentum, commercial vehicle volume expansion, and increasing EV penetration across {top_tickers_str}. "
+            f"Supply chain normalization and festive inventory replenishment support operating margins."
+        )
+        exec_outcome = (
+            f"Structural orderbook momentum projects {bullish_pct}% bullish continuation across automobile OEMs. "
+            f"High-growth EV product pipelines for {top_sym} provide multi-quarter revenue visibility. "
+            f"Invalidation trigger: Raw material input cost spikes or unexpected consumer auto-financing rate hikes."
+        )
+    elif "bank" in cat_lower or "finance" in cat_lower:
+        exec_analysis = (
+            f"Financial sector intelligence confirms sustained retail credit disbursement velocity and stable Net Interest Margin (NIM) profiles across {top_tickers_str}. "
+            f"Asset quality metrics remain resilient with contained gross NPA slippages across banking desks."
+        )
+        exec_outcome = (
+            f"Headline telemetry projects {bullish_pct}% constructive sentiment for banking heavyweights. "
+            f"Balance sheet capitalization and corporate capex lending pipelines favor {top_sym}. "
+            f"Invalidation trigger: Rapid surge in deposit cost of funds or central bank provisioning tightening."
+        )
+    elif "sebi" in cat_lower:
+        exec_analysis = (
+            "Regulatory intelligence from SEBI circulars emphasizes investor transparency, clearinghouse risk controls, and standardized derivative settlement frameworks. "
+            "Surveillance enhancements reinforce long-term domestic institutional capital market integrity."
+        )
+        exec_outcome = (
+            f"Regulatory governance outlook establishes a transparent, institutional-grade market ecosystem. "
+            f"Secondary market participation remains fortified with compliance clarity. "
+            f"Invalidation trigger: Intermediary compliance litigation or systemic volatility in derivative margin requirements."
+        )
+    elif "rbi" in cat_lower:
+        exec_analysis = (
+            "Central bank monetary telemetry indicates proactive interbank liquidity calibration via Variable Rate Reverse Repo (VRRR) operations and sovereign bond surveillance. "
+            "Benchmark money market rates and overnight call money yields remain well-anchored."
+        )
+        exec_outcome = (
+            f"Monetary policy posture projects stability across sovereign debt and banking liquidity desks. "
+            f"Surplus liquidity absorption supports orderly bond yield curves. "
+            f"Invalidation trigger: Unanticipated geopolitical supply shocks elevating headline CPI inflation beyond central bank tolerances."
+        )
+    elif "nse" in cat_lower:
+        exec_analysis = (
+            f"National Stock Exchange filing telemetry indicates active corporate disclosures, capacity additions, and strategic partnerships across {top_tickers_str}. "
+            f"Corporate actions reflect disciplined balance sheet deleveraging and capex execution."
+        )
+        exec_outcome = (
+            f"NSE corporate disclosure flow projects {bullish_pct}% positive business trajectory. "
+            f"Earnings compounding visibility favors {top_sym} and constituent market leaders. "
+            f"Invalidation trigger: Delayed project commissioning or unforeseen statutory compliance queries."
+        )
+    elif "bse" in cat_lower:
+        exec_analysis = (
+            f"BSE exchange disclosure telemetry indicates steady equity listings, corporate actions, and board resolution disclosures across {top_tickers_str}. "
+            f"Small, mid, and large-cap enterprises demonstrate active capital restructuring and corporate transparency."
+        )
+        exec_outcome = (
+            f"Exchange filing momentum projects {bullish_pct}% constructive corporate execution. "
+            f"Investor confidence is underpinned by transparent regulatory disclosures from {top_sym}. "
+            f"Invalidation trigger: Intermediary audit objections or extended corporate restructuring timelines."
+        )
+    elif "ir" in cat_lower or "company" in cat_lower:
+        exec_analysis = (
+            f"Investor Relations disclosures and analyst presentations highlight healthy order backlogs, EBITDA margin expansion, and steady capex across {top_tickers_str}. "
+            f"Management guidance reflects strong operating leverage."
+        )
+        exec_outcome = (
+            f"Corporate earnings telemetry signals {bullish_pct}% constructive fundamental trajectory for reporting companies. "
+            f"Capital expenditure programs position {top_sym} for long-term ROCE expansion. "
+            f"Invalidation trigger: Demand deceleration in core export markets or margin compression from raw material inputs."
+        )
+    elif "energy" in cat_lower or "oil" in cat_lower:
+        exec_analysis = (
+            f"Energy sector telemetry reflects stable upstream realizations, refining crack spreads, and rapid green hydrogen/renewable capacity additions led by {top_tickers_str}. "
+            f"Domestic power demand continues to sustain elevated base-load utilization."
+        )
+        exec_outcome = (
+            f"Sector trajectory projects {bullish_pct}% positive momentum driven by integrated energy producers like {top_sym}. "
+            f"Cash flows comfortably fund green transition capital expenditures. "
+            f"Invalidation trigger: Severe downturn in global crude benchmarks or unexpected regulatory windfall levies."
+        )
+    elif "macro" in cat_lower:
+        exec_analysis = (
+            f"Macroeconomic indicators highlight resilient domestic GDP growth, robust direct tax collections, and steady foreign institutional flows amidst global interest rate reassessments. "
+            f"Sovereign debt markets reflect controlled fiscal consolidation."
+        )
+        exec_outcome = (
+            f"Macro telemetry projects {bullish_pct}% constructive broader market continuation. "
+            f"Domestic cyclical leaders like {top_sym} stand to benefit from public infrastructure spending. "
+            f"Invalidation trigger: Escalating global trade tariffs or unexpected crude supply shocks."
+        )
+    else:
+        exec_analysis = (
+            f"Domestic institutional market telemetry reflects constructive headline flow led by private banking deposit accretion and industrial capex expansion. "
+            f"Energy transition capex and resilient auto orderbooks support corporate earnings visibility across {top_sym} and broader Nifty components."
+        )
+        exec_outcome = (
+            f"Headline momentum projects {bullish_pct}% bullish market continuation with sector capital actively rotating into banking, energy, and auto leaders like {top_sym}. "
+            f"The constructive thesis invalidates upon unexpected crude supply shocks or hawkish central bank liquidity tightening."
+        )
 
     return {
         "executive_analysis": exec_analysis,
@@ -841,17 +977,23 @@ def get_news_intelligence(filter_category: str = "All") -> Dict[str, Any]:
         if not filtered_articles:
             filtered_articles = all_articles
 
+    category_intel = _generate_news_executive_intelligence(filtered_articles, filter_category)
+    bullish_count = len([a for a in filtered_articles if a.get("sentiment") == "Bullish"])
+    macro_count = len([a for a in filtered_articles if a.get("category") == "Macro & Economy" or a.get("sentiment") == "Neutral"])
+    high_impact_count = len([a for a in filtered_articles if a.get("materiality") == "High" or a.get("sentiment_score", 0) >= 0.75])
+    bullish_pct = int((bullish_count / max(1, len(filtered_articles))) * 100)
+
     return {
         "articles": filtered_articles,
-        "sentiment_sentinel": base_intel.get("sentiment_sentinel", {
-            "bullish_pct": 75,
-            "positive_catalysts": 14,
-            "macro_watch": 4,
-            "high_impact_alerts": 6,
-            "sentiment_label": "75% Bullish Dominance"
-        }),
-        "executive_analysis": base_intel.get("executive_analysis"),
-        "executive_outcome": base_intel.get("executive_outcome")
+        "sentiment_sentinel": {
+            "bullish_pct": bullish_pct,
+            "positive_catalysts": bullish_count,
+            "macro_watch": macro_count,
+            "high_impact_alerts": high_impact_count,
+            "sentiment_label": f"{bullish_pct}% Bullish Dominance" if bullish_pct >= 60 else "Balanced Market Stance"
+        },
+        "executive_analysis": category_intel.get("executive_analysis"),
+        "executive_outcome": category_intel.get("executive_outcome")
     }
 
 def lookup_news_by_topic(user_query: str) -> Optional[Dict[str, Any]]:

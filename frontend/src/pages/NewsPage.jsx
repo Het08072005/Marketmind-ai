@@ -204,6 +204,25 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
   const [isSyncing, setIsSyncing] = useState(true);
   const [speakingNewsId, setSpeakingNewsId] = useState(null);
   const [expandedRippleId, setExpandedRippleId] = useState(null);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+
+  // Dynamic category switch handler with real-time sector telemetry update
+  const handleCategoryChange = async (c) => {
+    if (filter === c) return;
+    setFilter(c);
+    setIsCategoryLoading(true);
+    try {
+      const res = await apiClient.get(`/api/news?filter=${encodeURIComponent(c)}`);
+      if (res?.executive_analysis) setExecutiveAnalysis(res.executive_analysis);
+      if (res?.executive_outcome) setExecutiveOutcome(res.executive_outcome);
+    } catch (err) {
+      console.error("Failed to fetch category intelligence:", err);
+    } finally {
+      setTimeout(() => {
+        setIsCategoryLoading(false);
+      }, 200);
+    }
+  };
 
   // Right-Side Slide-Over Copilot Drawer State (Full screen right side, just like Dashboard)
   const [activeNewsForCopilot, setActiveNewsForCopilot] = useState(null);
@@ -496,7 +515,7 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
       <div className="page-banner news-banner-header">
         <div className="news-header-titles">
           <h2>Institutional Financial News &amp; Impact Engine</h2>
-          <p>Zero API Key Architecture · Real-time algorithmic ingestion from NSE Disclosures, BSE Announcements, SEBI Circulars, RBI Monetary Policy, Google News RSS, and Company IR pages.</p>
+          <p>Real-time algorithmic ingestion from NSE Disclosures, BSE Announcements, SEBI Circulars, RBI Monetary Policy, Google News RSS, and Company IR pages.</p>
         </div>
 
         {/* Category Filter Bar - Single Unbroken Line */}
@@ -521,7 +540,7 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
               <div
                 key={c}
                 className={`chip-tab ${filter === c ? "active" : ""}`}
-                onClick={() => setFilter(c)}
+                onClick={() => handleCategoryChange(c)}
               >
                 {c}
               </div>
@@ -531,25 +550,44 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
       </div>
 
       {/* 2. AI Executive Analysis & Final Outcome Banner */}
-      {executiveAnalysis && executiveOutcome && (
-        <div className="card c12 news-executive-banner">
-          <div className="executive-block analysis">
-            <div className="block-header">
-              <span className="block-tag-label analysis">Analysis :</span>
-              <span className="block-meta-note">Institutional Headline &amp; Capex Telemetry</span>
+      <div className="card c12 news-executive-banner">
+        {isCategoryLoading ? (
+          <>
+            <div className="executive-block analysis skeleton-block">
+              <div className="skeleton-line" style={{ width: "120px", height: "18px", marginBottom: "12px" }} />
+              <div className="skeleton-line" style={{ width: "96%", height: "14px", marginBottom: "8px" }} />
+              <div className="skeleton-line" style={{ width: "90%", height: "14px", marginBottom: "8px" }} />
+              <div className="skeleton-line" style={{ width: "70%", height: "14px" }} />
             </div>
-            <p className="block-text">{executiveAnalysis}</p>
-          </div>
+            <div className="executive-block outcome skeleton-block">
+              <div className="skeleton-line" style={{ width: "140px", height: "18px", marginBottom: "12px" }} />
+              <div className="skeleton-line" style={{ width: "96%", height: "14px", marginBottom: "8px" }} />
+              <div className="skeleton-line" style={{ width: "88%", height: "14px", marginBottom: "8px" }} />
+              <div className="skeleton-line" style={{ width: "75%", height: "14px" }} />
+            </div>
+          </>
+        ) : executiveAnalysis && executiveOutcome ? (
+          <>
+            <div className="executive-block analysis">
+              <div className="block-header">
+                <span className="block-tag-label analysis">Analysis :</span>
+                <span className="block-meta-note">
+                  {filter === "All" ? "Institutional Headline & Capex Telemetry" : `${filter} Sector Telemetry`}
+                </span>
+              </div>
+              <p className="block-text">{executiveAnalysis}</p>
+            </div>
 
-          <div className="executive-block outcome">
-            <div className="block-header">
-              <span className="block-tag-label outcome">Final Outcome :</span>
-              <span className="block-meta-note">Market Trajectory &amp; Invalidation</span>
+            <div className="executive-block outcome">
+              <div className="block-header">
+                <span className="block-tag-label outcome">Final Outcome :</span>
+                <span className="block-meta-note">Market Trajectory &amp; Invalidation</span>
+              </div>
+              <p className="block-text">{executiveOutcome}</p>
             </div>
-            <p className="block-text">{executiveOutcome}</p>
-          </div>
-        </div>
-      )}
+          </>
+        ) : null}
+      </div>
 
       {/* 3. Non-blocking sync status or only empty-state indicator */}
       {loading && news.length === 0 ? (
@@ -618,9 +656,24 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
               {n.title}
             </h3>
 
+            {/* Exact Actual News Story / Official Disclosure Content */}
+            {(n.full_content || n.what_happened || n.summary) && (
+              <div className="news-exact-story-card">
+                <div className="exact-story-badge-row">
+                  <span className="exact-story-badge">
+                    News Article :
+                  </span>
+                </div>
+                <p className="exact-story-paragraph">
+                  {n.full_content || n.what_happened || n.summary}
+                </p>
+              </div>
+            )}
+
             {/* Pointwise Institutional Takeaways */}
-            {Array.isArray(n.points) && n.points.length > 0 ? (
+            {Array.isArray(n.points) && n.points.length > 0 && (
               <div className="news-points-container">
+                <div className="points-header-tag">◆ Key Institutional Takeaways:</div>
                 {n.points.map((pt, pIdx) => (
                   <div key={pIdx} className="news-point-item">
                     <span className="news-point-bullet">◆</span>
@@ -628,10 +681,6 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="news-summary">
-                {n.summary}
-              </p>
             )}
 
             {/* Impacted Tickers Strip */}
