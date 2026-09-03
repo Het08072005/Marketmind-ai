@@ -58,8 +58,34 @@ SYMBOL_TO_YAHOO = {
     "CIPLA": "CIPLA.NS",
     "DIVISLAB": "DIVISLAB.NS",
 
-    # Airlines
+    # Airlines & Aviation
+    "INDIGO": "INDIGO.NS",
     "SPICEJET": "SPICEJET.BO",
+
+    # Defense & Aerospace
+    "HAL": "HAL.NS",
+    "BEL": "BEL.NS",
+
+    # Power & Green Energy
+    "TATAPOWER": "TATAPOWER.NS",
+
+    # Retail & Consumer Internet
+    "ZOMATO": "ZOMATO.NS",
+    "TRENT": "TRENT.NS",
+    "VARUNBEV": "VARUNBEV.NS",
+
+    # Healthcare & Hospitals
+    "APOLLOHOSP": "APOLLOHOSP.NS",
+
+    # Real Estate & Metals
+    "DLF": "DLF.NS",
+    "VEDL": "VEDL.NS",
+
+    # Specialty Chemicals
+    "PIDILITIND": "PIDILITIND.NS",
+
+    # Financial Services
+    "JIOFIN": "JIOFIN.NS",
 }
 
 # In-memory high speed cache (TTL 60s)

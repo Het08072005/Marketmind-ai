@@ -57,6 +57,12 @@ export const apiClient = {
     return await res.json();
   },
 
+  async getSectorIntelligence(symbol) {
+    const res = await fetch(`${API_BASE_URL}/api/stocks/${symbol}/sector-intelligence`);
+    if (!res.ok) throw new Error("Failed to fetch sector intelligence");
+    return await res.json();
+  },
+
   // Institutional AI Report Generator
   async generateReport(symbol, reportType = "Company Snapshot") {
     const res = await fetch(`${API_BASE_URL}/api/reports/generate?symbol=${encodeURIComponent(symbol)}&report_type=${encodeURIComponent(reportType)}`);

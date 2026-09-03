@@ -345,6 +345,209 @@ async def generate_autonomous_agent_response(
             reply_text = "Navigating to Hidden Dependency Map. Auditing 52% USD/INR exchange rate and crude oil correlation exposure."
 
     # =========================================================================
+    # 2B. AI SECTOR DECISION INTELLIGENCE & SCENARIO ENGINE INTENT
+    # =========================================================================
+    elif any(w in q_lower for w in [
+        "sector", "sector intelligence", "sector comparison", "peer comparison", "peer matrix",
+        "compare with sector", "sector analysis", "industry comparison", "sektor",
+        "scenario lab", "shock engine", "shock", "crude shock", "crude oil", "rate shock", "margin shock", "growth shock",
+        "stress test", "scenario test", "macro shock", "scenario",
+        "why gap", "why is this company different", "margin gap", "thesis unlock", "what must become true",
+        "counterfactual", "ai consensus", "disagreement map", "economic peers", "dynamic peers",
+        "traditional peers", "peer universe", "dna positioning", "5-axis", "radar chart",
+        "upgrade", "strong buy upgrade", "unlock condition", "unlock", "conditions", "growth edge",
+        "सेक्टर", "सेक्टर इंटेलिजेंस", "सेक्टर तुलना", "पीयर", "शॉक", "शॉक सिमुलेशन", "स्ट्रेस टेस्ट"
+    ]) or (
+        any(w in q_lower for w in ["compare", "tulaana", "तुलना", "muqabla", "मुकाबला"])
+        and not any(w in q_lower for w in ["trade", "buy", "sell"])
+    ):
+        from services.sector_intelligence_service import get_sector_intelligence_data
+
+        sec_data = get_sector_intelligence_data(detected_symbol)
+        overall_sc = sec_data.get("overall_score", 78)
+        tag_val = sec_data.get("tag", "SELECTIVE ACCUMULATION")
+        hl_val = sec_data.get("headline", "Quality Improving, Valuation Neutral")
+        thesis_read = sec_data.get("ai_read", "")
+
+        # 1. Detect target tab
+        target_tab = "overview"
+        if any(w in q_lower for w in ["why gap", "why-gap", "different", "margin breakdown", "variance", "gap reasoning", "margin gap", "मार्जिन गैप"]):
+            target_tab = "why_gap"
+        elif any(w in q_lower for w in ["unlock", "thesis unlock", "become true", "strong buy upgrade", "strong buy", "upgrade", "condition", "कंडीशन", "अपग्रेड"]):
+            target_tab = "thesis_unlock"
+        elif any(w in q_lower for w in ["counterfactual", "what if", "hypothetical", "slider", "अगर मार्जिन"]):
+            target_tab = "counterfactual"
+        elif any(w in q_lower for w in ["consensus", "disagreement", "model consensus", "disagreement map", "कंसेंसस"]):
+            target_tab = "consensus"
+
+        # 2. Detect scenario shock
+        target_scenario = None
+        if "crude" in q_lower or "oil" in q_lower or "कच्चा तेल" in q_lower:
+            target_scenario = "+10% Crude Oil"
+        elif "rate" in q_lower or "repo" in q_lower or "rbi" in q_lower or "interest" in q_lower or "ब्याज दर" in q_lower:
+            target_scenario = "+100 bps Rates"
+        elif "margin" in q_lower and ("expansion" in q_lower or "150" in q_lower or "बढ़े" in q_lower):
+            target_scenario = "+150 bps Margin"
+        elif "slowdown" in q_lower or "deceleration" in q_lower or "revenue drop" in q_lower or "-5%" in q_lower:
+            target_scenario = "-5% Revenue Growth"
+
+        # 3. Detect peer universe mode
+        target_mode = None
+        if "dynamic" in q_lower or "economic peers" in q_lower or "डाइनैमिक" in q_lower:
+            target_mode = "dynamic"
+        elif "traditional" in q_lower or "ट्रेडिशनल" in q_lower:
+            target_mode = "traditional"
+
+        # 4. Detect target sector
+        target_sector = None
+        if any(w in q_lower for w in ["it sector", "tech sector", "software sector", "it services"]):
+            target_sector = "IT Services & Tech"
+        elif any(w in q_lower for w in ["banking sector", "bank sector", "finance sector", "financial services"]):
+            target_sector = "Banking & Financial Services"
+        elif any(w in q_lower for w in ["auto sector", "automobile", "mobility sector", "गाड़ी"]):
+            target_sector = "Automotive & Mobility"
+        elif any(w in q_lower for w in ["pharma sector", "healthcare sector", "दवा"]):
+            target_sector = "Pharma & Healthcare"
+        elif any(w in q_lower for w in ["consumer sector", "fmcg sector", "fmcg"]):
+            target_sector = "Consumer & FMCG"
+        elif any(w in q_lower for w in ["energy sector", "oil sector", "power sector", "ऊर्जा"]):
+            target_sector = "Energy & Conglomerate"
+        elif any(w in q_lower for w in ["infra sector", "metal sector", "steel sector"]):
+            target_sector = "Infrastructure & Metals"
+        elif any(w in q_lower for w in ["defense sector", "aerospace"]):
+            target_sector = "Defense & Aerospace"
+        elif any(w in q_lower for w in ["aviation sector", "internet sector"]):
+            target_sector = "Consumer Tech & Aviation"
+
+        action_payload = {
+            "type": "NAVIGATE_AND_SELECT",
+            "target_page": "sector",
+            "command": "SECTOR_ACTION",
+            "params": {
+                "symbol": detected_symbol,
+                "sector": target_sector,
+                "scenario": target_scenario,
+                "tab": target_tab,
+                "mode": target_mode
+            }
+        }
+
+        # 5. Dynamically generate AI Voice Agent reply via Gemini 2.5 Flash
+        reply_text = ""
+        if gemini_client:
+            try:
+                lang_rule = (
+                    "The client has selected HINDI. You MUST respond exclusively in natural, grammatically pure Hindi in Devanagari script."
+                    if is_hindi else
+                    "The client has selected HINGLISH. Speak in natural Dalal Street professional Hinglish."
+                    if is_hinglish else
+                    "The client has selected ENGLISH. Deliver your complete answer in crisp, professional institutional English without retail fluff."
+                )
+
+                prompt_agent = f"""You are MarketMind AI Copilot — Chief Investment Officer and Senior Quantitative Equity Strategist.
+The client asked: "{user_query}"
+Current Company: {comp['name']} ({detected_symbol}) | Sector: {sec_data.get('sector', 'Core Industry')}
+
+LIVE SECTOR DECISION INTELLIGENCE TELEMETRY (EXACT DATA AS SHOWN IN THE UI):
+- Active View / Tab: {target_tab}
+- Active Scenario Shock: {target_scenario or 'None'}
+- Overall AI Sector Score: {overall_sc}/100 | Stance: {tag_val}
+- Institutional Headline: {hl_val}
+- Institutional Thesis: {thesis_read}
+- Growth Edge vs Sector: {sec_data.get('growth_edge', {}).get('val', '+0.0 pp')} ({sec_data.get('growth_edge', {}).get('status')})
+- Margin Gap vs Sector: {sec_data.get('margin_gap', {}).get('val', '+0.0 pp')} ({sec_data.get('margin_gap', {}).get('status')})
+- Valuation Multiple: {sec_data.get('valuation_multiple', {}).get('val', '24.0x P/E')}
+- Why-Gap Attribution: Operational {sec_data.get('margin_breakdown', {}).get('ai_attribution', {}).get('operational_pct', 70)}% vs Mix {sec_data.get('margin_breakdown', {}).get('ai_attribution', {}).get('business_mix_pct', 30)}%
+- Thesis Unlock Threshold: Target {sec_data.get('thesis_unlock', {}).get('target_threshold', 85)}+ with conditions: {sec_data.get('thesis_unlock', {}).get('conditions', [])}
+- Scenario Shocks:
+  * +10% Crude: Margin Delta {sec_data.get('scenarios', {}).get('+10% Crude Oil', {}).get('margin_delta')}%, Score {sec_data.get('scenarios', {}).get('+10% Crude Oil', {}).get('score_before')} -> {sec_data.get('scenarios', {}).get('+10% Crude Oil', {}).get('score_after')} | {sec_data.get('scenarios', {}).get('+10% Crude Oil', {}).get('narrative')}
+  * +150 bps Margin: Score {sec_data.get('scenarios', {}).get('+150 bps Margin', {}).get('score_after')} | {sec_data.get('scenarios', {}).get('+150 bps Margin', {}).get('narrative')}
+  * +100 bps Rates: Margin Delta {sec_data.get('scenarios', {}).get('+100 bps Rates', {}).get('margin_delta')}%, Score {sec_data.get('scenarios', {}).get('+100 bps Rates', {}).get('score_after')}
+  * -5% Revenue: Margin Delta {sec_data.get('scenarios', {}).get('-5% Revenue Growth', {}).get('margin_delta')}%, Score {sec_data.get('scenarios', {}).get('-5% Revenue Growth', {}).get('score_after')}
+- Dynamic Economic Peers: {', '.join(sec_data.get('economic_exposure', {}).get('economic_peers', []))}
+
+INSTRUCTIONS:
+1. Deliver a natural, high-conviction 25-35 word verbal response directly answering the client's query.
+2. Quote the exact numbers from the data above so your response precisely matches what is visible on the screen.
+3. {lang_rule}
+4. Never output markdown asterisks (no '**'). Keep sentences clean and ready for text-to-speech.
+"""
+                res = await asyncio.wait_for(
+                    asyncio.to_thread(
+                        gemini_client.models.generate_content,
+                        model="gemini-2.5-flash",
+                        contents=prompt_agent,
+                        config={"temperature": 0.25}
+                    ),
+                    timeout=3.5
+                )
+                if res and res.text:
+                    reply_text = res.text.strip()
+            except Exception as e:
+                print(f"Sector AI Agent generation error/timeout: {e}")
+
+        # Dynamic fallback if Gemini is offline
+        if not reply_text:
+            if target_tab == "why_gap":
+                gap_info = sec_data.get("margin_breakdown", {})
+                gap_pct = gap_info.get("gap_percentage", "-2.4%")
+                attrib = gap_info.get("ai_attribution", {})
+                op_pct = attrib.get("operational_pct", 72)
+                mix_pct = attrib.get("business_mix_pct", 28)
+                if is_hindi:
+                    reply_text = f"{comp['name']} का व्हाई-गैप रीज़निंग प्रस्तुत है। मार्जिन गैप ({gap_pct}) में {op_pct}% ऑपरेशनल लागत संरचना और {mix_pct}% बिज़नेस-मिक्स भिन्नता का योगदान है।"
+                elif is_hinglish:
+                    reply_text = f"{comp['name']} ka Why-Gap decomposition open kiya hai. Margin gap ({gap_pct}) me {op_pct}% operational cost structure aur {mix_pct}% conglomerate business-mix variance identify hui hai."
+                else:
+                    reply_text = f"Displaying Why-Gap decomposition for {comp['name']}. The variance ({gap_pct}) decomposes into {op_pct}% operational cost dynamics and {mix_pct}% portfolio business-mix differences."
+            elif target_tab == "thesis_unlock":
+                tu = sec_data.get("thesis_unlock", {})
+                c_score = tu.get("current_score", overall_sc)
+                t_score = tu.get("target_threshold", 85)
+                if is_hindi:
+                    reply_text = f"थीसिस अनलॉक इंजन सक्रिय है। {comp['name']} का वर्तमान स्कोर {c_score} है। स्ट्रॉन्ग बाय अपग्रेड के लिए स्कोर {t_score}+ और 4 में से 3 शर्तों को पूरा करना आवश्यक है।"
+                elif is_hinglish:
+                    reply_text = f"Thesis Unlock Engine load ho gaya hai. {comp['name']} ka current score {c_score} hai. Strong Buy upgrade ke liye score {t_score}+ aur margin expansion conditions met hona zaroori hai."
+                else:
+                    reply_text = f"Loading Thesis Unlock Engine for {comp['name']}. Current score is {c_score}. Upgrading to Strong Buy requires crossing the {t_score}+ threshold across capital efficiency and margin milestones."
+            elif target_tab == "counterfactual":
+                cf = sec_data.get("counterfactual", {})
+                sim_sc = cf.get("simulated_score", overall_sc + 8)
+                sim_m = cf.get("hypothetical_metric", "Net Margin 15.5%")
+                if is_hindi:
+                    reply_text = f"काउंटरफैक्चुअल सिमुलेटर खुला है। यदि {comp['name']} {sim_m} प्राप्त करता है, तो AI स्कोर बढ़कर {sim_sc}/100 हो जाएगा और रैंक #1 हासिल हो सकती है।"
+                elif is_hinglish:
+                    reply_text = f"Counterfactual Simulator load ho gaya hai. Agar {comp['name']} {sim_m} deliver karta hai, to AI score jump karke {sim_sc} ho jayega aur peer universe me Rank #1 unlock ho sakti hai."
+                else:
+                    reply_text = f"Running Counterfactual Simulator for {comp['name']}. Under hypothetical {sim_m}, the AI score ascends to {sim_sc}/100, unlocking Rank #1 positioning."
+            elif target_tab == "consensus":
+                if is_hindi:
+                    reply_text = f"मल्टी-मॉडल AI कंसेंसस मैप लोड हो चुका है। फंडामेंटल्स और मैनेजमेंट ट्रस्ट मॉडल मजबूत हैं, जबकि वैल्यूएशन मल्टीपल न्यूट्रल ज़ोन में है।"
+                elif is_hinglish:
+                    reply_text = f"Multi-Model AI Consensus Map open ho gaya hai. Fundamentals AI aur Management Trust Model bullish stance maintain kar rahe hain."
+                else:
+                    reply_text = f"Loading Multi-Model AI Consensus Map for {comp['name']}. Fundamental and Governance models demonstrate constructive alignment."
+            elif target_scenario:
+                sc_obj = sec_data.get("scenarios", {}).get(target_scenario, {})
+                m_delta = sc_obj.get("margin_delta", -1.5)
+                sc_before = sc_obj.get("score_before", overall_sc)
+                sc_after = sc_obj.get("score_after", overall_sc - 4)
+                narr = sc_obj.get("narrative", "")
+                if is_hindi:
+                    reply_text = f"{target_scenario} सिमुलेशन सक्रिय है। {comp['name']} के मार्जिन पर {m_delta}% प्रभाव पड़ेगा और स्कोर {sc_before} से {sc_after} पर पुनः कैलिब्रेट होगा। {narr}"
+                elif is_hinglish:
+                    reply_text = f"{target_scenario} shock simulation execute kiya hai. {comp['name']} ke operating margin par {m_delta}% delta aayega aur AI score {sc_before} se {sc_after} recalibrate hoga."
+                else:
+                    reply_text = f"Executed {target_scenario} stress test on {comp['name']}. Operating margin absorbs a {m_delta}% impact, adjusting the AI score from {sc_before} to {sc_after}. {narr}"
+            else:
+                if is_hindi:
+                    reply_text = f"{comp['name']} का AI सेक्टर इंटेलिजेंस खुला है। समग्र AI स्कोर {overall_sc}/100 ({tag_val}) है। {thesis_read}"
+                elif is_hinglish:
+                    reply_text = f"{comp['name']} ka Sector Decision Intelligence open ho gaya hai. Current AI Score {overall_sc}/100 ke saath rating {tag_val} hai. {thesis_read}"
+                else:
+                    reply_text = f"Navigating to Sector Intelligence for {comp['name']}. Overall AI Score is {overall_sc}/100 rated {tag_val}. {thesis_read}"
+
+    # =========================================================================
     # 3. INVESTMENT THESIS BREAKER INTENT
     # =========================================================================
     elif any(w in q_lower for w in ["thesis breaker", "thesis break", "investment thesis", "कोर थीसिस", "थीसिस ब्रेकर"]):
@@ -606,6 +809,9 @@ async def generate_autonomous_agent_response(
                     "The client has selected ENGLISH. Deliver your complete answer in crisp, professional institutional English without retail fluff."
                 )
 
+                from services.sector_intelligence_service import get_sector_intelligence_data
+                sec_intel = get_sector_intelligence_data(detected_symbol)
+
                 system_inst = f"""You are MarketMind AI Copilot — Chief Investment Officer (CIO) and Senior Quantitative Equity Strategist.
 You speak with decisive institutional authority, mathematical precision, and actionable clarity.
 
@@ -620,8 +826,26 @@ REAL-TIME TELEMETRY FOR {comp['name']} ({detected_symbol}):
 - HFT Quantitative Flow: {thesis.get('hft_pattern', 'Order Block Inflow')}
 - Forensic Divergence: {divergence_score} | Management Trust Score: {trust_score}/100
 
+ACTIVE SECTOR DECISION ENGINE METRICS (EXACT ACTIVE UI DATA):
+- Sector Comparison Score: {sec_intel.get('overall_score', 78)}/100 | Stance: {sec_intel.get('tag', 'SELECTIVE ACCUMULATION')}
+- Institutional Headline: {sec_intel.get('headline', 'Quality Improving, Valuation Neutral')}
+- Institutional Thesis: {sec_intel.get('ai_read', '')}
+- Growth Edge vs Sector: {sec_intel.get('growth_edge', {}).get('val', '+0.0 pp')} ({sec_intel.get('growth_edge', {}).get('status')})
+- Margin Gap vs Sector: {sec_intel.get('margin_gap', {}).get('val', '+0.0 pp')} ({sec_intel.get('margin_gap', {}).get('status')})
+- 5-Axis DNA Scores: Growth {sec_intel.get('dna_scores', {}).get('Growth', 70)}%, Margins {sec_intel.get('dna_scores', {}).get('Margins', 70)}%, ROE {sec_intel.get('dna_scores', {}).get('ROE', 70)}%, Value {sec_intel.get('dna_scores', {}).get('Value', 70)}%, Risk {sec_intel.get('dna_scores', {}).get('Risk', 70)}%
+- Sector Benchmark DNA: Growth {sec_intel.get('sector_dna_scores', {}).get('Growth', 70)}%, Margins {sec_intel.get('sector_dna_scores', {}).get('Margins', 70)}%, ROE {sec_intel.get('sector_dna_scores', {}).get('ROE', 70)}%
+- Anomaly Alerts: {[a.get('title') + ': ' + a.get('detail', '') for a in sec_intel.get('anomalies', [])]}
+- Why-Gap Decomposition: Gap {sec_intel.get('margin_breakdown', {}).get('gap_percentage', '-2.4%')} (Operational: {sec_intel.get('margin_breakdown', {}).get('ai_attribution', {}).get('operational_pct', 70)}%, Business-Mix: {sec_intel.get('margin_breakdown', {}).get('ai_attribution', {}).get('business_mix_pct', 30)}%)
+- Thesis Unlock Conditions (Target {sec_intel.get('thesis_unlock', {}).get('target_threshold', 85)}+): {[(c.get('metric') + ': ' + c.get('target', '') + ' [' + c.get('delta', '') + ']') for c in sec_intel.get('thesis_unlock', {}).get('conditions', [])]}
+- Economic Peers: {', '.join(sec_intel.get('economic_exposure', {}).get('economic_peers', []))}
+- Macro Shock Sensitivities:
+  * +10% Crude Oil: Margin Delta {sec_intel.get('scenarios', {}).get('+10% Crude Oil', {}).get('margin_delta')}%, AI Score {sec_intel.get('scenarios', {}).get('+10% Crude Oil', {}).get('score_before')} -> {sec_intel.get('scenarios', {}).get('+10% Crude Oil', {}).get('score_after')} | {sec_intel.get('scenarios', {}).get('+10% Crude Oil', {}).get('narrative')}
+  * +150 bps Margin: Margin Delta +1.5%, Score -> {sec_intel.get('scenarios', {}).get('+150 bps Margin', {}).get('score_after')}
+  * +100 bps Rates: Margin Delta {sec_intel.get('scenarios', {}).get('+100 bps Rates', {}).get('margin_delta')}%, Score -> {sec_intel.get('scenarios', {}).get('+100 bps Rates', {}).get('score_after')}
+  * -5% Revenue: Margin Delta {sec_intel.get('scenarios', {}).get('-5% Revenue Growth', {}).get('margin_delta')}%, Score -> {sec_intel.get('scenarios', {}).get('-5% Revenue Growth', {}).get('score_after')}
+
 STRICT RESPONSE DIRECTIVES:
-1. Directly answer the client's question using the exact facts and quantitative data for {comp['name']}.
+1. Directly answer the client's question using the exact facts and quantitative data for {comp['name']}. If the user asks about sector comparison, peers, why-gap, thesis unlock, or shock scenarios, quote the EXACT numbers from the ACTIVE SECTOR DECISION ENGINE METRICS above.
 2. NEVER output raw markdown asterisks (do NOT use '**'). If bulleting items, use '• ' with a clear label.
 3. Every response MUST begin with a concise, high-conviction 25-35 word institutional analyst paragraph tailored specifically to {comp['name']}'s catalysts, downside risks, or valuation, followed by clean quantitative execution bullet points if relevant.
 4. {lang_rule}

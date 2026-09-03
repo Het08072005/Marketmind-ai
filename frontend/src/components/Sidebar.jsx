@@ -15,7 +15,7 @@ export default function Sidebar({ currentPage, goPage, isOpen, onClose }) {
     { key: "learning", label: "Learning Mode", icon: (
       <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/></svg>
     )},
-    { key: "sector", label: "Sector Comparison", icon: (
+    { key: "sector", label: "Sector Intelligence", icon: (
       <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
     )},
     { key: "alerts", label: "Smart Alerts", badge: "3", icon: (
@@ -74,9 +74,9 @@ export default function Sidebar({ currentPage, goPage, isOpen, onClose }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "18px 12px 20px",
+            padding: "2px 8px 14px",
             borderBottom: "1px solid rgba(216,188,139,.18)",
-            marginBottom: "20px",
+            marginBottom: "14px",
             background: "none",
           }}
         >
