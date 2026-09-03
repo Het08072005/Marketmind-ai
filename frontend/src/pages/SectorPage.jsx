@@ -213,13 +213,10 @@ export default function SectorPage() {
 
   return (
     <div className="sector-intelligence-view">
-      {/* 1. Header Bar: Title on Left, Controls on Right in 1 Single Line */}
-      <div className="sector-header-strip">
-        <div className="sector-header-left">
-          <h1 className="sector-page-title">Sector Comparison &amp; Decision Engine</h1>
-        </div>
-
-        <div className="sector-header-controls">
+      {/* 1. Controls Bar: Sector & Benchmark Stock */}
+      <div className="sector-controls-bar">
+        <div className="sector-controls-left">
+          <span className="sector-control-label">SELECT SECTOR &amp; FOCUS STOCK</span>
           <div className="sector-select-group">
             <select
               value={selectedSector}
@@ -241,6 +238,12 @@ export default function SectorPage() {
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="sector-controls-right">
+          <span className="sector-ai-status">
+            <span className="pulse-dot-live" /> AI Dynamic Peer Universe &amp; Causal Reasoning Active
+          </span>
         </div>
       </div>
 

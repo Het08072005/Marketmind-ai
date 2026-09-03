@@ -15,7 +15,6 @@ import SectorPage from "./pages/SectorPage";
 import AlertsPage from "./pages/AlertsPage";
 import ReportsPage from "./pages/ReportsPage";
 import CandlestickPage from "./pages/CandlestickPage";
-import EsgPage from "./pages/EsgPage";
 import NewsPage from "./pages/NewsPage";
 import DominoPage from "./pages/DominoPage";
 import TrustMeterPage from "./pages/TrustMeterPage";
@@ -34,6 +33,7 @@ export default function App() {
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [assistantInitialTab, setAssistantInitialTab] = useState("chat");
   const [isMicMuted, setIsMicMuted] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState("");
 
   // Global Autonomous Voice Action Listener
   useEffect(() => {
@@ -169,10 +169,8 @@ export default function App() {
         return <ReportsPage />;
       case "candles":
         return <CandlestickPage />;
-      case "esg":
-        return <EsgPage />;
       case "news":
-        return <NewsPage goPage={goPage} />;
+        return <NewsPage goPage={goPage} searchQuery={globalSearch} />;
       case "domino":
         return <DominoPage goPage={goPage} />;
       case "trust":
@@ -234,9 +232,11 @@ export default function App() {
           onOpenSidebar={() => setSidebarOpen(true)}
           backendOnline={isOnline}
           backendLatency={latency}
+          searchQuery={globalSearch}
+          onSearchChange={setGlobalSearch}
         />
 
-        <Ticker />
+        {currentPage !== "candles" && <Ticker />}
 
         <div className="content">
           <div className="page active" data-page={currentPage}>

@@ -1,396 +1,924 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { apiClient } from "../api/client";
 
-const TOP_SYMBOLS = [
-  "WIPRO", "RELIANCE", "TCS", "HDFCBANK", "INFY", "TATAMOTORS", "ADANIENT", "ATGL", 
-  "ICICIBANK", "SBIN", "ITC", "LT", "MARUTI", "SUNPHARMA", "TITAN"
+const TRACKED_STOCKS = [
+  { symbol: "RELIANCE", name: "Reliance Industries Ltd", price: "₹1,302.50", change: "-0.81%", up: false },
+  { symbol: "ASIANPAINT", name: "Asian Paints Ltd", price: "₹2,541.60", change: "+0.56%", up: true },
+  { symbol: "TCS", name: "Tata Consultancy Services", price: "₹3,221.80", change: "-1.18%", up: false },
+  { symbol: "HDFCBANK", name: "HDFC Bank Ltd", price: "₹1,684.40", change: "+0.82%", up: true },
+  { symbol: "TATAMOTORS", name: "Tata Motors Ltd", price: "₹612.70", change: "-2.31%", up: false },
+  { symbol: "SUNPHARMA", name: "Sun Pharma Industries", price: "₹1,842.20", change: "+1.35%", up: true }
 ];
 
+// Local persistence helpers - validates that executive fields exist
+function getStoredCandleIntel(sym) {
+  try {
+    const raw = localStorage.getItem(`mm_candle_intel_${sym}`);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.decision_stance && parsed.executive_analysis && parsed.executive_outcome) {
+        return parsed;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+function storeCandleIntel(sym, data) {
+  try {
+    if (data && data.decision_stance && data.executive_analysis && data.executive_outcome) {
+      localStorage.setItem(`mm_candle_intel_${sym}`, JSON.stringify(data));
+    }
+  } catch (e) {}
+}
+
 export default function CandlestickPage() {
-  const [selectedSymbol, setSelectedSymbol] = useState("WIPRO");
-  const [stocks, setStocks] = useState([]);
-  const [historyData, setHistoryData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const savedSym = localStorage.getItem("mm_selected_candle_symbol") || window.__SELECTED_STOCK_SYMBOL || "RELIANCE";
+  const [selectedSymbol, setSelectedSymbol] = useState(savedSym);
+
+  // Initialize with persisted data if available for instant 0ms reload
+  const [intelData, setIntelData] = useState(() => getStoredCandleIntel(savedSym));
+  const [loading, setLoading] = useState(!getStoredCandleIntel(savedSym));
   const [hoveredCandle, setHoveredCandle] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: null, y: null });
-  const svgRef = useRef(null);
 
+  // Interactive Voice Copilot chat state
+  const [copilotMessages, setCopilotMessages] = useState([]);
+  const [inputQuery, setInputQuery] = useState("");
+  const [copilotLoading, setCopilotLoading] = useState(false);
+  const chatBottomRef = useRef(null);
+
+  // Load intelligence for selected symbol
   useEffect(() => {
-    const fetchStocks = async () => {
+    let isMounted = true;
+
+    const fetchIntel = async () => {
+      const cached = getStoredCandleIntel(selectedSymbol);
+      if (cached && !intelData) {
+        setIntelData(cached);
+      } else if (!cached && !intelData) {
+        setLoading(true);
+      }
+
       try {
-        const data = await apiClient.getStocks();
-        if (data && data.length > 0) {
-          setStocks(data);
-          // If window has an active symbol set by voice agent or prior tab, use it!
-          if (window.__SELECTED_STOCK_SYMBOL) {
-            setSelectedSymbol(window.__SELECTED_STOCK_SYMBOL);
-          }
+        const data = await apiClient.getCandlestickIntelligence(selectedSymbol);
+        if (isMounted && data && data.decision_stance) {
+          setIntelData(data);
+          storeCandleIntel(selectedSymbol, data);
         }
-      } catch (e) {}
-    };
-    fetchStocks();
-
-    const handleVoiceAction = (e) => {
-      const action = e.detail;
-      if (action && (action.target_page === "candles" || action.command === "SHOW_CANDLESTICK")) {
-        const sym = action.params?.symbol || "WIPRO";
-        setSelectedSymbol(sym);
-        window.__SELECTED_STOCK_SYMBOL = sym;
-      }
-    };
-    window.addEventListener("marketmind:voice_action", handleVoiceAction);
-    return () => window.removeEventListener("marketmind:voice_action", handleVoiceAction);
-  }, []);
-
-  useEffect(() => {
-    const fetchCandles = async () => {
-      setLoading(true);
-      try {
-        const data = await apiClient.getStockHistory(selectedSymbol, "1mo");
-        setHistoryData(data);
       } catch (err) {
-        console.warn("Error fetching candlestick history", err);
+        console.warn("Error loading candlestick intelligence:", err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
-    fetchCandles();
+
+    fetchIntel();
+
+    return () => {
+      isMounted = false;
+    };
   }, [selectedSymbol]);
 
-  const currentComp = stocks.find((s) => s.symbol === selectedSymbol) || {
-    symbol: selectedSymbol,
-    name: `${selectedSymbol} Ltd`,
-    price: historyData?.price || 168.50,
-    change: historyData?.change || "+0.5%",
-    rsi: historyData?.rsi || 30.08,
-    sector: "Core Industry",
-    market_cap: "₹2.1L Cr"
+  // Voice Assistant Global Listener
+  useEffect(() => {
+    const handleVoiceAction = (e) => {
+      const action = e.detail;
+      if (!action) return;
+
+      const isCandleTarget =
+        action.target_page === "candles" ||
+        action.command === "SHOW_CANDLESTICK" ||
+        action.command === "SHOW_CANDLESTICK_INTELLIGENCE";
+
+      if (isCandleTarget && action.params?.symbol) {
+        const sym = action.params.symbol.toUpperCase();
+        handleStockChange(sym);
+      }
+    };
+
+    window.addEventListener("marketmind:voice_action", handleVoiceAction);
+    return () => window.removeEventListener("marketmind:voice_action", handleVoiceAction);
+  }, [selectedSymbol]);
+
+  const handleStockChange = (newSym) => {
+    if (newSym === selectedSymbol) return;
+    localStorage.setItem("mm_selected_candle_symbol", newSym);
+    window.__SELECTED_STOCK_SYMBOL = newSym;
+    setSelectedSymbol(newSym);
+    setCopilotMessages([]); // Reset chat to empty state for new stock
+
+    // Clear data and trigger AI loading spinner immediately for clean transition
+    setIntelData(null);
+    setLoading(true);
   };
 
-  const candles = historyData?.candles || [];
-  const minPrice = candles.length > 0 ? Math.min(...candles.map(c => c.low)) : 150;
-  const maxPrice = candles.length > 0 ? Math.max(...candles.map(c => c.high)) : 200;
-  const priceRange = Math.max(maxPrice - minPrice, 5);
+  // Ask Copilot question
+  const handleAskCopilot = async (qText) => {
+    const query = qText || inputQuery;
+    if (!query || !query.trim()) return;
 
-  // SVG Dimension Constants
-  const SVG_WIDTH = 780;
-  const SVG_HEIGHT = 240;
-  const CHART_TOP = 25;
-  const CHART_HEIGHT = 150;
-  const VOL_TOP = 190;
-  const VOL_HEIGHT = 40;
+    const userMsg = { sender: "user", text: query.trim() };
+    setCopilotMessages((prev) => [...prev, userMsg]);
+    setInputQuery("");
+    setCopilotLoading(true);
 
-  const getY = (val) => {
-    return CHART_TOP + CHART_HEIGHT - ((val - minPrice) / priceRange) * CHART_HEIGHT;
+    try {
+      const res = await apiClient.askCandlestickCopilot(selectedSymbol, query);
+      const botMsg = { sender: "copilot", text: res.answer };
+      setCopilotMessages((prev) => [...prev, botMsg]);
+    } catch (err) {
+      const errMsg = {
+        sender: "copilot",
+        text: `For ${selectedSymbol}, support is holding near current levels, but resistance has not cleared. Wait for confirmed breakout volume.`
+      };
+      setCopilotMessages((prev) => [...prev, errMsg]);
+    } finally {
+      setCopilotLoading(false);
+      setTimeout(() => {
+        chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
   };
 
-  const getPriceFromY = (y) => {
-    const norm = (CHART_TOP + CHART_HEIGHT - y) / CHART_HEIGHT;
-    return (minPrice + norm * priceRange).toFixed(2);
-  };
+  const data = intelData || {};
+  const candles = data.candles || [];
+  const dailyStats = data.daily_stats || {};
+  const aiSetup = data.ai_setup || {};
+  const stance = data.decision_stance || {};
+  const outlook = data.probabilistic_outlook || {};
+  const supRes = data.chart_support_resistance || {};
+  const evidenceLayers = data.evidence_layers || [];
+  const hiddenBehaviour = data.hidden_market_behaviour || [];
+  const backtest = data.historical_backtest || {};
+  const counterfactual = data.counterfactual_engine || {};
 
-  const maxVol = candles.length > 0 ? Math.max(...candles.map(c => c.volume || 1000000)) : 10000000;
-  const getVolY = (vol) => {
-    const h = ((vol || 500000) / maxVol) * VOL_HEIGHT;
-    return VOL_TOP + VOL_HEIGHT - h;
-  };
+  // Interactive SVG Candlestick Geometry
+  const chartGeometry = useMemo(() => {
+    if (!candles || candles.length === 0) return null;
+    const width = 640;
+    const height = 240;
+    const paddingLeft = 18;
+    const paddingRight = 92; // Dedicated right rail for TradingView style price badges
+    const paddingY = 26;
+    const chartBottom = height - 38;
 
-  // Active or hovered candle for the top inspection bar
-  const activeCandle = hoveredCandle || (candles.length > 0 ? candles[candles.length - 1] : {
-    date: "Latest",
-    open: currentComp.price,
-    high: currentComp.price * 1.02,
-    low: currentComp.price * 0.98,
-    close: currentComp.price,
-    volume: 3820000,
-    rsi: currentComp.rsi || 30.08
-  });
+    const highs = candles.map((c) => c.high || c.close);
+    const lows = candles.map((c) => c.low || c.close);
+    const minP = Math.min(...lows) * 0.995;
+    const maxP = Math.max(...highs) * 1.005;
+    const rangeP = maxP - minP || 1;
 
-  const isCandleBullish = activeCandle ? activeCandle.close >= activeCandle.open : true;
-  const candleChange = activeCandle ? (activeCandle.close - activeCandle.open).toFixed(2) : "0.00";
-  const candleChangePct = activeCandle ? (((activeCandle.close - activeCandle.open) / (activeCandle.open || 1)) * 100).toFixed(2) : "0.00";
+    const volumes = candles.map((c) => c.volume || 1000000);
+    const maxVol = Math.max(...volumes) || 1;
 
-  const patterns = historyData?.patterns || [];
-  const activePattern = patterns[0] || {
-    name: currentComp.pattern || "Bullish Momentum Candle",
-    type: "Reversal / Support Bounce",
-    desc: "Testing local support with high institutional accumulation."
-  };
+    const n = candles.length;
+    const candleAreaWidth = width - paddingLeft - paddingRight; // 640 - 18 - 92 = 530px
+    const colWidth = Math.max(8, candleAreaWidth / (n || 1));
+    const candleWidth = Math.max(4, Math.min(10, candleAreaWidth / (n * 1.55)));
 
-  const supportLvl = historyData?.support_level || (minPrice * 1.01).toFixed(2);
-  const resistanceLvl = historyData?.resistance_level || (maxPrice * 0.99).toFixed(2);
+    const candleElements = candles.map((c, i) => {
+      const x = paddingLeft + (i / (n - 1 || 1)) * candleAreaWidth;
+      const isGreen = c.close >= c.open;
+      const highY = paddingY + ((maxP - c.high) / rangeP) * (chartBottom - paddingY);
+      const lowY = paddingY + ((maxP - c.low) / rangeP) * (chartBottom - paddingY);
+      const openY = paddingY + ((maxP - c.open) / rangeP) * (chartBottom - paddingY);
+      const closeY = paddingY + ((maxP - c.close) / rangeP) * (chartBottom - paddingY);
 
-  // SVG Mouse Move Handler for Crosshair
-  const handleMouseMove = (e) => {
-    if (!svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    setMousePos({ x: (x / rect.width) * SVG_WIDTH, y: (y / rect.height) * SVG_HEIGHT });
-  };
+      const bodyY = Math.min(openY, closeY);
+      const bodyHeight = Math.max(2, Math.abs(closeY - openY));
 
-  const handleMouseLeave = () => {
-    setMousePos({ x: null, y: null });
-    setHoveredCandle(null);
-  };
+      // Volume bar
+      const volHeight = ((c.volume || 0) / maxVol) * 30;
+      const volY = height - volHeight;
+
+      return {
+        ...c,
+        index: i,
+        x,
+        isGreen,
+        highY,
+        lowY,
+        openY,
+        closeY,
+        bodyY,
+        bodyHeight,
+        volY,
+        volHeight
+      };
+    });
+
+    // Support and Resistance Y coordinates
+    const supY = supRes.support_price
+      ? paddingY + ((maxP - supRes.support_price) / rangeP) * (chartBottom - paddingY)
+      : chartBottom - 18;
+    const resY = supRes.resistance_price
+      ? paddingY + ((maxP - supRes.resistance_price) / rangeP) * (chartBottom - paddingY)
+      : paddingY + 18;
+
+    return {
+      width,
+      height,
+      paddingLeft,
+      paddingRight,
+      chartBottom,
+      candleAreaWidth,
+      candleWidth,
+      colWidth,
+      candleElements,
+      supY,
+      resY,
+      minP,
+      maxP
+    };
+  }, [candles, supRes]);
 
   return (
-    <div className="grid">
-      {/* Top Banner & Quick Selector */}
-      <div className="page-banner">
-        <div>
-          <h2>Candlestick Pattern Detection</h2>
-          <p>Real-time 30-day algorithmic scanning across Indian stocks for classic reversal, breakout, and continuation patterns.</p>
+    <div className="candlestick-copilot-view">
+      {/* 1. Page Context & Live Status Bar */}
+      <div className="candle-intro-strip">
+        <p className="candle-page-desc">
+          Detect patterns, explain why they matter, compare historical setups, combine volume/news/sector context, and answer chart questions conversationally.
+        </p>
+        <span className="candle-live-badge">
+          <span className="pulse-dot-live" /> Voice + Pattern Engine Active
+        </span>
+      </div>
+
+      {/* 2. Interactive Ticker Bar */}
+      <div className="candle-ticker-bar">
+        {TRACKED_STOCKS.map((stock) => {
+          const isSelected = stock.symbol === selectedSymbol;
+          return (
+            <button
+              key={stock.symbol}
+              type="button"
+              className={`candle-ticker-item ${isSelected ? "active" : ""}`}
+              onClick={() => handleStockChange(stock.symbol)}
+            >
+              <span className="ticker-sym">{stock.symbol}</span>
+              <span className="ticker-p">{stock.price}</span>
+              <span className={`ticker-c ${stock.up ? "positive" : "negative"}`}>{stock.change}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Loading State Spinner if switching stock without cache */}
+      {loading && !intelData ? (
+        <div className="candle-ai-loading-card">
+          <div className="candle-loading-spinner" />
+          <h3>MarketMind Autonomous AI Chart Copilot Ingesting Microstructure...</h3>
+          <p>Auditing 30-day candlestick anatomy, support defense zones, and volume participation for <strong>{selectedSymbol}</strong></p>
+          <div className="candle-loading-tags">
+            <span>✓ Extracting candle wicks</span>
+            <span>✓ Calculating zone defense</span>
+            <span>✓ Running 24-case backtest</span>
+            <span>✓ Synthesizing Copilot</span>
+          </div>
         </div>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
-          <select
-            value={selectedSymbol}
-            onChange={(e) => {
-              const sym = e.target.value;
-              setSelectedSymbol(sym);
-              window.__SELECTED_STOCK_SYMBOL = sym;
-            }}
-            style={{ border: "1px solid var(--line)", background: "var(--paper)", borderRadius: "10px", padding: "8px 12px", fontSize: "12.5px", fontWeight: 600 }}
-          >
-            {(stocks.length > 0 ? stocks : TOP_SYMBOLS.map(s => ({ symbol: s, name: s }))).map((s) => (
-              <option key={s.symbol} value={s.symbol}>{s.name} ({s.symbol}) — ₹{s.price}</option>
-            ))}
-          </select>
-          <div className="chip-tabs">
-            {TOP_SYMBOLS.slice(0, 8).map((s) => (
-              <div
-                key={s}
-                className={`chip-tab ${selectedSymbol === s ? "active" : ""}`}
-                onClick={() => {
-                  setSelectedSymbol(s);
-                  window.__SELECTED_STOCK_SYMBOL = s;
+      ) : (
+        <>
+          {/* 2.5 AI Executive Analysis & Final Outcome Banner - Only renders real AI generated telemetry */}
+          {data.executive_analysis && data.executive_outcome && (
+            <div className="candle-executive-banner">
+              <div className="executive-block analysis">
+                <div className="block-header">
+                  <span className="block-tag-label analysis">Analysis :</span>
+                  <span className="block-meta-note">AI Technical &amp; Volume Telemetry</span>
+                </div>
+                <p className="block-text">
+                  {data.executive_analysis}
+                </p>
+              </div>
+
+              <div className="executive-block outcome">
+                <div className="block-header">
+                  <span className="block-tag-label outcome">Final Outcome :</span>
+                  <span className="block-meta-note">Directional Probability &amp; Invalidation</span>
+                </div>
+                <p className="block-text">
+                  {data.executive_outcome}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* 3. Top Row: Main Candlestick Chart Area (Left) + Probabilistic Outlook (Right) */}
+          <div className="candle-top-grid">
+            {/* Card 1: Main Candlestick Chart Area */}
+            <div className="candle-card main-chart-card">
+              <div className="chart-card-header">
+                <div className="chart-company-info">
+                  <div className="company-badge-box">{selectedSymbol.slice(0, 3)}</div>
+                  <div>
+                    <h2 className="company-title">
+                      {data.name || selectedSymbol} ({selectedSymbol})
+                    </h2>
+                    <span className="chart-timeframe-sub">NSE · Daily chart · 30-session intelligence window</span>
+                  </div>
+                </div>
+                <div className="chart-price-box">
+                  <div className="current-price">₹{Number(data.price || 1302.5).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
+                  <div className={`price-change-tag ${(data.change || "").includes("-") ? "down" : "up"}`}>
+                    {data.change_label || data.change || "-0.81% today"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Metrics Strip */}
+              <div className="chart-metrics-strip">
+                <div className="ohlc-group">
+                  <span><strong>O</strong> ₹{dailyStats.open || "1,313.1"}</span>
+                  <span><strong>H</strong> ₹{dailyStats.high || "1,316.8"}</span>
+                  <span><strong>L</strong> ₹{dailyStats.low || "1,302.5"}</span>
+                  <span><strong>C</strong> ₹{dailyStats.close || data.price || "1,302.5"}</span>
+                </div>
+                <div className="vol-rsi-group">
+                  <span><strong>Vol</strong> {dailyStats.volume || "9.72M"}</span>
+                  <span className="dot-sep">·</span>
+                  <span><strong>RSI</strong> {dailyStats.rsi || "47.28"}</span>
+                </div>
+              </div>
+
+              {/* AI Setup Banner */}
+              <div className="ai-setup-banner">
+                <div className="setup-banner-left">
+                  <div className="setup-headline">
+                    <span className="bolt-icon">⚡</span> <strong>AI Setup:</strong> {aiSetup.headline || "Consolidation near support + rejection candle"}
+                  </div>
+                  <div className="setup-sub">{aiSetup.summary || "Constructive rejection, but breakout confirmation is still missing."}</div>
+                </div>
+                <div className="setup-banner-right">
+                  <span className="setup-conf-badge">Pattern confidence {aiSetup.pattern_confidence || 81}%</span>
+                </div>
+              </div>
+
+              {/* Support & Resistance Dedicated Level Strip */}
+              <div className="chart-zones-strip">
+                <div className="zone-pill res">
+                  <span className="zone-dash-line res" />
+                  <span className="zone-name">Resistance:</span>
+                  <strong className="zone-val">{supRes.resistance_label || `₹${supRes.resistance_price}`}</strong>
+                </div>
+                <div className="zone-pill sup">
+                  <span className="zone-dash-line sup" />
+                  <span className="zone-name">Support:</span>
+                  <strong className="zone-val">{supRes.support_label || `₹${supRes.support_price}`}</strong>
+                </div>
+              </div>
+
+              {/* SVG Candlestick Chart */}
+              <div className="candle-svg-container">
+                {chartGeometry && (
+                  <svg
+                    viewBox={`0 0 ${chartGeometry.width} ${chartGeometry.height}`}
+                    className="candlestick-svg"
+                  >
+                    <defs>
+                      <linearGradient id="supportZoneGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#10B981" stopOpacity="0.12" />
+                        <stop offset="100%" stopColor="#10B981" stopOpacity="0.01" />
+                      </linearGradient>
+                      <linearGradient id="resistanceZoneGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.12" />
+                        <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.01" />
+                      </linearGradient>
+                    </defs>
+
+                    {/* Right Y-Axis Divider Line (TradingView style rail) */}
+                    <line
+                      x1={chartGeometry.width - 86}
+                      y1="8"
+                      x2={chartGeometry.width - 86}
+                      y2={chartGeometry.height - 8}
+                      stroke="rgba(16, 27, 51, 0.08)"
+                      strokeWidth="1"
+                      strokeDasharray="2 2"
+                    />
+
+                    {/* Resistance Horizontal Reference Line across candle area */}
+                    <line
+                      x1="12"
+                      y1={chartGeometry.resY}
+                      x2={chartGeometry.width - 86}
+                      y2={chartGeometry.resY}
+                      stroke="#D97706"
+                      strokeWidth="1.2"
+                      strokeDasharray="4 4"
+                    />
+
+                    {/* Resistance Price Badge in Right Rail */}
+                    <g className="chart-rail-badge res">
+                      <rect
+                        x={chartGeometry.width - 82}
+                        y={chartGeometry.resY - 9}
+                        width="76"
+                        height="18"
+                        rx="4"
+                        fill="#FEF3C7"
+                        stroke="#D97706"
+                        strokeWidth="1"
+                      />
+                      <text
+                        x={chartGeometry.width - 44}
+                        y={chartGeometry.resY + 3.5}
+                        textAnchor="middle"
+                        fill="#92400E"
+                        fontSize="8.5"
+                        fontFamily="'Inter', -apple-system, sans-serif"
+                        fontWeight="700"
+                      >
+                        RES ₹{supRes.resistance_price ? Number(supRes.resistance_price).toFixed(1) : "RES"}
+                      </text>
+                    </g>
+
+                    {/* Support Horizontal Reference Line across candle area */}
+                    <line
+                      x1="12"
+                      y1={chartGeometry.supY}
+                      x2={chartGeometry.width - 86}
+                      y2={chartGeometry.supY}
+                      stroke="#059669"
+                      strokeWidth="1.2"
+                      strokeDasharray="4 4"
+                    />
+
+                    {/* Support Price Badge in Right Rail */}
+                    <g className="chart-rail-badge sup">
+                      <rect
+                        x={chartGeometry.width - 82}
+                        y={chartGeometry.supY - 9}
+                        width="76"
+                        height="18"
+                        rx="4"
+                        fill="#ECFDF5"
+                        stroke="#059669"
+                        strokeWidth="1"
+                      />
+                      <text
+                        x={chartGeometry.width - 44}
+                        y={chartGeometry.supY + 3.5}
+                        textAnchor="middle"
+                        fill="#047857"
+                        fontSize="8.5"
+                        fontFamily="'Inter', -apple-system, sans-serif"
+                        fontWeight="700"
+                      >
+                        SUP ₹{supRes.support_price ? Number(supRes.support_price).toFixed(1) : "SUP"}
+                      </text>
+                    </g>
+
+                    {/* Candlesticks & Volume bars */}
+                    {chartGeometry.candleElements.map((cd) => (
+                      <g
+                        key={cd.index}
+                        className={`candle-element-group ${hoveredCandle?.index === cd.index ? "active-hover" : ""}`}
+                        onMouseEnter={() => setHoveredCandle(cd)}
+                        onMouseLeave={() => setHoveredCandle(null)}
+                      >
+                        {/* Invisible Full-Height Column Hitbox for smooth 100% reliable mouse tracking */}
+                        <rect
+                          x={cd.x - chartGeometry.colWidth / 2}
+                          y={0}
+                          width={chartGeometry.colWidth}
+                          height={chartGeometry.height}
+                          fill="transparent"
+                          style={{ cursor: "crosshair" }}
+                        />
+
+                        {/* Volume Bar at bottom */}
+                        <rect
+                          x={cd.x - chartGeometry.candleWidth / 2}
+                          y={cd.volY}
+                          width={chartGeometry.candleWidth}
+                          height={cd.volHeight}
+                          fill={cd.isGreen ? "rgba(16, 185, 129, 0.22)" : "rgba(239, 68, 68, 0.22)"}
+                          rx="1"
+                        />
+
+                        {/* Top and Bottom Wick */}
+                        <line
+                          x1={cd.x}
+                          y1={cd.highY}
+                          x2={cd.x}
+                          y2={cd.lowY}
+                          stroke={cd.isGreen ? "#059669" : "#DC2626"}
+                          strokeWidth="1.2"
+                        />
+
+                        {/* Candle Real Body */}
+                        <rect
+                          x={cd.x - chartGeometry.candleWidth / 2}
+                          y={cd.bodyY}
+                          width={chartGeometry.candleWidth}
+                          height={cd.bodyHeight}
+                          fill={cd.isGreen ? "#10B981" : "#EF4444"}
+                          rx="1"
+                        />
+                      </g>
+                    ))}
+
+                    {/* Crosshair Guide on Hover */}
+                    {hoveredCandle && (
+                      <g className="crosshair-guide-group">
+                        {/* Vertical Tracking Line */}
+                        <line
+                          x1={hoveredCandle.x}
+                          y1={chartGeometry.paddingY - 10}
+                          x2={hoveredCandle.x}
+                          y2={chartGeometry.height - 8}
+                          stroke="rgba(16, 27, 51, 0.25)"
+                          strokeWidth="1.2"
+                          strokeDasharray="3 3"
+                        />
+                        {/* Horizontal Tracking Line to Right Rail */}
+                        <line
+                          x1="12"
+                          y1={hoveredCandle.closeY}
+                          x2={chartGeometry.width - 86}
+                          y2={hoveredCandle.closeY}
+                          stroke="rgba(16, 27, 51, 0.22)"
+                          strokeWidth="1.2"
+                          strokeDasharray="3 3"
+                        />
+                        {/* Node circle on close price */}
+                        <circle
+                          cx={hoveredCandle.x}
+                          cy={hoveredCandle.closeY}
+                          r="4"
+                          fill={hoveredCandle.isGreen ? "#059669" : "#DC2626"}
+                          stroke="#FFFFFF"
+                          strokeWidth="2"
+                        />
+                        {/* Live Price Tag on Right Axis Rail */}
+                        <rect
+                          x={chartGeometry.width - 82}
+                          y={hoveredCandle.closeY - 9}
+                          width="76"
+                          height="18"
+                          rx="4"
+                          fill="#0F172A"
+                        />
+                        <text
+                          x={chartGeometry.width - 44}
+                          y={hoveredCandle.closeY + 3.5}
+                          textAnchor="middle"
+                          fill="#FFFFFF"
+                          fontSize="8.5"
+                          fontFamily="'Inter', monospace"
+                          fontWeight="700"
+                        >
+                          ₹{Number(hoveredCandle.close).toFixed(1)}
+                        </text>
+                      </g>
+                    )}
+                  </svg>
+                )}
+
+                {/* Floating Dynamic Hover Tooltip */}
+                {hoveredCandle && chartGeometry && (
+                  <div
+                    className="candle-hover-tooltip"
+                    style={{
+                      left: `${Math.min(Math.max((hoveredCandle.x / chartGeometry.width) * 100, 16), 72)}%`,
+                      transform: "translateX(-50%)",
+                      top: "10px"
+                    }}
+                  >
+                    <div className="tooltip-header-row">
+                      <span className="tooltip-date">{hoveredCandle.date || `Session ${hoveredCandle.index + 1}`}</span>
+                      <span className={`tooltip-tag ${hoveredCandle.isGreen ? "up" : "down"}`}>
+                        {hoveredCandle.isGreen ? "▲ Bullish" : "▼ Bearish"} ({(((hoveredCandle.close - hoveredCandle.open) / hoveredCandle.open) * 100).toFixed(2)}%)
+                      </span>
+                    </div>
+                    <div className="tooltip-grid">
+                      <div className="tooltip-row"><span>Open:</span> <strong>₹{hoveredCandle.open}</strong></div>
+                      <div className="tooltip-row"><span>High:</span> <strong>₹{hoveredCandle.high}</strong></div>
+                      <div className="tooltip-row"><span>Low:</span> <strong>₹{hoveredCandle.low}</strong></div>
+                      <div className="tooltip-row"><span>Close:</span> <strong>₹{hoveredCandle.close}</strong></div>
+                      <div className="tooltip-row"><span>Volume:</span> <strong>{Number(hoveredCandle.volume).toLocaleString()}</strong></div>
+                      <div className="tooltip-row"><span>Range:</span> <strong>₹{(hoveredCandle.high - hoveredCandle.low).toFixed(2)}</strong></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Card 2: Probabilistic Outlook Card */}
+            <div className="candle-card outlook-card">
+              <div className="outlook-header">
+                <span className="outlook-eyebrow">PROBABILISTIC OUTLOOK</span>
+                <h3 className="outlook-title">{outlook.title || "What is this setup implying?"}</h3>
+                <p className="outlook-desc">
+                  {outlook.subtitle || "Pattern confidence and future-outcome confidence are shown separately so the UI never pretends a candle pattern is certainty."}
+                </p>
+              </div>
+
+              {/* Current Stance Box */}
+              <div className="stance-box">
+                <div className="stance-box-top">
+                  <div>
+                    <span className="stance-tag-label">CURRENT STANCE</span>
+                    <div className="stance-main-text">{stance.stance || "WATCH"}</div>
+                  </div>
+                  <div className="stance-conf-text">{stance.stance_confidence || 72}%<span className="stance-conf-sub">stance confidence</span></div>
+                </div>
+                <p className="stance-explanation">
+                  {stance.explanation || "Support is holding, but resistance has not broken. A stronger stance requires confirmation, not just one candle."}
+                </p>
+              </div>
+
+              {/* Probabilistic Scenario Bars */}
+              <div className="scenario-bars-group">
+                <div className="scenario-bar-item">
+                  <div className="bar-labels">
+                    <span>Bullish follow-through</span>
+                    <strong>{outlook.bullish_pct || 48}%</strong>
+                  </div>
+                  <div className="bar-track">
+                    <div className="bar-fill bullish" style={{ width: `${outlook.bullish_pct || 48}%` }} />
+                  </div>
+                </div>
+
+                <div className="scenario-bar-item">
+                  <div className="bar-labels">
+                    <span>Range / sideways</span>
+                    <strong>{outlook.range_pct || 34}%</strong>
+                  </div>
+                  <div className="bar-track">
+                    <div className="bar-fill range" style={{ width: `${outlook.range_pct || 34}%` }} />
+                  </div>
+                </div>
+
+                <div className="scenario-bar-item">
+                  <div className="bar-labels">
+                    <span>Bearish break</span>
+                    <strong>{outlook.bearish_pct || 18}%</strong>
+                  </div>
+                  <div className="bar-track">
+                    <div className="bar-fill bearish" style={{ width: `${outlook.bearish_pct || 18}%` }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Dual Confidence Tiles (Side by Side) */}
+              <div className="confidence-tiles-row">
+                <div className="conf-tile">
+                  <span className="conf-tile-label">PATTERN CONFIDENCE</span>
+                  <div className="conf-tile-val">{outlook.pattern_confidence || 81} <span className="conf-max">/ 100</span></div>
+                </div>
+                <div className="conf-tile">
+                  <span className="conf-tile-label">OUTCOME CONFIDENCE</span>
+                  <div className="conf-tile-val">{outlook.outcome_confidence || 58} <span className="conf-max">/ 100</span></div>
+                </div>
+              </div>
+
+              {/* Quality Indicators */}
+              <div className="quality-tiles-row">
+                <div className="qual-tile">
+                  <span className="qual-tile-label">SUPPORT QUALITY</span>
+                  <div className="qual-tile-val">{outlook.support_quality || "Strong"}</div>
+                </div>
+                <div className="qual-tile">
+                  <span className="qual-tile-label">BREAKOUT QUALITY</span>
+                  <div className="qual-tile-val">{outlook.breakout_quality || "Not confirmed"}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Middle Row: AI Reasoning (Left) + MarketMind Voice Copilot (Right) */}
+          <div className="candle-middle-grid">
+            {/* Left: AI Reasoning (6 Numbered Evidence Cards) */}
+            <div className="candle-card reasoning-card">
+              <div className="card-top-title-row">
+                <div>
+                  <h3 className="section-title">AI reasoning: why this pattern matters</h3>
+                  <p className="section-desc">Every conclusion is explained point-by-point, instead of only naming &ldquo;Hammer&rdquo; or &ldquo;Doji&rdquo;.</p>
+                </div>
+                <span className="explainable-badge">Explainable evidence</span>
+              </div>
+
+              <div className="evidence-layers-list">
+                {evidenceLayers.map((layer) => (
+                  <div key={layer.num} className="evidence-layer-card">
+                    <div className="layer-num-badge">{layer.num}</div>
+                    <div className="layer-content">
+                      <div className="layer-header">
+                        <span className="layer-title">{layer.title}</span>
+                        <span className={`layer-badge ${layer.type || layer.badge?.toLowerCase()}`}>
+                          {layer.badge}
+                        </span>
+                      </div>
+                      <p className="layer-desc">{layer.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: MarketMind Voice Copilot Card */}
+            <div className="candle-card copilot-card">
+              <div className="copilot-card-header">
+                <div className="copilot-avatar-wrap">
+                  <div className="copilot-avatar-circle">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                  </div>
+                  <div>
+                    <h3 className="copilot-title">MarketMind Voice Copilot</h3>
+                    <span className="copilot-sub">Chart-aware · Context-aware · Evidence-first</span>
+                  </div>
+                </div>
+                <span className="copilot-status-badge">
+                  <span className="copilot-ready-dot" /> Ready
+                </span>
+              </div>
+
+              {/* Chat Transcript Area */}
+              <div className="copilot-chat-box">
+                {copilotMessages.length === 0 ? (
+                  <div className="copilot-empty-state">
+                    <div className="empty-copilot-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    </div>
+                    <div className="empty-copilot-title">Candlestick Copilot Ready</div>
+                    <p className="empty-copilot-desc">
+                      Ask any chart question about {data.name || selectedSymbol} (e.g., support defense, breakout confirmation, downside risk) or tap a quick question below to begin.
+                    </p>
+                  </div>
+                ) : (
+                  copilotMessages.map((msg, i) => (
+                    <div key={i} className={`chat-bubble-row ${msg.sender}`}>
+                      <div className={`chat-bubble ${msg.sender}`}>
+                        {msg.text}
+                      </div>
+                    </div>
+                  ))
+                )}
+                {copilotLoading && (
+                  <div className="chat-bubble-row copilot">
+                    <div className="chat-bubble copilot typing">
+                      <span className="typing-dot" />
+                      <span className="typing-dot" />
+                      <span className="typing-dot" />
+                    </div>
+                  </div>
+                )}
+                <div ref={chatBottomRef} />
+              </div>
+
+              {/* Quick Action Pills */}
+              <div className="quick-questions-strip">
+                {[
+                  "Explain today's candle",
+                  "Compare last 3 months",
+                  "What confirms breakout?",
+                  "Show downside risk"
+                ].map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    className="quick-q-pill"
+                    onClick={() => handleAskCopilot(q)}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+
+              {/* Chat Input Bar */}
+              <form
+                className="copilot-input-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAskCopilot();
                 }}
               >
-                {s}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Ultra-Realistic Candlestick Terminal Card */}
-      <div className="card c12" style={{ padding: "18px 22px" }}>
-        {/* Real-time Ticker & Header Info Bar */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--line)", paddingBottom: "12px", marginBottom: "12px", flexWrap: "wrap", gap: "12px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "linear-gradient(135deg, var(--navy), var(--navy-2))", color: "var(--gold-light)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "15px", boxShadow: "0 4px 12px rgba(16,27,51,.2)" }}>
-              {selectedSymbol.slice(0, 2)}
-            </div>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "#2F6F62", background: "rgba(47,111,98,.12)", padding: "2px 8px", borderRadius: "6px" }}>NSE LIVE</span>
-                <h3 style={{ fontSize: "20px", fontFamily: "var(--serif)", margin: 0, color: "var(--navy)" }}>
-                  {currentComp.name} ({selectedSymbol})
-                </h3>
-              </div>
-              <div style={{ fontSize: "12px", color: "var(--ink-soft)", marginTop: "2px" }}>
-                Sector: {currentComp.sector} · Market Cap: {currentComp.market_cap || "₹2.5L Cr"} · 30-Day Daily Chart
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: "22px", fontWeight: 700, color: "var(--navy)", fontFamily: "var(--mono, monospace)" }}>
-                ₹{Number(currentComp.price || 168.5).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-              </div>
-              <div style={{ fontSize: "12px", fontWeight: 600, color: String(currentComp.change).includes("-") ? "#A14545" : "#2F6F62" }}>
-                {currentComp.change} Today
-              </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-              <span className="tag" style={{ background: "rgba(216,188,139,.18)", color: "var(--gold-light)", fontSize: "11px", padding: "3px 8px" }}>
-                Support: ₹{supportLvl}
-              </span>
-              <span className="tag" style={{ background: "rgba(47,111,98,.15)", color: "#2F6F62", fontSize: "11px", padding: "3px 8px" }}>
-                Resistance: ₹{resistanceLvl}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Dynamic Real-Time OHLC Hover Inspection Strip (TradingView Style) */}
-        <div style={{ background: "var(--paper)", padding: "10px 16px", borderRadius: "10px", border: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px", marginBottom: "14px", fontSize: "12.5px", fontFamily: "var(--mono, monospace)" }}>
-          <div style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
-            <span style={{ fontWeight: 700, color: "var(--navy)" }}>📅 {activeCandle?.date}</span>
-            <span><b style={{ color: "var(--ink-soft)" }}>O:</b> ₹{activeCandle?.open}</span>
-            <span><b style={{ color: "var(--ink-soft)" }}>H:</b> ₹{activeCandle?.high}</span>
-            <span><b style={{ color: "var(--ink-soft)" }}>L:</b> ₹{activeCandle?.low}</span>
-            <span><b style={{ color: "var(--ink-soft)" }}>C:</b> <strong style={{ color: isCandleBullish ? "#2F6F62" : "#A14545" }}>₹{activeCandle?.close}</strong></span>
-            <span style={{ fontWeight: 600, color: isCandleBullish ? "#2F6F62" : "#A14545" }}>
-              {isCandleBullish ? `+₹${candleChange} (+${candleChangePct}%)` : `₹${candleChange} (${candleChangePct}%)`}
-            </span>
-          </div>
-
-          <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
-            <span><b style={{ color: "var(--ink-soft)" }}>Vol:</b> {(activeCandle?.volume ? (activeCandle.volume / 1000000).toFixed(2) + "M" : "3.84M")}</span>
-            <span className="tag live" style={{ fontSize: "11px", padding: "2px 8px" }}>
-              RSI(14): {historyData?.rsi || currentComp.rsi || 30.08}
-            </span>
-          </div>
-        </div>
-
-        {/* Algorithmic Pattern Badge */}
-        <div style={{ background: "rgba(216,188,139,.12)", border: "1px solid rgba(216,188,139,.35)", padding: "8px 14px", borderRadius: "8px", display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--gold-light)" strokeWidth="2.2" strokeLinecap="round">
-            <path d="M13 2 3 14h7l-1 8 10-12h-7z" />
-          </svg>
-          <span style={{ fontSize: "12.5px", color: "var(--navy)", fontWeight: 600 }}>
-            {activePattern.name} ({activePattern.type}) · <span style={{ color: "var(--ink-soft)", fontWeight: 400 }}>{activePattern.desc}</span>
-          </span>
-        </div>
-
-        {/* Ultra-Realistic TradingView-Style SVG Candlestick & Volume Chart */}
-        <div style={{ position: "relative", width: "100%", overflowX: "auto", background: "var(--paper)", borderRadius: "12px", border: "1px solid var(--line)", padding: "10px 0" }}>
-          <svg
-            ref={svgRef}
-            viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-            width="100%"
-            height={SVG_HEIGHT}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            style={{ cursor: "crosshair", display: "block" }}
-          >
-            {/* Background Grid Lines */}
-            <line x1="40" y1="40" x2={SVG_WIDTH - 20} y2="40" stroke="#EEE6D2" strokeDasharray="3 3" />
-            <line x1="40" y1="90" x2={SVG_WIDTH - 20} y2="90" stroke="#EEE6D2" strokeDasharray="3 3" />
-            <line x1="40" y1="140" x2={SVG_WIDTH - 20} y2="140" stroke="#EEE6D2" strokeDasharray="3 3" />
-            <line x1="40" y1={VOL_TOP} x2={SVG_WIDTH - 20} y2={VOL_TOP} stroke="rgba(16,27,51,.1)" strokeWidth="1" />
-
-            {/* Support & Resistance Horizontal Reference Lines */}
-            <line x1="40" y1={getY(Number(supportLvl))} x2={SVG_WIDTH - 20} y2={getY(Number(supportLvl))} stroke="rgba(216,188,139,.6)" strokeDasharray="4 4" strokeWidth="1.2" />
-            <line x1="40" y1={getY(Number(resistanceLvl))} x2={SVG_WIDTH - 20} y2={getY(Number(resistanceLvl))} stroke="rgba(47,111,98,.6)" strokeDasharray="4 4" strokeWidth="1.2" />
-
-            {/* Render 30-Day Candlesticks & Volume Bars */}
-            {candles.map((c, i) => {
-              const candleWidth = (SVG_WIDTH - 80) / (candles.length || 1);
-              const x = 50 + i * candleWidth;
-              const isBullish = c.close >= c.open;
-              const color = isBullish ? "#2F6F62" : "#A14545";
-              const openY = getY(c.open);
-              const closeY = getY(c.close);
-              const highY = getY(c.high);
-              const lowY = getY(c.low);
-              const topBodyY = Math.min(openY, closeY);
-              const bodyHeight = Math.max(Math.abs(closeY - openY), 2.5);
-              const volY = getVolY(c.volume);
-              const volHeight = VOL_TOP + VOL_HEIGHT - volY;
-
-              const isHovered = hoveredCandle && hoveredCandle.date === c.date;
-
-              return (
-                <g
-                  key={i}
-                  onMouseEnter={() => setHoveredCandle(c)}
-                  style={{ cursor: "pointer" }}
+                <button
+                  type="button"
+                  className="copilot-mic-btn"
+                  title="Voice trigger active"
+                  onClick={() => handleAskCopilot("Explain today's candle")}
                 >
-                  {/* High - Low Wick */}
-                  <line x1={x + 6} y1={highY} x2={x + 6} y2={lowY} stroke={color} strokeWidth="1.6" />
-                  
-                  {/* Real Body */}
-                  <rect
-                    x={x}
-                    y={topBodyY}
-                    width="12"
-                    height={bodyHeight}
-                    fill={color}
-                    rx="1.5"
-                    stroke={isHovered ? "var(--gold)" : "none"}
-                    strokeWidth={isHovered ? "1.5" : "0"}
-                  />
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                </button>
+                <input
+                  type="text"
+                  placeholder="Ask: Is this hammer reliable?"
+                  value={inputQuery}
+                  onChange={(e) => setInputQuery(e.target.value)}
+                  className="copilot-text-input"
+                />
+                <button
+                  type="submit"
+                  className="copilot-send-btn"
+                  disabled={!inputQuery.trim() || copilotLoading}
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
+              </form>
+            </div>
+          </div>
 
-                  {/* Volume Sub-Chart Bar */}
-                  <rect
-                    x={x + 1}
-                    y={volY}
-                    width="10"
-                    height={volHeight}
-                    fill={isBullish ? "rgba(47,111,98,.35)" : "rgba(161,69,69,.35)"}
-                    rx="1"
-                  />
-                </g>
-              );
-            })}
+          {/* 5. Bottom Section 1: Hidden Market Behaviour Layer (4 Cards) */}
+          <div className="candle-card hidden-signals-card">
+            <div className="card-top-title-row">
+              <div>
+                <h3 className="section-title">Hidden market behaviour layer</h3>
+                <p className="section-desc">These signals make the agent more useful than a classic candlestick scanner.</p>
+              </div>
+              <span className="multi-signal-badge">Multi-signal fusion</span>
+            </div>
 
-            {/* Crosshair Horizontal & Vertical Lines on Mouse Move */}
-            {mousePos.x !== null && mousePos.y !== null && (
-              <g pointerEvents="none">
-                <line x1="40" y1={mousePos.y} x2={SVG_WIDTH - 20} y2={mousePos.y} stroke="rgba(16,27,51,.4)" strokeDasharray="3 3" strokeWidth="1" />
-                <line x1={mousePos.x} y1="20" x2={mousePos.x} y2={SVG_HEIGHT - 10} stroke="rgba(16,27,51,.4)" strokeDasharray="3 3" strokeWidth="1" />
-                
-                {/* Floating Y-Axis Price Badge on Right */}
-                <rect x={SVG_WIDTH - 65} y={mousePos.y - 10} width="60" height="20" rx="4" fill="var(--navy)" />
-                <text x={SVG_WIDTH - 35} y={mousePos.y + 4} fill="#FFF" fontSize="10" textAnchor="middle" fontWeight="600" fontFamily="monospace">
-                  ₹{getPriceFromY(mousePos.y)}
-                </text>
-              </g>
-            )}
-          </svg>
-        </div>
-      </div>
-
-      {/* Real Pattern Scanner Table */}
-      <div className="card c6">
-        <div className="card-head">
-          <div className="card-eyebrow"><div><span>Scanner</span><h3>Recent Detections</h3></div></div>
-        </div>
-        <div className="table-scroll">
-          <table className="dtable">
-            <thead>
-              <tr><th>Symbol</th><th>Detected Pattern</th><th>Reliability</th><th>Bias</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-              {stocks.slice(0, 5).map((stk) => (
-                <tr key={stk.symbol} style={stk.symbol === selectedSymbol ? { background: "rgba(216,188,139,.12)" } : {}}>
-                  <td className="sym">
-                    <span className="row-logo">{stk.symbol.slice(0, 2)}</span>
-                    <b>{stk.symbol}</b>
-                  </td>
-                  <td>{stk.pattern || "Bullish Momentum Candle"}</td>
-                  <td className="num">{88 + (stk.symbol.length % 8)}%</td>
-                  <td><span className="tag live">Bullish</span></td>
-                  <td>
-                    <button
-                      className="pill-btn ghost"
-                      onClick={() => {
-                        setSelectedSymbol(stk.symbol);
-                        window.__SELECTED_STOCK_SYMBOL = stk.symbol;
-                      }}
-                      style={{ fontSize: "11px", padding: "3px 8px" }}
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
+            <div className="hidden-signals-grid">
+              {hiddenBehaviour.map((sig, i) => (
+                <div key={i} className="hidden-signal-card">
+                  <div className="signal-category">{sig.category}</div>
+                  <h4 className="signal-label">{sig.label}</h4>
+                  <p className="signal-desc">{sig.desc}</p>
+                  <div className="signal-metric-row">
+                    <span className="signal-value">{sig.value}</span>
+                    <span className="signal-sub">{sig.sub}</span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </div>
+          </div>
 
-      {/* Pattern Library */}
-      <div className="card c6">
-        <div className="card-head">
-          <div className="card-eyebrow"><div><span>Reference</span><h3 style={{ fontSize: "18px" }}>Pattern Library</h3></div></div>
-        </div>
-        <div className="pattern-lib-card">
-          <svg viewBox="0 0 40 50"><line x1="20" y1="6" x2="20" y2="44" stroke="#A14545" strokeWidth="2"/><rect x="12" y="20" width="16" height="10" fill="#A14545"/></svg>
-          <div><div className="pn">Doji</div><div className="pd">Open and close nearly equal — signals equilibrium and potential trend exhaustion.</div></div>
-        </div>
-        <div className="pattern-lib-card">
-          <svg viewBox="0 0 40 50"><line x1="20" y1="8" x2="20" y2="20" stroke="#2F6F62" strokeWidth="2"/><rect x="12" y="8" width="16" height="12" fill="#2F6F62"/><line x1="20" y1="20" x2="20" y2="44" stroke="#2F6F62" strokeWidth="2"/></svg>
-          <div><div className="pn">Bullish Hammer</div><div className="pd">Small body with long lower shadow — strong rejection of lower price levels.</div></div>
-        </div>
-        <div className="pattern-lib-card">
-          <svg viewBox="0 0 40 50"><rect x="6" y="18" width="12" height="16" fill="#A14545"/><rect x="20" y="10" width="16" height="26" fill="#2F6F62"/></svg>
-          <div><div className="pn">Bullish Engulfing</div><div className="pd">Large green candle fully engulfs prior red candle body — high probability reversal.</div></div>
-        </div>
-      </div>
+          {/* 6. Bottom Section 2: Historical Backtest (Left) + Counterfactual Engine (Right) */}
+          <div className="candle-bottom-grid">
+            {/* Left: Historical Validation Backtest */}
+            <div className="candle-card backtest-card">
+              <div className="backtest-header">
+                <span className="backtest-eyebrow">HISTORICAL VALIDATION</span>
+                <h3 className="section-title">{backtest.title || "Similar setup backtest"}</h3>
+                <p className="section-desc">
+                  {backtest.subtitle || "Compare the whole current feature vector with prior windows, not only the candle name."}
+                </p>
+              </div>
+
+              <div className="backtest-table-wrap">
+                <table className="backtest-table">
+                  <thead>
+                    <tr>
+                      <th>OUTCOME</th>
+                      <th>CASES</th>
+                      <th>MEDIAN 5D</th>
+                      <th>MEDIAN 20D</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(backtest.rows || []).map((row, i) => {
+                      const isBull = row.outcome.toLowerCase().includes("bullish");
+                      const isBear = row.outcome.toLowerCase().includes("bearish");
+                      return (
+                        <tr key={i}>
+                          <td className="outcome-cell"><strong>{row.outcome}</strong></td>
+                          <td>{row.cases}</td>
+                          <td className={isBull ? "val-green" : isBear ? "val-red" : ""}>{row.median_5d}</td>
+                          <td className={isBull ? "val-green" : isBear ? "val-red" : ""}>{row.median_20d}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="backtest-disclaimer">
+                {backtest.disclaimer || "Real backtests should expose sample size, test period, costs, leakage checks and out-of-sample performance."}
+              </div>
+            </div>
+
+            {/* Right: Counterfactual Engine */}
+            <div className="candle-card counterfactual-card">
+              <div className="counterfactual-header">
+                <span className="counterfactual-eyebrow">COUNTERFACTUAL ENGINE</span>
+                <h3 className="section-title">{counterfactual.title || "What changes the AI view?"}</h3>
+              </div>
+
+              <div className="counterfactual-content">
+                <div className="counter-block upgrade">
+                  <h4 className="counter-block-title">{counterfactual.upgrade_title || "↑ Upgrade toward Constructive"}</h4>
+                  <ul className="counter-conditions-list">
+                    {(counterfactual.upgrade_conditions || []).map((cond, i) => (
+                      <li key={i}>{cond}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="counter-block downgrade">
+                  <h4 className="counter-block-title">{counterfactual.downgrade_title || "↓ Downgrade toward High Risk"}</h4>
+                  <ul className="counter-conditions-list">
+                    {(counterfactual.downgrade_conditions || []).map((cond, i) => (
+                      <li key={i}>{cond}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

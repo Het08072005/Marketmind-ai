@@ -24,11 +24,8 @@ export default function Sidebar({ currentPage, goPage, isOpen, onClose }) {
     { key: "reports", label: "AI Report Generator", icon: (
       <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg>
     )},
-    { key: "candles", label: "Candlestick Patterns", icon: (
+    { key: "candles", label: "Candlestick Intelligence", icon: (
       <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l4-9 3 5 3-8 3 7 5-4"/></svg>
-    )},
-    { key: "esg", label: "ESG & Sustainability", icon: (
-      <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10l7 7"/></svg>
     )},
   ];
 

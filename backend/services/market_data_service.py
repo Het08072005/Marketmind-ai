@@ -106,54 +106,65 @@ def calculate_rsi(prices: pd.Series, period: int = 14) -> float:
     return float(round(last_val, 2)) if not pd.isna(last_val) else 50.0
 
 def calculate_quant_risk_metrics(df: pd.DataFrame, current_price: float) -> Dict[str, Any]:
-    if df.empty or len(df) < 5:
-        return {
-            "annualized_volatility": 24.5,
-            "var_95_daily": round(current_price * 0.024, 2),
-            "vwap_20": round(current_price * 0.995, 2),
-            "beta": 1.15,
-            "pivot_point": round(current_price, 2),
-            "support_1": round(current_price * 0.98, 2),
-            "support_2": round(current_price * 0.96, 2),
-            "resistance_1": round(current_price * 1.02, 2),
-            "resistance_2": round(current_price * 1.04, 2),
-        }
-    
-    returns = df["Close"].pct_change().dropna()
-    std_daily = float(returns.std()) if not pd.isna(returns.std()) and returns.std() > 0 else 0.015
-    ann_vol = round(std_daily * math.sqrt(252) * 100, 2)
-    var_95 = round(1.65 * std_daily * current_price, 2)
-    
-    # 20-day VWAP
-    df_20 = df.tail(20)
-    vol_sum = df_20["Volume"].sum()
-    if vol_sum > 0:
-        vwap = round(float((df_20["Close"] * df_20["Volume"]).sum() / vol_sum), 2)
-    else:
-        vwap = round(float(df_20["Close"].mean()), 2)
-        
-    last_row = df.iloc[-1]
-    h, l, c = float(last_row["High"]), float(last_row["Low"]), float(last_row["Close"])
-    pivot = round((h + l + c) / 3, 2)
-    r1 = round(2 * pivot - l, 2)
-    s1 = round(2 * pivot - h, 2)
-    r2 = round(pivot + (h - l), 2)
-    s2 = round(pivot - (h - l), 2)
-    
-    return {
-        "annualized_volatility": ann_vol,
-        "var_95_daily": var_95,
-        "vwap_20": vwap,
-        "beta": 1.12,
-        "pivot_point": pivot,
-        "support_1": s1,
-        "support_2": s2,
-        "resistance_1": r1,
-        "resistance_2": r2,
+    current_price = sanitize_float(current_price, 1500.0)
+    default_metrics = {
+        "annualized_volatility": 24.5,
+        "var_95_daily": round(current_price * 0.024, 2),
+        "vwap_20": round(current_price * 0.995, 2),
+        "beta": 1.15,
+        "pivot_point": round(current_price, 2),
+        "support_1": round(current_price * 0.98, 2),
+        "support_2": round(current_price * 0.96, 2),
+        "resistance_1": round(current_price * 1.02, 2),
+        "resistance_2": round(current_price * 1.04, 2),
     }
 
+    if df.empty or len(df) < 5:
+        return default_metrics
+    
+    try:
+        returns = df["Close"].pct_change().dropna()
+        std_daily = float(returns.std()) if not pd.isna(returns.std()) and returns.std() > 0 else 0.015
+        ann_vol = sanitize_float(round(std_daily * math.sqrt(252) * 100, 2), 24.5)
+        var_95 = sanitize_float(round(1.65 * std_daily * current_price, 2), round(current_price * 0.024, 2))
+        
+        # 20-day VWAP
+        df_20 = df.tail(20)
+        vol_sum = df_20["Volume"].sum()
+        if vol_sum > 0:
+            vwap_val = float((df_20["Close"] * df_20["Volume"]).sum() / vol_sum)
+        else:
+            vwap_val = float(df_20["Close"].mean())
+        vwap = sanitize_float(round(vwap_val, 2), round(current_price * 0.995, 2))
+            
+        last_row = df.iloc[-1]
+        h = sanitize_float(last_row["High"], current_price * 1.01)
+        l = sanitize_float(last_row["Low"], current_price * 0.99)
+        c = sanitize_float(last_row["Close"], current_price)
+
+        pivot = sanitize_float(round((h + l + c) / 3, 2), round(current_price, 2))
+        r1 = sanitize_float(round(2 * pivot - l, 2), round(current_price * 1.02, 2))
+        s1 = sanitize_float(round(2 * pivot - h, 2), round(current_price * 0.98, 2))
+        r2 = sanitize_float(round(pivot + (h - l), 2), round(current_price * 1.04, 2))
+        s2 = sanitize_float(round(pivot - (h - l), 2), round(current_price * 0.96, 2))
+        
+        return {
+            "annualized_volatility": ann_vol,
+            "var_95_daily": var_95,
+            "vwap_20": vwap,
+            "beta": 1.12,
+            "pivot_point": pivot,
+            "support_1": s1,
+            "support_2": s2,
+            "resistance_1": r1,
+            "resistance_2": r2,
+        }
+    except Exception:
+        return default_metrics
+
 def generate_order_book_depth(current_price: float, volume: int = 1000000) -> Dict[str, Any]:
-    base_qty = max(int(volume / 800), 500)
+    current_price = sanitize_float(current_price, 1500.0)
+    base_qty = max(int(sanitize_float(volume, 1000000) / 800), 500)
     bids = []
     asks = []
     total_bid_qty = 0
@@ -166,22 +177,22 @@ def generate_order_book_depth(current_price: float, volume: int = 1000000) -> Di
         total_bid_qty += b_qty
         
         a_price = round(current_price * (1 + 0.0008 * i), 2)
-        a_qty = int(base_qty * (1.0 + 0.18 * i - (i % 2) * 0.2))
+        a_qty = int(base_qty * (1.1 + 0.14 * i + ((i + 1) % 2) * 0.25))
         asks.append({"level": i, "price": a_price, "quantity": a_qty, "orders": 10 + i * 3})
         total_ask_qty += a_qty
         
     obi = round((total_bid_qty - total_ask_qty) / max(total_bid_qty + total_ask_qty, 1), 3)
     spread = round(asks[0]["price"] - bids[0]["price"], 2)
-    spread_bps = round((spread / current_price) * 10000, 1)
+    spread_bps = round((spread / current_price) * 10000, 1) if current_price > 0 else 0.0
     
     return {
         "bids": bids,
         "asks": asks,
         "total_bid_quantity": total_bid_qty,
         "total_ask_quantity": total_ask_qty,
-        "order_book_imbalance": obi,
-        "spread": spread,
-        "spread_bps": spread_bps,
+        "order_book_imbalance": sanitize_float(obi, 0.0),
+        "spread": sanitize_float(spread, 0.5),
+        "spread_bps": sanitize_float(spread_bps, 3.5),
         "bid_wall": max(bids, key=lambda x: x["quantity"]),
         "ask_wall": max(asks, key=lambda x: x["quantity"]),
     }
@@ -263,20 +274,34 @@ def detect_candlestick_patterns(df: pd.DataFrame) -> List[Dict[str, Any]]:
 
     return patterns
 
-def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
-    global _QUOTE_CACHE, _CACHE_TIMESTAMP
-    sym_upper = symbol.upper().strip()
-    fallback_comp = get_company_by_symbol(sym_upper) or {
-        "symbol": sym_upper,
-        "name": f"{sym_upper} India",
-        "price": 1500.0,
-        "change": "+0.5%",
-        "pe_ratio": 24.5,
-        "rsi": 55.0,
-        "sector": "Diversified"
-    }
+def sanitize_float(val, default=0.0):
+    try:
+        f = float(val)
+        if math.isnan(f) or math.isinf(f):
+            return default
+        return f
+    except (TypeError, ValueError):
+        return default
 
+def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
+    global _QUOTE_CACHE
+    sym_upper = symbol.upper().strip()
     now = time.time()
+
+    fallback_comp = get_company_by_symbol(sym_upper)
+    if not fallback_comp:
+        fallback_comp = {
+            "symbol": sym_upper,
+            "name": f"{sym_upper} India",
+            "sector": "Broad Market",
+            "price": 1500.0,
+            "change": "+0.0%",
+            "risk": "Moderate",
+            "trustScore": 75,
+            "thesisBreakerCount": 0,
+            "esgScore": 70
+        }
+
     if sym_upper in _QUOTE_CACHE and (now - _QUOTE_CACHE[sym_upper]["_ts"]) < CACHE_TTL:
         return _QUOTE_CACHE[sym_upper]["data"]
 
@@ -289,18 +314,20 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
             last_row = hist.iloc[-1]
             prev_row = hist.iloc[-2]
             
-            live_price = float(round(last_row["Close"], 2))
-            prev_close = float(round(prev_row["Close"], 2))
-            day_change = float(round(live_price - prev_close, 2))
-            day_change_pct = float(round((day_change / prev_close) * 100, 2))
+            raw_live_price = float(round(last_row["Close"], 2))
+            live_price = sanitize_float(raw_live_price, fallback_comp.get("price", 1500.0))
+            prev_close = sanitize_float(float(round(prev_row["Close"], 2)), live_price)
+            day_change = sanitize_float(float(round(live_price - prev_close, 2)), 0.0)
+            day_change_pct = sanitize_float(float(round((day_change / prev_close) * 100, 2)) if prev_close != 0 else 0.0, 0.0)
             
-            rsi = calculate_rsi(hist["Close"], 14)
-            sma_20 = float(round(hist["Close"].tail(20).mean(), 2))
+            rsi = sanitize_float(calculate_rsi(hist["Close"], 14), 50.0)
+            sma_20 = sanitize_float(float(round(hist["Close"].tail(20).mean(), 2)), live_price)
             
             formatted_change = f"{'+' if day_change_pct >= 0 else ''}{day_change_pct}%"
             
             quant_risk = calculate_quant_risk_metrics(hist, live_price)
-            order_book = generate_order_book_depth(live_price, int(last_row["Volume"]))
+            vol_val = int(last_row["Volume"]) if not pd.isna(last_row["Volume"]) else 1000000
+            order_book = generate_order_book_depth(live_price, vol_val)
 
             result = {
                 **fallback_comp,
@@ -311,9 +338,9 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
                 "change_pct_raw": day_change_pct,
                 "rsi": rsi,
                 "sma_20": sma_20,
-                "volume": int(last_row["Volume"]),
-                "day_high": float(round(last_row["High"], 2)),
-                "day_low": float(round(last_row["Low"], 2)),
+                "volume": vol_val,
+                "day_high": sanitize_float(round(last_row["High"], 2), live_price),
+                "day_low": sanitize_float(round(last_row["Low"], 2), live_price),
                 "is_live": True,
                 "last_updated": time.strftime("%H:%M:%S IST"),
                 "quant_risk": quant_risk,
@@ -333,13 +360,14 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
         print(f"yfinance fetch error for {sym_upper}: {e}")
 
     # Fallback response
-    sim_price = float(fallback_comp.get("price", 1500.0))
+    sim_price = sanitize_float(fallback_comp.get("price"), 1500.0)
     empty_df = pd.DataFrame()
     sim_risk = calculate_quant_risk_metrics(empty_df, sim_price)
     sim_ob = generate_order_book_depth(sim_price, 1000000)
 
     fallback_result = {
         **fallback_comp,
+        "price": sim_price,
         "is_live": False,
         "last_updated": "Cached / Simulated",
         "quant_risk": sim_risk,
@@ -355,16 +383,37 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
     _QUOTE_CACHE[sym_upper] = {"data": fallback_result, "_ts": now}
     return fallback_result
 
+_ALL_COMPANIES_CACHE: List[Dict[str, Any]] = []
+_ALL_COMPANIES_TS: float = 0
+
+def _fetch_company_worker(c: Dict[str, Any]) -> Dict[str, Any]:
+    sym = c.get("symbol")
+    try:
+        live_data = fetch_live_stock_data(sym)
+        if live_data:
+            if "price" in live_data:
+                live_data["price"] = sanitize_float(live_data["price"], c.get("price", 1500.0))
+            return live_data
+    except Exception:
+        pass
+    return c
+
 def get_all_live_companies() -> List[Dict[str, Any]]:
+    global _ALL_COMPANIES_CACHE, _ALL_COMPANIES_TS
+    now = time.time()
+    if _ALL_COMPANIES_CACHE and (now - _ALL_COMPANIES_TS) < 60:
+        return _ALL_COMPANIES_CACHE
+
     static_comps = get_all_companies()
-    results = []
-    for c in static_comps:
-        sym = c.get("symbol")
-        try:
-            live_data = fetch_live_stock_data(sym)
-            results.append(live_data)
-        except Exception:
-            results.append(c)
+    from concurrent.futures import ThreadPoolExecutor
+    try:
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            results = list(executor.map(_fetch_company_worker, static_comps))
+    except Exception:
+        results = static_comps
+
+    _ALL_COMPANIES_CACHE = results
+    _ALL_COMPANIES_TS = now
     return results
 
 def get_stock_historical_candles(symbol: str, period: str = "1mo") -> Dict[str, Any]:

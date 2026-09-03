@@ -1,6 +1,22 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 export const apiClient = {
+  // Generic HTTP helpers
+  async get(endpoint) {
+    const res = await fetch(`${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`);
+    if (!res.ok) throw new Error(`GET ${endpoint} failed`);
+    return await res.json();
+  },
+
+  async post(endpoint, data = {}) {
+    const res = await fetch(`${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`POST ${endpoint} failed`);
+    return await res.json();
+  },
   // Voice Endpoints
   async transcribeAudio(audioBlob, language = "en") {
     const formData = new FormData();
@@ -60,6 +76,28 @@ export const apiClient = {
   async getSectorIntelligence(symbol) {
     const res = await fetch(`${API_BASE_URL}/api/stocks/${symbol}/sector-intelligence`);
     if (!res.ok) throw new Error("Failed to fetch sector intelligence");
+    return await res.json();
+  },
+
+  async getSmartAlertIntelligence(symbol, lookback = "3M") {
+    const res = await fetch(`${API_BASE_URL}/api/stocks/${symbol}/smart-alert-intelligence?lookback=${encodeURIComponent(lookback)}`);
+    if (!res.ok) throw new Error("Failed to fetch smart alert intelligence");
+    return await res.json();
+  },
+
+  async getCandlestickIntelligence(symbol) {
+    const res = await fetch(`${API_BASE_URL}/api/stocks/${symbol}/candlestick-intelligence`);
+    if (!res.ok) throw new Error("Failed to fetch candlestick intelligence");
+    return await res.json();
+  },
+
+  async askCandlestickCopilot(symbol, question, history = []) {
+    const res = await fetch(`${API_BASE_URL}/api/stocks/${symbol}/candlestick-chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, history })
+    });
+    if (!res.ok) throw new Error("Failed to query candlestick copilot");
     return await res.json();
   },
 
@@ -150,6 +188,16 @@ export const apiClient = {
 
   async getLiveNews(query = "") {
     const res = await fetch(`${API_BASE_URL}/api/news/live?query=${encodeURIComponent(query)}`);
+    return await res.json();
+  },
+
+  async askNewsCopilot(query, newsId = null, history = []) {
+    const res = await fetch(`${API_BASE_URL}/api/news/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, news_id: newsId, history }),
+    });
+    if (!res.ok) throw new Error("Failed to query news copilot");
     return await res.json();
   },
 };

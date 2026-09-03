@@ -548,6 +548,226 @@ INSTRUCTIONS:
                     reply_text = f"Navigating to Sector Intelligence for {comp['name']}. Overall AI Score is {overall_sc}/100 rated {tag_val}. {thesis_read}"
 
     # =========================================================================
+    # 2.5. SMART ALERTS & DEEP MEMORY INTELLIGENCE INTENT
+    # =========================================================================
+    elif any(w in q_lower for w in [
+        "smart alert", "smart alerts", "deep alert", "deep alerts", "alert intelligence",
+        "stance", "ai stance", "purchase wait avoid", "wait watch", "entry quality",
+        "why alert", "why was this alert generated", "evidence layer", "evidence layers",
+        "before buy", "before buy improves", "upgrade criteria", "what must happen",
+        "invalidation alert", "invalidation rule", "invalidation condition", "invalid kab",
+        "pattern memory", "last few months pattern", "historical pattern memory",
+        "news reaction timeline", "event memory", "reaction timeline",
+        "अलर्ट", "स्मार्ट अलर्ट", "स्टांस", "बाय इम्प्रूव", "इनवैलिडेशन", "पैटर्न मेमोरी"
+    ]) or (
+        "alert" in q_lower and any(w in q_lower for w in ["reliance", "tcs", "hdfc", "tata", "infy", "sun", "zomato", "show", "dikhao", "batao", "kya"])
+    ):
+        from services.smart_alert_service import get_smart_alert_intelligence
+
+        lookback = "3M"
+        if any(w in q_lower for w in ["1 month", "1m", "1 mahina", "एक महीना"]):
+            lookback = "1M"
+        elif any(w in q_lower for w in ["6 month", "6m", "6 mahine", "छह महीने"]):
+            lookback = "6M"
+        elif any(w in q_lower for w in ["1 year", "1y", "1 saal", "एक साल"]):
+            lookback = "1Y"
+
+        alert_data = get_smart_alert_intelligence(detected_symbol, lookback)
+        dec = alert_data.get("decision_layer", {})
+        stance_val = dec.get("stance", "WAIT / WATCH")
+        stance_conf = dec.get("stance_confidence", 78)
+        entry_q = dec.get("entry_quality", 62)
+        risk_lvl = dec.get("risk_level", "Medium")
+
+        action_payload = {
+            "type": "NAVIGATE_AND_SELECT",
+            "target_page": "alerts",
+            "command": "SMART_ALERT_ACTION",
+            "params": {
+                "symbol": detected_symbol,
+                "lookback": lookback
+            }
+        }
+
+        # Dynamically generate AI Voice Agent reply via Gemini 2.5 Flash
+        reply_text = ""
+        if gemini_client:
+            try:
+                lang_rule = (
+                    "The client has selected HINDI. You MUST respond exclusively in natural, grammatically pure Hindi in Devanagari script."
+                    if is_hindi else
+                    "The client has selected HINGLISH. Speak in natural Dalal Street professional Hinglish."
+                    if is_hinglish else
+                    "The client has selected ENGLISH. Deliver your complete answer in crisp, professional institutional English without retail fluff."
+                )
+
+                prompt_agent = f"""You are MarketMind AI Copilot — Chief Investment Officer and Senior Quantitative Equity Strategist.
+The client asked: "{user_query}"
+Current Company: {comp['name']} ({detected_symbol}) | Price: ₹{alert_data.get('price', 1000):,.2f} ({alert_data.get('change', '+0.0%')})
+
+LIVE DEEP ALERT INTELLIGENCE & MARKET MEMORY TELEMETRY (EXACT ACTIVE UI DATA):
+- Current AI Stance: {stance_val} ({stance_conf}% confidence)
+- Entry Quality Score: {entry_q}/100 | Risk Level: {risk_lvl}
+- Stance Rationale: {dec.get('stance_explanation', '')}
+- Price Alert Banner: {alert_data.get('price_alert_banner', {}).get('title')} ({alert_data.get('price_alert_banner', {}).get('pattern_match_pct')}% match)
+- 6 Evidence Layers: {[l.get('title') + ' (' + l.get('badge') + '): ' + l.get('desc') for l in alert_data.get('why_alert_generated', {}).get('layers', [])]}
+- Upgrade Conditions (What Must Happen Before Buy): {[c.get('title') + ' [' + c.get('status') + ']' for c in alert_data.get('thesis_upgrade', {}).get('conditions', [])]}
+- Invalidation Rule: {alert_data.get('thesis_upgrade', {}).get('invalidation', {}).get('desc')}
+- Top Pattern Memory Matches: {[p.get('title') + ' (' + p.get('badge') + ', Avg follow-through ' + p.get('stat_2_val') + ')' for p in alert_data.get('pattern_memory', {}).get('patterns', [])]}
+- Event Reaction Timeline: {[e.get('period') + ': ' + e.get('title') + ' (' + e.get('reaction_pct') + ' ' + e.get('tag') + ')' for e in alert_data.get('news_reaction_timeline', {}).get('events', [])]}
+
+INSTRUCTIONS:
+1. Deliver a natural, high-conviction 25-35 word verbal response directly answering the client's query.
+2. Quote the exact numbers from the data above (e.g. Stance {stance_val}, Confidence {stance_conf}%, Entry Quality {entry_q}/100) so your response precisely matches what is visible on the screen.
+3. {lang_rule}
+4. Never output markdown asterisks (no '**'). Keep sentences clean and ready for text-to-speech.
+"""
+                res = await asyncio.wait_for(
+                    asyncio.to_thread(
+                        gemini_client.models.generate_content,
+                        model="gemini-2.5-flash",
+                        contents=prompt_agent,
+                        config={"temperature": 0.25}
+                    ),
+                    timeout=3.5
+                )
+                if res and res.text:
+                    reply_text = res.text.strip()
+            except Exception as e:
+                print(f"Smart Alert AI generation error/timeout: {e}")
+
+        # Dynamic fallback if Gemini is offline
+        if not reply_text:
+            if any(w in q_lower for w in ["invalidation", "invalid"]):
+                inv = alert_data.get("thesis_upgrade", {}).get("invalidation", {})
+                inv_text = inv.get("desc", "If price loses key support with heavy volume, stance shifts to Avoid.")
+                if is_hindi:
+                    reply_text = f"{comp['name']} का इनवैलिडेशन नियम: {inv_text}"
+                elif is_hinglish:
+                    reply_text = f"{comp['name']} ka Invalidation Rule: {inv_text}"
+                else:
+                    reply_text = f"Invalidation rule for {comp['name']}: {inv_text}"
+            elif any(w in q_lower for w in ["why", "evidence", "क्यो"]):
+                ev_cnt = alert_data.get("why_alert_generated", {}).get("evidence_count", 6)
+                if is_hindi:
+                    reply_text = f"{comp['name']} के लिए {ev_cnt} एविडेंस लेयर्स एक्टिव हैं। ब्रेकआउट सपोर्ट होल्ड हो रहा है और वॉल्यूम क्वालिटी सुधर रही है, लेकिन वैल्यूएशन स्ट्रेच मार्जिन ऑफ सेफ्टी को सीमित कर रहा है।"
+                elif is_hinglish:
+                    reply_text = f"{comp['name']} ke liye {ev_cnt} evidence layers evaluate hui hain. Breakout support hold ho raha hai aur volume improve ho raha hai, lekin valuation multiple entry comfort limit kar raha hai."
+                else:
+                    reply_text = f"Evaluating {ev_cnt} evidence layers for {comp['name']}. Price breakout support holds and volume quality is constructive, but valuation stretch limits margin of safety."
+            elif any(w in q_lower for w in ["before buy", "upgrade", "शर्तें"]):
+                if is_hindi:
+                    reply_text = f"बाय अपग्रेड के लिए वॉल्यूम और ट्रेंड सपोर्ट पहले से संतुष्ट हैं। पेंडिंग शर्तें: वैल्यूएशन का कूल होना या ईपीएस अनुमानों में वृद्धि और सेक्टर कन्फर्मेशन।"
+                elif is_hinglish:
+                    reply_text = f"Buy upgrade ke liye breakout support aur volume quality already met hain. Pending conditions me valuation cooling ya EPS estimate upgrade aur sector confirmation zaroori hai."
+                else:
+                    reply_text = f"Upgrade to Attractive requires valuation multiple cooling or earnings upgrades alongside broader sector confirmation. Breakout support and volume criteria are already satisfied."
+            elif any(w in q_lower for w in ["pattern", "memory"]):
+                top_p = alert_data.get("pattern_memory", {}).get("patterns", [{}])[0]
+                p_title = top_p.get("title", "Accumulation to breakout")
+                p_match = top_p.get("badge", "82% match")
+                if is_hindi:
+                    reply_text = f"{comp['name']} के 3-महीने के पैटर्न मेमोरी में {p_title} ({p_match}) डिटेक्ट हुआ है। ऐतिहासिक रूप से ऐसे सेटअप में औसत फॉलो-थ्रू +5.6% देखा गया है।"
+                elif is_hinglish:
+                    reply_text = f"{comp['name']} ke pattern memory me {p_title} ({p_match}) detect hua hai. Historical setup me average follow-through +5.6% observe hua hai."
+                else:
+                    reply_text = f"Pattern memory identifies {p_title} ({p_match}) for {comp['name']}, with historical setups delivering an average +5.6% follow-through."
+            else:
+                if is_hindi:
+                    reply_text = f"{comp['name']} का डीप अलर्ट प्रस्तुत है। वर्तमान AI स्टांस {stance_val} ({stance_conf}% विश्वास) है और एंट्री क्वालिटी {entry_q}/100 है।"
+                elif is_hinglish:
+                    reply_text = f"{comp['name']} ka Deep Alert Intelligence open ho gaya hai. Current AI Stance {stance_val} ({stance_conf}% confidence) hai aur Entry Quality {entry_q}/100 rated hai."
+                else:
+                    reply_text = f"Displaying Deep Alert Intelligence for {comp['name']}. Current AI Stance is {stance_val} with {stance_conf}% confidence and an Entry Quality score of {entry_q}/100."
+
+    # =========================================================================
+    # 2B. CANDLESTICK INTELLIGENCE & CHART COPILOT INTENT
+    # =========================================================================
+    elif any(w in q_lower for w in [
+        "candlestick", "candle", "pattern", "hammer", "doji", "engulfing", "rejection",
+        "chart intelligence", "chart copilot", "कैंडल", "कैंडलस्टिक", "पैटर्न", "कैंडल पैटर्न",
+        "support resistance", "breakout", "fake breakout", "bull trap", "outcome probability",
+        "probabilistic outlook", "counterfactual", "today's candle", "todays candle"
+    ]):
+        from services.candlestick_intelligence_service import get_candlestick_intelligence
+        c_intel = get_candlestick_intelligence(detected_symbol)
+        
+        c_stance = c_intel.get("decision_stance", {}).get("stance", "WATCH")
+        c_conf = c_intel.get("decision_stance", {}).get("stance_confidence", 72)
+        pat_conf = c_intel.get("probabilistic_outlook", {}).get("pattern_confidence", 81)
+        out_conf = c_intel.get("probabilistic_outlook", {}).get("outcome_confidence", 58)
+        sup_str = c_intel.get("chart_support_resistance", {}).get("support_label", "Support")
+        res_str = c_intel.get("chart_support_resistance", {}).get("resistance_label", "Resistance")
+        pat_name = c_intel.get("ai_setup", {}).get("headline", "Rejection Candle near Support")
+        upg_rule = c_intel.get("counterfactual_engine", {}).get("upgrade_conditions", [""])[0]
+        inv_rule = c_intel.get("counterfactual_engine", {}).get("downgrade_conditions", [""])[0]
+
+        action_payload = {
+            "type": "NAVIGATE_AND_SELECT",
+            "target_page": "candles",
+            "command": "SHOW_CANDLESTICK_INTELLIGENCE",
+            "params": {
+                "symbol": detected_symbol
+            }
+        }
+
+        if is_hindi:
+            reply_text = f"{comp['name']} में {pat_name} डिटेक्ट हुआ है {sup_str} के पास। पैटर्न मैच {pat_conf}% है, लेकिन आउटकम कॉन्फिडेंस {out_conf}% है। करंट रुख {c_stance} है। {upg_rule} होने पर रुख बेहतर होगा, और {inv_rule} होने पर इनवैलिडेट हो जाएगा।"
+        elif is_hinglish:
+            reply_text = f"{comp['name']} me {pat_name} observe hua hai near {sup_str}. Pattern Confidence {pat_conf}% hai, but empirical Outcome Confidence {out_conf}% hai. AI Stance {c_stance} ({c_conf}%). {upg_rule} par conviction upgrade hogi aur {inv_rule} par view invalid ho jayega."
+        else:
+            reply_text = f"Displaying Candlestick Intelligence for {comp['name']}. Detected {pat_name} near {sup_str}. Pattern Confidence is {pat_conf}% while Outcome Confidence is {out_conf}%. Current Stance is {c_stance} ({c_conf}%). Invalidation level is {inv_rule}."
+
+    # =========================================================================
+    # 2C. FINANCIAL NEWS & CATALYST IMPACT INTENT
+    # =========================================================================
+    elif any(w in q_lower for w in [
+        "news", "headline", "headlines", "catalyst", "event", "breaking",
+        "न्यूज़", "खबर", "खबरें", "ताज़ा खबर", "समाचार", "le test news", "market news",
+        "latest news", "top news", "ripple", "feed"
+    ]):
+        from services.live_news_service import get_news_intelligence, lookup_news_by_topic
+        news_intel = get_news_intelligence("All")
+        matched_item = lookup_news_by_topic(user_query) or (news_intel.get("articles", [])[0] if news_intel.get("articles") else {})
+
+        item_title = matched_item.get("title", "Market Update")
+        item_source = matched_item.get("source", "Financial Press")
+        item_ben = matched_item.get("beneficiaries", "Market Leaders")
+        item_risk = matched_item.get("headwinds", "Sector volatility")
+        item_tickers = matched_item.get("tickers", [detected_symbol])
+
+        wants_copilot = any(k in q_lower for k in ["copilot", "कोपलट", "कॉपायलट", "chat", "ask", "पूंछो", "पूछो", "सवाल", "drawer", "panel"])
+
+        action_payload = {
+            "type": "NAVIGATE_AND_SELECT",
+            "target_page": "news",
+            "command": "SHOW_NEWS",
+            "params": {
+                "symbol": item_tickers[0] if item_tickers else detected_symbol,
+                "category": matched_item.get("category", "All"),
+                "news_id": matched_item.get("id"),
+                "open_copilot": wants_copilot,
+                "query": user_query
+            }
+        }
+
+        if is_hindi:
+            if wants_copilot:
+                reply_text = f"मैंने '{item_title}' के लिए न्यूज़ कॉपायलट खोल दिया है। इसका मुख्य प्रभाव {item_ben} पर है। आप कॉपायलट में कोई भी सवाल पूछ सकते हैं।"
+            else:
+                reply_text = f"ताज़ा मार्केट न्यूज़ में '{item_title}' ({item_source}) सबसे प्रमुख है। इसका मुख्य फायदा {item_ben} को मिल रहा है, जबकि {item_risk} पर नज़र रखनी होगी।"
+        elif is_hinglish:
+            if wants_copilot:
+                reply_text = f"Maine '{item_title}' ke liye News Copilot drawer open kar diya hai. Iska main impact {item_ben} par hai. Poochiye aapka targeted question."
+            else:
+                reply_text = f"Market news me top headline '{item_title}' ({item_source}) hai. Iska primary positive impact {item_ben} par hai, jabki key risk {item_risk} observe karna hoga."
+        else:
+            if wants_copilot:
+                reply_text = f"Opened MarketMind News Copilot for '{item_title}'. Primary beneficiary is {item_ben}. Ask any targeted questions regarding sector ripples."
+            else:
+                reply_text = f"Displaying Latest Financial News. Key headline is '{item_title}' via {item_source}. Primary beneficiaries include {item_ben}, with risks centered on {item_risk}."
+
+    # =========================================================================
     # 3. INVESTMENT THESIS BREAKER INTENT
     # =========================================================================
     elif any(w in q_lower for w in ["thesis breaker", "thesis break", "investment thesis", "कोर थीसिस", "थीसिस ब्रेकर"]):
@@ -812,6 +1032,15 @@ INSTRUCTIONS:
                 from services.sector_intelligence_service import get_sector_intelligence_data
                 sec_intel = get_sector_intelligence_data(detected_symbol)
 
+                from services.smart_alert_service import get_smart_alert_intelligence
+                alert_intel = get_smart_alert_intelligence(detected_symbol, "3M")
+
+                from services.candlestick_intelligence_service import get_candlestick_intelligence
+                c_intel = get_candlestick_intelligence(detected_symbol)
+
+                from services.live_news_service import get_news_intelligence
+                news_intel = get_news_intelligence("All")
+
                 system_inst = f"""You are MarketMind AI Copilot — Chief Investment Officer (CIO) and Senior Quantitative Equity Strategist.
 You speak with decisive institutional authority, mathematical precision, and actionable clarity.
 
@@ -825,6 +1054,28 @@ REAL-TIME TELEMETRY FOR {comp['name']} ({detected_symbol}):
 - Key Institutional Catalyst: {thesis.get('catalyst', 'Leadership compounding and margin expansion')}
 - HFT Quantitative Flow: {thesis.get('hft_pattern', 'Order Block Inflow')}
 - Forensic Divergence: {divergence_score} | Management Trust Score: {trust_score}/100
+
+ACTIVE CANDLESTICK INTELLIGENCE & CHART COPILOT (EXACT ACTIVE UI DATA):
+- Active Pattern: {c_intel.get('ai_setup', {}).get('headline')}
+- Pattern Match Confidence: {c_intel.get('probabilistic_outlook', {}).get('pattern_confidence')}/100 | Outcome Confidence: {c_intel.get('probabilistic_outlook', {}).get('outcome_confidence')}/100
+- Probabilistic 5-Session Forecast: Bullish {c_intel.get('probabilistic_outlook', {}).get('bullish_pct')}%, Range {c_intel.get('probabilistic_outlook', {}).get('range_pct')}%, Bearish {c_intel.get('probabilistic_outlook', {}).get('bearish_pct')}%
+- Support Zone: {c_intel.get('chart_support_resistance', {}).get('support_label')} (Quality: {c_intel.get('probabilistic_outlook', {}).get('support_quality')})
+- Resistance Zone: {c_intel.get('chart_support_resistance', {}).get('resistance_label')} (Breakout Quality: {c_intel.get('probabilistic_outlook', {}).get('breakout_quality')})
+- Candlestick Stance: {c_intel.get('decision_stance', {}).get('stance')} ({c_intel.get('decision_stance', {}).get('stance_confidence')}% confidence)
+- Rationale: {c_intel.get('decision_stance', {}).get('explanation')}
+- 6 Evidence Layers: {[e.get('title') + ' [' + e.get('badge') + ']' for e in c_intel.get('evidence_layers', [])]}
+- Historical Backtest: 24 similar cases -> 12 Bullish (+1.9% 5D, +4.7% 20D), 8 Range, 4 Bearish
+- Upgrade Rule: {c_intel.get('counterfactual_engine', {}).get('upgrade_conditions', [''])[0]}
+- Invalidation Rule: {c_intel.get('counterfactual_engine', {}).get('downgrade_conditions', [''])[0]}
+
+ACTIVE SMART ALERT & DEEP MEMORY METRICS (EXACT ACTIVE UI DATA):
+- AI Stance: {alert_intel.get('decision_layer', {}).get('stance', 'WAIT / WATCH')} ({alert_intel.get('decision_layer', {}).get('stance_confidence', 78)}% confidence)
+- Entry Quality: {alert_intel.get('decision_layer', {}).get('entry_quality', 62)}/100 | Risk Level: {alert_intel.get('decision_layer', {}).get('risk_level', 'Medium')}
+- Stance Rationale: {alert_intel.get('decision_layer', {}).get('stance_explanation', '')}
+- 6 Evidence Layers: {[l.get('title') + ' (' + l.get('badge') + ')' for l in alert_intel.get('why_alert_generated', {}).get('layers', [])]}
+- Upgrade Conditions: {[c.get('title') + ' [' + c.get('status') + ']' for c in alert_intel.get('thesis_upgrade', {}).get('conditions', [])]}
+- Invalidation Rule: {alert_intel.get('thesis_upgrade', {}).get('invalidation', {}).get('desc')}
+- Top Pattern Memory: {[p.get('title') + ' (' + p.get('badge') + ')' for p in alert_intel.get('pattern_memory', {}).get('patterns', [])]}
 
 ACTIVE SECTOR DECISION ENGINE METRICS (EXACT ACTIVE UI DATA):
 - Sector Comparison Score: {sec_intel.get('overall_score', 78)}/100 | Stance: {sec_intel.get('tag', 'SELECTIVE ACCUMULATION')}
@@ -843,6 +1094,12 @@ ACTIVE SECTOR DECISION ENGINE METRICS (EXACT ACTIVE UI DATA):
   * +150 bps Margin: Margin Delta +1.5%, Score -> {sec_intel.get('scenarios', {}).get('+150 bps Margin', {}).get('score_after')}
   * +100 bps Rates: Margin Delta {sec_intel.get('scenarios', {}).get('+100 bps Rates', {}).get('margin_delta')}%, Score -> {sec_intel.get('scenarios', {}).get('+100 bps Rates', {}).get('score_after')}
   * -5% Revenue: Margin Delta {sec_intel.get('scenarios', {}).get('-5% Revenue Growth', {}).get('margin_delta')}%, Score -> {sec_intel.get('scenarios', {}).get('-5% Revenue Growth', {}).get('score_after')}
+
+ACTIVE FINANCIAL NEWS & SENTINEL INTEL (EXACT ACTIVE UI DATA):
+- Market Sentiment Sentinel: {news_intel.get('sentiment_sentinel', {}).get('sentiment_label')} ({news_intel.get('sentiment_sentinel', {}).get('bullish_pct')}% Bullish Dominance, {news_intel.get('sentiment_sentinel', {}).get('positive_catalysts')} Positive Catalysts)
+- Top Market Headlines: {[a.get('title') + ' [' + a.get('source') + ']' for a in news_intel.get('articles', [])[:3]]}
+- Executive News Analysis: {news_intel.get('executive_analysis')}
+- Executive Market Outcome: {news_intel.get('executive_outcome')}
 
 STRICT RESPONSE DIRECTIVES:
 1. Directly answer the client's question using the exact facts and quantitative data for {comp['name']}. If the user asks about sector comparison, peers, why-gap, thesis unlock, or shock scenarios, quote the EXACT numbers from the ACTIVE SECTOR DECISION ENGINE METRICS above.

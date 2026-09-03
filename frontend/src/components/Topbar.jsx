@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Topbar({ eyebrow, title, onOpenSidebar, backendOnline, backendLatency }) {
+export default function Topbar({ eyebrow, title, onOpenSidebar, backendOnline, backendLatency, searchQuery, onSearchChange }) {
   return (
     <div className="topbar">
       <button className="hamburger" onClick={onOpenSidebar} aria-label="Open navigation">
@@ -20,7 +20,30 @@ export default function Topbar({ eyebrow, title, onOpenSidebar, backendOnline, b
           <circle cx="11" cy="11" r="7"/>
           <path d="M21 21l-4.3-4.3"/>
         </svg>
-        <input type="text" placeholder="Search tickers, reports, sectors…" />
+        <input
+          type="text"
+          placeholder="Search tickers, reports, sectors, news…"
+          value={searchQuery || ""}
+          onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+        />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => onSearchChange && onSearchChange("")}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--ink-soft)",
+              fontSize: "12px",
+              padding: "0 6px",
+              lineHeight: 1
+            }}
+            title="Clear search"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       <button className="icon-btn" aria-label="Notifications">
