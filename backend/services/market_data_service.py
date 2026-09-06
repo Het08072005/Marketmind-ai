@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 from typing import Dict, List, Optional, Any
-from services.stock_service import get_all_companies, get_company_by_symbol
+from services.stock_service import get_all_companies, get_company_by_symbol, update_company_live_metrics
 
 # Symbol mapping: Internal symbol -> NSE Yahoo Ticker
 SYMBOL_TO_YAHOO = {
@@ -332,8 +332,6 @@ def detect_candlestick_patterns(df: pd.DataFrame) -> List[Dict[str, Any]]:
                 "desc": "Price is testing current support band."
             })
 
-    return patterns
-
 def sanitize_float(val, default=0.0):
     try:
         f = float(val)
@@ -342,6 +340,110 @@ def sanitize_float(val, default=0.0):
         return f
     except (TypeError, ValueError):
         return default
+
+# In-memory fundamentals cache (TTL 3600s / 1 hour)
+_FUNDAMENTALS_CACHE: Dict[str, Dict[str, Any]] = {}
+_FUNDAMENTALS_CACHE_TS: Dict[str, float] = {}
+FUNDAMENTALS_CACHE_TTL = 3600  # 1 hour
+
+def format_inr_market_cap(mcap: float) -> str:
+    """Formats numeric market capitalization in Indian Lakh Crores / Crores."""
+    if not mcap or mcap <= 0:
+        return "₹1.0L Cr"
+    crores = mcap / 10000000.0  # 1 Cr = 10,000,000 INR
+    if crores >= 100000:
+        return f"₹{crores/100000:.1f}L Cr"
+    elif crores >= 1000:
+        return f"₹{crores/1000:.1f}k Cr"
+    else:
+        return f"₹{crores:.0f} Cr"
+
+def fetch_ticker_fundamentals(ticker: yf.Ticker, sym_upper: str, live_price: float, fallback_comp: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Extracts live valuation and capital structure ratios directly from Yahoo Finance:
+    - trailingPE / dynamic PE = live_price / EPS
+    - priceToBook (P/B)
+    - returnOnEquity (ROE %)
+    - profitMargins (Net Margin %)
+    - revenueGrowth (Revenue Growth %)
+    - debtToEquity
+    - marketCap (Live Market Capitalization)
+    - 52-week High / Low
+    """
+    global _FUNDAMENTALS_CACHE, _FUNDAMENTALS_CACHE_TS
+    now = time.time()
+    if sym_upper in _FUNDAMENTALS_CACHE and (now - _FUNDAMENTALS_CACHE_TS.get(sym_upper, 0) < FUNDAMENTALS_CACHE_TTL):
+        cached = dict(_FUNDAMENTALS_CACHE[sym_upper])
+        if cached.get("eps") and cached["eps"] > 0 and live_price > 0:
+            cached["pe_ratio"] = round(live_price / cached["eps"], 1)
+        return cached
+
+    fund: Dict[str, Any] = {}
+    
+    # 1. Fast info extraction (sub-millisecond, zero web overhead)
+    try:
+        fi = ticker.fast_info
+        mcap = fi.get("marketCap") or fi.get("market_cap")
+        if mcap:
+            fund["market_cap_raw"] = float(mcap)
+            fund["market_cap"] = format_inr_market_cap(float(mcap))
+        fifty_two_h = fi.get("yearHigh") or fi.get("fiftyTwoWeekHigh")
+        if fifty_two_h:
+            fund["fifty_two_week_high"] = round(float(fifty_two_h), 2)
+        fifty_two_l = fi.get("yearLow") or fi.get("fiftyTwoWeekLow")
+        if fifty_two_l:
+            fund["fifty_two_week_low"] = round(float(fifty_two_l), 2)
+    except Exception:
+        pass
+
+    # 2. In-depth quarterly fundamentals from ticker.info
+    try:
+        info = ticker.info
+        if info:
+            trailing_pe = info.get("trailingPE") or info.get("forwardPE")
+            if trailing_pe and float(trailing_pe) > 0:
+                pe_val = round(float(trailing_pe), 1)
+                fund["pe_ratio"] = pe_val
+                fund["eps"] = round(live_price / pe_val, 2) if pe_val > 0 else 50.0
+
+            pb = info.get("priceToBook")
+            if pb and float(pb) > 0:
+                fund["pb_ratio"] = round(float(pb), 1)
+
+            roe = info.get("returnOnEquity")
+            if roe is not None:
+                r_val = float(roe)
+                fund["roe"] = round(r_val * 100, 1) if r_val < 1.0 else round(r_val, 1)
+
+            net_margin = info.get("profitMargins")
+            if net_margin is not None:
+                nm_val = float(net_margin)
+                fund["net_margin"] = round(nm_val * 100, 1) if nm_val < 1.0 else round(nm_val, 1)
+
+            rev_growth = info.get("revenueGrowth")
+            if rev_growth is not None:
+                rg_val = float(rev_growth)
+                fund["revenue_growth"] = round(rg_val * 100, 1) if rg_val < 1.0 else round(rg_val, 1)
+
+            debt_to_eq = info.get("debtToEquity")
+            if debt_to_eq is not None:
+                de_val = float(debt_to_eq)
+                fund["debt_to_equity"] = round(de_val / 100.0, 2) if de_val > 10 else round(de_val, 2)
+
+            if "market_cap" not in fund and info.get("marketCap"):
+                fund["market_cap_raw"] = float(info["marketCap"])
+                fund["market_cap"] = format_inr_market_cap(float(info["marketCap"]))
+    except Exception:
+        pass
+
+    # Merge with fallback defaults if missing
+    for k in ["pe_ratio", "pb_ratio", "roe", "net_margin", "revenue_growth", "debt_to_equity", "market_cap"]:
+        if k not in fund and fallback_comp.get(k) is not None:
+            fund[k] = fallback_comp[k]
+
+    _FUNDAMENTALS_CACHE[sym_upper] = fund
+    _FUNDAMENTALS_CACHE_TS[sym_upper] = now
+    return fund
 
 def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
     global _QUOTE_CACHE
@@ -397,8 +499,11 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
             else:
                 last_trade_time_str = f"{trade_date_str}, 15:30 IST"
 
+            fundamentals = fetch_ticker_fundamentals(ticker, sym_upper, live_price, fallback_comp)
+
             result = {
                 **fallback_comp,
+                **fundamentals,
                 "symbol": sym_upper,
                 "price": live_price,
                 "change": formatted_change,
@@ -429,6 +534,7 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
             }
             
             _QUOTE_CACHE[sym_upper] = {"data": result, "_ts": now}
+            update_company_live_metrics(sym_upper, result)
             return result
     except Exception as e:
         print(f"yfinance fetch error for {sym_upper}: {e}")

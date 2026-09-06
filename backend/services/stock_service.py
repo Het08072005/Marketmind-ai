@@ -41,6 +41,17 @@ def get_company_by_symbol(symbol: str) -> Optional[Dict]:
     }
     return dynamic_comp
 
+def update_company_live_metrics(symbol: str, metrics: Dict) -> None:
+    """Dynamically merges real-time live telemetry (prices, P/E, ROE, Market Cap) into registry."""
+    if not symbol or not metrics:
+        return
+    symbol_clean = symbol.upper().replace(".NS", "").replace(".BO", "").strip()
+    if symbol_clean in _COMPANIES_MAP:
+        # Keep non-null live metrics updated
+        for k, v in metrics.items():
+            if v is not None:
+                _COMPANIES_MAP[symbol_clean][k] = v
+
 def get_sector_peers(sector: str) -> List[Dict]:
     """Returns all peers within a given sector."""
     sec_lower = (sector or "").lower()

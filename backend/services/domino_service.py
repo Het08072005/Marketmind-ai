@@ -190,7 +190,19 @@ SCENARIOS_CATALOG = {
 }
 
 def get_domino_scenarios() -> List[Dict[str, Any]]:
-    return list(SCENARIOS_CATALOG.values())
+    from services.macro_data_service import get_live_macro_rates
+    rates_map = get_live_macro_rates().get("rates_map", {})
+    scenarios = []
+    for k, sc in SCENARIOS_CATALOG.items():
+        s_copy = dict(sc)
+        if s_copy.get("asset") == "BRENT" and "BRENT" in rates_map:
+            s_copy["benchmark_price"] = rates_map["BRENT"]["price"]
+        elif s_copy.get("asset") == "USDINR" and "USD_INR" in rates_map:
+            s_copy["benchmark_price"] = rates_map["USD_INR"]["price"]
+        elif "GOLD" in s_copy.get("asset", "") and "GOLD" in rates_map:
+            s_copy["benchmark_price"] = rates_map["GOLD"]["price"]
+        scenarios.append(s_copy)
+    return scenarios
 
 # Backward compatibility alias
 get_domino_events = get_domino_scenarios

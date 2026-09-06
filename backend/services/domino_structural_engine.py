@@ -7,13 +7,44 @@ KNOWLEDGE_GRAPH_FILE = os.path.join(
 )
 
 def load_knowledge_graph() -> Dict[str, Any]:
+    kg = {}
     if os.path.exists(KNOWLEDGE_GRAPH_FILE):
         try:
             with open(KNOWLEDGE_GRAPH_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                kg = json.load(f)
         except Exception as e:
             print(f"Error loading knowledge graph: {e}")
-    return {}
+            kg = {}
+            
+    # Overlay real-time live commodity spot prices onto graph nodes
+    try:
+        from services.macro_data_service import get_live_macro_rates
+        live_macro = get_live_macro_rates().get("rates_map", {})
+        commodities = kg.get("nodes", {}).get("commodities", {})
+        if "BRENT" in commodities and "BRENT" in live_macro:
+            commodities["BRENT"]["current_base_price"] = live_macro["BRENT"]["price"]
+        if "DUBAI_CRUDE" in commodities and "BRENT" in live_macro:
+            commodities["DUBAI_CRUDE"]["current_base_price"] = round(live_macro["BRENT"]["price"] * 0.985, 2)
+        if "NATURAL_GAS" in commodities and "NATURAL_GAS" in live_macro:
+            commodities["NATURAL_GAS"]["current_base_price"] = live_macro["NATURAL_GAS"]["price"]
+        if "GOLD" in commodities and "GOLD" in live_macro:
+            commodities["GOLD"]["current_base_price"] = live_macro["GOLD"]["price"]
+        if "COPPER" in commodities and "COPPER" in live_macro:
+            commodities["COPPER"]["current_base_price"] = live_macro["COPPER"]["price"]
+        if "ATF" in commodities and "BRENT" in live_macro:
+            crude_p = live_macro["BRENT"]["price"]
+            commodities["ATF"]["current_base_price"] = round(98500 * (crude_p / 82.40), 0)
+
+        # Overlay live FX & Sovereign yields
+        macro_vars = kg.get("nodes", {}).get("macro_variables", {})
+        if "USDINR" in macro_vars and "USD_INR" in live_macro:
+            macro_vars["USDINR"]["current_level"] = live_macro["USD_INR"]["price"]
+        if "IN_10Y_GSEC" in macro_vars and "US_10Y" in live_macro:
+            macro_vars["IN_10Y_GSEC"]["current_level"] = round(live_macro["US_10Y"]["price"] + 2.85, 2)
+    except Exception:
+        pass
+
+    return kg
 
 def calculate_company_structural_impact(
     symbol: str,

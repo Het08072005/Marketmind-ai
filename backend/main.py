@@ -15,6 +15,7 @@ from routes.reports import reports_router
 from routes.thesis import router as thesis_router
 from routes.dna import router as dna_router
 from routes.dependency import router as dependency_router
+from routes.macro import router as macro_router
 
 app = FastAPI(
     title="MarketMind AI — Financial Intelligence Terminal Backend",
@@ -34,6 +35,7 @@ app.add_middleware(
 # Register Sub-Routers
 app.include_router(voice_router)
 app.include_router(stocks_router)
+app.include_router(macro_router)
 app.include_router(domino_router)
 app.include_router(thesis_router)
 app.include_router(dna_router)
