@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { apiClient } from "../api/client";
 
 function formatCopilotMessage(text) {
@@ -123,6 +123,528 @@ function getStockAnalysisPoints(stock) {
   ];
 }
 
+function MiniInteractivePriceChart({ stock, initialMode = "line", onModeChange, onClose }) {
+  const [mode, setMode] = useState(initialMode); // "line" | "candles"
+  const [timeframe, setTimeframe] = useState("1D");
+  const [chartData, setChartData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [hoverPoint, setHoverPoint] = useState(null);
+
+  useEffect(() => {
+    setMode(initialMode);
+  }, [initialMode]);
+
+  const handleSetMode = (m) => {
+    setMode(m);
+    if (onModeChange) onModeChange(m);
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    const sym = (stock?.symbol || "COALINDIA").toUpperCase();
+    apiClient.getStockChart(sym, timeframe)
+      .then((res) => {
+        if (isMounted && res) {
+          setChartData(res);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error("Live chart fetch error:", err);
+        if (isMounted) setLoading(false);
+      });
+    return () => { isMounted = false; };
+  }, [stock?.symbol, timeframe]);
+
+  const currentPrice = chartData?.current_price ?? (Number(stock?.price) || 0);
+  const changeStr = chartData?.change_str ?? (stock?.change || "+0.0%");
+  const changeValStr = chartData?.change_val_str ?? "";
+  const isPositive = chartData ? chartData.is_positive : !String(changeStr).startsWith("-");
+  const prevClose = chartData?.prev_close ?? null;
+  const openPrice = chartData?.open_price ?? null;
+  const highPrice = chartData?.high_price ?? null;
+  const lowPrice = chartData?.low_price ?? null;
+  const marketCap = chartData?.market_cap ?? (stock?.market_cap || "—");
+  const peRatio = chartData?.pe_ratio ?? (stock?.pe_ratio || "—");
+  const divYield = chartData?.div_yield ?? "2.1%";
+  const qtrlyDiv = chartData?.qtrly_div ?? "1.00";
+  const high52w = chartData?.high_52w ?? (stock?.high_52w || null);
+  const low52w = chartData?.low_52w ?? (stock?.low_52w || null);
+  const points = chartData?.points || [];
+  const labels = chartData?.labels || ["11:00 am", "1:00 pm", "3:00 pm"];
+  const yTicks = chartData?.y_ticks || [];
+
+  const strokeColor = isPositive ? "#137333" : "#c5221f";
+  const gradientId = `chart-grad-${stock?.symbol || "def"}-${timeframe}`;
+
+  const width = 640;
+  const height = mode === "candles" ? 175 : 160;
+  const padLeft = 52;
+  const padRight = 16;
+  const padTop = 16;
+  const padBottom = 26;
+
+  const plotW = width - padLeft - padRight;
+  const plotH = height - padTop - padBottom;
+
+  const prices = points.map((p) => p.price);
+  const highs = points.map((p) => p.high ?? p.price);
+  const lows = points.map((p) => p.low ?? p.price);
+
+  const minP = points.length > 0
+    ? Math.min(...(mode === "candles" ? lows : prices), prevClose || prices[0])
+    : 100;
+  const maxP = points.length > 0
+    ? Math.max(...(mode === "candles" ? highs : prices), prevClose || prices[0])
+    : 200;
+  const range = Math.max(maxP - minP, 0.5);
+
+  const maxVol = Math.max(...points.map((p) => p.volume || 0), 1);
+
+  const coords = points.map((p, idx) => {
+    const x = padLeft + (idx / Math.max(points.length - 1, 1)) * plotW;
+    const y = padTop + plotH - ((p.price - minP) / range) * plotH;
+    return {
+      x,
+      y,
+      price: p.price,
+      open: p.open ?? p.price,
+      high: p.high ?? p.price,
+      low: p.low ?? p.price,
+      close: p.close ?? p.price,
+      volume: p.volume ?? 0,
+      time: p.time
+    };
+  });
+
+  const candleElements = coords.map((c, idx) => {
+    const isGreen = c.close >= c.open;
+    const highY = padTop + plotH - ((c.high - minP) / range) * plotH;
+    const lowY = padTop + plotH - ((c.low - minP) / range) * plotH;
+    const openY = padTop + plotH - ((c.open - minP) / range) * plotH;
+    const closeY = padTop + plotH - ((c.close - minP) / range) * plotH;
+    const bodyY = Math.min(openY, closeY);
+    const bodyH = Math.max(Math.abs(closeY - openY), 2);
+    const cWidth = Math.max(2.5, Math.min(8.5, (plotW / Math.max(points.length, 1)) * 0.72));
+    const volH = maxVol > 0 ? (c.volume / maxVol) * 22 : 0;
+    const volY = padTop + plotH - volH;
+    const color = isGreen ? "#137333" : "#c5221f";
+
+    return {
+      ...c,
+      idx,
+      isGreen,
+      color,
+      highY,
+      lowY,
+      openY,
+      closeY,
+      bodyY,
+      bodyH,
+      cWidth,
+      volH,
+      volY
+    };
+  });
+
+  let pathD = coords.length > 0 ? `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}` : "";
+  for (let i = 1; i < coords.length; i++) {
+    const prev = coords[i - 1];
+    const curr = coords[i];
+    const cp1x = prev.x + (curr.x - prev.x) * 0.45;
+    const cp1y = prev.y;
+    const cp2x = curr.x - (curr.x - prev.x) * 0.45;
+    const cp2y = curr.y;
+    pathD += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`;
+  }
+
+  const areaD = coords.length > 0
+    ? `${pathD} L ${coords[coords.length - 1].x.toFixed(1)} ${(padTop + plotH).toFixed(1)} L ${coords[0].x.toFixed(1)} ${(padTop + plotH).toFixed(1)} Z`
+    : "";
+
+  const prevCloseY = prevClose ? (padTop + plotH - ((prevClose - minP) / range) * plotH) : null;
+
+  const handleMouseMove = (e) => {
+    if (coords.length === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clientX = e.clientX - rect.left;
+    const svgX = (clientX / rect.width) * width;
+    let closest = coords[0];
+    let minDist = 99999;
+    for (const pt of coords) {
+      const dist = Math.abs(pt.x - svgX);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = pt;
+      }
+    }
+    setHoverPoint(closest);
+  };
+
+  const handleMouseLeave = () => {
+    setHoverPoint(null);
+  };
+
+  const activeDisplayPrice = hoverPoint ? (hoverPoint.close ?? hoverPoint.price) : currentPrice;
+
+  return (
+    <div
+      id={`google-finance-live-chart-${stock?.symbol}`}
+      className="chart-card"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* 1. Header: Price + Mode Switcher (Line / Candles) + Timeframes + Close */}
+      <div className="chart-header-row" style={{ alignItems: "center" }}>
+        <div>
+          <div className="chart-price-headline">
+            <span className="chart-big-price">
+              {Number(activeDisplayPrice || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="chart-curr-tag">INR</span>
+            </span>
+            <span className={`chart-change-pill ${isPositive ? "pos" : "neg"}`}>
+              {isPositive ? "▲" : "▼"} {changeStr} {changeValStr ? `(${changeValStr})` : ""}
+            </span>
+            <span style={{ fontSize: "11px", color: "#10b981", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px", marginLeft: "6px" }}>
+              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981" }} /> Live yfinance
+            </span>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          {/* Mode Switcher: Line vs Candles */}
+          <div className="chart-mode-pill-toggle">
+            <button
+              type="button"
+              className={`chart-mode-tab-btn ${mode === "line" ? "active" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSetMode("line");
+              }}
+              title="Line Chart view"
+            >
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              <span>Line</span>
+            </button>
+
+            <button
+              type="button"
+              className={`chart-mode-tab-btn ${mode === "candles" ? "active" : ""}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSetMode("candles");
+              }}
+              title="Candlestick Chart view"
+            >
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="9" y1="2" x2="9" y2="6"/>
+                <rect x="7" y="6" width="4" height="9" rx="1"/>
+                <line x1="9" y1="15" x2="9" y2="22"/>
+                <line x1="17" y1="4" x2="17" y2="9"/>
+                <rect x="15" y="9" width="4" height="7" rx="1"/>
+                <line x1="17" y1="16" x2="17" y2="20"/>
+              </svg>
+              <span>Candles</span>
+            </button>
+          </div>
+
+          {/* Timeframe Selector */}
+          <div className="chart-timeframe-selector">
+            {["1D", "5D", "1M", "6M", "YTD", "1Y", "5Y", "Max"].map((tf) => (
+              <button
+                key={tf}
+                type="button"
+                className={`chart-tf-btn ${timeframe === tf ? "active" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTimeframe(tf);
+                }}
+              >
+                {tf}
+              </button>
+            ))}
+          </div>
+
+          {onClose && (
+            <button
+              type="button"
+              className="chart-close-icon-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              title="Close chart"
+              style={{
+                background: "#f1f5f9",
+                border: "1px solid #cbd5e1",
+                borderRadius: "6px",
+                padding: "3px 8px",
+                fontSize: "12px",
+                color: "#64748b",
+                cursor: "pointer",
+                fontWeight: 600,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "4px"
+              }}
+            >
+              <span>✕</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 2. Interactive SVG Plot (Line or Candlesticks) */}
+      <div className="chart-svg-container" style={{ height: `${height}px` }} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
+        {loading && (
+          <div className="chart-loading-overlay">
+            <div className="candle-skeleton-spinner" />
+            <span>Fetching live {timeframe} {mode === "candles" ? "candlesticks" : "data"} from Yahoo Finance...</span>
+          </div>
+        )}
+
+        {hoverPoint && (
+          <div
+            className="chart-tooltip-badge"
+            style={{ left: `${(hoverPoint.x / width) * 100}%`, top: `${(Math.min(hoverPoint.y, 70) / height) * 100}%` }}
+          >
+            {mode === "candles" ? (
+              <div style={{ display: "flex", gap: "7px", alignItems: "center", fontSize: "10.5px" }}>
+                <span>O: ₹{Number(hoverPoint.open ?? hoverPoint.price).toFixed(1)}</span>
+                <span>H: ₹{Number(hoverPoint.high ?? hoverPoint.price).toFixed(1)}</span>
+                <span>L: ₹{Number(hoverPoint.low ?? hoverPoint.price).toFixed(1)}</span>
+                <span>C: ₹{Number(hoverPoint.close ?? hoverPoint.price).toFixed(1)}</span>
+                <span style={{ opacity: 0.7 }}>· {hoverPoint.time}</span>
+              </div>
+            ) : (
+              <span>₹{Number(hoverPoint.price).toLocaleString("en-IN", { minimumFractionDigits: 2 })} · {hoverPoint.time}</span>
+            )}
+          </div>
+        )}
+
+        <svg viewBox={`0 0 ${width} ${height}`} className="chart-svg-element" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={strokeColor} stopOpacity="0.16" />
+              <stop offset="100%" stopColor={strokeColor} stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+
+          {/* Left Y-Axis Gridlines & Labels */}
+          {yTicks.map((tickVal, tIdx) => {
+            const ty = padTop + plotH - ((tickVal - minP) / range) * plotH;
+            return (
+              <g key={tIdx}>
+                <line
+                  x1={padLeft}
+                  y1={ty}
+                  x2={padLeft + plotW}
+                  y2={ty}
+                  stroke="#f1f5f9"
+                  strokeWidth="1"
+                />
+                <text
+                  x={padLeft - 6}
+                  y={ty + 3.5}
+                  textAnchor="end"
+                  fill="#94a3b8"
+                  fontSize="9"
+                  fontFamily="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif"
+                >
+                  {tickVal}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Dotted Previous Close Horizontal Reference Line */}
+          {prevCloseY !== null && prevCloseY >= padTop && prevCloseY <= padTop + plotH && (
+            <g>
+              <line
+                x1={padLeft}
+                y1={prevCloseY}
+                x2={padLeft + plotW}
+                y2={prevCloseY}
+                stroke="#94a3b8"
+                strokeDasharray="3 3"
+                strokeWidth="1.1"
+              />
+              <text
+                x={padLeft + plotW}
+                y={prevCloseY - 4}
+                textAnchor="end"
+                fill="#94a3b8"
+                fontSize="8.5"
+                fontFamily="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif"
+              >
+                Previous close {Number(prevClose).toFixed(2)}
+              </text>
+            </g>
+          )}
+
+          {/* MODE: LINE */}
+          {mode === "line" && (
+            <>
+              {areaD && <path d={areaD} fill={`url(#${gradientId})`} />}
+              {pathD && <path d={pathD} fill="none" stroke={strokeColor} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />}
+              {coords.length > 0 && (hoverPoint ? (
+                <>
+                  <line
+                    x1={hoverPoint.x}
+                    y1={padTop}
+                    x2={hoverPoint.x}
+                    y2={padTop + plotH}
+                    stroke="#64748b"
+                    strokeDasharray="2 2"
+                    strokeWidth="1.2"
+                  />
+                  <circle cx={hoverPoint.x} cy={hoverPoint.y} r="4.5" fill={strokeColor} stroke="#ffffff" strokeWidth="2.5" />
+                </>
+              ) : (
+                <circle
+                  cx={coords[coords.length - 1].x}
+                  cy={coords[coords.length - 1].y}
+                  r="3.5"
+                  fill={strokeColor}
+                  stroke="#ffffff"
+                  strokeWidth="1.5"
+                />
+              ))}
+            </>
+          )}
+
+          {/* MODE: CANDLES */}
+          {mode === "candles" && (
+            <>
+              {/* Volume Bars at Bottom */}
+              {candleElements.map((c, i) => (
+                <rect
+                  key={`vol-${i}`}
+                  x={c.x - c.cWidth / 2}
+                  y={c.volY}
+                  width={c.cWidth}
+                  height={c.volH}
+                  fill={c.isGreen ? "rgba(19, 115, 51, 0.2)" : "rgba(197, 34, 31, 0.2)"}
+                  rx="0.5"
+                />
+              ))}
+
+              {/* Candlestick Wicks (Upper & Lower Shadows) */}
+              {candleElements.map((c, i) => (
+                <line
+                  key={`wick-${i}`}
+                  x1={c.x}
+                  y1={c.highY}
+                  x2={c.x}
+                  y2={c.lowY}
+                  stroke={c.color}
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                />
+              ))}
+
+              {/* Candlestick Real Bodies */}
+              {candleElements.map((c, i) => (
+                <rect
+                  key={`body-${i}`}
+                  x={c.x - c.cWidth / 2}
+                  y={c.bodyY}
+                  width={c.cWidth}
+                  height={c.bodyH}
+                  fill={c.color}
+                  rx="0.8"
+                />
+              ))}
+
+              {/* Hover Crosshair in Candles Mode */}
+              {hoverPoint && (
+                <>
+                  <line
+                    x1={hoverPoint.x}
+                    y1={padTop}
+                    x2={hoverPoint.x}
+                    y2={padTop + plotH}
+                    stroke="#64748b"
+                    strokeDasharray="2 2"
+                    strokeWidth="1.2"
+                  />
+                  <circle
+                    cx={hoverPoint.x}
+                    cy={padTop + plotH - (((hoverPoint.close ?? hoverPoint.price) - minP) / range) * plotH}
+                    r="4"
+                    fill={hoverPoint.close >= hoverPoint.open ? "#137333" : "#c5221f"}
+                    stroke="#ffffff"
+                    strokeWidth="2"
+                  />
+                </>
+              )}
+            </>
+          )}
+
+          {/* Bottom X-Axis Time / Date Labels */}
+          {labels.map((lbl, lIdx) => {
+            const lx = padLeft + (lIdx / Math.max(labels.length - 1, 1)) * plotW;
+            return (
+              <text
+                key={lIdx}
+                x={lx}
+                y={height - 5}
+                textAnchor={lIdx === 0 ? "start" : lIdx === labels.length - 1 ? "end" : "middle"}
+                fill="#94a3b8"
+                fontSize="9"
+                fontFamily="-apple-system, BlinkMacSystemFont, 'Inter', sans-serif"
+              >
+                {lbl}
+              </text>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* 3. Google Finance 3x3 Key Statistics Grid */}
+      <div className="gf-stats-grid">
+        <div className="gf-stat-item">
+          <span className="gf-stat-lbl">Open</span>
+          <span className="gf-stat-val">₹{Number(openPrice || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        </div>
+        <div className="gf-stat-item">
+          <span className="gf-stat-lbl">Mkt cap</span>
+          <span className="gf-stat-val">{marketCap}</span>
+        </div>
+        <div className="gf-stat-item">
+          <span className="gf-stat-lbl">Dividend</span>
+          <span className="gf-stat-val">{divYield}</span>
+        </div>
+        <div className="gf-stat-item">
+          <span className="gf-stat-lbl">High</span>
+          <span className="gf-stat-val">₹{Number(highPrice || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        </div>
+        <div className="gf-stat-item">
+          <span className="gf-stat-lbl">P/E ratio</span>
+          <span className="gf-stat-val">{peRatio}</span>
+        </div>
+        <div className="gf-stat-item">
+          <span className="gf-stat-lbl">Qtrly div</span>
+          <span className="gf-stat-val">₹{qtrlyDiv}</span>
+        </div>
+        <div className="gf-stat-item">
+          <span className="gf-stat-lbl">Low</span>
+          <span className="gf-stat-val">₹{Number(lowPrice || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        </div>
+        <div className="gf-stat-item">
+          <span className="gf-stat-lbl">52-wk high</span>
+          <span className="gf-stat-val">₹{Number(high52w || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        </div>
+        <div className="gf-stat-item">
+          <span className="gf-stat-lbl">52-wk low</span>
+          <span className="gf-stat-val">₹{Number(low52w || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage({ goPage, openAssistant, searchQuery = "", onSearchChange }) {
   const [radarData, setRadarData] = useState(() => {
     try {
@@ -157,13 +679,35 @@ export default function DashboardPage({ goPage, openAssistant, searchQuery = "",
       return true;
     }
   });
+  const [selectedStockSymbol, setSelectedStockSymbol] = useState(() => {
+    return localStorage.getItem("mm_selected_stock") ||
+           localStorage.getItem("mm_selected_candle_symbol") ||
+           window.__SELECTED_STOCK_SYMBOL ||
+           "";
+  });
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [selectedSector, setSelectedSector] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("conviction");
   const [expandedIntel, setExpandedIntel] = useState({});
+  const [expandedCharts, setExpandedCharts] = useState({ COALINDIA: true });
+  const [chartModes, setChartModes] = useState({ COALINDIA: "line" });
   const [dynamicStocks, setDynamicStocks] = useState([]);
   const [isSearchingOnline, setIsSearchingOnline] = useState(false);
+
+  // Global listener so changing stocks from any other page or copilot immediately updates chart
+  useEffect(() => {
+    const handleStockEvent = (e) => {
+      if (e.detail?.symbol) {
+        setSelectedStockSymbol(e.detail.symbol);
+        setExpandedCharts((prev) => ({ ...prev, [e.detail.symbol]: true }));
+      }
+    };
+    window.addEventListener("marketmind:stock_changed", handleStockEvent);
+    return () => window.removeEventListener("marketmind:stock_changed", handleStockEvent);
+  }, []);
+
+
 
   // In-Page Copilot Mini Chat State
   const [activeCopilotStock, setActiveCopilotStock] = useState(null);
@@ -174,6 +718,28 @@ export default function DashboardPage({ goPage, openAssistant, searchQuery = "",
 
   const toggleIntel = (symbol) => {
     setExpandedIntel((prev) => ({ ...prev, [symbol]: !prev[symbol] }));
+  };
+
+  const handleToggleLineChart = (symbol) => {
+    if (expandedCharts[symbol] && (chartModes[symbol] || "line") === "line") {
+      setExpandedCharts((prev) => ({ ...prev, [symbol]: false }));
+    } else {
+      setExpandedCharts((prev) => ({ ...prev, [symbol]: true }));
+      setChartModes((prev) => ({ ...prev, [symbol]: "line" }));
+    }
+  };
+
+  const handleToggleCandlesChart = (symbol) => {
+    if (expandedCharts[symbol] && chartModes[symbol] === "candles") {
+      setExpandedCharts((prev) => ({ ...prev, [symbol]: false }));
+    } else {
+      setExpandedCharts((prev) => ({ ...prev, [symbol]: true }));
+      setChartModes((prev) => ({ ...prev, [symbol]: "candles" }));
+    }
+  };
+
+  const toggleChart = (symbol) => {
+    setExpandedCharts((prev) => ({ ...prev, [symbol]: !prev[symbol] }));
   };
 
   const scrollToBottom = () => {
@@ -295,6 +861,26 @@ export default function DashboardPage({ goPage, openAssistant, searchQuery = "",
     if (sortBy === "price") return b.price - a.price;
     return 0;
   });
+
+  // Automatically keep selected company in sync with active filter/search list
+  useEffect(() => {
+    if (sortedStocks.length > 0) {
+      const exists = sortedStocks.some((s) => s.symbol.toUpperCase() === (selectedStockSymbol || "").toUpperCase());
+      if (!exists) {
+        setSelectedStockSymbol(sortedStocks[0].symbol);
+      }
+    }
+  }, [sortedStocks]);
+
+  const activeHeroStock = useMemo(() => {
+    if (selectedStockSymbol) {
+      const found = sortedStocks.find((s) => s.symbol.toUpperCase() === selectedStockSymbol.toUpperCase()) ||
+                    (radarData?.stocks || []).find((s) => s.symbol.toUpperCase() === selectedStockSymbol.toUpperCase());
+      if (found) return found;
+    }
+    return sortedStocks[0] || radarData?.stocks?.[0] || null;
+  }, [selectedStockSymbol, sortedStocks, radarData]);
+
 
   // Dynamic live search for non-catalog tickers
   const handleSearchOnline = async (queryText) => {
@@ -828,7 +1414,17 @@ export default function DashboardPage({ goPage, openAssistant, searchQuery = "",
                 }
 
                 return (
-                  <div key={stock.symbol} className="radar-stock-row">
+                  <div
+                    key={stock.symbol}
+                    className={`radar-stock-row ${selectedStockSymbol === stock.symbol ? "radar-row-selected" : ""}`}
+                    onClick={() => {
+                      setSelectedStockSymbol(stock.symbol);
+                      localStorage.setItem("mm_selected_stock", stock.symbol);
+                      window.__SELECTED_STOCK_SYMBOL = stock.symbol;
+                    }}
+                    style={{ cursor: "pointer" }}
+                    title={`Click to view details for ${stock.name}`}
+                  >
                     {/* Top Row: Info, Price, Verdict, Probability, Actions */}
                     <div className="radar-row-main">
                       {/* 1. Company Info */}
@@ -911,82 +1507,121 @@ export default function DashboardPage({ goPage, openAssistant, searchQuery = "",
                         </div>
                       </div>
 
-                      {/* 5. Row Action Buttons */}
+                      {/* 5. Row Action Buttons: 2 Neat Rows */}
                       <div className="radar-row-actions">
-                        <button
-                          type="button"
-                          className={`radar-intel-toggle-btn ${expandedIntel[stock.symbol] ? "active" : ""}`}
-                          onClick={() => toggleIntel(stock.symbol)}
-                          title="Toggle deep Market Microstructure & LOB Telemetry"
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="4" y="4" width="16" height="16" rx="2"/>
-                            <rect x="9" y="9" width="6" height="6"/>
-                            <line x1="9" y1="1" x2="9" y2="4"/>
-                            <line x1="15" y1="1" x2="15" y2="4"/>
-                            <line x1="9" y1="20" x2="9" y2="23"/>
-                            <line x1="15" y1="20" x2="15" y2="23"/>
-                            <line x1="20" y1="9" x2="23" y2="9"/>
-                            <line x1="20" y1="14" x2="23" y2="14"/>
-                            <line x1="1" y1="9" x2="4" y2="9"/>
-                            <line x1="1" y1="14" x2="4" y2="14"/>
-                          </svg>
-                          <span>{expandedIntel[stock.symbol] ? "Hide Intel" : "LOB Intel"}</span>
-                        </button>
+                        {/* Row 1: LOB Intel, Copilot, Simulate */}
+                        <div className="radar-actions-row">
+                          <button
+                            type="button"
+                            className={`radar-intel-toggle-btn ${expandedIntel[stock.symbol] ? "active" : ""}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleIntel(stock.symbol);
+                            }}
+                            title="Toggle deep Market Microstructure & LOB Telemetry"
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="4" y="4" width="16" height="16" rx="2"/>
+                              <rect x="9" y="9" width="6" height="6"/>
+                              <line x1="9" y1="1" x2="9" y2="4"/>
+                              <line x1="15" y1="1" x2="15" y2="4"/>
+                              <line x1="9" y1="20" x2="9" y2="23"/>
+                              <line x1="15" y1="20" x2="15" y2="23"/>
+                              <line x1="20" y1="9" x2="23" y2="9"/>
+                              <line x1="20" y1="14" x2="23" y2="14"/>
+                              <line x1="1" y1="9" x2="4" y2="9"/>
+                              <line x1="1" y1="14" x2="4" y2="14"/>
+                            </svg>
+                            <span>{expandedIntel[stock.symbol] ? "Hide Intel" : "LOB Intel"}</span>
+                          </button>
 
-                        <button
-                          type="button"
-                          className={`radar-action-btn ${activeCopilotStock === stock.symbol ? "active" : ""}`}
-                          onClick={() => handleToggleCopilot(stock)}
-                          title={`Chat with Copilot about ${stock.name}`}
-                        >
-                          <CopilotRobotIcon size={16} className="radar-copilot-icon" />
-                          <span>{activeCopilotStock === stock.symbol ? "Copilot Active" : "Copilot"}</span>
-                        </button>
+                          <button
+                            type="button"
+                            className={`radar-action-btn ${activeCopilotStock === stock.symbol ? "active" : ""}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleToggleCopilot(stock);
+                            }}
+                            title={`Chat with Copilot about ${stock.name}`}
+                          >
+                            <CopilotRobotIcon size={14} className="radar-copilot-icon" />
+                            <span>{activeCopilotStock === stock.symbol ? "Copilot Active" : "Copilot"}</span>
+                          </button>
 
-                        <button
-                          type="button"
-                          className="radar-action-btn"
-                          style={{ background: "#0E1526", color: "#F3D59B", borderColor: "rgba(184, 147, 90, 0.4)" }}
-                          onClick={() => {
-                            window.__SELECTED_STOCK_SYMBOL = stock.symbol;
-                            try {
-                              localStorage.setItem("mm_selected_candle_symbol", stock.symbol);
-                            } catch (e) {}
-                            window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: stock.symbol } }));
-                            goPage("candles");
-                          }}
-                          title={`View 30-session candlestick chart for ${stock.name}`}
-                        >
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="9" y1="3" x2="9" y2="7"/>
-                            <rect x="7" y="7" width="4" height="8" rx="1"/>
-                            <line x1="9" y1="15" x2="9" y2="21"/>
-                            <line x1="17" y1="3" x2="17" y2="9"/>
-                            <rect x="15" y="9" width="4" height="6" rx="1"/>
-                            <line x1="17" y1="15" x2="17" y2="21"/>
-                          </svg>
-                          <span>Candles</span>
-                        </button>
+                          <button
+                            type="button"
+                            className="radar-action-btn"
+                            style={{ background: "var(--navy)", color: "#FAF6EC", borderColor: "var(--navy)" }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.__SELECTED_STOCK_SYMBOL = stock.symbol;
+                              localStorage.setItem("marketmind_sim_stock", stock.symbol);
+                              window.dispatchEvent(new CustomEvent("marketmind:simulate_stock", { detail: { symbol: stock.symbol } }));
+                              goPage("portfolio");
+                            }}
+                            title={`Simulate trade for ${stock.name} in virtual portfolio`}
+                          >
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                              <polyline points="16 7 22 7 22 13"/>
+                            </svg>
+                            <span>Simulate</span>
+                          </button>
+                        </div>
 
-                        <button
-                          type="button"
-                          className="radar-action-btn"
-                          style={{ background: "var(--navy)", color: "#FAF6EC", borderColor: "var(--navy)" }}
-                          onClick={() => {
-                            window.__SELECTED_STOCK_SYMBOL = stock.symbol;
-                            localStorage.setItem("marketmind_sim_stock", stock.symbol);
-                            window.dispatchEvent(new CustomEvent("marketmind:simulate_stock", { detail: { symbol: stock.symbol } }));
-                            goPage("portfolio");
-                          }}
-                          title={`Simulate trade for ${stock.name} in virtual portfolio`}
-                        >
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-                            <polyline points="16 7 22 7 22 13"/>
-                          </svg>
-                          <span>Simulate</span>
-                        </button>
+                        {/* Row 2: Live / Active Chart, In-Card Candles */}
+                        <div className="radar-actions-row">
+                          <button
+                            type="button"
+                            className={`radar-action-btn ${expandedCharts[stock.symbol] && (chartModes[stock.symbol] || "line") === "line" ? "active" : ""}`}
+                            style={
+                              expandedCharts[stock.symbol] && (chartModes[stock.symbol] || "line") === "line"
+                                ? { background: "#1a73e8", color: "#ffffff", borderColor: "#1a73e8", boxShadow: "0 2px 6px rgba(26, 115, 232, 0.25)" }
+                                : { background: "#f8fafc", color: "#334155", borderColor: "#cbd5e1" }
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedStockSymbol(stock.symbol);
+                              localStorage.setItem("mm_selected_stock", stock.symbol);
+                              window.__SELECTED_STOCK_SYMBOL = stock.symbol;
+                              handleToggleLineChart(stock.symbol);
+                            }}
+                            title={`Toggle live interactive line chart for ${stock.name}`}
+                          >
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                            <span>{expandedCharts[stock.symbol] && (chartModes[stock.symbol] || "line") === "line" ? "Active Chart" : "Live Chart"}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={`radar-action-btn ${expandedCharts[stock.symbol] && chartModes[stock.symbol] === "candles" ? "active" : ""}`}
+                            style={
+                              expandedCharts[stock.symbol] && chartModes[stock.symbol] === "candles"
+                                ? { background: "#0E1526", color: "#F3D59B", borderColor: "rgba(184, 147, 90, 0.9)", boxShadow: "0 2px 8px rgba(184, 147, 90, 0.35)", fontWeight: 700 }
+                                : { background: "#f8fafc", color: "#334155", borderColor: "#cbd5e1" }
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedStockSymbol(stock.symbol);
+                              localStorage.setItem("mm_selected_stock", stock.symbol);
+                              window.__SELECTED_STOCK_SYMBOL = stock.symbol;
+                              handleToggleCandlesChart(stock.symbol);
+                            }}
+                            title={`View live candlestick chart for ${stock.name} right inside this card`}
+                          >
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="9" y1="3" x2="9" y2="7"/>
+                              <rect x="7" y="7" width="4" height="8" rx="1"/>
+                              <line x1="9" y1="15" x2="9" y2="21"/>
+                              <line x1="17" y1="3" x2="17" y2="9"/>
+                              <rect x="15" y="9" width="4" height="6" rx="1"/>
+                              <line x1="17" y1="15" x2="17" y2="21"/>
+                            </svg>
+                            <span>{expandedCharts[stock.symbol] && chartModes[stock.symbol] === "candles" ? "Active Candles" : "Candles"}</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -1192,6 +1827,20 @@ export default function DashboardPage({ goPage, openAssistant, searchQuery = "",
                             </div>
                           </div>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Expandable Live Interactive Price Chart (Line or Candlesticks) */}
+                    {expandedCharts[stock.symbol] && (
+                      <div className="radar-in-card-chart-wrap">
+                        <MiniInteractivePriceChart
+                          stock={stock}
+                          initialMode={chartModes[stock.symbol] || "line"}
+                          onModeChange={(newMode) => {
+                            setChartModes((prev) => ({ ...prev, [stock.symbol]: newMode }));
+                          }}
+                          onClose={() => setExpandedCharts((prev) => ({ ...prev, [stock.symbol]: false }))}
+                        />
                       </div>
                     )}
                   </div>

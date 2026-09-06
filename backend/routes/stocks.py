@@ -45,6 +45,14 @@ def get_stock_history(symbol: str, period: str = Query("1mo", description="Histo
         raise HTTPException(status_code=404, detail="Historical data not found")
     return history
 
+@router.get("/{symbol}/chart")
+def get_stock_chart_endpoint(symbol: str, timeframe: str = Query("1D", description="Timeframe like 1D, 5D, 1M, 6M, YTD, 1Y, 5Y, Max")):
+    from services.market_data_service import get_live_stock_chart
+    chart = get_live_stock_chart(symbol, timeframe=timeframe)
+    if not chart:
+        raise HTTPException(status_code=404, detail="Chart data not found")
+    return chart
+
 @router.get("/sector/{sector_name}")
 async def get_sector(sector_name: str):
     return get_sector_peers(sector_name)

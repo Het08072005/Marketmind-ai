@@ -727,23 +727,8 @@ function getFallbackAlertData(sym, lookback) {
     }
   } catch (e) {}
 
-  const REAL_PRICE_MAP = {
-    RELIANCE: 1322.0,
-    TCS: 2304.0,
-    HDFCBANK: 712.10,
-    TATAMOTORS: 974.85,
-    INFY: 1130.0,
-    ICICIBANK: 1423.20,
-    COALINDIA: 415.35,
-    TITAN: 5020.0,
-    HCLTECH: 1293.4,
-    ITC: 264.10,
-    ASIANPAINT: 2527.3,
-    SUNPHARMA: 1899.0
-  };
-
-  const price = liveQuote?.price ? Number(liveQuote.price) : (REAL_PRICE_MAP[sym] || 1000.0);
-  const change = liveQuote?.change || "+0.50%";
+  const price = liveQuote?.price ? Number(liveQuote.price) : 1000.0;
+  const change = liveQuote?.change || "+0.00%";
   const invalStop = Math.round(price * 0.955);
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

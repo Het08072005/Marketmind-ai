@@ -2,8 +2,8 @@ import os
 import json
 
 BASE_DATA_DIR = os.path.dirname(os.path.abspath(__file__))
-COMPANIES_DIR = os.path.join(BASE_DATA_DIR, "companies")
-os.makedirs(COMPANIES_DIR, exist_ok=True)
+# Companies directory removed - zero static JSON files on disk
+
 
 TOP_36_COMPANIES = [
     # --- 1. IT SERVICES & TECH ---
@@ -726,12 +726,7 @@ TOP_36_COMPANIES = [
 ]
 
 def init():
-    for comp in TOP_36_COMPANIES:
-        sym = comp["symbol"].lower()
-        filepath = os.path.join(COMPANIES_DIR, f"{sym}.json")
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(comp, f, indent=2, ensure_ascii=False)
-    print(f"✅ Successfully seeded {len(TOP_36_COMPANIES)} Top Indian Companies into {COMPANIES_DIR}")
+    print(f"✅ In-memory equity metadata registry initialized with {len(TOP_36_COMPANIES)} companies (Zero static disk files).")
 
 if __name__ == "__main__":
     init()

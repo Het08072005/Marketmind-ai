@@ -3,8 +3,17 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 export const apiClient = {
   // Generic HTTP helpers
   async get(endpoint) {
-    const res = await fetch(`${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`);
-    if (!res.ok) throw new Error(`GET ${endpoint} failed`);
+    const raw = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+    const path = raw.startsWith("/api/") ? raw : `/api${raw}`;
+    const res = await fetch(`${API_BASE_URL}${path}`);
+    if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`);
+    return await res.json();
+  },
+
+  async getStockChart(symbol, timeframe = "1D") {
+    const cleanSym = (symbol || "").toUpperCase().replace(".NS", "").replace(".BO", "").trim();
+    const res = await fetch(`${API_BASE_URL}/api/stocks/${cleanSym}/chart?timeframe=${timeframe}`);
+    if (!res.ok) throw new Error(`GET chart for ${cleanSym} failed: ${res.status}`);
     return await res.json();
   },
 
