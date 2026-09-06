@@ -4,7 +4,7 @@
   "sector": "Aviation & Distressed",
   "price": 10.96,
   "change": "+0.64%",
-  "market_cap": "₹4,200 Cr",
+  "market_cap": "\u20b94,200 Cr",
   "pe_ratio": 0.0,
   "pb_ratio": -1.2,
   "net_margin": -18.5,
@@ -18,13 +18,6 @@
     "environmental": 48,
     "social": 38,
     "governance": 40
-  },
-  "trust_meter": {
-    "score": 42,
-    "promises_kept": 4,
-    "promises_delayed": 7,
-    "promises_broken": 9,
-    "latest_quote": "QIP equity infusion completed to unground grounded aircraft fleet."
   },
   "forensic": {
     "reported_profit_growth": "-32%",

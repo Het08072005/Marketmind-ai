@@ -4,7 +4,7 @@
   "sector": "IT Services & Tech",
   "price": 1121.0,
   "change": "-0.80%",
-  "market_cap": "₹7.9L Cr",
+  "market_cap": "\u20b97.9L Cr",
   "pe_ratio": 26.8,
   "pb_ratio": 8.4,
   "net_margin": 21.4,
@@ -18,13 +18,6 @@
     "environmental": 78,
     "social": 81,
     "governance": 82
-  },
-  "trust_meter": {
-    "score": 82,
-    "promises_kept": 13,
-    "promises_delayed": 3,
-    "promises_broken": 1,
-    "latest_quote": "Large deal TCV reached $4.1 Billion for the quarter."
   },
   "forensic": {
     "reported_profit_growth": "+8%",

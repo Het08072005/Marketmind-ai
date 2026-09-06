@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Topbar({ eyebrow, title, onOpenSidebar, backendOnline, backendLatency, searchQuery, onSearchChange }) {
+export default function Topbar({ eyebrow, title, subtitle, onOpenSidebar, backendOnline, backendLatency, searchQuery, onSearchChange }) {
   return (
     <div className="topbar">
       <button className="hamburger" onClick={onOpenSidebar} aria-label="Open navigation">
@@ -12,8 +12,22 @@ export default function Topbar({ eyebrow, title, onOpenSidebar, backendOnline, b
       <div className="page-heading">
         {eyebrow ? <div className="eyebrow" id="pgEyebrow">{eyebrow}</div> : null}
         <h1 id="pgTitle">{title}</h1>
+        {subtitle ? (
+          <p
+            className="page-subtitle"
+            style={{
+              margin: "2px 0 0 0",
+              fontSize: "13.5px",
+              color: "#64748B",
+              fontFamily: "var(--sans)",
+              fontWeight: 400,
+              lineHeight: 1.4
+            }}
+          >
+            {subtitle}
+          </p>
+        ) : null}
       </div>
-
 
       <div className="search-box">
         <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round">
@@ -46,20 +60,54 @@ export default function Topbar({ eyebrow, title, onOpenSidebar, backendOnline, b
         )}
       </div>
 
-      <button className="icon-btn" aria-label="Notifications">
-        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <button className="icon-btn" aria-label="Notifications" style={{ position: "relative" }}>
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18, stroke: "currentColor" }}>
           <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
           <path d="M13.7 21a2 2 0 0 1-3.4 0"/>
         </svg>
-        <span className="dot"></span>
+        <span
+          style={{
+            position: "absolute",
+            top: "5px",
+            right: "5px",
+            background: "#EF4444",
+            color: "#FFFFFF",
+            fontSize: "10px",
+            fontWeight: 700,
+            width: "16px",
+            height: "16px",
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            lineHeight: 1,
+            boxShadow: "0 1px 3px rgba(239, 68, 68, 0.4)"
+          }}
+        >
+          1
+        </span>
       </button>
 
-      <button className="icon-btn" aria-label="Settings">
-        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
-        </svg>
-      </button>
+      <div
+        style={{
+          width: "38px",
+          height: "38px",
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, #2563EB, #1D4ED8)",
+          color: "#FFFFFF",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: "600",
+          fontSize: "14px",
+          cursor: "pointer",
+          flexShrink: 0,
+          boxShadow: "0 2px 8px rgba(37, 99, 235, 0.25)"
+        }}
+        title="Test User"
+      >
+        T
+      </div>
     </div>
   );
 }

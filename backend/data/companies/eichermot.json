@@ -4,7 +4,7 @@
   "sector": "Automotive & Mobility",
   "price": 4920.0,
   "change": "+0.45%",
-  "market_cap": "₹1.3L Cr",
+  "market_cap": "\u20b91.3L Cr",
   "pe_ratio": 32.0,
   "pb_ratio": 6.8,
   "net_margin": 24.2,
@@ -18,13 +18,6 @@
     "environmental": 70,
     "social": 76,
     "governance": 76
-  },
-  "trust_meter": {
-    "score": 85,
-    "promises_kept": 14,
-    "promises_delayed": 2,
-    "promises_broken": 0,
-    "latest_quote": "Global market expansion in Latin America and Europe exceeding expectations."
   },
   "forensic": {
     "reported_profit_growth": "+18%",

@@ -4,7 +4,7 @@
   "sector": "Infrastructure & Metals",
   "price": 412.0,
   "change": "+0.18%",
-  "market_cap": "₹3.9L Cr",
+  "market_cap": "\u20b93.9L Cr",
   "pe_ratio": 18.2,
   "pb_ratio": 2.4,
   "net_margin": 11.8,
@@ -18,13 +18,6 @@
     "environmental": 62,
     "social": 76,
     "governance": 75
-  },
-  "trust_meter": {
-    "score": 84,
-    "promises_kept": 14,
-    "promises_delayed": 2,
-    "promises_broken": 1,
-    "latest_quote": "Renewable capacity addition targeting 60 GW by 2032."
   },
   "forensic": {
     "reported_profit_growth": "+14%",

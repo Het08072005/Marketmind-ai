@@ -1007,7 +1007,7 @@ function getFallbackIntelligence(sym, comp, secAvg) {
         { name: "Fundamentals AI", stance: "Bullish", score: Math.min(overallScore + 4, 96), color: "#16a34a" },
         { name: "News & Sentiment AI", stance: "Bullish", score: 76, color: "#16a34a" },
         { name: "Valuation Multiple AI", stance: "Neutral", score: valueScore, color: "#f59e0b" },
-        { name: "Management Trust Meter", stance: "High Trust", score: 86, color: "#16a34a" },
+        { name: "Governance & Audit Engine", stance: "High Governance", score: 86, color: "#16a34a" },
         { name: "Forensic & Risk Engine", stance: "Stable", score: 74, color: "#16a34a" }
       ]
     },

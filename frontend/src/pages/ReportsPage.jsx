@@ -19,8 +19,7 @@ export default function ReportsPage() {
     upside_pct: 22.0,
     rating: "STRONG BUY / OVERWEIGHT",
     executive_summary: "HDFC Bank Ltd (HDFCBANK) is an established market leader in the Banking & Finance sector with a market capitalization of ₹12.8L Cr. The company currently trades at ₹726.95, supported by strong operating cash flows and secular multi-year tailwinds. Recent strategic capital allocation into higher-margin digital and domestic capacity expansion has significantly improved return ratios across operating segments.",
-    valuation_analysis: "The stock trades at a trailing Price-to-Earnings (P/E) ratio of 18.6x, compared to the broader sector average. Return on Equity (ROE) stands at an exceptional 16.8% with a Net Profit Margin of 26.5%. Debt-to-Equity is well-managed at 6.8, providing significant balance sheet flexibility for upcoming capex initiatives.",
-    forensic_trust_audit: "Forensic accounting audit indicates a divergence score of 'High Credit Quality'. Reported Profit Growth (+19%) is closely mirrored by Operating Cash Flow Growth (+17%), verifying high revenue quality with zero channel-stuffing anomalies. Management Trust Score is rated at 88/100, reflecting 16 promises successfully kept and zero severe disclosures broken over the last 8 quarters.",
+    forensic_trust_audit: "Forensic accounting audit indicates a divergence score of 'High Credit Quality'. Reported Profit Growth (+19%) is closely mirrored by Operating Cash Flow Growth (+17%), verifying high revenue quality with zero channel-stuffing anomalies. Internal governance and capital allocation discipline remain rated top-tier with zero severe disclosure discrepancies over the last 8 quarters.",
     technical_setup: "14-Day RSI is currently at 22.84, indicating constructive bullish consolidation with healthy volume accumulation. The algorithmic scanner identifies a 'Breakout Retest' pattern. Immediate key institutional support is pegged at ₹715.10, while resistance breakout level is observed at ₹772.50.",
     esg_governance: "Corporate ESG & Sustainability Score is rated 79/100 (Strong Tier). Breakdown: Environmental (E): 68/100, Social (S): 84/100, Governance (G): 85/100. The board exhibits high independence with clean auditor disclosures and progressive decarbonization benchmarks.",
     investment_thesis: "INSTITUTIONAL RATING: OVERWEIGHT / STRONG BUY. Target Price: ₹887.00 (22.0% upside potential over a 12-month investment horizon). The compounding thesis is anchored on high free cash flow generation, expanding operating leverage, and robust corporate governance standards.",
@@ -175,17 +174,17 @@ export default function ReportsPage() {
           </div>
 
           <div
-            className={`mini-card ${activeTemplate === "Forensic Audit & Trust Review" ? "active" : ""}`}
-            style={{ cursor: "pointer", border: activeTemplate === "Forensic Audit & Trust Review" ? "2px solid var(--gold)" : "1px solid var(--line)" }}
-            onClick={() => handleTemplateClick("Forensic Audit & Trust Review")}
+            className={`mini-card ${activeTemplate === "Forensic Audit & Risk Review" ? "active" : ""}`}
+            style={{ cursor: "pointer", border: activeTemplate === "Forensic Audit & Risk Review" ? "2px solid var(--gold)" : "1px solid var(--line)" }}
+            onClick={() => handleTemplateClick("Forensic Audit & Risk Review")}
           >
             <div className="mi-icon">
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round"><path d="M3 17l4-9 3 5 3-8 3 7 5-4"/></svg>
             </div>
-            <h4>Forensic &amp; Trust Audit</h4>
-            <p>Audited earnings call promises vs execution scorecard with red flag DNA forensic checks.</p>
+            <h4>Forensic Accounting &amp; Risk Audit</h4>
+            <p>Audited earnings divergence analysis with red flag DNA forensic checks and cash flow quality.</p>
             <button className="pill-btn" style={{ alignSelf: "flex-start", marginTop: "8px" }}>
-              {generating && activeTemplate === "Forensic Audit & Trust Review" ? "Generating..." : "Generate Audit"}
+              {generating && activeTemplate === "Forensic Audit & Risk Review" ? "Generating..." : "Generate Audit"}
             </button>
           </div>
         </div>

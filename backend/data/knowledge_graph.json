@@ -1,0 +1,358 @@
+{
+  "graph_metadata": {
+    "version": "2.4.0",
+    "last_updated": "2026-09-05T12:00:00+05:30",
+    "primary_jurisdiction": "IN",
+    "data_sources": [
+      "NSE India Exchange Filings FY24/25",
+      "DGCA Airline Fuel & Passenger Statistics",
+      "PPAC Petroleum Planning & Analysis Cell",
+      "RBI Database on Indian Economy (DBIE)",
+      "Bloomberg / Platts Asian Oil Benchmarks",
+      "Quarterly Earnings Call Disclosures"
+    ]
+  },
+  "nodes": {
+    "commodities": {
+      "BRENT": {
+        "name": "Brent Crude Oil",
+        "category": "Energy",
+        "benchmark_unit": "USD/barrel",
+        "current_base_price": 82.40,
+        "historical_volatility": 28.4
+      },
+      "DUBAI_CRUDE": {
+        "name": "Dubai/Oman Crude (Indian Basket)",
+        "category": "Energy",
+        "benchmark_unit": "USD/barrel",
+        "current_base_price": 81.15,
+        "historical_volatility": 27.8
+      },
+      "ATF": {
+        "name": "Aviation Turbine Fuel (Jet Fuel)",
+        "category": "Refined Petroleum",
+        "benchmark_unit": "INR/kL",
+        "current_base_price": 98500,
+        "crude_transmission_ratio": 0.88,
+        "transmission_lag_days": 1
+      },
+      "TITANIUM_DIOXIDE": {
+        "name": "Titanium Dioxide & Monomers",
+        "category": "Petrochemical Feedstock",
+        "benchmark_unit": "USD/MT",
+        "current_base_price": 2850,
+        "crude_transmission_ratio": 0.62,
+        "transmission_lag_days": 30
+      },
+      "NATURAL_GAS": {
+        "name": "Domestic & LNG Natural Gas",
+        "category": "Energy",
+        "benchmark_unit": "USD/mmbtu",
+        "current_base_price": 6.80,
+        "historical_volatility": 34.2
+      },
+      "STEEL_HRC": {
+        "name": "Hot-Rolled Coil Steel",
+        "category": "Metals",
+        "benchmark_unit": "INR/MT",
+        "current_base_price": 54200,
+        "historical_volatility": 18.5
+      }
+    },
+    "macro_variables": {
+      "USDINR": {
+        "name": "US Dollar / Indian Rupee",
+        "current_level": 89.12,
+        "beta_to_crude": 0.22,
+        "historical_volatility": 4.8
+      },
+      "RBI_REPO_RATE": {
+        "name": "RBI Benchmark Policy Repo Rate",
+        "current_level": 6.50,
+        "transmission_to_mclr_bps": 72
+      },
+      "IN_10Y_GSEC": {
+        "name": "India 10-Year Benchmark Sovereign Bond Yield",
+        "current_level": 7.08,
+        "oil_inflation_sensitivity_bps": 14
+      },
+      "CPI_INFLATION": {
+        "name": "India Consumer Price Index (Headline CPI)",
+        "current_level": 4.85,
+        "crude_pass_through_elasticity": 0.08
+      }
+    },
+    "companies": {
+      "INDIGO": {
+        "symbol": "INDIGO",
+        "full_name": "InterGlobe Aviation Ltd (IndiGo)",
+        "sector": "Aviation",
+        "market_cap_cr": 190240,
+        "filing_metrics": {
+          "fuel_expense_share_opex": 0.385,
+          "hedge_ratio": 0.00,
+          "usd_denominated_lease_share": 0.68,
+          "fare_pass_through_elasticity": 0.45,
+          "passenger_demand_elasticity": -0.65,
+          "domestic_market_share": 0.63,
+          "ebitdar_margin_baseline": 0.235,
+          "cash_cushion_months": 8.5
+        },
+        "filing_source": "IndiGo FY24 Annual Report & Q3FY25 Disclosures, Note 34 (Operating Expenses)"
+      },
+      "SPICEJET": {
+        "symbol": "SPICEJET",
+        "full_name": "SpiceJet Ltd",
+        "sector": "Aviation",
+        "market_cap_cr": 4850,
+        "filing_metrics": {
+          "fuel_expense_share_opex": 0.442,
+          "hedge_ratio": 0.00,
+          "usd_denominated_lease_share": 0.74,
+          "fare_pass_through_elasticity": 0.28,
+          "passenger_demand_elasticity": -0.85,
+          "domestic_market_share": 0.045,
+          "ebitdar_margin_baseline": 0.092,
+          "cash_cushion_months": 1.2
+        },
+        "filing_source": "SpiceJet FY24 Annual Filing & Auditor Qualifications"
+      },
+      "ONGC": {
+        "symbol": "ONGC",
+        "full_name": "Oil & Natural Gas Corporation Ltd",
+        "sector": "Upstream Oil & Gas",
+        "market_cap_cr": 328000,
+        "filing_metrics": {
+          "net_crude_realization_bbl": 74.20,
+          "windfall_tax_threshold_usd": 75.0,
+          "ebitda_sensitivity_per_dollar_usd_cr": 1120,
+          "operating_margin_baseline": 0.32,
+          "upstream_production_mmt": 21.5
+        },
+        "filing_source": "ONGC FY24 Annual Report & PPAC Net Realization Disclosures"
+      },
+      "OIL": {
+        "symbol": "OIL",
+        "full_name": "Oil India Ltd",
+        "sector": "Upstream Oil & Gas",
+        "market_cap_cr": 72400,
+        "filing_metrics": {
+          "net_crude_realization_bbl": 73.80,
+          "windfall_tax_threshold_usd": 75.0,
+          "ebitda_sensitivity_per_dollar_usd_cr": 340,
+          "operating_margin_baseline": 0.35
+        },
+        "filing_source": "Oil India FY24 Annual Statement"
+      },
+      "BPCL": {
+        "symbol": "BPCL",
+        "full_name": "Bharat Petroleum Corporation Ltd",
+        "sector": "Downstream Refining & Marketing",
+        "market_cap_cr": 154000,
+        "filing_metrics": {
+          "gross_refining_margin_usd_bbl": 8.40,
+          "marketing_margin_vulnerability": "High on retail pump price freeze",
+          "crude_import_dependency": 0.85,
+          "auto_fuel_under_recovery_risk_per_10usd": -1850
+        },
+        "filing_source": "BPCL FY24 Annual Report & PPAC Refining Statistics"
+      },
+      "ASIANPAINT": {
+        "symbol": "ASIANPAINT",
+        "full_name": "Asian Paints Ltd",
+        "sector": "Paints & Coatings",
+        "market_cap_cr": 268000,
+        "filing_metrics": {
+          "raw_material_cost_share_revenue": 0.53,
+          "petrochemical_feedstock_share_rm": 0.52,
+          "gross_margin_baseline": 0.435,
+          "pricing_power_lag_days": 45,
+          "fare_pass_through_elasticity": 0.65
+        },
+        "filing_source": "Asian Paints FY24 Annual Report, Raw Material Schedule 21"
+      },
+      "TATAMOTORS": {
+        "symbol": "TATAMOTORS",
+        "full_name": "Tata Motors Ltd",
+        "sector": "Automotive OEM",
+        "market_cap_cr": 312000,
+        "filing_metrics": {
+          "steel_aluminum_cost_share_cogs": 0.34,
+          "fuel_tco_sensitivity_cv": 0.22,
+          "ev_pv_shift_acceleration_ratio": 1.18
+        },
+        "filing_source": "Tata Motors FY24 Integrated Annual Report"
+      },
+      "IHCL": {
+        "symbol": "IHCL",
+        "full_name": "The Indian Hotels Company Ltd (Taj)",
+        "sector": "Hospitality & Tourism",
+        "market_cap_cr": 89000,
+        "filing_metrics": {
+          "domestic_leisure_revenue_share": 0.38,
+          "airfare_demand_cross_elasticity": -0.42,
+          "revpar_growth_baseline": 0.14
+        },
+        "filing_source": "IHCL FY24 Annual Report & Investor Presentation"
+      },
+      "TCS": {
+        "symbol": "TCS",
+        "full_name": "Tata Consultancy Services Ltd",
+        "sector": "IT Services",
+        "market_cap_cr": 1420000,
+        "filing_metrics": {
+          "us_revenue_share": 0.505,
+          "usdinr_ebit_sensitivity_bps_per_100bps": 28,
+          "wage_inflation_sensitivity": -0.32
+        },
+        "filing_source": "TCS FY24 Annual Filing, Segmental Revenue Analysis"
+      },
+      "HDFCBANK": {
+        "symbol": "HDFCBANK",
+        "full_name": "HDFC Bank Ltd",
+        "sector": "Banking & Financial Services",
+        "market_cap_cr": 1280000,
+        "filing_metrics": {
+          "net_interest_margin_baseline": 0.036,
+          "floating_rate_loan_book_share": 0.68,
+          "rate_hike_nim_sensitivity_bps_per_25bps": 4.2
+        },
+        "filing_source": "HDFC Bank Pillar 3 Regulatory Disclosures FY24"
+      }
+    }
+  },
+  "edges": [
+    {
+      "from_node": "BRENT",
+      "to_node": "ATF",
+      "relation": "INPUT_FEEDSTOCK_TRANSMISSION",
+      "direction": "positive",
+      "elasticity": 0.88,
+      "lag_window": "0_1_day",
+      "confidence": 0.94,
+      "source": "PPAC Fortnightly ATF Pricing Formula",
+      "last_verified": "2026-08-15"
+    },
+    {
+      "from_node": "ATF",
+      "to_node": "INDIGO",
+      "relation": "COST_EXPOSED_TO",
+      "direction": "negative",
+      "elasticity": 0.385,
+      "lag_window": "1_5_days",
+      "confidence": 0.91,
+      "source": "IndiGo FY24 Note 34 (Fuel is 38.5% of opex)",
+      "last_verified": "2026-08-01"
+    },
+    {
+      "from_node": "ATF",
+      "to_node": "SPICEJET",
+      "relation": "COST_EXPOSED_TO",
+      "direction": "negative",
+      "elasticity": 0.442,
+      "lag_window": "1_5_days",
+      "confidence": 0.89,
+      "source": "SpiceJet FY24 Opex Schedule (Fuel is 44.2% of opex)",
+      "last_verified": "2026-08-01"
+    },
+    {
+      "from_node": "BRENT",
+      "to_node": "ONGC",
+      "relation": "BENEFITS_FROM",
+      "direction": "positive",
+      "elasticity": 0.68,
+      "lag_window": "0_1_day",
+      "confidence": 0.90,
+      "source": "ONGC Upstream Realization Formula",
+      "last_verified": "2026-08-10"
+    },
+    {
+      "from_node": "BRENT",
+      "to_node": "OIL",
+      "relation": "BENEFITS_FROM",
+      "direction": "positive",
+      "elasticity": 0.65,
+      "lag_window": "0_1_day",
+      "confidence": 0.87,
+      "source": "Oil India Realization Schedule",
+      "last_verified": "2026-08-10"
+    },
+    {
+      "from_node": "BRENT",
+      "to_node": "ASIANPAINT",
+      "relation": "COST_EXPOSED_TO",
+      "direction": "negative",
+      "elasticity": 0.275,
+      "lag_window": "1_4_weeks",
+      "confidence": 0.81,
+      "source": "Asian Paints Raw Material Schedule (52% petro raw materials)",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "from_node": "BRENT",
+      "to_node": "BPCL",
+      "relation": "REFINING_MARGIN_VULNERABILITY",
+      "direction": "negative",
+      "elasticity": 0.32,
+      "lag_window": "1_5_days",
+      "confidence": 0.79,
+      "source": "PPAC Marketing Margin & Under-recovery History",
+      "last_verified": "2026-08-05"
+    },
+    {
+      "from_node": "INDIGO",
+      "to_node": "IHCL",
+      "relation": "SUBSTITUTION_DEMAND_DRAG",
+      "direction": "negative",
+      "elasticity": 0.18,
+      "lag_window": "1_4_weeks",
+      "confidence": 0.69,
+      "source": "Cross-sector Airfare vs Leisure Hotel Occupancy Study",
+      "last_verified": "2026-06-30"
+    },
+    {
+      "from_node": "BRENT",
+      "to_node": "CPI_INFLATION",
+      "relation": "IMPORTED_INFLATION_FEEDBACK",
+      "direction": "positive",
+      "elasticity": 0.08,
+      "lag_window": "1_3_months",
+      "confidence": 0.74,
+      "source": "RBI Monetary Policy Report Transmission Chapter",
+      "last_verified": "2026-08-12"
+    },
+    {
+      "from_node": "CPI_INFLATION",
+      "to_node": "IN_10Y_GSEC",
+      "relation": "DISCOUNT_RATE_EXPANSION",
+      "direction": "positive",
+      "elasticity": 0.14,
+      "lag_window": "1_3_months",
+      "confidence": 0.68,
+      "source": "Term Premium & Inflation Expectations Model",
+      "last_verified": "2026-08-12"
+    },
+    {
+      "from_node": "USDINR",
+      "to_node": "TCS",
+      "relation": "BENEFITS_FROM",
+      "direction": "positive",
+      "elasticity": 0.28,
+      "lag_window": "1_4_weeks",
+      "confidence": 0.85,
+      "source": "TCS Forex Realization & Operating Margin Disclosures",
+      "last_verified": "2026-08-10"
+    },
+    {
+      "from_node": "RBI_REPO_RATE",
+      "to_node": "HDFCBANK",
+      "relation": "NIM_EXPANSION_FLOATING_ASSETS",
+      "direction": "positive",
+      "elasticity": 0.22,
+      "lag_window": "1_5_days",
+      "confidence": 0.83,
+      "source": "HDFC Bank Asset-Liability Management (ALM) Filing",
+      "last_verified": "2026-08-14"
+    }
+  ]
+}

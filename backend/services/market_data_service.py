@@ -297,7 +297,6 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
             "price": 1500.0,
             "change": "+0.0%",
             "risk": "Moderate",
-            "trustScore": 75,
             "thesisBreakerCount": 0,
             "esgScore": 70
         }

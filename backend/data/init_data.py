@@ -23,7 +23,6 @@ TOP_36_COMPANIES = [
         "rsi": 58.2,
         "pattern": "Bullish Engulfing",
         "esg": { "overall": 82, "environmental": 72, "social": 85, "governance": 88 },
-        "trust_meter": { "score": 91, "promises_kept": 18, "promises_delayed": 1, "promises_broken": 0, "latest_quote": "Enterprise AI contracts expanded by 34% YoY." },
         "forensic": { "reported_profit_growth": "+11%", "cash_flow_growth": "+13%", "receivables_growth": "+8%", "divergence_score": "Strong (Zero Anomaly)" },
         "dna": { "growth": 88, "debt": 8, "news_sensitivity": 52, "mgmt_reliability": 94, "market_fear": 36 }
     },
@@ -43,7 +42,6 @@ TOP_36_COMPANIES = [
         "rsi": 56.4,
         "pattern": "Ascending Channel",
         "esg": { "overall": 80, "environmental": 78, "social": 81, "governance": 82 },
-        "trust_meter": { "score": 82, "promises_kept": 13, "promises_delayed": 3, "promises_broken": 1, "latest_quote": "Large deal TCV reached $4.1 Billion for the quarter." },
         "forensic": { "reported_profit_growth": "+8%", "cash_flow_growth": "+10%", "receivables_growth": "+6%", "divergence_score": "Clean Balance Sheet" },
         "dna": { "growth": 82, "debt": 12, "news_sensitivity": 62, "mgmt_reliability": 84, "market_fear": 45 }
     },
@@ -63,7 +61,6 @@ TOP_36_COMPANIES = [
         "rsi": 49.8,
         "pattern": "Consolidation Range",
         "esg": { "overall": 76, "environmental": 74, "social": 78, "governance": 76 },
-        "trust_meter": { "score": 75, "promises_kept": 10, "promises_delayed": 4, "promises_broken": 2, "latest_quote": "Capco consulting business stabilizing across European banking accounts." },
         "forensic": { "reported_profit_growth": "+4%", "cash_flow_growth": "+3%", "receivables_growth": "+7%", "divergence_score": "Moderate (Low Risk)" },
         "dna": { "growth": 64, "debt": 18, "news_sensitivity": 68, "mgmt_reliability": 75, "market_fear": 52 }
     },
@@ -83,7 +80,6 @@ TOP_36_COMPANIES = [
         "rsi": 61.2,
         "pattern": "Bullish Continuation",
         "esg": { "overall": 79, "environmental": 75, "social": 82, "governance": 80 },
-        "trust_meter": { "score": 86, "promises_kept": 15, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "Software products division engineering revenue up 8.2%." },
         "forensic": { "reported_profit_growth": "+12%", "cash_flow_growth": "+14%", "receivables_growth": "+9%", "divergence_score": "Strong" },
         "dna": { "growth": 84, "debt": 10, "news_sensitivity": 55, "mgmt_reliability": 88, "market_fear": 40 }
     },
@@ -103,7 +99,6 @@ TOP_36_COMPANIES = [
         "rsi": 53.0,
         "pattern": "Turnaround Breakout",
         "esg": { "overall": 75, "environmental": 70, "social": 78, "governance": 78 },
-        "trust_meter": { "score": 79, "promises_kept": 11, "promises_delayed": 3, "promises_broken": 1, "latest_quote": "Cost optimization Project Fortius targeting 15% EBIT margin by FY27." },
         "forensic": { "reported_profit_growth": "+6%", "cash_flow_growth": "+4%", "receivables_growth": "+8%", "divergence_score": "Improving Margins" },
         "dna": { "growth": 70, "debt": 16, "news_sensitivity": 70, "mgmt_reliability": 78, "market_fear": 50 }
     },
@@ -125,7 +120,6 @@ TOP_36_COMPANIES = [
         "rsi": 72.4,
         "pattern": "Breakout Retest",
         "esg": { "overall": 79, "environmental": 68, "social": 84, "governance": 85 },
-        "trust_meter": { "score": 88, "promises_kept": 16, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "Credit-deposit ratio smoothly normalizing post-merger integration." },
         "forensic": { "reported_profit_growth": "+19%", "cash_flow_growth": "+17%", "receivables_growth": "+16%", "divergence_score": "High Credit Quality" },
         "dna": { "growth": 85, "debt": 65, "news_sensitivity": 58, "mgmt_reliability": 90, "market_fear": 35 }
     },
@@ -145,7 +139,6 @@ TOP_36_COMPANIES = [
         "rsi": 64.8,
         "pattern": "Steady Uptrend",
         "esg": { "overall": 81, "environmental": 70, "social": 86, "governance": 87 },
-        "trust_meter": { "score": 90, "promises_kept": 17, "promises_delayed": 1, "promises_broken": 0, "latest_quote": "Net NPA declined to record low 0.42% with strong retail CASA." },
         "forensic": { "reported_profit_growth": "+18%", "cash_flow_growth": "+19%", "receivables_growth": "+14%", "divergence_score": "Industry Leading Asset Quality" },
         "dna": { "growth": 90, "debt": 62, "news_sensitivity": 50, "mgmt_reliability": 92, "market_fear": 32 }
     },
@@ -165,7 +158,6 @@ TOP_36_COMPANIES = [
         "rsi": 59.5,
         "pattern": "Bullish Consolidation",
         "esg": { "overall": 73, "environmental": 65, "social": 78, "governance": 76 },
-        "trust_meter": { "score": 83, "promises_kept": 14, "promises_delayed": 3, "promises_broken": 1, "latest_quote": "Corporate credit loan book grew 16% YoY across infrastructure." },
         "forensic": { "reported_profit_growth": "+14%", "cash_flow_growth": "+12%", "receivables_growth": "+13%", "divergence_score": "Sovereign Backed" },
         "dna": { "growth": 82, "debt": 78, "news_sensitivity": 68, "mgmt_reliability": 84, "market_fear": 42 }
     },
@@ -185,7 +177,6 @@ TOP_36_COMPANIES = [
         "rsi": 54.2,
         "pattern": "Channel Support",
         "esg": { "overall": 76, "environmental": 68, "social": 80, "governance": 80 },
-        "trust_meter": { "score": 82, "promises_kept": 13, "promises_delayed": 2, "promises_broken": 1, "latest_quote": "Citi consumer portfolio migration achieved with zero customer attrition." },
         "forensic": { "reported_profit_growth": "+15%", "cash_flow_growth": "+14%", "receivables_growth": "+12%", "divergence_score": "Clean Retail Portfolio" },
         "dna": { "growth": 80, "debt": 68, "news_sensitivity": 64, "mgmt_reliability": 83, "market_fear": 46 }
     },
@@ -205,7 +196,6 @@ TOP_36_COMPANIES = [
         "rsi": 52.1,
         "pattern": "Base Reversal",
         "esg": { "overall": 78, "environmental": 70, "social": 82, "governance": 83 },
-        "trust_meter": { "score": 85, "promises_kept": 14, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "Tech infrastructure investments fully compliant with regulatory standards." },
         "forensic": { "reported_profit_growth": "+12%", "cash_flow_growth": "+11%", "receivables_growth": "+10%", "divergence_score": "Strong Capital Adequacy" },
         "dna": { "growth": 78, "debt": 52, "news_sensitivity": 62, "mgmt_reliability": 88, "market_fear": 44 }
     },
@@ -225,7 +215,6 @@ TOP_36_COMPANIES = [
         "rsi": 57.8,
         "pattern": "Growth Channel",
         "esg": { "overall": 75, "environmental": 64, "social": 80, "governance": 81 },
-        "trust_meter": { "score": 87, "promises_kept": 15, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "AUM crossed ₹3.5 Lakh Crore with consumer app downloads exceeding 50M." },
         "forensic": { "reported_profit_growth": "+22%", "cash_flow_growth": "+20%", "receivables_growth": "+24%", "divergence_score": "High Growth FinTech Engine" },
         "dna": { "growth": 94, "debt": 55, "news_sensitivity": 65, "mgmt_reliability": 89, "market_fear": 48 }
     },
@@ -247,7 +236,6 @@ TOP_36_COMPANIES = [
         "rsi": 68.4,
         "pattern": "Ascending Triangle",
         "esg": { "overall": 77, "environmental": 81, "social": 74, "governance": 76 },
-        "trust_meter": { "score": 79, "promises_kept": 14, "promises_delayed": 3, "promises_broken": 1, "latest_quote": "Solar cell gigafactory in Jamnagar operational on schedule." },
         "forensic": { "reported_profit_growth": "+14%", "cash_flow_growth": "+9%", "receivables_growth": "+11%", "divergence_score": "Fair (Low Risk)" },
         "dna": { "growth": 82, "debt": 38, "news_sensitivity": 71, "mgmt_reliability": 79, "market_fear": 44 }
     },
@@ -267,7 +255,6 @@ TOP_36_COMPANIES = [
         "rsi": 51.4,
         "pattern": "Value Dividend Base",
         "esg": { "overall": 68, "environmental": 62, "social": 72, "governance": 70 },
-        "trust_meter": { "score": 76, "promises_kept": 11, "promises_delayed": 4, "promises_broken": 2, "latest_quote": "KG-DWN-98/2 deepwater block oil production ramped up." },
         "forensic": { "reported_profit_growth": "+8%", "cash_flow_growth": "+12%", "receivables_growth": "+5%", "divergence_score": "High Cash Flow Generative" },
         "dna": { "growth": 68, "debt": 40, "news_sensitivity": 82, "mgmt_reliability": 76, "market_fear": 55 }
     },
@@ -287,7 +274,6 @@ TOP_36_COMPANIES = [
         "rsi": 57.0,
         "pattern": "High Beta Swing",
         "esg": { "overall": 58, "environmental": 54, "social": 60, "governance": 60 },
-        "trust_meter": { "score": 68, "promises_kept": 9, "promises_delayed": 4, "promises_broken": 2, "latest_quote": "Navi Mumbai Airport Phase 1 scheduled for commercial launch." },
         "forensic": { "reported_profit_growth": "+15%", "cash_flow_growth": "-8%", "receivables_growth": "+26%", "divergence_score": "Elevated Debt Anomaly" },
         "dna": { "growth": 92, "debt": 78, "news_sensitivity": 95, "mgmt_reliability": 66, "market_fear": 72 }
     },
@@ -307,7 +293,6 @@ TOP_36_COMPANIES = [
         "rsi": 44.5,
         "pattern": "Distribution Channel",
         "esg": { "overall": 64, "environmental": 68, "social": 62, "governance": 62 },
-        "trust_meter": { "score": 74, "promises_kept": 8, "promises_delayed": 2, "promises_broken": 1, "latest_quote": "Targeting 100 CNG stations expansion this fiscal." },
         "forensic": { "reported_profit_growth": "+12%", "cash_flow_growth": "+8%", "receivables_growth": "+14%", "divergence_score": "Steady Gas Conversion" },
         "dna": { "growth": 82, "debt": 38, "news_sensitivity": 88, "mgmt_reliability": 74, "market_fear": 65 }
     },
@@ -327,7 +312,6 @@ TOP_36_COMPANIES = [
         "rsi": 62.1,
         "pattern": "Cargo Volume Leader",
         "esg": { "overall": 66, "environmental": 62, "social": 68, "governance": 68 },
-        "trust_meter": { "score": 81, "promises_kept": 13, "promises_delayed": 2, "promises_broken": 1, "latest_quote": "Cargo throughput exceeded 420 MMT landmark." },
         "forensic": { "reported_profit_growth": "+20%", "cash_flow_growth": "+22%", "receivables_growth": "+15%", "divergence_score": "High Cash Flow Margin" },
         "dna": { "growth": 88, "debt": 58, "news_sensitivity": 78, "mgmt_reliability": 81, "market_fear": 50 }
     },
@@ -347,7 +331,6 @@ TOP_36_COMPANIES = [
         "rsi": 54.6,
         "pattern": "High Dividend Yield",
         "esg": { "overall": 55, "environmental": 42, "social": 64, "governance": 60 },
-        "trust_meter": { "score": 78, "promises_kept": 12, "promises_delayed": 3, "promises_broken": 1, "latest_quote": "Production target of 838 MT on course with thermal demand." },
         "forensic": { "reported_profit_growth": "+8%", "cash_flow_growth": "+14%", "receivables_growth": "+4%", "divergence_score": "Strong Cash Pile" },
         "dna": { "growth": 68, "debt": 12, "news_sensitivity": 65, "mgmt_reliability": 78, "market_fear": 45 }
     },
@@ -369,7 +352,6 @@ TOP_36_COMPANIES = [
         "rsi": 49.2,
         "pattern": "EV Transformation",
         "esg": { "overall": 74, "environmental": 78, "social": 72, "governance": 72 },
-        "trust_meter": { "score": 84, "promises_kept": 14, "promises_delayed": 3, "promises_broken": 1, "latest_quote": "Achieved net zero debt milestone across automotive operations." },
         "forensic": { "reported_profit_growth": "+48%", "cash_flow_growth": "+42%", "receivables_growth": "+12%", "divergence_score": "Strong Turnaround FCF" },
         "dna": { "growth": 95, "debt": 48, "news_sensitivity": 76, "mgmt_reliability": 84, "market_fear": 48 }
     },
@@ -389,7 +371,6 @@ TOP_36_COMPANIES = [
         "rsi": 58.6,
         "pattern": "SUV Market Share Surge",
         "esg": { "overall": 76, "environmental": 72, "social": 78, "governance": 78 },
-        "trust_meter": { "score": 89, "promises_kept": 16, "promises_delayed": 1, "promises_broken": 0, "latest_quote": "SUV segment market share reached 26% with strong hybrid push." },
         "forensic": { "reported_profit_growth": "+24%", "cash_flow_growth": "+26%", "receivables_growth": "+10%", "divergence_score": "Robust Zero Debt Balance" },
         "dna": { "growth": 84, "debt": 4, "news_sensitivity": 56, "mgmt_reliability": 90, "market_fear": 38 }
     },
@@ -409,7 +390,6 @@ TOP_36_COMPANIES = [
         "rsi": 64.5,
         "pattern": "SUV Order Backlog",
         "esg": { "overall": 77, "environmental": 74, "social": 80, "governance": 78 },
-        "trust_meter": { "score": 87, "promises_kept": 15, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "Open bookings for XUV700, Thar and Scorpio-N exceeding 2.2 Lakh units." },
         "forensic": { "reported_profit_growth": "+21%", "cash_flow_growth": "+24%", "receivables_growth": "+14%", "divergence_score": "Strong Auto Cash Flows" },
         "dna": { "growth": 90, "debt": 36, "news_sensitivity": 62, "mgmt_reliability": 88, "market_fear": 42 }
     },
@@ -429,7 +409,6 @@ TOP_36_COMPANIES = [
         "rsi": 60.2,
         "pattern": "Export Recovery",
         "esg": { "overall": 76, "environmental": 72, "social": 78, "governance": 79 },
-        "trust_meter": { "score": 88, "promises_kept": 15, "promises_delayed": 1, "promises_broken": 0, "latest_quote": "Chetak electric scooter monthly volumes crossed 20,000 units." },
         "forensic": { "reported_profit_growth": "+25%", "cash_flow_growth": "+28%", "receivables_growth": "+12%", "divergence_score": "High Cash Return" },
         "dna": { "growth": 86, "debt": 6, "news_sensitivity": 58, "mgmt_reliability": 89, "market_fear": 36 }
     },
@@ -449,7 +428,6 @@ TOP_36_COMPANIES = [
         "rsi": 55.4,
         "pattern": "Royal Enfield Premiumization",
         "esg": { "overall": 74, "environmental": 70, "social": 76, "governance": 76 },
-        "trust_meter": { "score": 85, "promises_kept": 14, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "Global market expansion in Latin America and Europe exceeding expectations." },
         "forensic": { "reported_profit_growth": "+18%", "cash_flow_growth": "+21%", "receivables_growth": "+9%", "divergence_score": "Industry High EBITDA Margin" },
         "dna": { "growth": 82, "debt": 8, "news_sensitivity": 60, "mgmt_reliability": 86, "market_fear": 40 }
     },
@@ -471,7 +449,6 @@ TOP_36_COMPANIES = [
         "rsi": 62.4,
         "pattern": "Hotels Demerger Catalyst",
         "esg": { "overall": 86, "environmental": 92, "social": 84, "governance": 82 },
-        "trust_meter": { "score": 89, "promises_kept": 16, "promises_delayed": 1, "promises_broken": 0, "latest_quote": "Non-cigarette FMCG EBITDA margins expanded 110 bps YoY." },
         "forensic": { "reported_profit_growth": "+10%", "cash_flow_growth": "+15%", "receivables_growth": "+5%", "divergence_score": "Exceptional FCF" },
         "dna": { "growth": 74, "debt": 2, "news_sensitivity": 44, "mgmt_reliability": 90, "market_fear": 30 }
     },
@@ -491,7 +468,6 @@ TOP_36_COMPANIES = [
         "rsi": 46.2,
         "pattern": "Rural Demand Recovery",
         "esg": { "overall": 85, "environmental": 88, "social": 84, "governance": 84 },
-        "trust_meter": { "score": 87, "promises_kept": 15, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "Rural volume growth outpaced urban growth across beauty and home care." },
         "forensic": { "reported_profit_growth": "+7%", "cash_flow_growth": "+9%", "receivables_growth": "+6%", "divergence_score": "High Quality Moat" },
         "dna": { "growth": 70, "debt": 4, "news_sensitivity": 48, "mgmt_reliability": 88, "market_fear": 35 }
     },
@@ -511,7 +487,6 @@ TOP_36_COMPANIES = [
         "rsi": 58.2,
         "pattern": "Jewellery Market Share Gains",
         "esg": { "overall": 79, "environmental": 72, "social": 84, "governance": 82 },
-        "trust_meter": { "score": 90, "promises_kept": 17, "promises_delayed": 1, "promises_broken": 0, "latest_quote": "Tanishq store network expanded by 45 stores during wedding season." },
         "forensic": { "reported_profit_growth": "+19%", "cash_flow_growth": "+16%", "receivables_growth": "+18%", "divergence_score": "Strong Retail Momentum" },
         "dna": { "growth": 91, "debt": 32, "news_sensitivity": 62, "mgmt_reliability": 92, "market_fear": 40 }
     },
@@ -531,7 +506,6 @@ TOP_36_COMPANIES = [
         "rsi": 50.4,
         "pattern": "Premium Nutrition Base",
         "esg": { "overall": 78, "environmental": 76, "social": 78, "governance": 80 },
-        "trust_meter": { "score": 86, "promises_kept": 14, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "Prepared dishes and coffee categories delivered strong double-digit growth." },
         "forensic": { "reported_profit_growth": "+11%", "cash_flow_growth": "+13%", "receivables_growth": "+7%", "divergence_score": "High Cash Conversion" },
         "dna": { "growth": 76, "debt": 6, "news_sensitivity": 46, "mgmt_reliability": 87, "market_fear": 32 }
     },
@@ -551,7 +525,6 @@ TOP_36_COMPANIES = [
         "rsi": 47.8,
         "pattern": "Crude Price Margin Relief",
         "esg": { "overall": 80, "environmental": 82, "social": 78, "governance": 80 },
-        "trust_meter": { "score": 85, "promises_kept": 14, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "Decorative paints volume growth maintained in double-digits." },
         "forensic": { "reported_profit_growth": "+9%", "cash_flow_growth": "+12%", "receivables_growth": "+8%", "divergence_score": "Strong Moat" },
         "dna": { "growth": 78, "debt": 8, "news_sensitivity": 68, "mgmt_reliability": 86, "market_fear": 42 }
     },
@@ -573,7 +546,6 @@ TOP_36_COMPANIES = [
         "rsi": 65.2,
         "pattern": "Capex Megatrend",
         "esg": { "overall": 78, "environmental": 74, "social": 80, "governance": 80 },
-        "trust_meter": { "score": 88, "promises_kept": 16, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "Order book reached all-time high of ₹4.8 Lakh Crore." },
         "forensic": { "reported_profit_growth": "+21%", "cash_flow_growth": "+18%", "receivables_growth": "+19%", "divergence_score": "High Order Execution" },
         "dna": { "growth": 91, "debt": 46, "news_sensitivity": 65, "mgmt_reliability": 89, "market_fear": 38 }
     },
@@ -593,7 +565,6 @@ TOP_36_COMPANIES = [
         "rsi": 53.8,
         "pattern": "UK Green Transition",
         "esg": { "overall": 72, "environmental": 68, "social": 75, "governance": 74 },
-        "trust_meter": { "score": 80, "promises_kept": 12, "promises_delayed": 3, "promises_broken": 1, "latest_quote": "Kalinganagar Phase 2 blast furnace commissioning completed." },
         "forensic": { "reported_profit_growth": "+6%", "cash_flow_growth": "+11%", "receivables_growth": "+7%", "divergence_score": "Cyclical FCF" },
         "dna": { "growth": 74, "debt": 54, "news_sensitivity": 85, "mgmt_reliability": 80, "market_fear": 60 }
     },
@@ -613,7 +584,6 @@ TOP_36_COMPANIES = [
         "rsi": 55.2,
         "pattern": "Capacity Expansion",
         "esg": { "overall": 70, "environmental": 64, "social": 74, "governance": 72 },
-        "trust_meter": { "score": 82, "promises_kept": 13, "promises_delayed": 2, "promises_broken": 1, "latest_quote": "Targeting 38.5 MTPA crude steel capacity by FY25." },
         "forensic": { "reported_profit_growth": "+12%", "cash_flow_growth": "+15%", "receivables_growth": "+10%", "divergence_score": "Strong Domestic Realization" },
         "dna": { "growth": 82, "debt": 60, "news_sensitivity": 82, "mgmt_reliability": 82, "market_fear": 58 }
     },
@@ -633,7 +603,6 @@ TOP_36_COMPANIES = [
         "rsi": 59.4,
         "pattern": "Green Energy IPO",
         "esg": { "overall": 71, "environmental": 62, "social": 76, "governance": 75 },
-        "trust_meter": { "score": 84, "promises_kept": 14, "promises_delayed": 2, "promises_broken": 1, "latest_quote": "Renewable capacity addition targeting 60 GW by 2032." },
         "forensic": { "reported_profit_growth": "+14%", "cash_flow_growth": "+16%", "receivables_growth": "+12%", "divergence_score": "Stable Regulated Return" },
         "dna": { "growth": 80, "debt": 68, "news_sensitivity": 55, "mgmt_reliability": 85, "market_fear": 36 }
     },
@@ -653,7 +622,6 @@ TOP_36_COMPANIES = [
         "rsi": 56.8,
         "pattern": "High Margin Monopoly",
         "esg": { "overall": 79, "environmental": 75, "social": 82, "governance": 80 },
-        "trust_meter": { "score": 89, "promises_kept": 16, "promises_delayed": 1, "promises_broken": 0, "latest_quote": "Inter-state transmission system availability sustained at 99.8%." },
         "forensic": { "reported_profit_growth": "+10%", "cash_flow_growth": "+18%", "receivables_growth": "+6%", "divergence_score": "High Cash Generation" },
         "dna": { "growth": 78, "debt": 62, "news_sensitivity": 42, "mgmt_reliability": 90, "market_fear": 28 }
     },
@@ -675,7 +643,6 @@ TOP_36_COMPANIES = [
         "rsi": 66.5,
         "pattern": "Global Specialty Leader",
         "esg": { "overall": 78, "environmental": 74, "social": 80, "governance": 80 },
-        "trust_meter": { "score": 87, "promises_kept": 15, "promises_delayed": 2, "promises_broken": 0, "latest_quote": "Global specialty business revenues reached $1.1 Billion." },
         "forensic": { "reported_profit_growth": "+16%", "cash_flow_growth": "+19%", "receivables_growth": "+11%", "divergence_score": "Strong Specialty Moat" },
         "dna": { "growth": 86, "debt": 10, "news_sensitivity": 60, "mgmt_reliability": 88, "market_fear": 35 }
     },
@@ -695,7 +662,6 @@ TOP_36_COMPANIES = [
         "rsi": 58.0,
         "pattern": "US Generics Recovery",
         "esg": { "overall": 76, "environmental": 72, "social": 78, "governance": 78 },
-        "trust_meter": { "score": 84, "promises_kept": 14, "promises_delayed": 2, "promises_broken": 1, "latest_quote": "Biosimilar pipeline approvals accelerating in Europe." },
         "forensic": { "reported_profit_growth": "+15%", "cash_flow_growth": "+17%", "receivables_growth": "+12%", "divergence_score": "Strong Cash Flow" },
         "dna": { "growth": 84, "debt": 8, "news_sensitivity": 65, "mgmt_reliability": 85, "market_fear": 40 }
     },
@@ -715,7 +681,6 @@ TOP_36_COMPANIES = [
         "rsi": 55.2,
         "pattern": "Respiratory Franchise Moat",
         "esg": { "overall": 80, "environmental": 78, "social": 82, "governance": 80 },
-        "trust_meter": { "score": 86, "promises_kept": 15, "promises_delayed": 1, "promises_broken": 0, "latest_quote": "One-India business grew 10% with chronic therapies leading." },
         "forensic": { "reported_profit_growth": "+13%", "cash_flow_growth": "+15%", "receivables_growth": "+9%", "divergence_score": "Clean Balance Sheet" },
         "dna": { "growth": 82, "debt": 6, "news_sensitivity": 52, "mgmt_reliability": 87, "market_fear": 36 }
     },
@@ -735,7 +700,6 @@ TOP_36_COMPANIES = [
         "rsi": 62.8,
         "pattern": "CDMO Revival",
         "esg": { "overall": 79, "environmental": 76, "social": 80, "governance": 81 },
-        "trust_meter": { "score": 88, "promises_kept": 16, "promises_delayed": 1, "promises_broken": 0, "latest_quote": "New custom synthesis contrast media contracts commencing commercial batches." },
         "forensic": { "reported_profit_growth": "+18%", "cash_flow_growth": "+22%", "receivables_growth": "+10%", "divergence_score": "High EBITDA Moat" },
         "dna": { "growth": 85, "debt": 2, "news_sensitivity": 56, "mgmt_reliability": 89, "market_fear": 38 }
     },
@@ -756,7 +720,6 @@ TOP_36_COMPANIES = [
         "rsi": 38.2,
         "pattern": "Distressed Restructuring",
         "esg": { "overall": 42, "environmental": 48, "social": 38, "governance": 40 },
-        "trust_meter": { "score": 42, "promises_kept": 4, "promises_delayed": 7, "promises_broken": 9, "latest_quote": "QIP equity infusion completed to unground grounded aircraft fleet." },
         "forensic": { "reported_profit_growth": "-32%", "cash_flow_growth": "-45%", "receivables_growth": "+18%", "divergence_score": "High Distress & Solvency Risk" },
         "dna": { "growth": 25, "debt": 98, "news_sensitivity": 98, "mgmt_reliability": 40, "market_fear": 92 }
     }

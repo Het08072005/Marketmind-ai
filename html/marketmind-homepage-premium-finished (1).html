@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="MarketMind AI — explainable market intelligence that connects events, fundamentals, management behaviour, hidden dependencies and portfolio risk.">
+<title>MarketMind AI — Explainable Market Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=EB+Garamond:wght@500;600;700;800&family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600;6..96,700;6..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#07152F;
+  --navy-2:#0D2249;
+  --navy-3:#12336F;
+  --blue:#2E63FF;
+  --blue-2:#6E96FF;
+  --cyan:#5BD6FF;
+  --sky:#DDE8FF;
+  --paper:#FFFFFF;
+  --bg:#F5F7FB;
+  --bg-2:#EEF3FC;
+  --ink:#0B1732;
+  --ink-2:#43516F;
+  --muted:#7B89A7;
+  --line:#DCE5F4;
+  --line-2:#EAF0F8;
+  --green:#0C9B6E;
+  --amber:#D58B1F;
+  --red:#D45555;
+  --purple:#6C56D9;
+  --shadow:0 24px 80px rgba(14,31,68,.10);
+  --shadow-soft:0 14px 42px rgba(14,31,68,.07);
+  --radius:24px;
+  --container:1240px;
+  --font-body:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --font-display:'EB Garamond',Georgia,'Times New Roman',serif;
+  --font-numeric:'Bodoni Moda','EB Garamond',Georgia,serif;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 10% 0%,rgba(46,99,255,.055),transparent 30%),
+    radial-gradient(circle at 92% 5%,rgba(91,214,255,.06),transparent 26%),
+    var(--bg);
+  font-family:var(--font-body);
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.65;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.24;
+  z-index:-1;
+  background-image:
+    linear-gradient(rgba(10,31,70,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10,31,70,.028) 1px, transparent 1px);
+  background-size:44px 44px;
+  mask-image:linear-gradient(to bottom,black 0%,transparent 80%);
+}
+::selection{background:#cddaff;color:var(--navy)}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit}
+button{cursor:pointer}
+svg{display:block;max-width:100%}
+h1,h2,h3,h4,p{margin:0}
+.container{max-width:var(--container);margin:auto;padding-inline:clamp(20px,4.6vw,64px)}
+.kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--blue)}
+.serif{font-family:var(--font-display)}
+.mono{font-variant-numeric:tabular-nums}
+.soft{color:var(--ink-2)}
+
+/* progress + ambient cursor */
+#scrollProgress{position:fixed;left:0;top:0;width:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--purple));z-index:10000;box-shadow:0 0 18px rgba(46,99,255,.55)}
+#cursorAura{position:fixed;width:380px;height:380px;border-radius:50%;pointer-events:none;z-index:-1;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(46,99,255,.065),transparent 64%);filter:blur(6px);opacity:0;transition:opacity .35s ease}
+
+/* live ribbon */
+.market-ribbon{height:34px;background:var(--navy);color:#D9E5FF;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;font-size:11.5px;letter-spacing:.01em}
+.ribbon-track{display:flex;width:max-content;animation:ribbon 38s linear infinite;will-change:transform}
+.ribbon-track:hover{animation-play-state:paused}
+.ribbon-item{display:flex;align-items:center;gap:8px;padding:0 21px;border-right:1px solid rgba(255,255,255,.11);white-space:nowrap}
+.ribbon-dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.up{color:#71DFB7}.down{color:#FF9999}.flag{color:#9FB9FF}
+@keyframes ribbon{to{transform:translateX(-50%)}}
+
+/* nav */
+.site-nav{position:sticky;top:0;z-index:900;background:rgba(247,249,253,.82);backdrop-filter:blur(18px) saturate(145%);border-bottom:1px solid rgba(207,218,238,.82)}
+.nav-inner{height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;align-items:center;gap:11px;font-family:'Manrope',sans-serif;font-weight:800;letter-spacing:-.03em;color:var(--navy);font-size:20px;white-space:nowrap}
+.brand-mark{width:31px;height:31px;border-radius:10px;background:linear-gradient(145deg,var(--navy),var(--blue));position:relative;box-shadow:0 8px 18px rgba(46,99,255,.2)}
+.brand-mark::before,.brand-mark::after{content:"";position:absolute;border-radius:999px;background:white}
+.brand-mark::before{width:15px;height:2px;left:8px;top:15px;transform:rotate(-28deg)}
+.brand-mark::after{width:5px;height:5px;right:6px;top:7px;box-shadow:-13px 12px 0 -1px rgba(255,255,255,.82)}
+.nav-links{display:flex;align-items:center;gap:25px;font-size:13px;color:#4B5976}
+.nav-links a{position:relative;padding:26px 0 22px;transition:.25s;color:inherit}
+.nav-links a::after{content:"";position:absolute;bottom:13px;left:50%;width:0;height:2px;border-radius:999px;background:var(--blue);transform:translateX(-50%);transition:.25s}
+.nav-links a.active,.nav-links a:hover{color:var(--blue)}
+.nav-links a.active::after,.nav-links a:hover::after{width:72%}
+.nav-cta{border:0;background:var(--navy);color:white;padding:11px 17px;border-radius:999px;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center;gap:8px;box-shadow:0 10px 25px rgba(7,21,47,.16);transition:.25s}
+.nav-cta:hover{transform:translateY(-1px);background:var(--blue)}
+.nav-cta i{width:7px;height:7px;border-radius:50%;background:#7EE6C3;box-shadow:0 0 0 4px rgba(126,230,195,.16)}
+
+/* reveal + typing */
+[data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.2,.75,.2,1),transform .8s cubic-bezier(.2,.75,.2,1)}
+[data-reveal="left"]{transform:translateX(-34px)}
+[data-reveal="right"]{transform:translateX(34px)}
+[data-reveal].in-view{opacity:1;transform:none}
+.type-line{min-height:1.5em}
+.type-caret::after{content:"";display:inline-block;width:1.5px;height:1em;background:currentColor;margin-left:4px;vertical-align:-.08em;animation:blink .8s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* hero */
+.hero{padding:clamp(64px,8vw,102px) 0 84px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-150px;top:15px;width:620px;height:620px;border-radius:50%;border:1px solid rgba(46,99,255,.07);box-shadow:0 0 0 70px rgba(46,99,255,.025),0 0 0 140px rgba(46,99,255,.018);z-index:-1}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(460px,.98fr);gap:64px;align-items:center}
+.hero-copy{max-width:720px}
+.hero-pill{display:inline-flex;align-items:center;gap:9px;padding:7px 11px 7px 8px;border:1px solid #D7E2F7;background:rgba(255,255,255,.7);border-radius:999px;color:#52617D;font-size:11px;font-weight:700;margin-bottom:22px;box-shadow:0 8px 25px rgba(17,39,85,.05)}
+.hero-pill span{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#E8F0FF;color:var(--blue);font-size:10px}
+.hero h1{font-family:'Manrope',sans-serif;font-size:clamp(44px,5.5vw,76px);line-height:1.02;letter-spacing:-.055em;font-weight:800;color:var(--navy);max-width:830px}
+.hero h1 em{font-family:'Manrope',serif;font-weight:600;color:var(--blue);letter-spacing:-.035em}
+.hero-lead{font-size:clamp(16px,1.4vw,19px);color:var(--ink-2);max-width:680px;margin-top:24px;line-height:1.72}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.primary-btn,.secondary-btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:13px 18px;font-weight:700;font-size:13px;transition:.25s}
+.primary-btn{color:white;background:linear-gradient(135deg,var(--navy),#133A7D);box-shadow:0 14px 30px rgba(7,21,47,.16)}
+.primary-btn:hover{transform:translateY(-2px);box-shadow:0 20px 38px rgba(7,21,47,.2)}
+.secondary-btn{border:1px solid #CFDBEE;background:rgba(255,255,255,.75);color:var(--navy)}
+.secondary-btn:hover{border-color:#9BB5E8;background:white}
+.hero-proof{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-top:38px;padding-top:22px;border-top:1px solid var(--line)}
+.proof{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--muted)}
+.proof b{color:var(--ink);font-size:12px}
+.proof-icon{width:28px;height:28px;border-radius:8px;background:#EAF1FF;display:flex;align-items:center;justify-content:center;color:var(--blue);font-weight:800}
+
+/* live reasoning canvas */
+.reasoning-shell{background:linear-gradient(160deg,#0A1936,#0D254F 58%,#0A1C3D);border:1px solid rgba(104,146,234,.25);box-shadow:0 36px 80px rgba(6,21,52,.2);border-radius:28px;padding:0;overflow:hidden;position:relative;min-height:560px;color:white}
+.reasoning-shell::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 82% 9%,rgba(91,214,255,.12),transparent 28%),linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:auto,36px 36px,36px 36px;pointer-events:none}
+.reasoning-head{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid rgba(255,255,255,.09);position:relative;z-index:2}
+.reasoning-head .title{font-size:12px;font-weight:700;letter-spacing:.04em;color:#D7E5FF;display:flex;align-items:center;gap:9px}
+.live-pulse{width:8px;height:8px;border-radius:50%;background:#6DE0B8;box-shadow:0 0 0 0 rgba(109,224,184,.6);animation:live 1.8s infinite}
+@keyframes live{70%{box-shadow:0 0 0 8px rgba(109,224,184,0)}100%{box-shadow:0 0 0 0 rgba(109,224,184,0)}}
+.demo-badge{font-size:10px;color:#93ACE0;border:1px solid rgba(147,172,224,.32);padding:4px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:.12em}
+.reasoning-visual{position:relative;height:306px;padding:18px}
+.reasoning-visual svg{width:100%;height:100%}
+.net-line{fill:none;stroke:rgba(127,165,237,.32);stroke-width:1.3;stroke-dasharray:5 8;animation:dash 8s linear infinite}
+.net-line.hot{stroke:#5BD6FF;stroke-width:1.7;filter:drop-shadow(0 0 5px rgba(91,214,255,.55))}
+@keyframes dash{to{stroke-dashoffset:-80}}
+.net-node circle{fill:#0E2A59;stroke:#6F9CFF;stroke-width:1.2;transform-origin:center;transition:.4s}
+.net-node text{font-family:'Inter';font-size:9px;fill:#C8D8FB}
+.net-node .value{font-weight:700;fill:white;font-size:10px}
+.reasoning-shell.in-view .net-node circle{animation:nodePulse 2.8s ease-in-out infinite}
+.net-node:nth-of-type(2) circle{animation-delay:.4s!important}.net-node:nth-of-type(3) circle{animation-delay:.8s!important}.net-node:nth-of-type(4) circle{animation-delay:1.2s!important}
+@keyframes nodePulse{0%,100%{filter:drop-shadow(0 0 0 rgba(91,214,255,0))}50%{filter:drop-shadow(0 0 8px rgba(91,214,255,.6));stroke:#79E2FF}}
+.reasoning-console{position:absolute;left:18px;right:18px;bottom:15px;background:rgba(7,18,42,.78);border:1px solid rgba(150,178,235,.18);border-radius:14px;padding:11px 12px;backdrop-filter:blur(10px);font-size:10.5px;color:#B8CAE9;line-height:1.6}
+.console-line{display:flex;gap:8px}.console-line .tag{color:#5BD6FF;font-weight:700;min-width:58px}.console-line b{color:#fff;font-weight:600}
+.reasoning-metrics{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.08);position:relative;z-index:2}
+.reasoning-metric{padding:16px 17px;border-right:1px solid rgba(255,255,255,.08)}.reasoning-metric:last-child{border-right:0}
+.reasoning-metric small{display:block;color:#8FA8D5;font-size:9.5px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.reasoning-metric strong{font-family:'Manrope';font-size:20px;letter-spacing:-.03em;color:white}.reasoning-metric span{font-size:10px;color:#8FA8D5;margin-left:4px}
+
+/* section common */
+.section{padding:clamp(86px,10vw,132px) 0}
+.section-head{display:grid;grid-template-columns:.7fr 1.3fr;gap:40px;margin-bottom:68px;align-items:start}
+.section-head h2{font-family:'Manrope';font-size:clamp(34px,4vw,54px);line-height:1.06;letter-spacing:-.045em;color:var(--navy);max-width:700px}
+.section-head .lead{color:var(--ink-2);font-size:16px;max-width:620px;margin-top:12px}
+.section-head .side-note{border-left:1px solid var(--line);padding-left:24px;color:var(--muted);font-size:12.5px;max-width:380px;line-height:1.75}
+
+/* problem / difference */
+.problem-stage{background:white;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.problem-layout{display:grid;grid-template-columns:.9fr 1.1fr;gap:76px;align-items:center}
+.problem-copy h2{font-family:'Manrope';font-size:clamp(36px,4vw,56px);line-height:1.08;letter-spacing:-.045em;color:var(--navy)}
+.problem-copy p{font-size:16px;color:var(--ink-2);margin-top:22px;max-width:530px}
+.problem-questions{margin-top:32px;border-top:1px solid var(--line)}
+.question-row{display:grid;grid-template-columns:34px 1fr auto;gap:13px;align-items:center;padding:15px 0;border-bottom:1px solid var(--line-2);color:#53617D;font-size:13px;opacity:0;transform:translateX(-16px);transition:.5s}
+.problem-copy.in-view .question-row{opacity:1;transform:none}.problem-copy.in-view .question-row:nth-child(2){transition-delay:.09s}.problem-copy.in-view .question-row:nth-child(3){transition-delay:.18s}.problem-copy.in-view .question-row:nth-child(4){transition-delay:.27s}.problem-copy.in-view .question-row:nth-child(5){transition-delay:.36s}
+.qnum{color:var(--blue);font-size:10px;font-weight:800}.qstate{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--red)}
+.connection-map{position:relative;min-height:520px;border-radius:28px;background:linear-gradient(180deg,#F9FBFF,#F0F5FD);border:1px solid var(--line);overflow:hidden;box-shadow:var(--shadow-soft)}
+.connection-map::after{content:"";position:absolute;inset:0;background-image:radial-gradient(#BFCDE5 1px,transparent 1px);background-size:24px 24px;opacity:.24}
+.connection-map svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+.causal-path{fill:none;stroke:#AFC1E3;stroke-width:1.5;stroke-dasharray:1000;stroke-dashoffset:1000;transition:stroke-dashoffset 1.8s ease}
+.connection-map.in-view .causal-path{stroke-dashoffset:0}.causal-path.focus{stroke:var(--blue);stroke-width:2}
+.map-node{position:absolute;z-index:2;padding:10px 13px;background:rgba(255,255,255,.94);border:1px solid #D6E2F4;border-radius:13px;box-shadow:0 10px 30px rgba(15,36,77,.07);font-size:11px;color:#51607A;opacity:0;transform:scale(.9);transition:.5s}
+.map-node b{display:block;font-family:'Manrope';font-size:12px;color:var(--navy);margin-bottom:2px}
+.connection-map.in-view .map-node{opacity:1;transform:scale(1)}
+.connection-map.in-view .n1{transition-delay:.15s}.connection-map.in-view .n2{transition-delay:.35s}.connection-map.in-view .n3{transition-delay:.55s}.connection-map.in-view .n4{transition-delay:.75s}.connection-map.in-view .n5{transition-delay:.95s}.connection-map.in-view .n6{transition-delay:1.15s}
+.n1{left:8%;top:13%}.n2{left:56%;top:7%}.n3{left:38%;top:39%}.n4{left:9%;top:68%}.n5{left:61%;top:67%}.n6{right:5%;top:40%}
+.map-summary{position:absolute;left:24px;right:24px;bottom:20px;z-index:3;background:rgba(7,21,47,.94);color:white;border-radius:16px;padding:14px 16px;display:flex;justify-content:space-between;gap:18px;align-items:center;box-shadow:0 16px 32px rgba(7,21,47,.16)}
+.map-summary span{font-size:11px;color:#9FB5DE}.map-summary strong{font-size:13px}.map-summary .risk{color:#FF9B9B}
+
+/* capability stories */
+.capabilities{padding-top:0}
+.capability{position:relative;padding:104px 0;border-top:1px solid var(--line)}
+.capability-grid{display:grid;grid-template-columns:.84fr 1.16fr;gap:70px;align-items:center}
+.capability.reverse .cap-copy{order:2}.capability.reverse .cap-visual{order:1}
+.cap-no{font-family:'Manrope';font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--blue);text-transform:uppercase;margin-bottom:12px}
+.cap-copy h3{font-family:'Manrope';font-size:clamp(32px,3.7vw,48px);line-height:1.07;letter-spacing:-.04em;color:var(--navy);margin-bottom:16px}
+.cap-copy>.type-line{color:var(--ink-2);font-size:15.5px;line-height:1.75;min-height:84px}
+.cap-facts{margin-top:28px;border-top:1px solid var(--line)}
+.cap-fact{padding:14px 0;border-bottom:1px solid var(--line-2);display:grid;grid-template-columns:116px 1fr;gap:14px;font-size:12.5px}
+.cap-fact b{color:var(--navy);font-weight:700}.cap-fact span{color:#65728D}
+.cap-diff{margin-top:19px;padding-left:15px;border-left:2px solid var(--blue);color:#44516A;font-size:12.5px}
+.cap-diff strong{color:var(--blue)}
+.cap-visual{min-height:500px;position:relative;border-radius:26px;border:1px solid var(--line);background:linear-gradient(180deg,#FFFFFF,#F5F8FD);box-shadow:var(--shadow);overflow:hidden}
+.visual-top{height:50px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 17px;background:rgba(255,255,255,.75);position:relative;z-index:3}
+.visual-top .title{font-size:11px;font-weight:800;color:#53617B;letter-spacing:.05em;display:flex;gap:8px;align-items:center}
+.visual-top .title i{width:7px;height:7px;background:#6EDDB7;border-radius:50%;box-shadow:0 0 0 4px rgba(110,221,183,.13)}
+.visual-top .demo{font-size:9px;color:#8997B4;text-transform:uppercase;letter-spacing:.14em}
+
+/* domino */
+.domino-canvas{height:450px;position:relative;padding:18px}
+.domino-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(39,88,186,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(39,88,186,.035) 1px,transparent 1px);background-size:34px 34px}
+.domino-svg{position:absolute;inset:26px 16px 34px;width:calc(100% - 32px);height:calc(100% - 60px)}
+.domino-edge{stroke:#C6D4EA;stroke-width:1.3;fill:none;stroke-dasharray:6 7;animation:dash 7s linear infinite}.domino-edge.active{stroke:var(--blue);stroke-width:2;filter:drop-shadow(0 0 5px rgba(46,99,255,.25))}
+.dn circle{fill:white;stroke:#B4C6E5;stroke-width:1.2}.dn.hot circle{fill:#EEF4FF;stroke:var(--blue);stroke-width:1.8}.dn text{font:10px 'Inter';fill:#51607D}.dn .sub{font-size:8.8px;fill:#8190AA}.dn .impact.pos{fill:var(--green);font-weight:700}.dn .impact.neg{fill:var(--red);font-weight:700}
+.cap-visual.in-view .dn{animation:pop .55s both}.cap-visual.in-view .dn:nth-of-type(2){animation-delay:.15s}.cap-visual.in-view .dn:nth-of-type(3){animation-delay:.3s}.cap-visual.in-view .dn:nth-of-type(4){animation-delay:.45s}.cap-visual.in-view .dn:nth-of-type(5){animation-delay:.6s}.cap-visual.in-view .dn:nth-of-type(6){animation-delay:.75s}
+@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.domino-footer{position:absolute;left:17px;right:17px;bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:14px;background:white;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:10.5px;color:#68758F}
+.domino-footer b{color:var(--navy);font-size:11.5px}.confidence{color:var(--green)!important}
+
+/* thesis */
+.thesis-ui{height:450px;padding:26px 28px;display:flex;flex-direction:column;justify-content:space-between}
+.thesis-header{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start}.ticker-name{font-family:'Manrope';font-weight:800;color:var(--navy);font-size:20px}.ticker-name span{display:block;font-family:'Inter';font-size:10px;color:#8592AA;font-weight:600;margin-top:2px}.health-ring{width:92px;height:92px;position:relative}.health-ring svg{transform:rotate(-90deg)}.health-ring circle{fill:none;stroke-width:8}.health-ring .bg{stroke:#E4EBF6}.health-ring .fg{stroke:var(--amber);stroke-linecap:round;stroke-dasharray:251;stroke-dashoffset:251;transition:1.4s cubic-bezier(.2,.75,.2,1)}.cap-visual.in-view .health-ring .fg{stroke-dashoffset:80}.health-value{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}.health-value strong{font:800 22px 'Manrope';color:var(--navy)}.health-value span{font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:#8A97B2}
+.thesis-quote{margin-top:20px;color:#3E4C68;font-size:13px;line-height:1.7;padding-left:14px;border-left:2px solid var(--blue)}
+.assumption-list{margin-top:16px}.assumption{display:grid;grid-template-columns:1fr 100px;gap:14px;padding:10px 0;border-top:1px solid var(--line-2);font-size:11px;color:#68758E}.assumption strong{text-align:right;font-size:10px}.ok{color:var(--green)}.watch{color:var(--amber)}.broken{color:var(--red)}
+.invalidation{display:flex;justify-content:space-between;gap:18px;padding:14px 0;border-top:1px solid var(--line);font-size:10.5px;color:#7C8AA5}.invalidation b{display:block;color:var(--navy);font-size:12px;margin-top:3px}.invalidation .red{color:var(--red)}
+
+/* management trust */
+.trust-ui{height:450px;display:grid;grid-template-columns:190px 1fr;gap:20px;padding:26px;align-items:center}.trust-score{width:164px;height:164px;position:relative;margin:auto}.trust-score svg{transform:rotate(-90deg)}.trust-score circle{fill:none;stroke-width:8}.trust-score .bg{stroke:#E6EDF7}.trust-score .fg{stroke:url(#scoreGrad);stroke-linecap:round;stroke-dasharray:427;stroke-dashoffset:427;transition:1.5s}.cap-visual.in-view .trust-score .fg{stroke-dashoffset:116}.trust-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}.trust-center strong{font:800 38px 'Manrope';color:var(--navy)}.trust-center span{font-size:9px;color:#8A97AF;text-transform:uppercase;letter-spacing:.15em}.promise-stream{border-left:1px solid var(--line);padding-left:20px}.promise-row{position:relative;padding:10px 0 10px 14px;border-bottom:1px solid var(--line-2);font-size:10.7px;color:#65728C;opacity:0;transform:translateX(8px);transition:.5s}.cap-visual.in-view .promise-row{opacity:1;transform:none}.cap-visual.in-view .promise-row:nth-child(2){transition-delay:.1s}.cap-visual.in-view .promise-row:nth-child(3){transition-delay:.2s}.cap-visual.in-view .promise-row:nth-child(4){transition-delay:.3s}.cap-visual.in-view .promise-row:nth-child(5){transition-delay:.4s}.promise-row::before{content:"";position:absolute;left:-25px;top:17px;width:8px;height:8px;border-radius:50%;background:#9AB1D8;border:2px solid white}.promise-row.kept::before{background:var(--green)}.promise-row.delayed::before{background:var(--amber)}.promise-row.missed::before{background:var(--red)}.promise-row b{display:block;color:var(--navy);font-size:11.5px}.promise-row span{float:right;font-size:9px;font-weight:800}.promise-row.kept span{color:var(--green)}.promise-row.delayed span{color:var(--amber)}.promise-row.missed span{color:var(--red)}
+
+/* autopsy */
+.autopsy-ui{height:450px;padding:24px;display:grid;grid-template-columns:1fr 185px;gap:22px}.autopsy-timeline{position:relative;padding-left:22px}.autopsy-timeline::before{content:"";position:absolute;left:6px;top:7px;bottom:7px;width:1px;background:#D6E1F0}.autopsy-event{position:relative;padding:7px 0 11px 12px;opacity:0;transform:translateY(8px);transition:.5s}.autopsy-event::before{content:"";position:absolute;left:-20px;top:13px;width:8px;height:8px;border-radius:50%;background:#AABBDD;border:2px solid white;box-shadow:0 0 0 1px #D4DFF0}.autopsy-event.alert::before{background:var(--red)}.cap-visual.in-view .autopsy-event{opacity:1;transform:none}.cap-visual.in-view .autopsy-event:nth-child(2){transition-delay:.1s}.cap-visual.in-view .autopsy-event:nth-child(3){transition-delay:.2s}.cap-visual.in-view .autopsy-event:nth-child(4){transition-delay:.3s}.cap-visual.in-view .autopsy-event:nth-child(5){transition-delay:.4s}.autopsy-event small{font-size:8.5px;color:#8D9AB3;text-transform:uppercase;letter-spacing:.08em}.autopsy-event b{display:block;font-size:11px;color:#46536C}.autopsy-event.alert b{color:var(--red)}.similarity-panel{background:#0B1C3A;border-radius:18px;padding:18px;color:white;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 18px 36px rgba(7,21,47,.18)}.sim-top small{color:#8EA8D7;font-size:8.5px;text-transform:uppercase;letter-spacing:.12em}.sim-top strong{display:block;font:800 38px 'Manrope';letter-spacing:-.04em;margin-top:7px}.sim-top span{font-size:10px;color:#AFC2E5}.sim-bars{display:grid;gap:10px}.sim-item{font-size:9px;color:#9DB2D8}.sim-line{height:4px;border-radius:999px;background:#1B3564;margin-top:4px;overflow:hidden}.sim-line i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5BD6FF,#6D83FF);border-radius:999px;transition:1.2s}.cap-visual.in-view .sim-item:nth-child(1) i{width:82%}.cap-visual.in-view .sim-item:nth-child(2) i{width:74%}.cap-visual.in-view .sim-item:nth-child(3) i{width:69%}.sim-foot{font-size:9px;color:#8EA5CF;border-top:1px solid rgba(255,255,255,.08);padding-top:10px}
+
+/* dependency */
+.dependency-ui{height:450px;position:relative}.dependency-ui svg{width:100%;height:100%}.dep-line{stroke:#C2D0E6;stroke-width:1.15;stroke-dasharray:4 5;animation:dash 7s linear infinite}.dep-line.hot{stroke:var(--blue);stroke-width:1.8}.dep-node circle{fill:white;stroke:#B7C8E4;stroke-width:1.3}.dep-node.center circle{fill:#0B1D3D;stroke:#2E63FF;stroke-width:2;filter:drop-shadow(0 0 8px rgba(46,99,255,.28))}.dep-node text{font:10px 'Inter';fill:#55637F}.dep-node.center text{fill:white;font-weight:700}.dep-value{font-size:8px!important;fill:#8C99B1!important}.dep-node{opacity:0;transition:.5s}.cap-visual.in-view .dep-node{opacity:1}.cap-visual.in-view .dep-node:nth-of-type(2){transition-delay:.1s}.cap-visual.in-view .dep-node:nth-of-type(3){transition-delay:.2s}.cap-visual.in-view .dep-node:nth-of-type(4){transition-delay:.3s}.cap-visual.in-view .dep-node:nth-of-type(5){transition-delay:.4s}.dependency-badge{position:absolute;right:18px;bottom:18px;background:white;border:1px solid var(--line);border-radius:14px;padding:11px 13px;box-shadow:0 12px 28px rgba(14,32,71,.08)}.dependency-badge small{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.1em;color:#8D9AB3}.dependency-badge strong{font:800 20px 'Manrope';color:var(--red)}
+
+/* decision */
+.decision-ui{height:450px;display:grid;grid-template-columns:1fr 1fr}.time-machine,.ghost-portfolio{padding:24px;position:relative}.time-machine{border-right:1px solid var(--line)}.pane-label{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--blue);font-weight:800}.time-machine h4,.ghost-portfolio h4{font:800 18px 'Manrope';color:var(--navy);margin-top:7px}.decision-date{margin:24px 0 16px;font:800 30px 'Manrope';color:var(--navy);letter-spacing:-.04em}.blind-data{display:grid;gap:8px}.blind-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line-2);font-size:10.5px;color:#6D7A93}.blind-row b{color:#42506B}.decision-lock{margin-top:18px;display:flex;gap:7px}.decision-lock span{flex:1;text-align:center;border:1px solid var(--line);padding:7px 4px;border-radius:8px;font-size:9px;color:#738099}.decision-lock .chosen{background:#EAF1FF;color:var(--blue);border-color:#AFC4F4;font-weight:800}.outcome-reveal{position:absolute;left:24px;right:24px;bottom:20px;padding:11px;border-radius:10px;background:#0B1D3D;color:#D5E3FF;font-size:9.5px}.outcome-reveal strong{color:#70E0B7}.ghost-stat{font:800 42px 'Manrope';color:var(--red);letter-spacing:-.05em;margin:30px 0 2px}.ghost-sub{font-size:10px;color:#8C99B2}.ghost-chart{height:120px;margin-top:22px;position:relative}.ghost-chart svg{width:100%;height:100%}.ghost-line{fill:none;stroke:var(--blue);stroke-width:2;stroke-dasharray:400;stroke-dashoffset:400;transition:1.5s}.cap-visual.in-view .ghost-line{stroke-dashoffset:0}.ghost-base{stroke:#DCE5F2;stroke-width:1}.ghost-note{font-size:10px;color:#60708B;margin-top:10px}
+
+/* extended intelligence layer */
+.intelligence-layer{background:var(--navy);color:white;overflow:hidden}
+.intelligence-layer::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 75% 25%,rgba(60,118,255,.22),transparent 32%),linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:auto,44px 44px,44px 44px}
+.dark-head{position:relative;z-index:2;display:grid;grid-template-columns:1fr .85fr;gap:70px;margin-bottom:52px}.dark-head h2{font:800 clamp(34px,4vw,54px) 'Manrope';letter-spacing:-.045em;line-height:1.06}.dark-head p{color:#AFC2E5;font-size:14.5px;max-width:560px;align-self:end}
+.intel-stage{position:relative;z-index:2;display:grid;grid-template-columns:260px 1fr;gap:34px;min-height:500px}
+.intel-tabs{display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.1)}
+.intel-tab{border:0;background:transparent;color:#8FA8D5;text-align:left;padding:16px 4px;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:.25s}.intel-tab b{color:inherit}.intel-tab span{font-size:9px;opacity:.6}.intel-tab.active{color:white;padding-left:10px;border-left:2px solid var(--cyan);background:linear-gradient(90deg,rgba(91,214,255,.08),transparent)}
+.intel-preview{border:1px solid rgba(145,174,228,.2);background:rgba(8,25,56,.68);backdrop-filter:blur(10px);border-radius:24px;min-height:500px;overflow:hidden;box-shadow:0 26px 70px rgba(0,0,0,.18)}
+.intel-preview-head{height:54px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;padding:0 18px;color:#91A9D5;font-size:10px;text-transform:uppercase;letter-spacing:.11em}.intel-preview-head b{color:#DDE8FF;font-size:11px;letter-spacing:.04em}.intel-body{padding:24px;display:grid;grid-template-columns:1.05fr .95fr;gap:24px}.intel-copy h3{font:800 24px 'Manrope';letter-spacing:-.03em;margin-bottom:10px}.intel-copy p{font-size:12.5px;color:#AFC1DF;line-height:1.75;max-width:500px}.intel-copy .why{margin-top:18px;padding-left:13px;border-left:2px solid var(--cyan);font-size:11px;color:#D5E4FF}.intel-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}.intel-stat{border-top:1px solid rgba(255,255,255,.1);padding-top:10px}.intel-stat small{display:block;color:#7892C0;font-size:8px;text-transform:uppercase;letter-spacing:.12em}.intel-stat strong{font:700 19px 'Manrope';color:white}.mini-chart{height:270px;align-self:center;position:relative;border-left:1px solid rgba(255,255,255,.07);padding-left:20px}.mini-chart svg{width:100%;height:100%}.mini-grid{stroke:rgba(255,255,255,.06);stroke-width:1}.mini-line{fill:none;stroke:var(--cyan);stroke-width:2;stroke-dasharray:550;stroke-dashoffset:0}.mini-area{fill:url(#miniArea)}.mini-dot{fill:white;stroke:var(--cyan);stroke-width:3;filter:drop-shadow(0 0 6px rgba(91,214,255,.6))}.mini-label{font:9px 'Inter';fill:#8EA7D2}
+
+/* architecture */
+.architecture{background:white;border-bottom:1px solid var(--line)}
+.arch-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:72px;align-items:start}.arch-copy{position:sticky;top:120px}.arch-copy h2{font:800 clamp(36px,4vw,54px) 'Manrope';letter-spacing:-.045em;line-height:1.06;color:var(--navy)}.arch-copy p{margin-top:20px;color:var(--ink-2);font-size:15px}.arch-copy .trace{margin-top:24px;padding-left:14px;border-left:2px solid var(--blue);font-size:12px;color:#5E6D88}.arch-flow{position:relative;padding-left:34px}.arch-spine{position:absolute;left:8px;top:16px;bottom:16px;width:1px;background:linear-gradient(var(--blue),#A4BAE2 65%,#D5E0F1)}.arch-packet{position:absolute;left:4px;top:16px;width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 6px rgba(91,214,255,.12),0 0 18px rgba(46,99,255,.4);animation:packet 6s ease-in-out infinite}@keyframes packet{0%{top:16px}20%{top:20%}40%{top:40%}60%{top:61%}80%{top:81%}100%{top:calc(100% - 24px)}}
+.arch-layer{position:relative;padding:25px 0 28px;border-bottom:1px solid var(--line);opacity:.46;transition:.45s}.arch-layer.in-view{opacity:1}.arch-layer::before{content:"";position:absolute;left:-30px;top:32px;width:9px;height:9px;border-radius:50%;background:white;border:2px solid #93ACE0}.arch-layer.in-view::before{border-color:var(--blue);box-shadow:0 0 0 5px #EDF3FF}.arch-layer-top{display:flex;justify-content:space-between;gap:20px;align-items:baseline}.arch-layer h4{font:800 19px 'Manrope';color:var(--navy)}.arch-layer .num{font-size:10px;color:var(--blue);font-weight:800;letter-spacing:.12em}.arch-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.arch-chip{border:1px solid var(--line);background:#F8FAFE;color:#5A6883;padding:7px 10px;border-radius:8px;font-size:10px;opacity:0;transform:translateY(6px);transition:.45s}.arch-layer.in-view .arch-chip{opacity:1;transform:none}.arch-layer.in-view .arch-chip:nth-child(2){transition-delay:.05s}.arch-layer.in-view .arch-chip:nth-child(3){transition-delay:.1s}.arch-layer.in-view .arch-chip:nth-child(4){transition-delay:.15s}.arch-layer.in-view .arch-chip:nth-child(5){transition-delay:.2s}.arch-layer.in-view .arch-chip:nth-child(6){transition-delay:.25s}
+
+/* e2e scenario */
+.example{background:linear-gradient(180deg,#F3F6FB,#EEF3FB)}
+.example-shell{background:white;border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);overflow:hidden}.example-header{display:grid;grid-template-columns:1fr auto;gap:24px;padding:28px 30px;border-bottom:1px solid var(--line);align-items:center}.example-header h3{font:800 24px 'Manrope';letter-spacing:-.03em;color:var(--navy)}.example-header p{font-size:12px;color:#76849E;margin-top:4px}.scenario-trigger{padding:9px 12px;border-radius:10px;background:#FFF2F2;color:var(--red);font-size:10px;font-weight:800;border:1px solid #F1C6C6}.example-body{display:grid;grid-template-columns:260px 1fr}.stage-index{border-right:1px solid var(--line);padding:16px 0}.stage-btn{width:100%;border:0;background:transparent;text-align:left;padding:14px 20px;color:#72809A;font-size:11px;display:flex;align-items:center;gap:11px;transition:.25s}.stage-btn i{width:25px;height:25px;border-radius:50%;border:1px solid #C8D5E9;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:9px}.stage-btn.active{color:var(--navy);background:#F3F7FF;font-weight:700}.stage-btn.active i{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 0 0 5px #E7EFFF}.stage-display{min-height:430px;padding:32px;position:relative;overflow:hidden}.stage-display::after{content:"";position:absolute;inset:0;background-image:radial-gradient(#D8E3F3 1px,transparent 1px);background-size:28px 28px;opacity:.22;pointer-events:none}.stage-content{position:relative;z-index:2;max-width:760px}.stage-label{font-size:9px;color:var(--blue);font-weight:800;letter-spacing:.14em;text-transform:uppercase}.stage-title{font:800 30px 'Manrope';letter-spacing:-.04em;color:var(--navy);margin:6px 0 12px}.stage-text{font-size:14px;color:#56647E;line-height:1.75;min-height:72px}.stage-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:28px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.stage-metric{padding:15px 12px;border-right:1px solid var(--line)}.stage-metric:last-child{border-right:0}.stage-metric small{display:block;font-size:8px;color:#8C99B1;text-transform:uppercase;letter-spacing:.12em}.stage-metric strong{font:800 18px 'Manrope';color:var(--navy)}.stage-flow{margin-top:30px;height:100px}.stage-flow svg{width:100%;height:100%}.stage-path{fill:none;stroke:var(--blue);stroke-width:2;stroke-dasharray:9 8;animation:dash 5s linear infinite}.stage-node{fill:white;stroke:#9FB6E0;stroke-width:1.4}.stage-node.hot{fill:#EAF1FF;stroke:var(--blue)}.stage-text-label{font:9px 'Inter';fill:#64728E}
+
+/* how it works */
+.how{background:white}
+.process-line{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.process-step{padding:24px 18px;border-right:1px solid var(--line);min-height:180px;position:relative;overflow:hidden}.process-step:last-child{border-right:0}.process-step::before{content:"";position:absolute;left:0;bottom:0;width:100%;height:0;background:linear-gradient(180deg,transparent,#F0F5FF);transition:.8s}.process-step.in-view::before{height:100%}.process-step>*{position:relative;z-index:2}.process-step .num{font:800 10px 'Manrope';letter-spacing:.13em;color:var(--blue)}.process-step h4{font:800 16px 'Manrope';color:var(--navy);margin:38px 0 7px}.process-step p{font-size:10.5px;color:#72809A;line-height:1.65}.process-step i{position:absolute;right:15px;top:20px;width:7px;height:7px;border-radius:50%;background:#C8D6ED;transition:.5s}.process-step.in-view i{background:var(--blue);box-shadow:0 0 0 5px #E7EFFF}
+
+/* promise */
+.promise{padding:110px 0;background:var(--navy);color:white;position:relative;overflow:hidden}.promise::before{content:"";position:absolute;width:600px;height:600px;border-radius:50%;right:-180px;top:-230px;border:1px solid rgba(105,151,255,.16);box-shadow:0 0 0 70px rgba(91,214,255,.025),0 0 0 140px rgba(91,214,255,.018)}.promise-grid{display:grid;grid-template-columns:1fr 1fr;gap:70px;position:relative;z-index:2}.promise h2{font:800 clamp(38px,4.2vw,58px) 'Manrope';letter-spacing:-.045em;line-height:1.06}.promise h2 em{font-family:'Manrope';color:#8EB1FF;font-weight:600}.promise p{color:#AFC1E0;margin-top:18px;font-size:14px;max-width:570px}.question-matrix{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(255,255,255,.12)}.qm{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.09);font-size:11px;color:#CAD8F1;opacity:0;transform:translateY(8px);transition:.5s}.qm:nth-child(odd){border-right:1px solid rgba(255,255,255,.09);padding-right:18px}.qm:nth-child(even){padding-left:18px}.question-matrix.in-view .qm{opacity:1;transform:none}.question-matrix.in-view .qm:nth-child(2){transition-delay:.06s}.question-matrix.in-view .qm:nth-child(3){transition-delay:.12s}.question-matrix.in-view .qm:nth-child(4){transition-delay:.18s}.question-matrix.in-view .qm:nth-child(5){transition-delay:.24s}.question-matrix.in-view .qm:nth-child(6){transition-delay:.3s}.question-matrix.in-view .qm:nth-child(7){transition-delay:.36s}.question-matrix.in-view .qm:nth-child(8){transition-delay:.42s}.qm b{color:#69D9FF;margin-right:6px}
+
+/* closing */
+.closing{padding:120px 0 126px;text-align:center;background:linear-gradient(180deg,#F4F7FC,#FFFFFF)}.closing .kicker{margin-bottom:13px}.closing h2{font:800 clamp(42px,5vw,68px) 'Manrope';letter-spacing:-.05em;line-height:1.03;color:var(--navy);max-width:900px;margin:auto}.closing p{font-size:15px;color:#64728D;max-width:650px;margin:20px auto 0}.closing-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:30px}
+
+/* footer */
+footer{background:#07152F;color:#9FB0D0;border-top:1px solid rgba(255,255,255,.08);padding:34px 0}.footer-row{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}.footer-row .brand{color:white;font-size:17px}.footer-links{display:flex;gap:19px;font-size:10.5px}.footer-links a:hover{color:white}.footer-note{font-size:9.5px;color:#7086AD;margin-top:18px}
+
+/* voice copilot */
+.voice-button{position:fixed;right:24px;bottom:24px;z-index:1200;width:54px;height:54px;border-radius:50%;border:0;background:linear-gradient(145deg,var(--blue),#2049C8);color:white;box-shadow:0 18px 38px rgba(30,78,208,.32);display:flex;align-items:center;justify-content:center;transition:.25s}.voice-button:hover{transform:translateY(-2px) scale(1.02)}.voice-bars{display:flex;align-items:center;gap:2px;height:18px}.voice-bars i{width:2px;background:white;border-radius:4px;animation:wave 1s ease-in-out infinite}.voice-bars i:nth-child(1){height:7px}.voice-bars i:nth-child(2){height:15px;animation-delay:.12s}.voice-bars i:nth-child(3){height:11px;animation-delay:.24s}.voice-bars i:nth-child(4){height:17px;animation-delay:.36s}.voice-bars i:nth-child(5){height:8px;animation-delay:.48s}@keyframes wave{50%{transform:scaleY(.45);opacity:.65}}
+.voice-panel{position:fixed;right:24px;bottom:88px;z-index:1199;width:min(390px,calc(100vw - 32px));background:#0A1B3A;color:white;border:1px solid rgba(126,159,223,.25);border-radius:22px;box-shadow:0 28px 70px rgba(5,18,43,.3);overflow:hidden;transform:translateY(14px) scale(.96);opacity:0;pointer-events:none;transition:.28s}.voice-panel.open{transform:none;opacity:1;pointer-events:auto}.voice-head{height:52px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08)}.voice-head b{font-size:11px}.voice-head span{font-size:9px;color:#7EE6C3;text-transform:uppercase;letter-spacing:.1em}.voice-body{padding:16px}.user-bubble,.ai-bubble{font-size:10.5px;line-height:1.6;padding:10px 11px;border-radius:12px;margin-bottom:9px}.user-bubble{background:#163364;color:#DBE7FF;margin-left:48px}.ai-bubble{background:#0F274F;color:#BFD0EC;margin-right:18px;border:1px solid rgba(128,157,216,.12)}.voice-suggestions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}.voice-suggestions button{border:1px solid rgba(144,174,230,.18);background:transparent;color:#95ACD5;border-radius:999px;padding:6px 8px;font-size:8.5px}.voice-suggestions button:hover{color:white;border-color:#5BD6FF}
+
+
+/* thesis price-context refinement */
+.thesis-ui{padding:22px 24px;gap:15px}
+.thesis-market-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;min-height:230px}
+.thesis-price-chart{border:1px solid var(--line);background:#fbfcff;border-radius:14px;padding:12px 14px;overflow:hidden}
+.chart-title-row{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:10px;color:#738099;margin-bottom:5px}
+.chart-title-row b{font-family:var(--font-numeric);font-size:13px;color:var(--navy)}
+.chart-title-row em{font-family:var(--font-body);font-style:normal;color:var(--green);font-size:9px;margin-left:5px}
+.thesis-price-chart svg{width:100%;height:180px;overflow:visible}
+.t-grid line{stroke:#E6EDF7;stroke-width:1}.t-area{fill:rgba(46,99,255,.07)}.t-price{fill:none;stroke:var(--blue);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.t-floor{stroke:var(--red);stroke-width:1.2;stroke-dasharray:5 5}.t-label{font:8px var(--font-body);fill:var(--red);letter-spacing:.06em}.t-point{fill:white;stroke:var(--blue);stroke-width:3}.t-last{font:8px var(--font-body);fill:var(--blue);font-weight:700;letter-spacing:.08em}
+.thesis-market-grid .assumption-list{margin:0;display:flex;flex-direction:column;justify-content:center}.thesis-market-grid .assumption{padding:10px 0}
+
+/* professional candlestick laboratory */
+.candle-lab{background:linear-gradient(180deg,#F4F7FC,#EEF3FB);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.candle-head{margin-bottom:48px}
+.trading-terminal{background:#08152e;border:1px solid #1C3260;border-radius:22px;overflow:hidden;box-shadow:0 34px 90px rgba(7,21,47,.20);color:#DCE7FB}
+.terminal-topbar{min-height:68px;display:grid;grid-template-columns:230px 220px 1fr;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);background:#0A1935;padding:0 16px;gap:14px}
+.terminal-symbol{display:flex;gap:10px;align-items:center}.exchange-dot{width:9px;height:9px;border-radius:50%;background:#22c99a;box-shadow:0 0 0 5px rgba(34,201,154,.12)}.terminal-symbol strong{font-family:var(--font-display);font-size:18px;color:white}.terminal-symbol small{display:block;font-size:8.5px;color:#8297be;letter-spacing:.08em;text-transform:uppercase}
+.terminal-quote{display:flex;align-items:baseline;gap:9px}.terminal-quote strong{font-family:var(--font-numeric);font-size:20px;color:white}.terminal-quote span{font-size:10px;font-weight:700}.terminal-quote small{font-size:8px;color:#6ee0b8;border:1px solid rgba(110,224,184,.2);padding:3px 6px;border-radius:999px;margin-left:auto}
+.chart-actions{display:flex;gap:5px;justify-content:flex-end;align-items:center;flex-wrap:wrap}.chart-actions span{width:1px;height:20px;background:rgba(255,255,255,.12);margin:0 4px}.tf-btn,.tool-btn{border:1px solid transparent;background:transparent;color:#8298c1;border-radius:7px;padding:6px 8px;font-size:8.5px}.tf-btn:hover,.tool-btn:hover,.tf-btn.active{color:white;background:#142a53;border-color:#284679}.tool-btn{border-color:rgba(255,255,255,.08);color:#9eb2d7}
+.terminal-body{display:grid;grid-template-columns:180px minmax(0,1fr) 280px;min-height:590px}
+.terminal-watchlist{border-right:1px solid rgba(255,255,255,.08);background:#09172f}.watch-head{height:46px;padding:0 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.07)}.watch-head b{font-size:10px;color:#dbe6fa}.watch-head span{font-size:8px;color:#6f85ad}.watch-row{width:100%;border:0;border-bottom:1px solid rgba(255,255,255,.055);background:transparent;color:inherit;padding:10px 11px;display:flex;justify-content:space-between;text-align:left;gap:8px}.watch-row:hover,.watch-row.active{background:#10254a}.watch-row b{font-size:9px;color:#f1f5ff}.watch-row small{display:block;font-size:7.7px;color:#6e84aa;margin-top:2px}.watch-row strong{font-family:var(--font-numeric);font-size:9.5px;color:#dce7fb}.watch-row em{display:block;font-size:7.8px;font-style:normal;text-align:right;margin-top:2px}.watch-foot{display:flex;justify-content:space-between;padding:12px;font-size:8px;color:#7e94ba}
+.terminal-chart-wrap{position:relative;background:#08152e;min-width:0}.chart-meta-row{height:42px;display:flex;justify-content:space-between;align-items:center;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.06);font-size:8px;color:#7790bd}.chart-meta-row>span:first-child{font-weight:700;color:#cfe0ff}.chart-meta-row b{font-family:var(--font-numeric);color:#dbe6fa;font-weight:600;margin-right:5px}.pattern-chart{width:100%;height:455px;display:block}.pattern-strip{height:92px;border-top:1px solid rgba(255,255,255,.07);display:grid;grid-template-columns:repeat(6,1fr);padding:9px;gap:6px;background:#09172f}.pattern-chip{border:1px solid rgba(255,255,255,.07);background:#0c1d3a;color:#869ac0;border-radius:9px;padding:7px;text-align:left;display:flex;gap:7px;align-items:center}.pattern-chip:hover,.pattern-chip.active{background:#122a51;border-color:#345c9f;color:#fff}.pattern-chip i{width:6px;height:24px;border-radius:2px;position:relative;flex:0 0 6px}.pattern-chip i::before{content:"";position:absolute;left:2px;top:-4px;width:2px;height:32px;background:currentColor;opacity:.7}.pattern-chip .bull{background:#18b38c;color:#18b38c}.pattern-chip .bear{background:#ef4d5d;color:#ef4d5d}.pattern-chip .neutral{background:#8ba0c4;color:#8ba0c4}.pattern-chip span{font-size:7.7px;font-weight:700}.pattern-chip small{display:block;font-size:6.8px;color:#667ea7;margin-top:1px;font-weight:500}
+.terminal-insight{border-left:1px solid rgba(255,255,255,.08);background:#0A1934;padding:18px}.insight-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:15px}.insight-head small{font-size:7.5px;color:#6f8cbe;letter-spacing:.13em}.insight-head h3{font-family:var(--font-display);font-size:22px;margin-top:4px;color:white}.setup-score{display:flex;align-items:baseline}.setup-score strong{font-family:var(--font-numeric);font-size:31px;color:#79e2ff}.setup-score span{font-size:9px;color:#7e94ba}.terminal-insight>p{font-size:10.5px;color:#a9bad8;line-height:1.7;margin-top:15px}.signal-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:17px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)}.signal-grid div{padding:10px 0}.signal-grid div:nth-child(odd){border-right:1px solid rgba(255,255,255,.07)}.signal-grid div:nth-child(even){padding-left:10px}.signal-grid small{display:block;font-size:7px;color:#7189b2;text-transform:uppercase;letter-spacing:.1em}.signal-grid b{font-family:var(--font-numeric);font-size:10px;color:#e1ebfc}.evidence-checks{margin-top:15px}.evidence-checks div{display:grid;grid-template-columns:14px 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.055);font-size:8.5px;color:#9badcb}.evidence-checks i{width:7px;height:7px;border-radius:50%}.evidence-checks i.ok{background:#20c997}.evidence-checks i.warn{background:#dca23c}.evidence-checks b{font-size:7.5px;color:#dce7fb}.trade-thesis{margin-top:15px;border:1px solid rgba(91,214,255,.14);background:rgba(91,214,255,.045);border-radius:10px;padding:11px}.trade-thesis small{font-size:7px;color:#6edcfb;letter-spacing:.12em}.trade-thesis p{font-size:9px;color:#c5d5ee;line-height:1.65;margin-top:5px}.demo-warning{font-size:7.5px;color:#687fa9;margin-top:14px}
+.pattern-grid{stroke:#16305a;stroke-width:1}.pattern-axis{font:8px var(--font-body);fill:#6f86ae}.pattern-wick-up{stroke:#19b48b;stroke-width:1.5}.pattern-wick-down{stroke:#ef4d5d;stroke-width:1.5}.pattern-body-up{fill:#19b48b}.pattern-body-down{fill:#ef4d5d}.pattern-volume{fill:#244b80}.pattern-volume.hot{fill:#267f9a}.pattern-vwap{fill:none;stroke:#72ddff;stroke-width:1.6;stroke-dasharray:4 4}.pattern-ma{fill:none;stroke:#7396ff;stroke-width:1.4;opacity:.82}.pattern-support{stroke:#ff7979;stroke-width:1;stroke-dasharray:6 5}.pattern-price-line{stroke:#ef4d5d;stroke-width:1;stroke-dasharray:2 4}.pattern-highlight{fill:rgba(91,214,255,.05);stroke:rgba(91,214,255,.45);stroke-dasharray:4 4}.pattern-label-bg{fill:#10294e;stroke:#2b5a91}.pattern-label{font:8px var(--font-body);fill:#dceaff}.pattern-price-tag{fill:#ef4d5d}.pattern-price-tag-text{font:8px var(--font-body);fill:white;font-weight:700}.pattern-chart-note{font:7.5px var(--font-body);fill:#8398bc}
+
+/* responsive */
+@media(max-width:1050px){.hero-grid,.problem-layout,.capability-grid,.arch-grid{grid-template-columns:1fr}.hero-copy{max-width:820px}.reasoning-shell{max-width:720px}.capability.reverse .cap-copy,.capability.reverse .cap-visual{order:initial}.arch-copy{position:static}.arch-flow{margin-top:12px}.dark-head{grid-template-columns:1fr}.intel-stage{grid-template-columns:1fr}.intel-tabs{display:grid;grid-template-columns:repeat(3,1fr)}.intel-tab{border-right:1px solid rgba(255,255,255,.08)}.process-line{grid-template-columns:repeat(3,1fr)}.process-step:nth-child(3){border-right:0}.section-head{grid-template-columns:1fr}.section-head .side-note{padding-left:0;border-left:0}.example-body{grid-template-columns:220px 1fr}}
+
+
+/* premium typography + chart refinement pass */
+.brand,.hero h1,.hero h1 em,.problem-copy h2,.section-head h2,.cap-copy h3,.dark-head h2,.arch-copy h2,.example-header h3,.arch-layer-top h4,.time-machine h4,.ghost-portfolio h4,.intel-copy h3,.footer-brand,.cta-card h3,.voice-panel h4{
+  font-family:var(--font-display)!important;
+  letter-spacing:-.03em;
+}
+.hero h1{font-weight:700;line-height:.98}
+.hero h1 em{font-style:italic;font-weight:700}
+.brand{font-size:21px;font-weight:700}
+.kicker,.cap-no,.pane-label,.visual-top .demo,.demo-badge,.intel-preview-head,.arch-layer-top .num,.example-header p,.stage-badge,.stage-label,.footer-mini{
+  letter-spacing:.16em;
+}
+.visual-top .title,.map-node b,.reasoning-head .title,.domino-footer b,.cap-fact b,.trace strong,.voice-chip strong{
+  font-family:var(--font-body)!important;
+}
+
+[data-counter],.ghost-stat,.decision-date,.reasoning-metric strong,.sim-top strong,.trust-score .score,.trust-score .value,.intel-stat strong,.stage-metric strong,.hero-proof b,.map-summary strong,.nav-cta,.scenario-trigger,.example-metric strong,.arch-layer-top .num,.stat-number,.metric-number,.price-label,.price-chip,.ticker-value,.trust-meter strong,.stage-value,.num-display{
+  font-family:var(--font-numeric)!important;
+  font-variant-numeric:lining-nums tabular-nums;
+  letter-spacing:-.035em;
+}
+.reasoning-metric strong,.intel-stat strong,.ghost-stat,.decision-date{font-weight:700}
+
+.site-nav{background:rgba(249,250,253,.88);border-bottom:1px solid rgba(207,218,238,.9)}
+.nav-links{font-size:12.8px}
+.nav-links a{padding:27px 0 21px}
+.hero-pill,.secondary-btn,.map-node,.domino-footer,.question-row,.example-shell,.voice-panel,.intel-preview,.arch-layer,.cap-visual,.connection-map,.reasoning-shell{border-radius:20px}
+.cap-visual,.connection-map,.example-shell,.intel-stage,.arch-layer{box-shadow:0 18px 50px rgba(18,39,84,.07)!important}
+.map-node{padding:13px 16px;background:rgba(255,255,255,.97)}
+.map-node b{font-size:13px;margin-bottom:4px}
+.map-summary{padding:16px 18px;border-radius:18px}
+.map-summary strong{font-size:16px}
+.map-summary .risk{font-family:var(--font-display);font-style:italic}
+
+.connection-map::after{opacity:.18;background-size:22px 22px}
+.causal-path{stroke:#B7C8E6;stroke-width:1.7}
+.causal-path.focus{stroke:#2E63FF;stroke-width:2.6}
+.domino-edge{stroke:#C1D0EA;stroke-width:1.6}
+.domino-edge.active{stroke:#2E63FF;stroke-width:2.4}
+.dn circle{filter:drop-shadow(0 10px 18px rgba(18,42,93,.08))}
+.domino-footer{padding:12px 14px;font-size:11px}
+.visual-top{height:58px;background:rgba(255,255,255,.82)}
+.visual-top .title{font-size:12px;font-weight:700;color:#445575}
+.visual-top .demo{font-size:10px;color:#8C9AB7}
+
+.cap-copy>.type-line{font-size:15.8px;color:#4E5D78}
+.cap-fact{grid-template-columns:132px 1fr;font-size:12.8px}
+.cap-diff{font-size:12.8px;color:#4D5B77}
+.ghost-chart{height:144px;margin-top:18px;padding:8px 0 0}
+.ghost-note{font-size:11px}
+.ghost-sub{font-size:11px}
+
+.intel-preview{background:linear-gradient(160deg,#09162f,#0e2347 62%,#122d5f)}
+.intel-preview-head{height:58px}
+.intel-copy p{font-size:12.8px;color:#bed0ee}
+.intel-copy .why{font-size:11px;color:#dce7ff}
+.intel-stat strong{font-size:21px}
+.mini-chart{height:286px;padding-left:24px}
+.mini-chart svg{overflow:visible}
+.mini-grid{stroke:rgba(255,255,255,.08);stroke-width:1}
+.mini-line{fill:none;stroke:#7be7ff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 6px rgba(91,214,255,.2))}
+.mini-area{fill:url(#miniArea)}
+.mini-label{font-family:var(--font-body);font-size:8.6px;fill:#8EA7D2;letter-spacing:.04em}
+.chart-caption{position:absolute;left:24px;bottom:4px;font-size:9.5px;color:#9bb0d8;text-transform:uppercase;letter-spacing:.12em}
+.candle-chart .price-axis text,.candle-chart .time-axis text,.candle-chart .annot{font-family:var(--font-body);fill:#9db3dd;font-size:8.5px}
+.candle-chart .axis-line{stroke:rgba(255,255,255,.15);stroke-width:1}
+.candle-chart .grid-line{stroke:rgba(255,255,255,.06);stroke-width:1}
+.candle-chart .wick-up,.candle-chart .wick-down{stroke-linecap:round;stroke-width:2}
+.candle-chart .wick-up{stroke:#20c997}.candle-chart .wick-down{stroke:#ff6b6b}
+.candle-chart .bar-up{fill:#18b38c}.candle-chart .bar-down{fill:#ef4d5d}
+.candle-chart .guide{stroke:#7ba6ff;stroke-width:1.2;stroke-dasharray:5 6}
+.candle-chart .vwap{stroke:#7be7ff;stroke-width:1.4;stroke-dasharray:3 4}
+.candle-chart .price-tag{fill:#ef4d5d}.candle-chart .price-tag-2{fill:#111826}
+.candle-chart .tag-text{fill:#fff;font-family:var(--font-body);font-size:8.7px;font-weight:600}
+.candle-chart .pattern-badge{fill:rgba(123,231,255,.12);stroke:rgba(123,231,255,.45)}
+.candle-chart .pattern-text{fill:#d9ecff;font-family:var(--font-body);font-size:8.5px}
+.candle-chart .volume{fill:rgba(123,166,255,.28)}
+.candle-chart .volume.hot{fill:rgba(123,231,255,.45)}
+
+.arch-layer{background:rgba(255,255,255,.94)}
+.arch-chip{border-radius:999px}
+.stage-content h4,.example-header h3{font-family:var(--font-display)!important}
+.stage-text{color:#54627d}
+.footer-brand{font-family:var(--font-display)!important}
+.voice-panel,.voice-bubble{border-radius:22px}
+
+@media(max-width:1050px){.terminal-body{grid-template-columns:150px 1fr}.terminal-insight{grid-column:1/-1;border-left:0;border-top:1px solid rgba(255,255,255,.08);display:grid;grid-template-columns:1fr 1fr;gap:18px}.terminal-insight>.insight-head,.terminal-insight>p{grid-column:1}.terminal-insight .signal-grid,.terminal-insight .evidence-checks,.terminal-insight .trade-thesis,.terminal-insight .demo-warning{grid-column:2}.terminal-topbar{grid-template-columns:210px 180px 1fr}.thesis-market-grid{grid-template-columns:1fr}}
+@media(max-width:780px){.nav-links{display:none}.nav-cta{display:none}.hero{padding-top:54px}.hero-grid{gap:38px}.hero h1{font-size:clamp(42px,12vw,64px)}.reasoning-shell{min-height:520px}.problem-layout{gap:45px}.section{padding:78px 0}.capability{padding:78px 0}.cap-visual{min-height:440px}.trust-ui,.autopsy-ui{grid-template-columns:1fr;height:auto}.trust-ui{min-height:450px}.autopsy-ui{min-height:500px}.trust-score{width:140px;height:140px}.decision-ui{grid-template-columns:1fr;height:auto}.time-machine{border-right:0;border-bottom:1px solid var(--line);min-height:370px}.ghost-portfolio{min-height:330px}.intel-tabs{grid-template-columns:1fr 1fr}.intel-body{grid-template-columns:1fr}.mini-chart{border-left:0;padding-left:0;border-top:1px solid rgba(255,255,255,.07);padding-top:20px}.example-body{grid-template-columns:1fr}.stage-index{display:flex;overflow:auto;border-right:0;border-bottom:1px solid var(--line)}.stage-btn{min-width:160px}.process-line{grid-template-columns:1fr 1fr}.process-step:nth-child(2n){border-right:0}.promise-grid{grid-template-columns:1fr}.footer-row{align-items:flex-start;flex-direction:column}.reasoning-metrics{grid-template-columns:1fr}.reasoning-metric{border-right:0;border-bottom:1px solid rgba(255,255,255,.08)}.reasoning-metric:last-child{border-bottom:0}.reasoning-shell{min-height:640px}}
+@media(max-width:780px){.terminal-topbar{grid-template-columns:1fr auto}.chart-actions{grid-column:1/-1;justify-content:flex-start;padding-bottom:10px}.terminal-body{grid-template-columns:1fr}.terminal-watchlist{display:none}.terminal-insight{grid-template-columns:1fr;grid-column:auto}.terminal-insight>.insight-head,.terminal-insight>p,.terminal-insight .signal-grid,.terminal-insight .evidence-checks,.terminal-insight .trade-thesis,.terminal-insight .demo-warning{grid-column:auto}.pattern-strip{grid-template-columns:repeat(3,1fr);height:auto}.pattern-chart{height:400px}.thesis-market-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.container{padding-inline:18px}.hero-proof{gap:12px}.reasoning-visual{height:300px}.problem-copy h2,.section-head h2{font-size:36px}.cap-copy h3{font-size:32px}.cap-fact{grid-template-columns:1fr;gap:2px}.cap-visual{border-radius:19px}.visual-top{padding:0 13px}.domino-canvas{padding:8px}.trust-ui{padding:18px}.autopsy-ui{padding:18px}.intel-tabs{grid-template-columns:1fr}.intel-preview{border-radius:18px}.stage-display{padding:23px 18px}.stage-metrics{grid-template-columns:1fr}.stage-metric{border-right:0;border-bottom:1px solid var(--line)}.stage-metric:last-child{border-bottom:0}.process-line{grid-template-columns:1fr}.process-step{border-right:0}.question-matrix{grid-template-columns:1fr}.qm:nth-child(odd){border-right:0;padding-right:0}.qm:nth-child(even){padding-left:0}.voice-button{right:16px;bottom:16px}.voice-panel{right:16px;bottom:80px}.map-summary{flex-direction:column;align-items:flex-start}.connection-map{min-height:570px}.n1{left:6%;top:10%}.n2{left:48%;top:8%}.n3{left:28%;top:36%}.n4{left:6%;top:65%}.n5{left:51%;top:69%}.n6{right:4%;top:44%}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}.type-caret::after{display:none}.ribbon-track{animation:none}.arch-packet{display:none}}
+
+
+/* ==========================================================
+   FINAL PRODUCT POLISH — restrained institutional fintech UI
+   ========================================================== */
+:root{
+  --navy:#0B1630;
+  --navy-2:#132448;
+  --navy-3:#183568;
+  --blue:#2F63E9;
+  --blue-2:#6F95EE;
+  --cyan:#62C9ED;
+  --sky:#E7EEFC;
+  --paper:#FFFFFF;
+  --bg:#F6F8FC;
+  --bg-2:#F0F4FA;
+  --ink:#111A2E;
+  --ink-2:#4B5871;
+  --muted:#7E8AA1;
+  --line:#DCE4EF;
+  --line-2:#E9EEF5;
+  --green:#138866;
+  --amber:#C78325;
+  --red:#C94E55;
+  --purple:#6859C7;
+  --shadow:0 18px 48px rgba(18,37,76,.075);
+  --shadow-soft:0 10px 30px rgba(18,37,76,.055);
+  --radius:18px;
+  --container:1220px;
+}
+html{scroll-padding-top:78px}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  font-size:15px;
+  line-height:1.62;
+  letter-spacing:-.005em;
+}
+body::before{
+  opacity:.11;
+  background-size:56px 56px;
+  mask-image:linear-gradient(to bottom,black 0%,transparent 58%);
+}
+#cursorAura{display:none!important}
+.container{max-width:var(--container);padding-inline:clamp(22px,4vw,52px)}
+.kicker{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.14em;font-weight:700;color:var(--blue)}
+.serif{font-family:'Manrope',sans-serif!important}
+
+/* restrained top chrome */
+.market-ribbon{height:31px;font-size:10.5px;background:#09142B}
+.ribbon-item{padding:0 18px}
+.site-nav{background:rgba(248,250,253,.94);backdrop-filter:blur(14px) saturate(120%);border-bottom-color:#E2E8F1}
+.nav-inner{height:68px}
+.brand{font-size:18px;letter-spacing:-.025em}
+.brand-mark{width:29px;height:29px;border-radius:8px;box-shadow:0 6px 14px rgba(47,99,233,.14)}
+.nav-links{gap:27px;font-size:12.5px}
+.nav-links a{padding:24px 0 21px}
+.nav-links a::after{bottom:12px;height:1.5px}
+.nav-cta{border-radius:9px;padding:10px 15px;font-size:12px;box-shadow:none;background:var(--navy)}
+
+/* motion should feel intentional, not decorative */
+[data-reveal]{transform:translateY(16px);transition-duration:.68s}
+[data-reveal="left"],[data-reveal="right"]{transform:translateY(16px)}
+[data-reveal].in-view{transform:none}
+.type-caret::after{height:.9em;opacity:.65}
+
+/* hero */
+.hero{padding:72px 0 74px;background:linear-gradient(180deg,#F8FAFD 0%,#F6F8FC 100%)}
+.hero::after{display:none}
+.hero-grid{grid-template-columns:minmax(0,1.02fr) minmax(440px,.9fr);gap:56px}
+.hero-copy{max-width:690px}
+.hero-pill{margin-bottom:18px;padding:6px 10px 6px 7px;border-color:#DCE5F2;background:#fff;border-radius:8px;font-size:10.5px;box-shadow:none;color:#5F6B80}
+.hero-pill span{width:22px;height:22px;border-radius:6px;font-size:9px;background:#EDF2FF}
+.hero h1{font-size:clamp(42px,5vw,66px);line-height:1.045;letter-spacing:-.047em;max-width:760px}
+.hero h1 em{font-family:'Manrope',sans-serif;font-style:normal;font-weight:800;color:var(--blue);letter-spacing:inherit}
+.hero-lead{font-size:16px;line-height:1.75;margin-top:21px;max-width:660px}
+.hero-actions{margin-top:27px;gap:11px}
+.primary-btn,.secondary-btn{border-radius:9px;padding:12px 17px;font-size:12.5px;box-shadow:none}
+.primary-btn{background:var(--navy)}
+.primary-btn:hover{background:#13264C;box-shadow:0 8px 22px rgba(11,22,48,.13)}
+.secondary-btn{background:#fff;border-color:#D8E0EC}
+.hero-proof{margin-top:33px;padding-top:19px;gap:28px}
+.proof{font-size:10.8px;line-height:1.45}
+.proof b{font-size:11.5px}
+.proof-icon{width:26px;height:26px;border-radius:7px;font-size:8.5px;letter-spacing:.05em;background:#EEF3FE}
+
+/* flagship reasoning canvas */
+.reasoning-shell{min-height:526px;border-radius:20px;background:linear-gradient(155deg,#0B1831,#10284E);box-shadow:0 22px 56px rgba(9,24,51,.16);border-color:rgba(121,151,210,.22)}
+.reasoning-shell::before{background:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:40px 40px}
+.reasoning-head{height:52px;padding:0 17px}
+.reasoning-head .title{font-size:11.2px;letter-spacing:.02em}
+.demo-badge{font-size:8.5px;letter-spacing:.1em;border-radius:6px;padding:4px 6px}
+.reasoning-visual{height:296px;padding:16px}
+.net-node text{font-family:'Inter';font-size:9.4px}.net-node .value{font-size:10.5px}
+.reasoning-console{left:16px;right:16px;bottom:14px;border-radius:10px;font-size:10.5px;padding:10px 11px;background:rgba(7,18,42,.88);backdrop-filter:none}
+.reasoning-metric{padding:14px 16px}
+.reasoning-metric small{font-size:8.5px;letter-spacing:.1em}
+.reasoning-metric strong{font-size:19px}
+
+/* shared section rhythm */
+.section{padding:94px 0}
+.section-head{grid-template-columns:minmax(0,1fr) minmax(250px,.58fr);gap:72px;margin-bottom:54px}
+.section-head h2{font-size:clamp(32px,3.5vw,46px);line-height:1.09;letter-spacing:-.038em;max-width:720px}
+.section-head .side-note{font-size:12.5px;line-height:1.7;padding-left:21px;max-width:420px}
+
+/* problem statement */
+.problem-layout{grid-template-columns:.92fr 1.08fr;gap:64px}
+.problem-copy h2{font-size:clamp(34px,3.7vw,48px);line-height:1.1;letter-spacing:-.038em}
+.problem-copy p{font-size:14.5px;line-height:1.72;margin-top:18px}
+.problem-questions{margin-top:27px}
+.question-row{font-size:12px;padding:13px 0;grid-template-columns:30px 1fr auto}
+.qstate{font-size:8.8px;letter-spacing:.09em}
+.connection-map{min-height:490px;border-radius:18px;background:#F8FAFD;box-shadow:var(--shadow-soft)}
+.connection-map::after{opacity:.14;background-size:28px 28px}
+.map-node{padding:9px 11px;border-radius:9px;box-shadow:0 7px 18px rgba(15,36,77,.055);font-size:10.5px;background:#fff}
+.map-node b{font-size:11.5px}
+.map-summary{left:18px;right:18px;bottom:16px;border-radius:10px;padding:12px 14px;box-shadow:none;background:#0D1C38}
+.map-summary span{font-size:9.5px}.map-summary strong{font-size:11.5px}
+
+/* capabilities: editorial copy + one polished live visual */
+.capability{padding:88px 0}
+.capability-grid{grid-template-columns:.88fr 1.12fr;gap:68px}
+.cap-no{font-size:10px;letter-spacing:.13em;margin-bottom:10px}
+.cap-copy h3{font-size:clamp(30px,3.2vw,42px);line-height:1.1;letter-spacing:-.035em;margin-bottom:14px}
+.cap-copy>.type-line{font-size:14px;line-height:1.72;min-height:76px}
+.cap-facts{margin-top:23px}
+.cap-fact{grid-template-columns:112px 1fr;padding:12px 0;font-size:11.8px;gap:12px}
+.cap-diff{font-size:11.8px;line-height:1.68;margin-top:17px;padding-left:13px}
+.cap-visual{min-height:470px;border-radius:18px;background:#FBFCFE;box-shadow:var(--shadow);border-color:#DCE4EF}
+.visual-top{height:48px;padding:0 15px;background:#fff}
+.visual-top .title{font-size:10.5px;letter-spacing:.025em}.visual-top .demo{font-size:8.4px;letter-spacing:.09em}
+.domino-canvas,.thesis-ui,.trust-ui,.autopsy-ui,.dependency-ui,.decision-ui{height:422px}
+.domino-footer{border-radius:8px;box-shadow:none;font-size:10px}
+.dn text,.dep-node text{font-family:'Inter'}
+.dn text{font-size:10.4px}.dn .sub{font-size:9.2px}.dep-node text{font-size:10.4px}
+.ticker-name{font-size:18px}.ticker-name span{font-family:'Inter';font-size:9.5px}
+.thesis-quote{font-size:12px;line-height:1.65}
+.assumption{font-size:10.5px}.assumption strong{font-size:9.5px}
+.invalidation{font-size:10px}.invalidation b{font-size:11px}
+.trust-ui{grid-template-columns:176px 1fr;padding:24px}.trust-score{width:150px;height:150px}.trust-center strong{font-size:34px}
+.promise-row{font-size:10.5px}.promise-row b{font-size:11px}
+.autopsy-ui{padding:22px;grid-template-columns:1fr 176px}.similarity-panel{border-radius:13px;box-shadow:none}.sim-top strong{font-size:34px}
+.dependency-badge{border-radius:9px;box-shadow:none}.dependency-badge strong{font-size:18px}
+.time-machine,.ghost-portfolio{padding:22px}.time-machine h4,.ghost-portfolio h4{font-size:17px}.decision-date{font-size:27px}.ghost-stat{font-size:38px}.outcome-reveal{border-radius:8px}
+
+/* dark intelligence area */
+.intelligence-layer{background:#0A1730}
+.intelligence-layer::before{background:radial-gradient(circle at 78% 20%,rgba(56,107,219,.14),transparent 31%),linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:auto,52px 52px,52px 52px}
+.dark-head{gap:64px;margin-bottom:44px}.dark-head h2{font-size:clamp(32px,3.5vw,46px);line-height:1.09;letter-spacing:-.038em}.dark-head p{font-size:13.5px;line-height:1.7}
+.intel-stage{grid-template-columns:235px 1fr;gap:26px;min-height:470px}
+.intel-tab{padding:14px 5px;font-size:11.5px}.intel-tab.active{padding-left:9px;background:linear-gradient(90deg,rgba(98,201,237,.075),transparent)}
+.intel-preview{min-height:470px;border-radius:16px;box-shadow:none;background:rgba(10,27,57,.88);backdrop-filter:none}
+.intel-preview-head{height:50px;font-size:8.8px}.intel-preview-head b{font-size:10.5px}
+.intel-body{padding:23px;gap:22px}.intel-copy h3{font-size:22px}.intel-copy p{font-size:12px;line-height:1.7}.intel-copy .why{font-size:10.5px}.intel-stat small{font-size:7.8px}.intel-stat strong{font-size:17px}.mini-chart{height:250px}.mini-label{font-family:'Inter';font-size:8.5px}
+
+/* architecture */
+.arch-grid{grid-template-columns:.82fr 1.18fr;gap:66px}.arch-copy{top:104px}.arch-copy h2{font-size:clamp(33px,3.6vw,47px);line-height:1.09;letter-spacing:-.038em}.arch-copy p{font-size:14px;line-height:1.7}.arch-copy .trace{font-size:11.5px;line-height:1.65}
+.arch-flow{padding-left:31px}.arch-layer{padding:22px 0 24px}.arch-layer h4{font-size:17px}.arch-layer .num{font-size:8.8px}.arch-chip{padding:6px 9px;border-radius:6px;font-size:9.7px;background:#FAFBFD}
+
+/* scenario */
+.example{background:#F3F6FB}
+.example-shell{border-radius:18px;box-shadow:var(--shadow)}
+.example-header{padding:23px 25px}.example-header h3{font-size:21px}.example-header p{font-size:11px}.scenario-trigger{border-radius:7px;font-size:9px}
+.example-body{grid-template-columns:235px 1fr}.stage-index{padding:11px 0}.stage-btn{padding:13px 17px;font-size:10.5px}.stage-btn i{width:23px;height:23px;font-size:8.5px}.stage-btn.active i{box-shadow:0 0 0 4px #E9EFFF}
+.stage-display{min-height:395px;padding:28px}.stage-title{font-size:26px;letter-spacing:-.032em}.stage-text{font-size:13px;line-height:1.7}.stage-metric small{font-size:7.8px}.stage-metric strong{font-size:16px}.stage-text-label{font-family:'Inter';font-size:8.5px}
+
+/* how it works */
+.process-step{padding:22px 16px;min-height:170px}.process-step .num{font-size:8.8px;letter-spacing:.1em}.process-step h4{font-size:14.5px;margin:34px 0 7px}.process-step p{font-size:10.3px;line-height:1.6}.process-step::before{background:linear-gradient(180deg,transparent,#F5F8FE)}
+
+/* final promise + closing */
+.promise{padding:92px 0;background:#0A1730}.promise::before{display:none}.promise-grid{gap:64px}.promise h2{font-size:clamp(34px,3.7vw,48px);line-height:1.09;letter-spacing:-.038em}.promise h2 em{font-family:'Manrope',sans-serif;font-style:normal;font-weight:800;color:#8EAEF2}.promise p{font-size:13.5px;line-height:1.7}.qm{font-size:10.5px}
+.closing{padding:96px 0 102px;background:#F8FAFD}.closing h2{font-size:clamp(38px,4.4vw,58px);line-height:1.06;letter-spacing:-.043em;max-width:860px}.closing p{font-size:14px;line-height:1.7}
+footer{padding:30px 0}.footer-row .brand{font-size:16px}.footer-links{font-size:10px}.footer-note{font-size:9.5px;line-height:1.6}
+
+/* voice copilot */
+.voice-button{width:50px;height:50px;right:22px;bottom:22px;box-shadow:0 12px 30px rgba(30,78,208,.22)}
+.voice-panel{right:22px;bottom:82px;border-radius:15px;box-shadow:0 20px 52px rgba(5,18,43,.24)}
+.voice-head b{font-size:10.5px}.voice-body{padding:15px}.user-bubble,.ai-bubble{font-size:10.5px;border-radius:9px}.voice-suggestions button{font-size:8.5px}
+
+/* responsive finishing */
+@media(max-width:1050px){
+  .hero-grid{grid-template-columns:1fr;gap:40px}.reasoning-shell{max-width:760px}.hero-copy{max-width:780px}
+  .section-head{grid-template-columns:1fr;gap:20px}.section-head .side-note{border-left:0;padding-left:0;max-width:700px}
+  .capability-grid{grid-template-columns:1fr;gap:38px}.cap-copy{max-width:760px}.capability.reverse .cap-copy,.capability.reverse .cap-visual{order:initial}
+  .problem-layout,.arch-grid{grid-template-columns:1fr;gap:44px}.arch-copy{position:static}.intel-stage{grid-template-columns:1fr}.intel-tabs{display:grid;grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:780px){
+  .hero{padding:54px 0 60px}.hero h1{font-size:clamp(39px,10vw,54px)}.hero-lead{font-size:15px}.hero-proof{gap:16px}
+  .reasoning-shell{min-height:600px}.section,.capability{padding:72px 0}.cap-visual{min-height:430px}
+  .domino-canvas,.thesis-ui,.trust-ui,.autopsy-ui,.dependency-ui,.decision-ui{height:auto;min-height:410px}
+  .intel-tabs{grid-template-columns:1fr 1fr}.intel-body{grid-template-columns:1fr}.mini-chart{border-left:0;border-top:1px solid rgba(255,255,255,.08);padding-left:0;padding-top:18px}
+  .example-body{grid-template-columns:1fr}.stage-index{display:flex;overflow:auto;border-right:0;border-bottom:1px solid var(--line)}.stage-btn{min-width:145px}
+  .process-line{grid-template-columns:1fr 1fr}.process-step:nth-child(2n){border-right:0}.promise-grid{grid-template-columns:1fr;gap:42px}
+}
+@media(max-width:520px){
+  .container{padding-inline:18px}.hero h1{font-size:40px}.hero-proof{display:grid;grid-template-columns:1fr}.proof-icon{flex:0 0 auto}
+  .reasoning-visual{height:315px}.reasoning-metrics{grid-template-columns:1fr}.reasoning-metric{border-right:0;border-bottom:1px solid rgba(255,255,255,.08)}
+  .problem-copy h2,.section-head h2{font-size:33px}.connection-map{min-height:550px}.cap-copy h3{font-size:30px}.cap-fact{grid-template-columns:1fr;gap:3px}
+  .trust-ui,.autopsy-ui{grid-template-columns:1fr}.decision-ui{grid-template-columns:1fr}.time-machine{border-right:0;border-bottom:1px solid var(--line)}
+  .intel-tabs{grid-template-columns:1fr}.stage-display{padding:22px 17px}.stage-metrics{grid-template-columns:1fr}.stage-metric{border-right:0;border-bottom:1px solid var(--line)}
+  .process-line{grid-template-columns:1fr}.process-step{border-right:0}.question-matrix{grid-template-columns:1fr}.qm:nth-child(odd){border-right:0;padding-right:0}.qm:nth-child(even){padding-left:0}
+  .voice-button{right:15px;bottom:15px}.voice-panel{right:15px;bottom:76px}
+}
+
+
+
+/* capability intro typography — Cormorant Garamond, scoped only to this section */
+.capabilities .section-head{
+  align-items:end;
+  margin-bottom:58px;
+}
+.capabilities .section-head > div:first-child{
+  max-width:900px;
+}
+.capabilities .section-head .kicker{
+  font-family:'Cormorant Garamond', Georgia, serif!important;
+  font-style:italic!important;
+  font-size:18px!important;
+  line-height:1.2;
+  font-weight:600!important;
+  letter-spacing:.01em!important;
+  text-transform:none!important;
+  color:#2E63FF!important;
+  margin-bottom:14px;
+}
+.capabilities .section-head h2{
+  font-family:'Cormorant Garamond', Georgia, serif!important;
+  font-style:normal!important;
+  font-size:clamp(42px,4.8vw,66px)!important;
+  line-height:1.04!important;
+  letter-spacing:-.025em!important;
+  font-weight:600!important;
+  color:#14297A!important;
+  max-width:1040px!important;
+}
+.capabilities .section-head .side-note{
+  color:#66758f;
+  font-family:var(--font-body);
+  font-size:12.5px;
+  line-height:1.7;
+}
+@media(max-width:780px){
+  .capabilities .section-head{margin-bottom:42px}
+  .capabilities .section-head .kicker{font-size:16px!important}
+  .capabilities .section-head h2{font-size:clamp(34px,10vw,48px)!important;line-height:1.06!important}
+}
+
+</style>
+</head>
+<body>
+<div id="scrollProgress"></div>
+<div id="cursorAura"></div>
+
+<div class="market-ribbon" aria-label="Demo market ticker">
+  <div class="ribbon-track" id="ribbonTrack">
+    <div class="ribbon-item"><span class="ribbon-dot"></span><b>NIFTY 50</b><span class="up">+0.64%</span></div>
+    <div class="ribbon-item"><b>RELIANCE</b><span class="up">₹2,948 · +1.24%</span></div>
+    <div class="ribbon-item"><b>HDFCBANK</b><span class="down">₹1,612 · −0.45%</span></div>
+    <div class="ribbon-item"><b>BRENT</b><span class="down">$82.4 · +2.10%</span></div>
+    <div class="ribbon-item"><b>USD/INR</b><span class="flag">83.88</span></div>
+    <div class="ribbon-item"><b>INFY</b><span class="up">₹1,892 · +1.95%</span></div>
+    <div class="ribbon-item"><span class="flag">Pattern watch · cash-flow divergence detected in demo universe</span></div>
+    <div class="ribbon-item"><span class="ribbon-dot"></span><b>NIFTY 50</b><span class="up">+0.64%</span></div>
+    <div class="ribbon-item"><b>RELIANCE</b><span class="up">₹2,948 · +1.24%</span></div>
+    <div class="ribbon-item"><b>HDFCBANK</b><span class="down">₹1,612 · −0.45%</span></div>
+    <div class="ribbon-item"><b>BRENT</b><span class="down">$82.4 · +2.10%</span></div>
+    <div class="ribbon-item"><b>USD/INR</b><span class="flag">83.88</span></div>
+    <div class="ribbon-item"><b>INFY</b><span class="up">₹1,892 · +1.95%</span></div>
+    <div class="ribbon-item"><span class="flag">Pattern watch · cash-flow divergence detected in demo universe</span></div>
+  </div>
+</div>
+
+<header class="site-nav">
+  <div class="container nav-inner">
+    <a class="brand" href="#top" aria-label="MarketMind home"><span class="brand-mark"></span>MarketMind AI</a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="#intelligence">Intelligence</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#scenario">Live Scenario</a>
+      <a href="#candlestick-lab">Candles</a>
+      <a href="#how">How it works</a>
+    </nav>
+    <a class="nav-cta" href="#intelligence"><i></i> Explore Intelligence</a>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero" data-section="top">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <div class="hero-pill" data-reveal><span>AI</span> Explainable market intelligence · evidence-linked reasoning</div>
+      <h1 data-reveal>Markets give you data. <em>MarketMind explains the chain behind it.</em></h1>
+      <p class="hero-lead type-line" data-type="MarketMind AI connects market events, financial statements, management commentary, historical failures, hidden dependencies and your portfolio into one evidence-linked reasoning layer — so you can understand what moved, why it matters, what could move next, and what would invalidate the conclusion."></p>
+      <div class="hero-actions" data-reveal>
+        <a class="primary-btn" href="#intelligence">Explore intelligence <span>→</span></a>
+        <a class="secondary-btn" href="#scenario">Run the demo scenario <span>↘</span></a>
+      </div>
+      <div class="hero-proof" data-reveal>
+        <div class="proof"><span class="proof-icon">01</span><span><b>Evidence-linked</b><br>Every conclusion shows why</span></div>
+        <div class="proof"><span class="proof-icon">02</span><span><b>Portfolio-aware</b><br>Signals mapped to exposure</span></div>
+        <div class="proof"><span class="proof-icon">03</span><span><b>Counter-thesis first</b><br>Looks for what can break</span></div>
+      </div>
+    </div>
+
+    <div class="reasoning-shell" data-reveal="right">
+      <div class="reasoning-head"><div class="title"><span class="live-pulse"></span>MarketMind Intelligence Graph</div><span class="demo-badge">illustrative view</span></div>
+      <div class="reasoning-visual">
+        <svg viewBox="0 0 520 280" aria-label="Market reasoning graph">
+          <path class="net-line hot" d="M70 142 C140 50 180 58 235 92 S340 62 405 92"/>
+          <path class="net-line" d="M70 142 C150 190 190 206 260 184 S370 166 452 210"/>
+          <path class="net-line" d="M235 92 C260 132 290 138 320 138"/>
+          <path class="net-line hot" d="M320 138 C360 138 390 128 440 126"/>
+          <path class="net-line" d="M260 184 C290 170 300 160 320 138"/>
+          <g class="net-node" transform="translate(70,142)"><circle r="30"/><text text-anchor="middle" y="-3">EVENT</text><text class="value" text-anchor="middle" y="12">Crude +14%</text></g>
+          <g class="net-node" transform="translate(235,92)"><circle r="28"/><text text-anchor="middle" y="-3">COST DRIVER</text><text class="value" text-anchor="middle" y="12">ATF ↑</text></g>
+          <g class="net-node" transform="translate(260,184)"><circle r="28"/><text text-anchor="middle" y="-3">FX CHANNEL</text><text class="value" text-anchor="middle" y="12">INR −0.8%</text></g>
+          <g class="net-node" transform="translate(320,138)"><circle r="32"/><text text-anchor="middle" y="-3">SECTOR</text><text class="value" text-anchor="middle" y="12">Aviation</text></g>
+          <g class="net-node" transform="translate(440,126)"><circle r="31"/><text text-anchor="middle" y="-3">COMPANY</text><text class="value" text-anchor="middle" y="12">INDIGO</text></g>
+          <g class="net-node" transform="translate(452,210)"><circle r="27"/><text text-anchor="middle" y="-3">PORTFOLIO</text><text class="value" text-anchor="middle" y="12">3 exposed</text></g>
+        </svg>
+        <div class="reasoning-console">
+          <div class="console-line"><span class="tag">OBSERVE</span><span>Brent move exceeds <b>2.4σ</b> of 60-day daily returns.</span></div>
+          <div class="console-line"><span class="tag">CONNECT</span><span>Fuel + FX overlap raises airline input-cost sensitivity.</span></div>
+          <div class="console-line"><span class="tag">REASON</span><span class="type-line" data-type="Portfolio impact is concentrated in three holdings; thesis risk rises first in the airline exposure." data-speed="19"></span></div>
+        </div>
+      </div>
+      <div class="reasoning-metrics">
+        <div class="reasoning-metric"><small>Evidence sources</small><strong data-counter data-target="42">0</strong><span>demo inputs</span></div>
+        <div class="reasoning-metric"><small>Reasoning confidence</small><strong data-counter data-target="91.6" data-decimals="1" data-suffix="%">0%</strong></div>
+        <div class="reasoning-metric"><small>Portfolio paths found</small><strong data-counter data-target="7">0</strong><span>causal links</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section problem-stage" data-section="intelligence">
+  <div class="container problem-layout">
+    <div class="problem-copy" data-reveal="left">
+      <div class="kicker">The problem MarketMind is built to solve</div>
+      <h2>Investors do not lack information. They lack <span style="color:var(--blue)">connected reasoning.</span></h2>
+      <p>A chart knows the move. A news feed knows the headline. A filing knows the numbers. Your notes know why you bought. Existing tools usually keep those facts in separate screens. MarketMind is designed to connect them into one traceable decision context.</p>
+      <div class="problem-questions">
+        <div class="question-row"><span class="qnum">01</span><span>What actually caused the move?</span><span class="qstate">usually separate</span></div>
+        <div class="question-row"><span class="qnum">02</span><span>Which portfolio holdings share the same hidden risk?</span><span class="qstate">often invisible</span></div>
+        <div class="question-row"><span class="qnum">03</span><span>Is management keeping earlier commitments?</span><span class="qstate">manual memory</span></div>
+        <div class="question-row"><span class="qnum">04</span><span>Is the investment thesis weakening before price reacts?</span><span class="qstate">rarely tracked</span></div>
+        <div class="question-row"><span class="qnum">05</span><span>What evidence would prove the conclusion wrong?</span><span class="qstate">missing in feeds</span></div>
+      </div>
+    </div>
+
+    <div class="connection-map" data-reveal="right">
+      <svg viewBox="0 0 620 520" preserveAspectRatio="none" aria-label="Disconnected information connected into reasoning">
+        <path class="causal-path" d="M95 95 C180 130 205 175 260 225"/>
+        <path class="causal-path" d="M410 72 C365 115 330 160 280 220"/>
+        <path class="causal-path focus" d="M270 230 C330 250 410 240 515 240"/>
+        <path class="causal-path" d="M115 365 C170 320 210 280 265 235"/>
+        <path class="causal-path" d="M425 370 C360 330 325 285 275 235"/>
+        <path class="causal-path focus" d="M515 240 C520 302 490 350 425 370"/>
+      </svg>
+      <div class="map-node n1"><b>Market event</b>Crude +14% in 5 sessions</div>
+      <div class="map-node n2"><b>Management commentary</b>Fuel hedge coverage 24%</div>
+      <div class="map-node n3"><b>Reasoning layer</b>Causal + contradiction checks</div>
+      <div class="map-node n4"><b>Financials</b>Fuel = 40% of opex</div>
+      <div class="map-node n5"><b>Hidden dependency</b>USD/INR overlap</div>
+      <div class="map-node n6"><b>Portfolio</b>3 positions affected</div>
+      <div class="map-summary"><span>CONNECTED OUTPUT</span><strong>Airline thesis risk rising before earnings reset</strong><strong class="risk">Watch</strong></div>
+    </div>
+  </div>
+</section>
+
+<section class="section capabilities" id="intelligence" data-section="intelligence">
+  <div class="container">
+    <div class="section-head">
+      <div><div class="kicker">Core intelligence capabilities</div><h2 data-reveal>Six capabilities that turn disconnected signals into a reasoning chain.</h2></div>
+      <div class="side-note" data-reveal="right">Each capability below answers a different investment question, but all of them write back into the same evidence layer. That means a signal discovered in one capability can automatically trigger checks in the others.</div>
+    </div>
+
+    <article class="capability" id="domino">
+      <div class="capability-grid">
+        <div class="cap-copy" data-reveal="left">
+          <div class="cap-no">01 · Market Domino Predictor</div>
+          <h3>Trace the chain reaction, not just the headline.</h3>
+          <p class="type-line" data-type="Feed in one event and MarketMind maps the first-, second-, third- and fourth-order effects across business drivers, sectors, companies and your own portfolio — with direction, estimated magnitude, confidence and time horizon attached to every link."></p>
+          <div class="cap-facts">
+            <div class="cap-fact"><b>Problem solved</b><span>News says what happened, but not the full downstream economic path.</span></div>
+            <div class="cap-fact"><b>What we build</b><span>A heterogeneous causal graph over macro, commodity, company and portfolio relationships.</span></div>
+            <div class="cap-fact"><b>Output</b><span>Impact path, lag window, confidence, beneficiaries, losers and portfolio exposure.</span></div>
+          </div>
+          <div class="cap-diff"><strong>Different from a news impact score:</strong> it follows the event beyond the first obvious company and continues through secondary and tertiary effects.</div>
+        </div>
+        <div class="cap-visual" data-reveal="right">
+          <div class="visual-top"><div class="title"><i></i> Crude-shock propagation graph</div><span class="demo">illustrative market data</span></div>
+          <div class="domino-canvas">
+            <div class="domino-bg"></div>
+            <svg class="domino-svg" viewBox="0 0 620 360" aria-label="Domino impact graph">
+              <path class="domino-edge active" d="M74 176 C145 82 190 80 245 110"/>
+              <path class="domino-edge active" d="M74 176 C150 250 195 248 260 238"/>
+              <path class="domino-edge" d="M245 110 C330 96 350 112 410 126"/>
+              <path class="domino-edge active" d="M245 110 C300 145 330 160 385 188"/>
+              <path class="domino-edge" d="M260 238 C330 250 365 240 428 224"/>
+              <path class="domino-edge active" d="M410 126 C500 122 520 110 570 92"/>
+              <path class="domino-edge" d="M385 188 C485 184 515 210 560 242"/>
+              <g class="dn hot" transform="translate(74,176)"><circle r="40"/><text text-anchor="middle" y="-8">EVENT</text><text class="impact neg" text-anchor="middle" y="8">Brent +14%</text><text class="sub" text-anchor="middle" y="23">T+0</text></g>
+              <g class="dn" transform="translate(245,110)"><circle r="38"/><text text-anchor="middle" y="-8">AVIATION FUEL</text><text class="impact neg" text-anchor="middle" y="8">+11.2%</text><text class="sub" text-anchor="middle" y="23">cost input</text></g>
+              <g class="dn" transform="translate(260,238)"><circle r="38"/><text text-anchor="middle" y="-8">REFINING</text><text class="impact pos" text-anchor="middle" y="8">+3.9%</text><text class="sub" text-anchor="middle" y="23">inventory benefit</text></g>
+              <g class="dn" transform="translate(410,126)"><circle r="36"/><text text-anchor="middle" y="-7">INDIGO</text><text class="impact neg" text-anchor="middle" y="8">−6.2%</text><text class="sub" text-anchor="middle" y="23">T+0 to T+2</text></g>
+              <g class="dn" transform="translate(385,188)"><circle r="36"/><text text-anchor="middle" y="-7">PAINTS</text><text class="impact neg" text-anchor="middle" y="8">−4.8%</text><text class="sub" text-anchor="middle" y="23">T+1 to T+4</text></g>
+              <g class="dn" transform="translate(570,92)"><circle r="35"/><text text-anchor="middle" y="-7">TOURISM</text><text class="impact neg" text-anchor="middle" y="8">−1.7%</text><text class="sub" text-anchor="middle" y="23">secondary</text></g>
+              <g class="dn" transform="translate(560,242)"><circle r="35"/><text text-anchor="middle" y="-7">PORTFOLIO</text><text class="impact neg" text-anchor="middle" y="8">3 exposed</text><text class="sub" text-anchor="middle" y="23">2 overlapping</text></g>
+            </svg>
+            <div class="domino-footer"><span><b>Highest sensitivity:</b> aviation + paints</span><span><b>Confidence:</b> <span class="confidence" data-counter data-target="89.4" data-decimals="1" data-suffix="%">0%</span></span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="capability reverse" id="thesis">
+      <div class="capability-grid">
+        <div class="cap-copy" data-reveal="right">
+          <div class="cap-no">02 · Thesis Integrity Engine</div>
+          <h3>Monitor why you bought — not only the price.</h3>
+          <p class="type-line" data-type="MarketMind stores the actual investment thesis, converts it into measurable assumptions, and continuously checks whether revenue growth, margins, leverage, market share, regulation or management execution are strengthening or weakening that thesis."></p>
+          <div class="cap-facts">
+            <div class="cap-fact"><b>Problem solved</b><span>Investors often remember the price target but forget the assumptions behind it.</span></div>
+            <div class="cap-fact"><b>What we build</b><span>A thesis ledger with measurable claims, thresholds and explicit invalidation conditions.</span></div>
+            <div class="cap-fact"><b>Output</b><span>Intact, Watch, Weakening or Broken — plus the exact assumption causing the change.</span></div>
+          </div>
+          <div class="cap-diff"><strong>Different from a stop-loss:</strong> the alert can fire because the business thesis deteriorated even while the share price still looks healthy.</div>
+        </div>
+        <div class="cap-visual" data-reveal="left">
+          <div class="visual-top"><div class="title"><i></i> Thesis health · RELIANCE</div><span class="demo">auto re-evaluation</span></div>
+          <div class="thesis-ui">
+            <div class="thesis-header"><div><div class="ticker-name">RELIANCE <span>Consumer + digital compounding thesis</span></div><div class="thesis-quote">“Jio ARPU expands while retail EBITDA margin sustains above the defined floor.”</div></div><div class="health-ring"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="40"/><circle class="fg" cx="50" cy="50" r="40"/></svg><div class="health-value"><strong data-counter data-target="68">0</strong><span>health</span></div></div></div>
+            <div class="thesis-market-grid">
+              <div class="thesis-price-chart">
+                <div class="chart-title-row"><span>Price vs thesis floor</span><b>₹2,948.30 <em>+1.24%</em></b></div>
+                <svg viewBox="0 0 420 180" aria-label="Thesis price chart">
+                  <g class="t-grid"><line x1="0" y1="35" x2="420" y2="35"/><line x1="0" y1="80" x2="420" y2="80"/><line x1="0" y1="125" x2="420" y2="125"/></g>
+                  <path class="t-area" d="M0 142 C38 136 62 122 96 125 S150 98 185 103 S236 72 274 82 S329 58 362 62 S397 42 420 48 L420 180 L0 180Z"/>
+                  <path class="t-price" d="M0 142 C38 136 62 122 96 125 S150 98 185 103 S236 72 274 82 S329 58 362 62 S397 42 420 48"/>
+                  <line class="t-floor" x1="0" y1="151" x2="420" y2="151"/><text class="t-label" x="8" y="166">THESIS FLOOR ₹2,810</text>
+                  <circle class="t-point" cx="420" cy="48" r="4"/><text class="t-last" x="342" y="38">CURRENT</text>
+                </svg>
+              </div>
+              <div class="assumption-list">
+                <div class="assumption"><span>Jio ARPU remains above ₹205</span><strong class="ok">PASS · ₹211</strong></div>
+                <div class="assumption"><span>Retail EBITDA margin ≥ 8.0%</span><strong class="watch">WATCH · 7.8%</strong></div>
+                <div class="assumption"><span>Net debt / EBITDA remains below 1.85×</span><strong class="watch">1.72×</strong></div>
+                <div class="assumption"><span>O2C GRM does not stay below $7.5/bbl</span><strong class="ok">SAFE</strong></div>
+              </div>
+            </div>
+            <div class="invalidation"><span>PRICE-BASED FLOOR<b class="red">₹2,810</b></span><span>BUSINESS INVALIDATION<b>2 assumptions breach</b></span><span>CURRENT STATE<b style="color:var(--amber)">WATCH</b></span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="capability" id="trust">
+      <div class="capability-grid">
+        <div class="cap-copy" data-reveal="left">
+          <div class="cap-no">03 · Management Trust Ledger</div>
+          <h3>Give management commentary a memory.</h3>
+          <p class="type-line" data-type="Every measurable promise from earnings calls, investor presentations, annual reports and filings is captured as Promise → Date → Target → Deadline → Result → Status. A polished quarter can no longer erase years of missed guidance."></p>
+          <div class="cap-facts">
+            <div class="cap-fact"><b>Problem solved</b><span>Management credibility is qualitative, scattered and difficult to remember over multiple years.</span></div>
+            <div class="cap-fact"><b>What we build</b><span>A structured commitment timeline with target extraction and outcome verification.</span></div>
+            <div class="cap-fact"><b>Output</b><span>Kept, delayed, revised and missed commitments with a transparent trust score.</span></div>
+          </div>
+          <div class="cap-diff"><strong>Different from sentiment analysis:</strong> it scores whether management actually delivered what it previously promised.</div>
+        </div>
+        <div class="cap-visual" data-reveal="right">
+          <div class="visual-top"><div class="title"><i></i> Management commitment history</div><span class="demo">3-year memory</span></div>
+          <div class="trust-ui">
+            <div class="trust-score"><svg viewBox="0 0 160 160"><defs><linearGradient id="scoreGrad"><stop offset="0" stop-color="#2E63FF"/><stop offset="1" stop-color="#5BD6FF"/></linearGradient></defs><circle class="bg" cx="80" cy="80" r="68"/><circle class="fg" cx="80" cy="80" r="68"/></svg><div class="trust-center"><strong data-counter data-target="72">0</strong><span>trust score</span></div></div>
+            <div class="promise-stream">
+              <div class="promise-row kept"><b>FY24 capex discipline</b>Target ≤ ₹95k Cr · delivered ₹92k Cr <span>KEPT</span></div>
+              <div class="promise-row kept"><b>Retail store expansion</b>Target 1,800 additions · achieved 1,867 <span>KEPT</span></div>
+              <div class="promise-row delayed"><b>New-energy commissioning</b>Target Q4 FY25 · moved to H1 FY26 <span>DELAYED</span></div>
+              <div class="promise-row missed"><b>O2C margin recovery</b>Target > 12.0% · achieved 9.7% <span>MISSED</span></div>
+              <div class="promise-row kept"><b>Subscriber monetisation</b>ARPU target > ₹200 · achieved ₹211 <span>KEPT</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="capability reverse" id="autopsy">
+      <div class="capability-grid">
+        <div class="cap-copy" data-reveal="right">
+          <div class="cap-no">04 · Stock Autopsy & Red-Flag DNA</div>
+          <h3>Learn the sequence before the collapse repeats.</h3>
+          <p class="type-line" data-type="Historical failures are reconstructed as machine-readable timelines — cash-flow deterioration, receivable spikes, leverage, auditor warnings, governance signals and management behaviour — then compared with current companies to detect repeating combinations early."></p>
+          <div class="cap-facts">
+            <div class="cap-fact"><b>Problem solved</b><span>Fraud and business failure signals usually appear separately long before the final collapse.</span></div>
+            <div class="cap-fact"><b>What we build</b><span>A failure-pattern library and similarity engine across accounting, governance and operating markers.</span></div>
+            <div class="cap-fact"><b>Output</b><span>Pattern similarity, matched markers, missing markers, severity and historical analogues.</span></div>
+          </div>
+          <div class="cap-diff"><strong>Different from a red-flag checklist:</strong> it evaluates combinations and sequence, not only whether one ratio crossed a threshold.</div>
+        </div>
+        <div class="cap-visual" data-reveal="left">
+          <div class="visual-top"><div class="title"><i></i> Historical failure pattern reconstruction</div><span class="demo">illustrative case</span></div>
+          <div class="autopsy-ui">
+            <div class="autopsy-timeline">
+              <div class="autopsy-event"><small>T−12 months</small><b>Operating cash flow begins diverging from reported profit.</b></div>
+              <div class="autopsy-event"><small>T−9 months</small><b>Receivables accelerate faster than revenue growth.</b></div>
+              <div class="autopsy-event"><small>T−7 months</small><b>Leverage rises while related-party exposure expands.</b></div>
+              <div class="autopsy-event"><small>T−5 months</small><b>Management guidance misses become more frequent.</b></div>
+              <div class="autopsy-event alert"><small>T−3 months</small><b>Auditor / regulatory concern enters the evidence chain.</b></div>
+              <div class="autopsy-event alert"><small>Outcome</small><b>Market-value destruction after confidence breaks.</b></div>
+            </div>
+            <div class="similarity-panel"><div class="sim-top"><small>Current-company match</small><strong><span data-counter data-target="73">0</span>%</strong><span>similarity to historical failure cluster</span></div><div class="sim-bars"><div class="sim-item">Cash-flow divergence<div class="sim-line"><i></i></div></div><div class="sim-item">Receivable stress<div class="sim-line"><i></i></div></div><div class="sim-item">Governance pattern<div class="sim-line"><i></i></div></div></div><div class="sim-foot">Demo result · explanation required before alert severity increases.</div></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="capability" id="dependency">
+      <div class="capability-grid">
+        <div class="cap-copy" data-reveal="left">
+          <div class="cap-no">05 · Hidden Dependency Graph</div>
+          <h3>Ten stocks do not always mean ten different risks.</h3>
+          <p class="type-line" data-type="MarketMind traces holdings back to shared currencies, commodities, suppliers, geographies, customers and financing conditions — exposing economic concentration that sector labels and name-level diversification can hide."></p>
+          <div class="cap-facts">
+            <div class="cap-fact"><b>Problem solved</b><span>Different companies can still depend on the same hidden macro or supply-chain variable.</span></div>
+            <div class="cap-fact"><b>What we build</b><span>A portfolio knowledge graph with dependency edges and concentration centrality scores.</span></div>
+            <div class="cap-fact"><b>Output</b><span>Shared-risk clusters, single points of failure and look-through portfolio exposure.</span></div>
+          </div>
+          <div class="cap-diff"><strong>Different from sector allocation:</strong> it measures what companies economically depend on, not only the industry label assigned to them.</div>
+        </div>
+        <div class="cap-visual" data-reveal="right">
+          <div class="visual-top"><div class="title"><i></i> Portfolio dependency topology</div><span class="demo">network view</span></div>
+          <div class="dependency-ui">
+            <svg viewBox="0 0 620 440" aria-label="Hidden dependency graph">
+              <line class="dep-line hot" x1="310" y1="220" x2="105" y2="90"/><line class="dep-line hot" x1="310" y1="220" x2="110" y2="335"/><line class="dep-line" x1="310" y1="220" x2="305" y2="62"/><line class="dep-line hot" x1="310" y1="220" x2="505" y2="105"/><line class="dep-line" x1="310" y1="220" x2="500" y2="334"/><line class="dep-line" x1="105" y1="90" x2="305" y2="62"/><line class="dep-line" x1="500" y1="334" x2="505" y2="105"/>
+              <g class="dep-node center" transform="translate(310,220)"><circle r="46"/><text text-anchor="middle" y="-4">USD/INR</text><text text-anchor="middle" y="13">shared driver</text></g>
+              <g class="dep-node" transform="translate(105,90)"><circle r="34"/><text text-anchor="middle" y="-3">TCS</text><text class="dep-value" text-anchor="middle" y="13">34% revenue</text></g>
+              <g class="dep-node" transform="translate(110,335)"><circle r="34"/><text text-anchor="middle" y="-3">INFY</text><text class="dep-value" text-anchor="middle" y="13">US exposure</text></g>
+              <g class="dep-node" transform="translate(305,62)"><circle r="34"/><text text-anchor="middle" y="-3">WIPRO</text><text class="dep-value" text-anchor="middle" y="13">FX benefit</text></g>
+              <g class="dep-node" transform="translate(505,105)"><circle r="38"/><text text-anchor="middle" y="-3">INDIGO</text><text class="dep-value" text-anchor="middle" y="13">lease + fuel</text></g>
+              <g class="dep-node" transform="translate(500,334)"><circle r="39"/><text text-anchor="middle" y="-3">TATA CONSUMER</text><text class="dep-value" text-anchor="middle" y="13">import basket</text></g>
+            </svg>
+            <div class="dependency-badge"><small>shared portfolio exposure</small><strong><span data-counter data-target="34">0</span>%</strong></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="capability reverse" id="decision">
+      <div class="capability-grid">
+        <div class="cap-copy" data-reveal="right">
+          <div class="cap-no">06 · Decision Intelligence</div>
+          <h3>Judge the decision process, not only the final return.</h3>
+          <p class="type-line" data-type="The Decision Time Machine hides hindsight and shows only what was knowable at a past date before you lock Buy, Hold or Sell. The Ghost Portfolio separately tracks ideas you rejected or exited, revealing behavioural patterns such as selling winners too early."></p>
+          <div class="cap-facts">
+            <div class="cap-fact"><b>Problem solved</b><span>Outcome bias makes a lucky result look like a good process and a good process look bad after randomness.</span></div>
+            <div class="cap-fact"><b>What we build</b><span>A frozen-information decision replay plus a counterfactual portfolio of rejected or exited ideas.</span></div>
+            <div class="cap-fact"><b>Output</b><span>Decision-quality score, repeated bias patterns and opportunity-cost attribution.</span></div>
+          </div>
+          <div class="cap-diff"><strong>Different from performance analytics:</strong> it evaluates the information and reasoning available when the decision was actually made.</div>
+        </div>
+        <div class="cap-visual" data-reveal="left">
+          <div class="visual-top"><div class="title"><i></i> Decision replay + ghost portfolio</div><span class="demo">bias audit</span></div>
+          <div class="decision-ui">
+            <div class="time-machine"><div class="pane-label">Decision Time Machine</div><h4>Information frozen</h4><div class="decision-date">12 Jun 2024</div><div class="blind-data"><div class="blind-row"><span>Revenue growth</span><b>+13.8%</b></div><div class="blind-row"><span>FCF trend</span><b>Improving</b></div><div class="blind-row"><span>Valuation percentile</span><b>62nd</b></div><div class="blind-row"><span>Known red flags</span><b>1 moderate</b></div></div><div class="decision-lock"><span>SELL</span><span class="chosen">HOLD</span><span>BUY</span></div><div class="outcome-reveal">Outcome unlock: <strong>+21.4%</strong> over the next 180 days · process grade B+</div></div>
+            <div class="ghost-portfolio"><div class="pane-label">Ghost Portfolio</div><h4>What happened after your exits?</h4><div class="ghost-stat"><span data-counter data-target="18">0</span>%</div><div class="ghost-sub">average upside missed after early exits</div><div class="ghost-chart"><svg viewBox="0 0 250 110"><line class="ghost-base" x1="0" y1="82" x2="250" y2="82"/><path class="ghost-line" d="M5 84 C30 80 48 70 68 75 S112 55 135 60 S175 39 196 42 S225 20 245 24"/></svg></div><div class="ghost-note">Pattern: sold winners too early in <b style="color:var(--red)">6 of last 9</b> profitable exits.</div></div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section intelligence-layer" id="layer" data-section="intelligence">
+  <div class="container">
+    <div class="dark-head"><div><div class="kicker" style="color:#6F9CFF">The intelligence layer beneath the flagship capabilities</div><h2 data-reveal>Supporting analysis that continuously feeds the same reasoning graph.</h2></div><p data-reveal="right">These capabilities do not need their own disconnected homepage cards. They operate as specialized lenses inside the same system and can be invoked by the portfolio, the voice assistant, a smart alert or another reasoning path.</p></div>
+    <div class="intel-stage">
+      <div class="intel-tabs" id="intelTabs">
+        <button class="intel-tab active" data-intel="accounting"><b>Accounting Reality</b><span>01</span></button>
+        <button class="intel-tab" data-intel="dna"><b>Stock DNA</b><span>02</span></button>
+        <button class="intel-tab" data-intel="news"><b>News Impact</b><span>03</span></button>
+        <button class="intel-tab" data-intel="portfolio"><b>Portfolio Simulator</b><span>04</span></button>
+        <button class="intel-tab" data-intel="sector"><b>Sector Intelligence</b><span>05</span></button>
+        <button class="intel-tab" data-intel="candles"><b>Candlestick + Order Flow</b><span>06</span></button>
+        <button class="intel-tab" data-intel="alerts"><b>Smart Alerts + Memory</b><span>07</span></button>
+        <button class="intel-tab" data-intel="voice"><b>Voice Intelligence</b><span>08</span></button>
+        <button class="intel-tab" data-intel="reports"><b>AI Reports + Learning</b><span>09</span></button>
+      </div>
+      <div class="intel-preview">
+        <div class="intel-preview-head"><b id="intelLabel">Accounting Reality Checker</b><span>MarketMind intelligence view · illustrative</span></div>
+        <div class="intel-body">
+          <div class="intel-copy"><h3 id="intelTitle">Does reported profit behave like real cash?</h3><p id="intelDesc">Compares profit growth with operating cash flow, receivables, leverage, related-party disclosures and forensic accounting signals. Instead of showing isolated ratios, it explains whether the numbers tell one coherent economic story.</p><div class="why" id="intelWhy"><b>Why it matters:</b> fast profit growth is not automatically high-quality growth if cash conversion deteriorates at the same time.</div><div class="intel-stats"><div class="intel-stat"><small id="stat1Label">CFO / PAT</small><strong id="stat1Value">1.12×</strong></div><div class="intel-stat"><small id="stat2Label">Forensic state</small><strong id="stat2Value">Clean</strong></div><div class="intel-stat"><small id="stat3Label">Receivable signal</small><strong id="stat3Value">Stable</strong></div><div class="intel-stat"><small id="stat4Label">Confidence</small><strong id="stat4Value">88%</strong></div></div></div>
+          <div class="mini-chart" id="miniChart"><svg viewBox="0 0 360 260" preserveAspectRatio="none"><defs><linearGradient id="miniArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5BD6FF" stop-opacity=".26"/><stop offset="1" stop-color="#5BD6FF" stop-opacity="0"/></linearGradient></defs><g class="mini-grid"><line x1="0" y1="50" x2="360" y2="50"/><line x1="0" y1="105" x2="360" y2="105"/><line x1="0" y1="160" x2="360" y2="160"/><line x1="0" y1="215" x2="360" y2="215"/></g><path id="miniAreaPath" class="mini-area" d="M0 205 C45 192 80 176 118 180 S185 145 220 148 S282 116 320 104 S345 92 360 88 L360 260 L0 260Z"/><path id="miniLinePath" class="mini-line" d="M0 205 C45 192 80 176 118 180 S185 145 220 148 S282 116 320 104 S345 92 360 88"/><circle id="miniDot" class="mini-dot" cx="360" cy="88" r="5"/><text class="mini-label" x="10" y="244" id="miniXAxis">5-year operating quality trend</text></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section candle-lab" id="candlestick-lab" data-section="candlestick-lab">
+  <div class="container">
+    <div class="section-head candle-head">
+      <div><div class="kicker">Candlestick & order-flow intelligence</div><h2 data-reveal>Read price action like a trading terminal — then explain the pattern in context.</h2></div>
+      <div class="side-note" data-reveal="right">The chart is an illustrative live simulation. MarketMind does not treat a candle name as a signal by itself; it checks trend structure, volume, VWAP, liquidity sweeps and invalidation before scoring a setup.</div>
+    </div>
+
+    <div class="trading-terminal" data-reveal>
+      <div class="terminal-topbar">
+        <div class="terminal-symbol"><span class="exchange-dot"></span><div><strong>RELIANCE</strong><small>NSE · EQ · demo feed</small></div></div>
+        <div class="terminal-quote"><strong id="labPrice">₹2,948.30</strong><span class="up" id="labChange">+1.24%</span><small id="labClock">LIVE DEMO</small></div>
+        <div class="chart-actions"><button class="tf-btn">1m</button><button class="tf-btn active">5m</button><button class="tf-btn">15m</button><button class="tf-btn">1H</button><button class="tf-btn">1D</button><span></span><button class="tool-btn">VWAP</button><button class="tool-btn">Volume</button><button class="tool-btn">Patterns</button></div>
+      </div>
+
+      <div class="terminal-body">
+        <aside class="terminal-watchlist">
+          <div class="watch-head"><b>Watchlist</b><span>5 symbols</span></div>
+          <button class="watch-row active"><span><b>RELIANCE</b><small>Reliance Industries</small></span><span><strong>2,948.30</strong><em class="up">+1.24%</em></span></button>
+          <button class="watch-row"><span><b>HDFCBANK</b><small>HDFC Bank</small></span><span><strong>1,612.40</strong><em class="down">−0.45%</em></span></button>
+          <button class="watch-row"><span><b>TCS</b><small>Tata Consultancy</small></span><span><strong>4,180.50</strong><em class="up">+0.82%</em></span></button>
+          <button class="watch-row"><span><b>INFY</b><small>Infosys</small></span><span><strong>1,892.10</strong><em class="up">+1.95%</em></span></button>
+          <button class="watch-row"><span><b>INDIGO</b><small>InterGlobe Aviation</small></span><span><strong>4,426.75</strong><em class="down">−1.18%</em></span></button>
+          <div class="watch-foot"><span>NIFTY 50</span><b class="up">+0.64%</b></div>
+        </aside>
+
+        <div class="terminal-chart-wrap">
+          <div class="chart-meta-row"><span id="patternTitle">Bullish Engulfing · VWAP reclaim</span><span>O <b id="ohlcO">2940.4</b> H <b id="ohlcH">2954.8</b> L <b id="ohlcL">2937.1</b> C <b id="ohlcC">2948.3</b></span></div>
+          <svg id="patternChart" class="pattern-chart" viewBox="0 0 820 470" aria-label="Interactive candlestick pattern chart"></svg>
+          <div class="pattern-strip" id="patternStrip">
+            <button class="pattern-chip active" data-pattern="engulfing"><i class="bull"></i><span>Bullish Engulfing<small>reversal</small></span></button>
+            <button class="pattern-chip" data-pattern="hammer"><i class="bull"></i><span>Hammer<small>rejection</small></span></button>
+            <button class="pattern-chip" data-pattern="morning"><i class="bull"></i><span>Morning Star<small>3-candle</small></span></button>
+            <button class="pattern-chip" data-pattern="doji"><i class="neutral"></i><span>Doji<small>indecision</small></span></button>
+            <button class="pattern-chip" data-pattern="bearish"><i class="bear"></i><span>Bearish Engulfing<small>reversal</small></span></button>
+            <button class="pattern-chip" data-pattern="shooting"><i class="bear"></i><span>Shooting Star<small>rejection</small></span></button>
+          </div>
+        </div>
+
+        <aside class="terminal-insight">
+          <div class="insight-head"><div><small>MARKETMIND READ</small><h3 id="patternName">Bullish Engulfing</h3></div><div class="setup-score"><strong id="patternScore">87</strong><span>/100</span></div></div>
+          <p id="patternSummary">A lower-liquidity sweep is followed by a wide bullish body reclaiming VWAP. Volume expands into the close, so the pattern has stronger context than a standalone candle label.</p>
+          <div class="signal-grid"><div><small>Bias</small><b id="patternBias" class="up">Bullish</b></div><div><small>Invalidation</small><b id="patternInvalidation">₹2,910.50</b></div><div><small>Volume</small><b id="patternVolume">1.42× avg</b></div><div><small>Context</small><b id="patternContext">VWAP reclaim</b></div></div>
+          <div class="evidence-checks">
+            <div><i class="ok"></i><span>Liquidity sweep confirmed</span><b id="check1">YES</b></div>
+            <div><i class="ok"></i><span>Close above VWAP</span><b id="check2">YES</b></div>
+            <div><i class="ok"></i><span>Volume expansion</span><b id="check3">+42%</b></div>
+            <div><i class="warn"></i><span>Higher-timeframe trend</span><b id="check4">NEUTRAL</b></div>
+          </div>
+          <div class="trade-thesis"><small>AI INTERPRETATION</small><p id="patternInterpretation">Setup quality improves only if price holds above the reclaimed value area. A close back below ₹2,910.50 invalidates the bullish interpretation.</p></div>
+          <div class="demo-warning">Illustrative dummy market data · not investment advice</div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section architecture" id="architecture" data-section="architecture">
+  <div class="container arch-grid">
+    <div class="arch-copy" data-reveal="left"><div class="kicker">System architecture</div><h2>Five layers. One continuous evidence trail.</h2><p>Data enters at the bottom, specialized intelligence transforms it, reasoning connects it, personalization maps it to the user, and delivery surfaces only the part that matters.</p><div class="trace"><strong>Explainability rule:</strong> every conclusion must be able to trace itself back to the underlying evidence, transformation and confidence path that produced it.</div></div>
+    <div class="arch-flow">
+      <div class="arch-spine"></div><div class="arch-packet"></div>
+      <div class="arch-layer" data-reveal><div class="arch-layer-top"><h4>Data ingestion</h4><span class="num">LAYER 01</span></div><div class="arch-chips"><span class="arch-chip">Market prices</span><span class="arch-chip">Financial statements</span><span class="arch-chip">News + filings</span><span class="arch-chip">Earnings calls</span><span class="arch-chip">Portfolio + watchlist</span><span class="arch-chip">Historical failure archive</span></div></div>
+      <div class="arch-layer" data-reveal><div class="arch-layer-top"><h4>Specialized intelligence</h4><span class="num">LAYER 02</span></div><div class="arch-chips"><span class="arch-chip">Domino reasoning</span><span class="arch-chip">Thesis integrity</span><span class="arch-chip">Trust ledger</span><span class="arch-chip">Autopsy + red-flag DNA</span><span class="arch-chip">Hidden dependency</span><span class="arch-chip">Accounting reality</span><span class="arch-chip">Stock DNA</span><span class="arch-chip">News impact</span><span class="arch-chip">Order flow</span></div></div>
+      <div class="arch-layer" data-reveal><div class="arch-layer-top"><h4>Reasoning & explainability</h4><span class="num">LAYER 03</span></div><div class="arch-chips"><span class="arch-chip">Causal chain builder</span><span class="arch-chip">Confidence scoring</span><span class="arch-chip">Evidence linking</span><span class="arch-chip">Contradiction checks</span><span class="arch-chip">Counter-thesis search</span></div></div>
+      <div class="arch-layer" data-reveal><div class="arch-layer-top"><h4>Personalization</h4><span class="num">LAYER 04</span></div><div class="arch-chips"><span class="arch-chip">Portfolio mapping</span><span class="arch-chip">Thesis store</span><span class="arch-chip">Ghost portfolio</span><span class="arch-chip">Watchlist memory</span><span class="arch-chip">User decision history</span></div></div>
+      <div class="arch-layer" data-reveal><div class="arch-layer-top"><h4>Delivery</h4><span class="num">LAYER 05</span></div><div class="arch-chips"><span class="arch-chip">Web terminal</span><span class="arch-chip">Voice intelligence</span><span class="arch-chip">Smart alerts</span><span class="arch-chip">AI reports</span><span class="arch-chip">Learning mode</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section example" id="scenario" data-section="scenario">
+  <div class="container">
+    <div class="section-head"><div><div class="kicker">End-to-end example</div><h2 data-reveal>One market event, followed all the way to a portfolio decision.</h2></div><div class="side-note" data-reveal="right">The example is intentionally traceable: every stage shows what came in, which reasoning capability handled it, and what new information was created before the next stage.</div></div>
+    <div class="example-shell" data-reveal>
+      <div class="example-header"><div><h3>Crude Oil Shock · +30%</h3><p>Illustrative walk-through using dummy data</p></div><div class="scenario-trigger">TRIGGER · 2.9σ MOVE</div></div>
+      <div class="example-body">
+        <div class="stage-index" id="stageIndex">
+          <button class="stage-btn active" data-stage="0"><i>1</i>Event detected</button>
+          <button class="stage-btn" data-stage="1"><i>2</i>Domino reasoning</button>
+          <button class="stage-btn" data-stage="2"><i>3</i>Portfolio match</button>
+          <button class="stage-btn" data-stage="3"><i>4</i>Dependency check</button>
+          <button class="stage-btn" data-stage="4"><i>5</i>Thesis re-test</button>
+          <button class="stage-btn" data-stage="5"><i>6</i>Alert + report</button>
+        </div>
+        <div class="stage-display"><div class="stage-content"><div class="stage-label" id="stageLabel">Layer 01 · Observe</div><div class="stage-title" id="stageTitle">Event detected and cross-checked</div><div class="stage-text type-line" id="stageText">Brent crude rises 30% across the selected window. The event is cross-checked against price history, macro feeds and related news before being promoted into the reasoning layer.</div><div class="stage-metrics"><div class="stage-metric"><small id="stageM1L">Move significance</small><strong id="stageM1">2.9σ</strong></div><div class="stage-metric"><small id="stageM2L">Sources matched</small><strong id="stageM2">42</strong></div><div class="stage-metric"><small id="stageM3L">State</small><strong id="stageM3">Verified</strong></div></div><div class="stage-flow"><svg viewBox="0 0 680 100"><path class="stage-path" d="M20 50 C115 15 170 80 260 50 S420 18 500 50 S610 75 660 50"/><circle class="stage-node hot" cx="20" cy="50" r="8"/><circle class="stage-node" cx="260" cy="50" r="8"/><circle class="stage-node" cx="500" cy="50" r="8"/><circle class="stage-node" cx="660" cy="50" r="8"/><text class="stage-text-label" x="7" y="79">event</text><text class="stage-text-label" x="238" y="79">reasoning</text><text class="stage-text-label" x="480" y="79">portfolio</text><text class="stage-text-label" x="638" y="79">action</text></svg></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section how" id="how" data-section="how">
+  <div class="container">
+    <div class="section-head"><div><div class="kicker">How MarketMind works</div><h2 data-reveal>Observe. Connect. Detect. Reason. Personalize. Explain.</h2></div><div class="side-note" data-reveal="right">The goal is not to produce a magical buy/sell answer. The goal is to compress a large amount of evidence into an inspectable chain of reasoning that helps a human make a better-informed decision.</div></div>
+    <div class="process-line">
+      <div class="process-step" data-reveal><i></i><div class="num">01 · OBSERVE</div><h4>Collect evidence</h4><p>Financials, prices, news, filings, management commentary and portfolio data.</p></div>
+      <div class="process-step" data-reveal><i></i><div class="num">02 · CONNECT</div><h4>Map relationships</h4><p>Companies, sectors, commodities, currencies, suppliers and historical analogues.</p></div>
+      <div class="process-step" data-reveal><i></i><div class="num">03 · DETECT</div><h4>Find divergence</h4><p>Thesis decay, accounting conflict, hidden concentration and repeating risk patterns.</p></div>
+      <div class="process-step" data-reveal><i></i><div class="num">04 · REASON</div><h4>Build causal chains</h4><p>Explainable paths with direction, magnitude, evidence and counter-thesis checks.</p></div>
+      <div class="process-step" data-reveal><i></i><div class="num">05 · PERSONALIZE</div><h4>Map to the investor</h4><p>Portfolio, watchlist, original thesis, previous decisions and risk concentration.</p></div>
+      <div class="process-step" data-reveal><i></i><div class="num">06 · EXPLAIN</div><h4>Surface only what matters</h4><p>Evidence-linked alerts, reports, visual reasoning and natural-language voice answers.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="promise" data-section="how">
+  <div class="container promise-grid">
+    <div data-reveal="left"><div class="kicker" style="color:#6F9CFF">The product promise</div><h2>Not more market noise. <em>More context around the decision.</em></h2><p>MarketMind is designed to show the relationships and reasoning that ordinary dashboards leave disconnected — without pretending uncertainty has disappeared.</p></div>
+    <div class="question-matrix" data-reveal="right"><div class="qm"><b>01</b>What happened?</div><div class="qm"><b>02</b>Why does it matter?</div><div class="qm"><b>03</b>What caused it?</div><div class="qm"><b>04</b>Who is exposed?</div><div class="qm"><b>05</b>What could happen next?</div><div class="qm"><b>06</b>How confident are we?</div><div class="qm"><b>07</b>What evidence supports it?</div><div class="qm"><b>08</b>What would invalidate it?</div></div>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="container"><div class="kicker" data-reveal>MarketMind AI</div><h2 data-reveal>See the connections the market does not show you.</h2><p class="type-line" data-type="From a single headline to the final portfolio implication — MarketMind keeps the evidence, assumptions, dependencies and counter-thesis connected in one explainable system."></p><div class="closing-actions" data-reveal><a class="primary-btn" href="#intelligence">Explore the intelligence layer <span>→</span></a><a class="secondary-btn" href="#architecture">Inspect the architecture</a></div></div>
+</section>
+</main>
+
+<footer><div class="container"><div class="footer-row"><div class="brand"><span class="brand-mark"></span>MarketMind AI</div><div class="footer-links"><a href="#intelligence">Intelligence</a><a href="#architecture">Architecture</a><a href="#scenario">Scenario</a><a href="#how">How it works</a></div></div><div class="footer-note">Illustrative product interface. Market values and scenarios on this page are sample data for demonstration only and are not investment advice.</div></div></footer>
+
+<button class="voice-button" id="voiceButton" aria-label="Open MarketMind voice copilot"><span class="voice-bars"><i></i><i></i><i></i><i></i><i></i></span></button>
+<div class="voice-panel" id="voicePanel" aria-live="polite">
+  <div class="voice-head"><b>MarketMind Voice Intelligence</b><span>● ready</span></div>
+  <div class="voice-body"><div class="user-bubble">What happens to my portfolio if Brent moves above $95?</div><div class="ai-bubble type-line" id="voiceAnswer">I would trace the crude shock through fuel, FX, sectors and your holdings, then re-test any affected investment thesis. In this demo, aviation is the first high-sensitivity path and three positions share related exposure.</div><div class="voice-suggestions"><button data-voice="Check my HDFC thesis">Check HDFC thesis</button><button data-voice="Show hidden dependencies">Hidden dependencies</button><button data-voice="Run accounting reality check">Accounting reality</button></div></div>
+</div>
+
+<script>
+(() => {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Scroll progress.
+  const progress = document.getElementById('scrollProgress');
+  const updateProgress = () => {
+    const root = document.documentElement;
+    const max = root.scrollHeight - root.clientHeight;
+    progress.style.width = (max > 0 ? (root.scrollTop / max) * 100 : 0) + '%';
+  };
+  document.addEventListener('scroll', () => requestAnimationFrame(updateProgress), {passive:true});
+  updateProgress();
+
+  // Cursor aura for desktop only.
+  const aura = document.getElementById('cursorAura');
+  if (window.matchMedia('(pointer:fine)').matches && !reduceMotion) {
+    document.addEventListener('pointermove', e => {
+      aura.style.opacity = '1';
+      aura.style.left = e.clientX + 'px';
+      aura.style.top = e.clientY + 'px';
+    }, {passive:true});
+  }
+
+  // Reveal observer.
+  const revealTargets = document.querySelectorAll('[data-reveal], .cap-visual, .arch-layer, .process-step, .question-matrix');
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        if (entry.target.matches('[data-reveal]')) entry.target.dataset.seen = '1';
+      }
+    });
+  }, {threshold:.16, rootMargin:'0px 0px -7% 0px'});
+  revealTargets.forEach(el => revealObserver.observe(el));
+
+  // Typewriter: runs only once when visible; content exists in data-type for a clean auto-print effect.
+  const typeTargets = document.querySelectorAll('[data-type]');
+  const typeText = el => {
+    if (el.dataset.typed === '1') return;
+    el.dataset.typed = '1';
+    const text = el.dataset.type || '';
+    const speed = Number(el.dataset.speed || 13);
+    if (reduceMotion) { el.textContent = text; return; }
+    el.textContent = '';
+    el.classList.add('type-caret');
+    let i = 0;
+    const tick = () => {
+      const burst = Math.max(1, Math.round(text.length / 150));
+      el.textContent = text.slice(0, i += burst);
+      if (i < text.length) setTimeout(tick, speed);
+      else el.classList.remove('type-caret');
+    };
+    tick();
+  };
+  const typeObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (entry.isIntersecting) { typeText(entry.target); typeObserver.unobserve(entry.target); }
+  }), {threshold:.36});
+  typeTargets.forEach(el => typeObserver.observe(el));
+
+  // Counters.
+  const animateCounter = el => {
+    if (el.dataset.done === '1') return;
+    el.dataset.done = '1';
+    const target = Number(el.dataset.target || 0);
+    const decimals = Number(el.dataset.decimals || 0);
+    const suffix = el.dataset.suffix || '';
+    if (reduceMotion) { el.textContent = target.toFixed(decimals) + suffix; return; }
+    const start = performance.now();
+    const duration = 1350;
+    const loop = now => {
+      const p = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = (target * eased).toFixed(decimals) + suffix;
+      if (p < 1) requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  };
+  const counterObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (entry.isIntersecting) { animateCounter(entry.target); counterObserver.unobserve(entry.target); }
+  }), {threshold:.45});
+  document.querySelectorAll('[data-counter]').forEach(el => counterObserver.observe(el));
+
+  // Active nav state.
+  const navLinks = [...document.querySelectorAll('.nav-links a')];
+  const navSections = [...document.querySelectorAll('[data-section]')];
+  const setActiveNav = () => {
+    let current = 'top';
+    navSections.forEach(section => {
+      if (section.getBoundingClientRect().top <= 155) current = section.dataset.section;
+    });
+    navLinks.forEach(link => {
+      const href = link.getAttribute('href').replace('#','');
+      link.classList.toggle('active', href === current || (href === 'scenario' && current === 'scenario'));
+    });
+  };
+  document.addEventListener('scroll', () => requestAnimationFrame(setActiveNav), {passive:true});
+  setActiveNav();
+
+  // Supporting intelligence interactive preview.
+  const intelData = {
+    accounting:{chartType:'line',label:'Accounting Reality Checker',title:'Does reported profit behave like real cash?',desc:'Compares profit growth with operating cash flow, receivables, leverage, related-party disclosures and forensic accounting signals. Instead of showing isolated ratios, it explains whether the numbers tell one coherent economic story.',why:'fast profit growth is not automatically high-quality growth if cash conversion deteriorates at the same time.',stats:[['CFO / PAT','1.12×'],['Forensic state','Clean'],['Receivable signal','Stable'],['Confidence','88%']],axis:'5-year operating quality trend',path:'M0 205 C45 192 80 176 118 180 S185 145 220 148 S282 116 320 104 S345 92 360 88',dot:[360,88]},
+    dna:{chartType:'line',label:'Stock DNA Fingerprint',title:'Compare behavioural structure, not only valuation.',desc:'Normalizes growth, earnings quality, solvency, volatility, ownership, momentum and sentiment into a multi-dimensional company fingerprint, then finds structural twins even across different sectors.',why:'two stocks with different businesses can still behave similarly because their factor exposures and balance-sheet quality are alike.',stats:[['Top twin','TCS 94%'],['Earnings quality','94/100'],['Solvency','96/100'],['Momentum','64/100']],axis:'multi-factor similarity trajectory',path:'M0 190 C42 150 79 156 114 118 S187 135 220 102 S285 78 320 95 S346 76 360 64',dot:[360,64]},
+    news:{label:'News Impact Intelligence',title:'Turn a headline into a portfolio-specific impact chain.',desc:'Scores relevance, direction, magnitude, confidence and time horizon; then maps the story to the companies and theses actually exposed instead of producing another undifferentiated news feed.',why:'a headline matters only when the system can explain which driver changed and who is exposed to that driver.',stats:[['Stories clustered','18'],['Holdings exposed','3'],['Highest impact','−6.2%'],['Confidence','86%']],axis:'news-to-price impact confidence',path:'M0 218 C44 212 74 190 106 194 S166 162 206 150 S270 102 313 110 S346 80 360 72',dot:[360,72]},
+    portfolio:{label:'Portfolio Simulator & Macro Risk',title:'Stress the portfolio before the market does.',desc:'Runs historical and forward scenarios across asset weights, correlations, factor shocks and look-through dependencies to estimate drawdown, concentration and which positions dominate downside.',why:'portfolio risk is not the average of individual stock risk when several holdings share the same hidden factor.',stats:[['Stress drawdown','−6.42%'],['99% 1D VaR','₹1.48L'],['Shared factor','34%'],['Resilience','0.84']],axis:'simulated portfolio path under stress',path:'M0 74 C50 80 78 88 112 100 S164 140 205 160 S255 192 292 178 S333 168 360 181',dot:[360,181]},
+    sector:{chartType:'line',label:'Sector Intelligence',title:'Model the margin transfer before consensus revisions.',desc:'Links raw materials, tariffs, demand variables and capital flows to sector economics, then estimates which companies receive or lose margin under a counterfactual scenario.',why:'sector views become more useful when the system shows the operating mechanism rather than only relative price strength.',stats:[['Steel shock','−10%'],['Auto margin','+180 bps'],['PAT impact','+₹1,420 Cr'],['Confidence','82%']],axis:'counterfactual margin transfer',path:'M0 195 C50 190 80 174 110 168 S170 150 208 132 S269 112 310 90 S342 76 360 64',dot:[360,64]},
+    candles:{chartType:'candles',label:'Order-Flow Intelligence',title:'Professional price-structure analysis, not just candle names.',desc:'Maps each candle inside liquidity, VWAP, swing structure and absorption context. The goal is to explain whether buyers are reclaiming value, getting trapped into supply, or successfully sweeping liquidity before continuation.',why:'named candlestick patterns become more useful when combined with context such as reclaim, imbalance fill, wick rejection and closing strength.',stats:[['Pattern set','Bullish engulfing'],['VWAP gap','+0.62%'],['Liquidity sweep','Completed'],['Setup quality','87/100']],axis:'intraday structure · 5m candles',path:'M0 160 C24 160 40 92 62 130 S100 178 124 118 S160 80 184 144 S220 186 245 120 S289 90 315 118 S345 72 360 102',dot:[360,102]},
+    alerts:{chartType:'line',label:'Smart Alerts + Market Memory',title:'Alert only when several weak signals become one meaningful setup.',desc:'Combines current evidence with historical precedents, user theses and portfolio exposure. Alerts escalate when multiple independent signals converge rather than whenever one indicator flickers.',why:'the goal is fewer, deeper alerts with historical context — not more notifications.',stats:[['Analogue cycles','5'],['Pattern hit','4 / 5'],['60D edge','+4.6%'],['Priority','High']],axis:'historical precedent match strength',path:'M0 205 C40 180 74 188 110 152 S166 142 205 120 S260 130 302 92 S338 84 360 68',dot:[360,68]},
+    voice:{chartType:'line',label:'Voice Intelligence Assistant',title:'Ask the whole reasoning system one natural-language question.',desc:'The voice layer routes a spoken request to the appropriate capabilities, synthesizes their evidence and returns one consolidated answer instead of forcing the user to manually open separate tools.',why:'voice becomes valuable when it can trigger real analysis, not when it merely reads a dashboard aloud.',stats:[['Capabilities routed','4'],['Evidence paths','7'],['Answer mode','Sourced'],['Demo latency','1.2 s']],axis:'query routing across intelligence capabilities',path:'M0 180 C42 160 74 168 110 122 S170 80 210 110 S270 140 310 90 S345 78 360 54',dot:[360,54]},
+    reports:{chartType:'line',label:'AI Reports + Learning Layer',title:'Turn the reasoning chain into a reviewable research dossier.',desc:'Generates a structured investment memo containing the thesis, supporting evidence, contradictions, sensitivities, red flags, dependency risks and the questions an investor should still answer.',why:'the report is assembled from the same live evidence graph, so it is a traceable synthesis rather than a generic text summary.',stats:[['Sections','12'],['Evidence links','34'],['Risk checks','9'],['Concept guides','150+']],axis:'evidence coverage across generated report',path:'M0 212 C44 200 80 176 116 160 S171 130 210 122 S262 96 303 78 S339 62 360 52',dot:[360,52]}
+  };
+  const tabs = document.querySelectorAll('.intel-tab');
+  const intelLabel = document.getElementById('intelLabel');
+  const intelTitle = document.getElementById('intelTitle');
+  const intelDesc = document.getElementById('intelDesc');
+  const intelWhy = document.getElementById('intelWhy');
+  const statEls = [1,2,3,4].map(n => ({l:document.getElementById('stat'+n+'Label'),v:document.getElementById('stat'+n+'Value')}));
+  const miniChart = document.getElementById('miniChart');
+  const lineChartMarkup = d => `
+    <svg viewBox="0 0 360 260" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="miniArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#5BD6FF" stop-opacity=".28"/>
+          <stop offset="1" stop-color="#5BD6FF" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <g class="mini-grid">
+        <line x1="0" y1="50" x2="360" y2="50"/>
+        <line x1="0" y1="105" x2="360" y2="105"/>
+        <line x1="0" y1="160" x2="360" y2="160"/>
+        <line x1="0" y1="215" x2="360" y2="215"/>
+      </g>
+      <path class="mini-area" d="${d.path} L360 260 L0 260Z"/>
+      <path class="mini-line" d="${d.path}"/>
+      <circle class="mini-dot" cx="${d.dot[0]}" cy="${d.dot[1]}" r="5"/>
+      <text class="mini-label" x="10" y="244">${d.axis}</text>
+    </svg>
+    <div class="chart-caption">Live analytical preview</div>
+  `;
+  const candleChartMarkup = `
+    <svg class="candle-chart" viewBox="0 0 360 260" preserveAspectRatio="none">
+      <g>
+        <line class="grid-line" x1="0" y1="34" x2="360" y2="34"/>
+        <line class="grid-line" x1="0" y1="86" x2="360" y2="86"/>
+        <line class="grid-line" x1="0" y1="138" x2="360" y2="138"/>
+        <line class="grid-line" x1="0" y1="190" x2="360" y2="190"/>
+        <line class="axis-line" x1="0" y1="230" x2="360" y2="230"/>
+        <line class="guide" x1="0" y1="121" x2="360" y2="121"/>
+        <line class="vwap" x1="0" y1="108" x2="360" y2="108"/>
+      </g>
+      <g class="price-axis">
+        <text x="330" y="38">340.00</text>
+        <text x="330" y="90">330.00</text>
+        <text x="330" y="142">320.00</text>
+        <text x="330" y="194">310.00</text>
+      </g>
+      <g>
+        <line class="wick-up" x1="24" y1="184" x2="24" y2="134"/><rect class="bar-up" x="19" y="148" width="10" height="28" rx="1.5"/>
+        <line class="wick-up" x1="44" y1="176" x2="44" y2="112"/><rect class="bar-up" x="39" y="126" width="10" height="38" rx="1.5"/>
+        <line class="wick-up" x1="64" y1="160" x2="64" y2="106"/><rect class="bar-up" x="59" y="118" width="10" height="30" rx="1.5"/>
+        <line class="wick-down" x1="84" y1="152" x2="84" y2="86"/><rect class="bar-down" x="79" y="102" width="10" height="32" rx="1.5"/>
+        <line class="wick-up" x1="104" y1="148" x2="104" y2="98"/><rect class="bar-up" x="99" y="110" width="10" height="27" rx="1.5"/>
+        <line class="wick-up" x1="124" y1="136" x2="124" y2="80"/><rect class="bar-up" x="119" y="94" width="10" height="30" rx="1.5"/>
+        <line class="wick-down" x1="144" y1="128" x2="144" y2="72"/><rect class="bar-down" x="139" y="84" width="10" height="28" rx="1.5"/>
+        <line class="wick-up" x1="164" y1="122" x2="164" y2="62"/><rect class="bar-up" x="159" y="74" width="10" height="36" rx="1.5"/>
+        <line class="wick-up" x1="184" y1="110" x2="184" y2="46"/><rect class="bar-up" x="179" y="58" width="10" height="42" rx="1.5"/>
+        <line class="wick-down" x1="204" y1="118" x2="204" y2="58"/><rect class="bar-down" x="199" y="76" width="10" height="26" rx="1.5"/>
+        <line class="wick-down" x1="224" y1="146" x2="224" y2="92"/><rect class="bar-down" x="219" y="100" width="10" height="34" rx="1.5"/>
+        <line class="wick-up" x1="244" y1="136" x2="244" y2="88"/><rect class="bar-up" x="239" y="96" width="10" height="28" rx="1.5"/>
+        <line class="wick-up" x1="264" y1="128" x2="264" y2="82"/><rect class="bar-up" x="259" y="88" width="10" height="31" rx="1.5"/>
+        <line class="wick-up" x1="284" y1="116" x2="284" y2="74"/><rect class="bar-up" x="279" y="80" width="10" height="28" rx="1.5"/>
+        <line class="wick-down" x1="304" y1="124" x2="304" y2="66"/><rect class="bar-down" x="299" y="78" width="10" height="40" rx="1.5"/>
+      </g>
+      <g>
+        <rect class="pattern-badge" x="12" y="10" width="136" height="20" rx="10"/>
+        <text class="pattern-text" x="22" y="23">BULLISH ENGULFING · VWAP RECLAIM</text>
+        <text class="annot" x="188" y="102">VWAP</text>
+      </g>
+      <g>
+        <rect class="price-tag" x="326" y="114" width="34" height="18" rx="3"/>
+        <text class="tag-text" x="332" y="127">319.97</text>
+        <rect class="price-tag-2" x="326" y="184" width="34" height="18" rx="3"/>
+        <text class="tag-text" x="332" y="197">310.55</text>
+      </g>
+      <g>
+        <rect class="volume" x="18" y="236" width="8" height="12" rx="1.5"/><rect class="volume" x="38" y="232" width="8" height="16" rx="1.5"/><rect class="volume hot" x="58" y="228" width="8" height="20" rx="1.5"/><rect class="volume" x="78" y="236" width="8" height="12" rx="1.5"/><rect class="volume" x="98" y="230" width="8" height="18" rx="1.5"/><rect class="volume" x="118" y="236" width="8" height="12" rx="1.5"/><rect class="volume hot" x="138" y="224" width="8" height="24" rx="1.5"/><rect class="volume" x="158" y="236" width="8" height="12" rx="1.5"/><rect class="volume hot" x="178" y="218" width="8" height="30" rx="1.5"/><rect class="volume" x="198" y="234" width="8" height="14" rx="1.5"/><rect class="volume" x="218" y="236" width="8" height="12" rx="1.5"/><rect class="volume" x="238" y="230" width="8" height="18" rx="1.5"/><rect class="volume" x="258" y="226" width="8" height="22" rx="1.5"/><rect class="volume hot" x="278" y="220" width="8" height="28" rx="1.5"/><rect class="volume" x="298" y="232" width="8" height="16" rx="1.5"/>
+      </g>
+      <g class="time-axis">
+        <text x="18" y="258">09:30</text>
+        <text x="126" y="258">11:00</text>
+        <text x="234" y="258">13:00</text>
+        <text x="300" y="258">14:30</text>
+      </g>
+    </svg>
+    <div class="chart-caption">Illustrative 5-minute price action with pattern context</div>
+  `;
+  const renderMiniChart = d => {
+    if (!miniChart) return;
+    miniChart.innerHTML = d.chartType === 'candles' ? candleChartMarkup : lineChartMarkup(d);
+    const line = miniChart.querySelector('.mini-line');
+    if (line && !reduceMotion){
+      line.style.strokeDasharray = '550';
+      line.style.strokeDashoffset = '550';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{ line.style.transition='stroke-dashoffset 1s ease'; line.style.strokeDashoffset='0'; }));
+    }
+  };
+  let intelTimer;
+  const setIntel = key => {
+    const d = intelData[key]; if (!d) return;
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.intel === key));
+    intelLabel.textContent = d.label; intelTitle.textContent = d.title; intelDesc.textContent = d.desc; intelWhy.innerHTML = '<b>Why it matters:</b> ' + d.why;
+    d.stats.forEach((s,i)=>{statEls[i].l.textContent=s[0];statEls[i].v.textContent=s[1];});
+    renderMiniChart(d);
+  };
+  tabs.forEach(tab => tab.addEventListener('click',()=>{setIntel(tab.dataset.intel);clearInterval(intelTimer);}));
+  if (!reduceMotion) {
+    const keys = Object.keys(intelData); let intelIndex = 0;
+    intelTimer = setInterval(()=>{intelIndex=(intelIndex+1)%keys.length;setIntel(keys[intelIndex]);},6500);
+  }
+
+  // End-to-end scenario stepper.
+  const stages = [
+    {label:'Layer 01 · Observe',title:'Event detected and cross-checked',text:'Brent crude rises 30% across the selected window. The event is cross-checked against price history, macro feeds and related news before being promoted into the reasoning layer.',m:[['Move significance','2.9σ'],['Sources matched','42'],['State','Verified']]},
+    {label:'Layer 02 · Market Domino Predictor',title:'Causal paths expand beyond the headline',text:'The system maps fuel cost, freight, petrochemical inputs, inflation, FX and sector pass-through. Aviation, paints and tyre makers become the first negative branches while refiners show a short-term inventory benefit.',m:[['Causal paths','14'],['Highest impact','−6.2%'],['Confidence','89%']]},
+    {label:'Layer 04 · Portfolio mapping',title:'The event is matched to actual holdings',text:'Three of twelve positions sit inside affected paths. One airline holding has direct fuel sensitivity while two additional positions have secondary commodity or currency exposure.',m:[['Holdings checked','12'],['Directly exposed','3'],['Capital at risk','21%']]},
+    {label:'Layer 02 · Hidden Dependency Graph',title:'A second risk channel appears',text:'Two of the affected holdings also share USD/INR sensitivity. The portfolio looked diversified by company name, but the same macro shock is now arriving through both commodity and currency channels.',m:[['Shared factor','USD/INR'],['Overlap','34%'],['Risk state','Elevated']]},
+    {label:'Layer 02 + 03 · Thesis Integrity',title:'The original investment thesis is re-tested',text:'The airline thesis assumed fuel cost normalization and stable FX. Both assumptions deteriorate simultaneously, moving thesis health from Intact to Watch before the next earnings report is published.',m:[['Health score','68/100'],['Assumptions hit','2'],['Status','Watch']]},
+    {label:'Layer 05 · Delivery',title:'One evidence-linked alert is generated',text:'Instead of six separate notifications, MarketMind synthesizes one alert: thesis risk is rising because fuel and currency pressures now reinforce each other. The report links back to every source and assumption.',m:[['Alerts merged','6 → 1'],['Evidence links','34'],['Action','Review']]}
+  ];
+  const stageBtns = document.querySelectorAll('.stage-btn');
+  const stageLabel = document.getElementById('stageLabel'), stageTitle = document.getElementById('stageTitle'), stageText = document.getElementById('stageText');
+  const metricL = [1,2,3].map(n=>document.getElementById('stageM'+n+'L')); const metricV=[1,2,3].map(n=>document.getElementById('stageM'+n));
+  let stageTimer, stageIndex = 0;
+  const renderStage = i => {
+    stageIndex=i; const s=stages[i]; stageBtns.forEach((b,n)=>b.classList.toggle('active',n===i)); stageLabel.textContent=s.label;stageTitle.textContent=s.title;
+    stageText.dataset.type=s.text;stageText.dataset.typed='0';typeText(stageText);
+    s.m.forEach((m,n)=>{metricL[n].textContent=m[0];metricV[n].textContent=m[1];});
+  };
+  stageBtns.forEach((b,i)=>b.addEventListener('click',()=>{renderStage(i);clearInterval(stageTimer);}));
+  if (!reduceMotion) stageTimer=setInterval(()=>renderStage((stageIndex+1)%stages.length),7000);
+
+  // Voice copilot.
+  const voiceButton=document.getElementById('voiceButton'), voicePanel=document.getElementById('voicePanel'), voiceAnswer=document.getElementById('voiceAnswer');
+  voiceButton.addEventListener('click',()=>voicePanel.classList.toggle('open'));
+  document.querySelectorAll('[data-voice]').forEach(btn=>btn.addEventListener('click',()=>{
+    const q=btn.dataset.voice;
+    const answers={
+      'Check my HDFC thesis':'HDFC Bank thesis health is in Watch state in this demo because credit-to-deposit pressure is still above the preferred range, while asset quality remains stable. I would surface the LDR assumption first, then show the evidence and invalidation threshold.',
+      'Show hidden dependencies':'The current demo portfolio has a 34% shared USD/INR dependency across several otherwise unrelated holdings. I would rank the overlap by centrality and show which positions create the concentration.',
+      'Run accounting reality check':'The demo accounting check compares reported profit with cash conversion, receivables, leverage and forensic markers. The current sample reads as coherent, with CFO/PAT at 1.12× and no major receivable divergence.'
+    };
+    voiceAnswer.dataset.type=answers[q]||'I can route that question across MarketMind’s reasoning capabilities.';voiceAnswer.dataset.typed='0';typeText(voiceAnswer);
+  }));
+
+  // Candlestick + order-flow laboratory.
+  const patternChart=document.getElementById('patternChart');
+  const patternButtons=[...document.querySelectorAll('.pattern-chip')];
+  const patternFields={
+    title:document.getElementById('patternTitle'),name:document.getElementById('patternName'),score:document.getElementById('patternScore'),summary:document.getElementById('patternSummary'),bias:document.getElementById('patternBias'),invalidation:document.getElementById('patternInvalidation'),volume:document.getElementById('patternVolume'),context:document.getElementById('patternContext'),interpretation:document.getElementById('patternInterpretation'),
+    o:document.getElementById('ohlcO'),h:document.getElementById('ohlcH'),l:document.getElementById('ohlcL'),c:document.getElementById('ohlcC')
+  };
+  const patterns={
+    engulfing:{name:'Bullish Engulfing',title:'Bullish Engulfing · VWAP reclaim',score:87,bias:'Bullish',invalid:'₹2,910.50',volume:'1.42× avg',context:'VWAP reclaim',summary:'A lower-liquidity sweep is followed by a wide bullish body reclaiming VWAP. Volume expands into the close, so the pattern has stronger context than a standalone candle label.',interpretation:'Setup quality improves only if price holds above the reclaimed value area. A close back below ₹2,910.50 invalidates the bullish interpretation.',ohlc:[2940.4,2954.8,2937.1,2948.3],highlight:[12,13],data:[[2928,2934,2923,2931,72],[2931,2938,2929,2936,65],[2936,2942,2933,2939,68],[2939,2941,2930,2933,81],[2933,2938,2928,2935,75],[2935,2941,2932,2939,70],[2939,2944,2936,2942,83],[2942,2946,2938,2940,76],[2940,2943,2934,2936,82],[2936,2938,2929,2932,92],[2932,2935,2925,2928,110],[2929,2931,2918,2924,138],[2923,2952,2921,2948,180],[2948,2956,2944,2953,148],[2953,2959,2948,2956,120],[2956,2960,2950,2952,104],[2952,2958,2947,2955,96],[2955,2962,2951,2959,112]]},
+    hammer:{name:'Hammer',title:'Hammer · demand rejection at support',score:82,bias:'Bullish',invalid:'₹2,902.20',volume:'1.31× avg',context:'Support rejection',summary:'Price sells below support, rejects the lower auction and closes back near the candle high. The long lower wick matters because it occurs after a controlled decline and on expanding volume.',interpretation:'The hammer is constructive only while the rejected low remains protected. Confirmation improves on a close above the next candle high.',ohlc:[2910.8,2923.4,2899.9,2920.7],highlight:[12,12],data:[[2962,2966,2958,2960,74],[2960,2961,2954,2956,68],[2956,2958,2949,2951,71],[2951,2954,2945,2948,79],[2948,2950,2940,2942,83],[2942,2946,2937,2940,77],[2940,2941,2932,2934,88],[2934,2937,2928,2930,94],[2930,2932,2923,2925,102],[2925,2928,2918,2920,110],[2920,2922,2911,2914,126],[2914,2917,2905,2910,134],[2910,2923,2899,2921,174],[2921,2928,2918,2926,142],[2926,2933,2922,2931,119],[2931,2937,2928,2935,105],[2935,2940,2931,2938,99],[2938,2944,2934,2942,104]]},
+    morning:{name:'Morning Star',title:'Morning Star · three-candle reversal',score:84,bias:'Bullish',invalid:'₹2,887.80',volume:'1.36× avg',context:'3-candle reversal',summary:'A long bearish candle is followed by a small indecision candle and then a wide bullish reclaim. The third candle closes back through the first candle midpoint, improving reversal quality.',interpretation:'The reversal remains valid while price holds above the star low. A return below that low means the demand transition failed.',ohlc:[2908.3,2932.6,2902.4,2928.9],highlight:[10,12],data:[[2965,2968,2959,2962,66],[2962,2965,2955,2958,68],[2958,2960,2950,2952,72],[2952,2954,2945,2948,78],[2948,2950,2939,2942,82],[2942,2945,2935,2938,84],[2938,2940,2929,2932,91],[2932,2935,2924,2927,98],[2927,2930,2917,2920,108],[2920,2922,2905,2908,136],[2908,2911,2895,2899,164],[2899,2905,2890,2901,132],[2902,2933,2900,2929,176],[2929,2938,2925,2935,138],[2935,2942,2930,2939,113],[2939,2945,2934,2942,102],[2942,2948,2937,2946,96],[2946,2951,2941,2949,91]]},
+    doji:{name:'Doji',title:'Doji · indecision at resistance',score:61,bias:'Neutral',invalid:'₹2,972.00',volume:'0.96× avg',context:'Resistance test',summary:'Open and close converge after a strong advance. This is not a reversal signal by itself; it marks balance at resistance and requires follow-through before direction can be inferred.',interpretation:'Wait for confirmation. A break above resistance with volume supports continuation; a close below the doji low shifts the setup toward rejection.',ohlc:[2964.2,2974.8,2955.7,2964.8],highlight:[12,12],data:[[2918,2926,2915,2924,61],[2924,2932,2921,2930,67],[2930,2938,2927,2935,72],[2935,2943,2932,2941,74],[2941,2948,2938,2946,78],[2946,2951,2942,2949,76],[2949,2957,2947,2955,82],[2955,2961,2952,2959,88],[2959,2968,2957,2965,94],[2965,2971,2962,2968,99],[2968,2975,2964,2972,103],[2972,2976,2960,2964,118],[2964,2975,2956,2965,96],[2965,2972,2959,2962,92],[2962,2969,2958,2967,91],[2967,2974,2961,2970,93],[2970,2976,2965,2972,96],[2972,2978,2967,2974,99]]},
+    bearish:{name:'Bearish Engulfing',title:'Bearish Engulfing · rejection from supply',score:86,bias:'Bearish',invalid:'₹3,006.40',volume:'1.48× avg',context:'Supply rejection',summary:'A bullish candle into resistance is fully engulfed by a wider bearish body. The reversal has stronger context because it follows a liquidity grab above the prior swing high.',interpretation:'Bearish structure is valid below the engulfing high. Reclaiming ₹3,006.40 would invalidate the rejection thesis.',ohlc:[2999.4,3005.8,2978.6,2982.2],highlight:[11,12],data:[[2922,2930,2919,2928,65],[2928,2936,2925,2934,69],[2934,2942,2931,2940,72],[2940,2947,2937,2945,76],[2945,2953,2942,2951,81],[2951,2958,2948,2956,82],[2956,2964,2953,2962,88],[2962,2970,2959,2968,91],[2968,2978,2965,2976,98],[2976,2986,2972,2984,105],[2984,2994,2981,2992,112],[2992,3006,2989,3000,128],[3001,3005,2978,2982,176],[2982,2986,2970,2974,141],[2974,2978,2964,2968,124],[2968,2973,2958,2962,117],[2962,2968,2953,2957,108],[2957,2962,2948,2952,103]]},
+    shooting:{name:'Shooting Star',title:'Shooting Star · upper-wick rejection',score:79,bias:'Bearish',invalid:'₹3,018.20',volume:'1.25× avg',context:'Upper liquidity sweep',summary:'Price sweeps above resistance but fails to hold the auction, leaving a long upper wick and weak close. The signal strengthens because volume rises during the rejection.',interpretation:'The rejection remains active below the wick high. A strong close above ₹3,018.20 cancels the bearish interpretation.',ohlc:[3004.4,3018.2,2997.6,3000.1],highlight:[12,12],data:[[2930,2937,2927,2935,63],[2935,2943,2932,2941,68],[2941,2949,2938,2947,72],[2947,2955,2944,2953,76],[2953,2961,2950,2959,81],[2959,2967,2956,2965,84],[2965,2973,2962,2971,89],[2971,2979,2968,2977,93],[2977,2987,2974,2985,101],[2985,2994,2982,2992,108],[2992,3002,2989,3000,116],[3000,3008,2996,3005,121],[3005,3018,2997,3000,151],[3000,3003,2988,2992,137],[2992,2997,2982,2986,125],[2986,2990,2975,2980,116],[2980,2985,2969,2974,108],[2974,2979,2963,2968,101]]}
+  };
+  const fmt=n=>n.toFixed(1);
+  const renderPattern=key=>{
+    if(!patternChart||!patterns[key]) return;
+    const p=patterns[key], data=p.data;
+    const low=Math.min(...data.map(d=>d[2]))-5, high=Math.max(...data.map(d=>d[1]))+5;
+    const left=44,right=760,top=24,bottom=372,volTop=388,volBottom=446;
+    const xStep=(right-left)/data.length, body=Math.max(7,xStep*.46);
+    const y=v=>bottom-(v-low)/(high-low)*(bottom-top);
+    const maxVol=Math.max(...data.map(d=>d[4]));
+    let grid='';
+    for(let i=0;i<5;i++){const yy=top+i*(bottom-top)/4;const price=high-(high-low)*i/4;grid+=`<line class="pattern-grid" x1="${left}" y1="${yy}" x2="${right}" y2="${yy}"/><text class="pattern-axis" x="${right+8}" y="${yy+3}">${fmt(price)}</text>`}
+    for(let i=0;i<=6;i++){const xx=left+i*(right-left)/6;grid+=`<line class="pattern-grid" x1="${xx}" y1="${top}" x2="${xx}" y2="${bottom}"/>`}
+    let candles='',volumes='',closePoints=[];
+    data.forEach((d,i)=>{const [o,h,l,c,v]=d;const x=left+xStep*i+xStep/2, up=c>=o, cls=up?'up':'down';const yo=y(o),yc=y(c),yh=y(h),yl=y(l);const rectY=Math.min(yo,yc),rectH=Math.max(2,Math.abs(yc-yo));candles+=`<line class="pattern-wick-${cls}" x1="${x}" y1="${yh}" x2="${x}" y2="${yl}"/><rect class="pattern-body-${cls}" x="${x-body/2}" y="${rectY}" width="${body}" height="${rectH}" rx="1.3"/>`;const vh=(v/maxVol)*(volBottom-volTop);volumes+=`<rect class="pattern-volume${i>=p.highlight[0]&&i<=p.highlight[1]?' hot':''}" x="${x-body/2}" y="${volBottom-vh}" width="${body}" height="${vh}" rx="1"/>`;closePoints.push([x,y(c)]);});
+    const smoothPath=closePoints.map((pt,i)=>`${i?'L':'M'}${pt[0]} ${pt[1]}`).join(' ');
+    const vwapPoints=closePoints.map((pt,i)=>{const start=Math.max(0,i-4);const avg=data.slice(start,i+1).reduce((s,d)=>s+d[3],0)/(i-start+1);return [pt[0],y(avg)]});
+    const vwapPath=vwapPoints.map((pt,i)=>`${i?'L':'M'}${pt[0]} ${pt[1]}`).join(' ');
+    const h1=left+xStep*p.highlight[0],h2=left+xStep*(p.highlight[1]+1);
+    const last=data[data.length-1][3],lastY=y(last),support=y(Math.min(...data.slice(Math.max(0,p.highlight[0]-2),p.highlight[1]+2).map(d=>d[2])));
+    patternChart.innerHTML=`${grid}<rect class="pattern-highlight" x="${h1}" y="${top+4}" width="${h2-h1}" height="${bottom-top-8}" rx="5"/><line class="pattern-support" x1="${left}" y1="${support}" x2="${right}" y2="${support}"/><path class="pattern-ma" d="${smoothPath}" opacity=".24"/><path class="pattern-vwap" d="${vwapPath}"/>${candles}<line class="pattern-grid" x1="${left}" y1="${volTop-5}" x2="${right}" y2="${volTop-5}"/>${volumes}<line class="pattern-price-line" x1="${left}" y1="${lastY}" x2="${right}" y2="${lastY}"/><rect class="pattern-price-tag" x="${right+4}" y="${lastY-9}" width="50" height="18" rx="3"/><text class="pattern-price-tag-text" x="${right+10}" y="${lastY+3}">${fmt(last)}</text><rect class="pattern-label-bg" x="${Math.max(left,h1-4)}" y="${top+8}" width="118" height="20" rx="10"/><text class="pattern-label" x="${Math.max(left+8,h1+5)}" y="${top+21}">${p.name.toUpperCase()}</text><text class="pattern-chart-note" x="${left}" y="466">VWAP · volume · support/resistance · pattern window highlighted</text>`;
+    patternButtons.forEach(b=>b.classList.toggle('active',b.dataset.pattern===key));
+    patternFields.title.textContent=p.title;patternFields.name.textContent=p.name;patternFields.score.textContent=p.score;patternFields.summary.textContent=p.summary;patternFields.bias.textContent=p.bias;patternFields.bias.className=p.bias==='Bullish'?'up':p.bias==='Bearish'?'down':'';patternFields.invalidation.textContent=p.invalid;patternFields.volume.textContent=p.volume;patternFields.context.textContent=p.context;patternFields.interpretation.textContent=p.interpretation;[patternFields.o,patternFields.h,patternFields.l,patternFields.c].forEach((el,i)=>el.textContent=fmt(p.ohlc[i]));
+  };
+  patternButtons.forEach(b=>b.addEventListener('click',()=>renderPattern(b.dataset.pattern)));
+  document.querySelectorAll('.tf-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tf-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');}));
+  renderPattern('engulfing');
+  const labPrice=document.getElementById('labPrice'),labChange=document.getElementById('labChange'),labClock=document.getElementById('labClock');let liveBase=2948.30;
+  if(labClock) setInterval(()=>{const d=new Date();labClock.textContent='LIVE DEMO · '+d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});if(!reduceMotion){liveBase+=((Math.random()-.46)*1.15);if(labPrice)labPrice.textContent='₹'+liveBase.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});const pct=(liveBase/2912.2-1)*100;if(labChange){labChange.textContent=(pct>=0?'+':'')+pct.toFixed(2)+'%';labChange.className=pct>=0?'up':'down';}}},1800);
+
+  // Keyboard accessibility: Escape closes voice panel.
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')voicePanel.classList.remove('open');});
+})();
+</script>
+</body>
+</html>

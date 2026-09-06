@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { apiClient } from "../api/client";
 
-export function useVoiceAgent(onAction = null, isMicMuted = false) {
+export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMuted = false) {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -10,7 +10,15 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
   const [voiceGender, setVoiceGender] = useState("female");
   const [autoPlayAudio, setAutoPlayAudio] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([
+    {
+      id: "alex-welcome-msg",
+      sender: "bot",
+      text: "Welcome to MarketMind AI. I am Alex, your financial copilot. How can I assist with your market analysis today?",
+      time: "Now",
+      isVoice: false,
+    },
+  ]);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -26,6 +34,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
   const continuousModeRef = useRef(false);
   const isListeningRef = useRef(false);
   const isMicMutedRef = useRef(isMicMuted);
+  const isSpeakerMutedRef = useRef(isSpeakerMuted);
   const activeTickerRef = useRef(window.__SELECTED_STOCK_SYMBOL || "RELIANCE");
 
   // Live language ref
@@ -140,6 +149,14 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
     transcriptRef.current = "";
     window.dispatchEvent(new CustomEvent("marketmind:voice_speaking_state", { detail: { isSpeaking: false } }));
   }, []);
+
+  // Speaker Mute Enforcer: Halts ongoing audio immediately if speaker is muted
+  useEffect(() => {
+    isSpeakerMutedRef.current = isSpeakerMuted;
+    if (isSpeakerMuted) {
+      stopAudioPlayback();
+    }
+  }, [isSpeakerMuted, stopAudioPlayback]);
 
   // Handler when TTS speech finishes -> Automatically Re-Open Mic ONLY if NOT MUTED!
   const handlePlaybackFinished = useCallback(() => {
@@ -299,7 +316,9 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
         isVoice: isVoice,
       };
       setMessages((prev) => [...prev, botMsg]);
-      speakText(goodbyeReply, languageRef.current);
+      if (!isSpeakerMutedRef.current) {
+        speakText(goodbyeReply, languageRef.current);
+      }
       return;
     }
 
@@ -363,10 +382,20 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
         window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: newSym } }));
       }
 
+      setIsProcessing(false);
+
+      const botId = `bot-${Date.now()}`;
+      const fullReply = (response.reply || "").trim();
+      const replyWords = fullReply.split(/\s+/);
+      const isMultiWord = replyWords.length > 2;
+      const initialChunk = isMultiWord ? replyWords.slice(0, 2).join(" ") : fullReply;
+
       const botMsg = {
-        id: `bot-${Date.now()}`,
+        id: botId,
         sender: "bot",
-        text: response.reply,
+        text: initialChunk,
+        fullText: fullReply,
+        isStreaming: isMultiWord,
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         audioBase64: response.audio_base64,
         isVoice: isVoice,
@@ -374,14 +403,39 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
 
       setMessages((prev) => [...prev, botMsg]);
 
+      if (isMultiWord) {
+        let currentIdx = 2;
+        const streamInterval = setInterval(() => {
+          if (currentIdx < replyWords.length) {
+            currentIdx += 2;
+            const currentSlice = replyWords.slice(0, currentIdx).join(" ");
+            const stillStreaming = currentIdx < replyWords.length;
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === botId
+                  ? { ...m, text: currentSlice, isStreaming: stillStreaming }
+                  : m
+              )
+            );
+          } else {
+            clearInterval(streamInterval);
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === botId ? { ...m, text: fullReply, isStreaming: false } : m
+              )
+            );
+          }
+        }, 28);
+      }
+
       // Enable hands-free continuous loop ONLY if not muted and voice was used
       if (isVoice && !isMicMutedRef.current) {
         continuousModeRef.current = true;
         setIsContinuousMode(true);
       }
 
-      // Play audio if enabled or if initiated via voice
-      if (autoPlayAudio || isVoice) {
+      // Play audio if enabled or if initiated via voice, AND speaker is NOT muted
+      if (!isSpeakerMutedRef.current && (autoPlayAudio || isVoice)) {
         if (response.audio_base64) {
           playBase64Audio(response.audio_base64, response.reply);
         } else {
@@ -415,7 +469,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false) {
         isVoice: isVoice,
       };
       setMessages((prev) => [...prev, fallbackMsg]);
-      if (isVoice || autoPlayAudio) {
+      if (!isSpeakerMutedRef.current && (isVoice || autoPlayAudio)) {
         speakText(fallbackText, currentLang);
       }
     } finally {

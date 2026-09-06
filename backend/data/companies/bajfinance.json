@@ -4,7 +4,7 @@
   "sector": "Banking & Finance",
   "price": 1095.0,
   "change": "+0.00%",
-  "market_cap": "₹4.6L Cr",
+  "market_cap": "\u20b94.6L Cr",
   "pe_ratio": 31.8,
   "pb_ratio": 5.4,
   "net_margin": 24.6,
@@ -18,13 +18,6 @@
     "environmental": 64,
     "social": 80,
     "governance": 81
-  },
-  "trust_meter": {
-    "score": 87,
-    "promises_kept": 15,
-    "promises_delayed": 2,
-    "promises_broken": 0,
-    "latest_quote": "AUM crossed ₹3.5 Lakh Crore with consumer app downloads exceeding 50M."
   },
   "forensic": {
     "reported_profit_growth": "+22%",

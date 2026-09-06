@@ -4,7 +4,7 @@
   "sector": "Consumer & FMCG",
   "price": 2880.0,
   "change": "-0.50%",
-  "market_cap": "₹2.7L Cr",
+  "market_cap": "\u20b92.7L Cr",
   "pe_ratio": 51.2,
   "pb_ratio": 16.5,
   "net_margin": 14.8,
@@ -18,13 +18,6 @@
     "environmental": 82,
     "social": 78,
     "governance": 80
-  },
-  "trust_meter": {
-    "score": 85,
-    "promises_kept": 14,
-    "promises_delayed": 2,
-    "promises_broken": 0,
-    "latest_quote": "Decorative paints volume growth maintained in double-digits."
   },
   "forensic": {
     "reported_profit_growth": "+9%",

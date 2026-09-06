@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MarketMind AI — Stock DNA + Hidden Dependency Lab</title>
+<style>
+  :root{
+    --navy:#0d1f3b; --navy2:#12284b; --ink:#15213b; --muted:#6f706b;
+    --cream:#f7f1e5; --paper:#fffdf8; --gold:#c49b59; --gold2:#e7d4ad;
+    --green:#267564; --green2:#dff0ea; --red:#a84743; --red2:#f6e5e2;
+    --line:#e7dbc6; --blue:#5d78ad; --shadow:0 10px 30px rgba(13,31,59,.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  button,input,select{font:inherit}
+  button{cursor:pointer}
+  .app{min-height:100vh;display:grid;grid-template-columns:248px 1fr}
+  .side{position:sticky;top:0;height:100vh;background:linear-gradient(180deg,#0d1f3b,#12284b);color:#dbe4f2;padding:18px 14px;overflow:auto}
+  .brand{display:flex;align-items:center;gap:10px;padding:8px 7px 18px;border-bottom:1px solid rgba(255,255,255,.12)}
+  .logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#087cf0,#7a51ff);font-weight:900;color:white;box-shadow:0 8px 18px rgba(0,0,0,.22)}
+  .brand b{font-size:17px}.brand small{display:block;color:#8fa3c2;margin-top:2px}
+  .navtitle{font-size:10px;letter-spacing:.22em;color:#8fa3c2;margin:24px 10px 8px;font-weight:800}
+  .navbtn{width:100%;background:none;border:0;color:#dbe4f2;text-align:left;padding:11px 12px;border-radius:11px;margin:3px 0;display:flex;gap:10px;align-items:center}
+  .navbtn:hover,.navbtn.active{background:rgba(255,255,255,.12);color:#fff}
+  .navbtn .dot{width:8px;height:8px;border-radius:50%;background:#7890b4}
+  .navbtn.active .dot{background:#d0a75e;box-shadow:0 0 0 4px rgba(208,167,94,.15)}
+  .profile{margin-top:22px;border-top:1px solid rgba(255,255,255,.12);padding:16px 10px 4px;font-size:12px;color:#b8c6d9;line-height:1.6}
+  main{min-width:0}
+  .top{position:sticky;top:0;z-index:20;background:rgba(247,241,229,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(196,155,89,.22);padding:16px 28px 12px}
+  .toprow{display:flex;justify-content:space-between;align-items:center;gap:18px}
+  .eyebrow{font-size:10px;letter-spacing:.22em;color:#a67c3f;font-weight:900;text-transform:uppercase}
+  h1{font-family:Georgia,serif;margin:5px 0 0;font-size:28px}
+  .search{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:12px;padding:9px 12px;min-width:360px}
+  .search input{border:0;outline:0;width:100%;color:var(--ink)}
+  .ticker{margin-top:12px;background:var(--navy);color:#dbe4f2;border-radius:12px;padding:12px 16px;display:flex;gap:28px;overflow:hidden;white-space:nowrap;font-family:Georgia,serif;font-size:12px}
+  .up{color:#7bd1b4}.down{color:#f28e8b}
+  .content{padding:22px 28px 84px;max-width:1600px;margin:auto}
+  .page{display:none}.page.active{display:block}
+  .hero{background:rgba(255,253,248,.9);border:1px solid var(--line);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow);margin-bottom:18px}
+  .hero h2,.card h3{font-family:Georgia,serif;margin:0}.hero p{color:var(--muted);max-width:900px;line-height:1.55;margin:8px 0 16px}
+  .controls{display:flex;flex-wrap:wrap;align-items:end;gap:12px}
+  label{font-size:11px;font-weight:800;color:#7e735f;text-transform:uppercase;letter-spacing:.08em}
+  select,.ctrlinput{margin-top:5px;border:1px solid #decdaa;background:#fff;border-radius:10px;padding:10px 12px;color:var(--ink);min-width:240px;outline:none}
+  .btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;background:var(--navy);color:#fff;box-shadow:0 6px 15px rgba(13,31,59,.16)}
+  .btn.alt{background:#fff;color:var(--navy);border:1px solid var(--line);box-shadow:none}
+  .btn.gold{background:var(--gold);color:#fff}
+  .grid{display:grid;grid-template-columns:1.05fr 1fr;gap:18px;margin-bottom:18px}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:19px;box-shadow:var(--shadow);min-width:0}
+  .kicker{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#77736b;font-weight:900;margin-bottom:9px}
+  .sub{color:var(--muted);font-size:13px;line-height:1.5}
+  .bigmatch{display:grid;grid-template-columns:180px 1fr;gap:18px;align-items:center;margin-top:12px}
+  .ring{--p:88;width:150px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) calc(var(--p)*1%),#eee7d8 0);position:relative;margin:auto}
+  .ring:after{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--paper)}
+  .ringtext{position:relative;z-index:1;text-align:center}.ringtext b{font-family:Georgia,serif;font-size:37px;color:var(--green)}.ringtext span{display:block;font-size:9px;letter-spacing:.13em;font-weight:900;color:#716a60}
+  .verdict{padding:12px 13px;border:1px solid #e6d6b8;background:#fffaf0;border-radius:10px;font-size:12px;line-height:1.55;margin-top:10px}
+  .trait{margin:13px 0}.traittop{display:flex;justify-content:space-between;gap:10px;font-size:12px;font-weight:800}.bars{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}.bar{height:8px;border-radius:999px;background:#eee6d6;overflow:hidden}.bar i{height:100%;display:block;border-radius:inherit;background:var(--gold)}.bar.green i{background:var(--green)}
+  .pillrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.pill{font-size:10px;padding:7px 10px;border-radius:999px;background:#f2eadb;color:#514c43;font-weight:800}.pill.green{background:var(--green2);color:var(--green)}.pill.red{background:var(--red2);color:var(--red)}.pill.navy{background:var(--navy);color:#fff}
+  .strand{display:grid;grid-template-columns:120px 1fr 1fr 70px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed #e8dece;font-size:12px}.strand:last-child{border-bottom:0}.strandname{font-weight:800}.scorebox{text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:900}
+  .pattern{border-left:4px solid var(--gold);padding:12px 14px;background:#fffaf2;border-radius:0 12px 12px 0;margin:10px 0}.pattern strong{font-size:12px}.pattern p{font-size:12px;color:#5f5b55;line-height:1.5;margin:5px 0 7px}.evidence{display:flex;flex-wrap:wrap;gap:6px;font-size:9px}.ev{background:#efe8dc;border-radius:7px;padding:5px 7px}.confidence{margin-left:auto;font-weight:900;color:var(--green)}
+  .metric{padding:14px;border-radius:14px;background:#fbf6ec;border:1px solid #eadfc9}.metric b{font-family:Georgia,serif;font-size:25px}.metric span{display:block;font-size:10px;color:#776f63;margin-top:4px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+  .metric.good b{color:var(--green)}.metric.bad b{color:var(--red)}
+  .timeline{display:flex;gap:0;overflow:auto;padding:10px 0 4px}.event{min-width:150px;border-top:2px solid #d9c7a6;padding:10px 8px 0;position:relative}.event:before{content:"";position:absolute;width:10px;height:10px;background:var(--gold);border-radius:50%;top:-6px;left:8px}.event b{font-size:11px}.event small{display:block;color:#7b746a;margin-top:4px;line-height:1.4}
+  table{width:100%;border-collapse:collapse;font-size:11px}th{text-align:left;color:#7a7265;text-transform:uppercase;letter-spacing:.08em;font-size:9px;padding:9px;border-bottom:1px solid var(--line)}td{padding:10px 9px;border-bottom:1px solid #efe6d6}tr:last-child td{border-bottom:0}
+  .status{font-size:9px;border-radius:999px;padding:5px 7px;font-weight:900}.s-high{background:var(--green2);color:var(--green)}.s-med{background:#fff0cc;color:#906b2f}.s-low{background:var(--red2);color:var(--red)}
+  .mapwrap{background:#fffaf3;border:1px solid #e8d7b8;border-radius:15px;min-height:460px;position:relative;overflow:hidden}.mapwrap svg{width:100%;height:460px;display:block}.nodeLabel{font-size:10px;font-weight:800;fill:white;text-anchor:middle;pointer-events:none}.edge{stroke:#d7c39f;stroke-width:1.6;opacity:.75}.edge.strong{stroke:#bf9550;stroke-width:3;opacity:.95}.edge.hidden{stroke-dasharray:5 6;opacity:.5}.node{cursor:pointer;filter:drop-shadow(0 6px 8px rgba(12,31,59,.12))}
+  .factorTabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0 4px}.factorTabs button{border:1px solid var(--line);background:#f2eadc;color:#655d52;padding:8px 11px;border-radius:999px;font-weight:800;font-size:10px}.factorTabs button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .exposureHero{padding:15px;border:1px solid #e7d3ae;border-radius:13px;background:#fff9ee;margin-top:11px}.exposureHero .row{display:flex;justify-content:space-between;gap:12px;align-items:center}.exposureHero b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--green);font-size:18px}
+  .shock{display:grid;grid-template-columns:1fr 80px;gap:12px;align-items:center;margin:12px 0}.shock input[type=range]{width:100%}.shockoutput{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:900;text-align:right}
+  .impact{display:flex;align-items:center;gap:10px;margin:10px 0}.impactname{width:95px;font-size:11px;font-weight:800}.impactbar{height:10px;background:#ece4d7;border-radius:99px;flex:1;overflow:hidden;position:relative}.impactbar i{position:absolute;top:0;bottom:0;left:50%;background:var(--green)}.impactbar i.neg{right:50%;left:auto;background:var(--red)}.impactval{width:62px;text-align:right;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;font-weight:900}
+  .voiceDock{position:fixed;right:26px;bottom:22px;z-index:50;display:flex;align-items:center;gap:10px}.voiceBubble{background:#0e1e36;color:white;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.2);width:min(420px,calc(100vw - 310px));display:none;overflow:hidden}.voiceBubble.open{display:block}.voiceHead{padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.14);display:flex;justify-content:space-between;align-items:center}.voiceBody{padding:12px;max-height:330px;overflow:auto}.msg{font-size:11px;line-height:1.5;padding:9px 10px;border-radius:10px;margin:7px 0;background:rgba(255,255,255,.08)}.msg.user{background:#c69b55;color:#101a2d;margin-left:40px}.voiceInput{display:flex;gap:7px;padding:10px;border-top:1px solid rgba(255,255,255,.13)}.voiceInput input{min-width:0;flex:1;border:0;border-radius:9px;padding:9px}.voiceInput button{border:0;border-radius:9px;background:#c69b55;color:#fff;padding:0 12px;font-weight:900}.mic{width:58px;height:58px;border:0;border-radius:50%;background:var(--gold);color:white;font-size:23px;box-shadow:0 12px 24px rgba(90,65,28,.25)}.mic.live{animation:pulse 1s infinite;background:#a84743}@keyframes pulse{50%{transform:scale(1.06);box-shadow:0 0 0 12px rgba(168,71,67,.12)}}
+  .method{background:#0f213e;color:#dce5f1;border-radius:16px;padding:17px}.method h3{color:#fff}.methodgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.methodstep{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px}.methodstep b{display:block;font-size:11px;color:#e5c994;margin-bottom:5px}.methodstep span{font-size:10px;line-height:1.45;color:#b8c6db}
+  .notice{font-size:10px;padding:9px 11px;background:#fff5dc;border:1px solid #ead4a8;color:#745d32;border-radius:9px;margin-bottom:16px}
+  .inlineTitle{display:flex;justify-content:space-between;gap:10px;align-items:center}.tinybtn{border:1px solid var(--line);background:white;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:900}
+  @media(max-width:1100px){.app{grid-template-columns:210px 1fr}.grid,.grid.three{grid-template-columns:1fr}.search{min-width:240px}.methodgrid{grid-template-columns:1fr 1fr}.bigmatch{grid-template-columns:1fr}.voiceBubble{width:min(420px,calc(100vw - 250px))}}
+  @media(max-width:760px){.app{display:block}.side{position:relative;height:auto}.top{position:relative}.toprow{align-items:flex-start;flex-direction:column}.search{width:100%;min-width:0}.content{padding:16px}.voiceBubble{width:calc(100vw - 32px);position:fixed;left:16px;bottom:88px}.voiceDock{right:16px}.methodgrid{grid-template-columns:1fr}.strand{grid-template-columns:1fr 1fr}.strand .scorebox:last-child{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="logo">M↑</div><div><b>MarketMind <span style="color:#6b8cff">AI</span></b><small>Analyst Workspace</small></div></div>
+    <div class="navtitle">ADVANCED INTELLIGENCE</div>
+    <button class="navbtn active" data-page="dna"><span class="dot"></span>Stock DNA Fingerprint</button>
+    <button class="navbtn" data-page="dependency"><span class="dot"></span>Hidden Dependency Map</button>
+    <div class="navtitle">ENGINE LAYERS</div>
+    <button class="navbtn" data-scroll="hiddenPatterns"><span class="dot"></span>Hidden Pattern Lab</button>
+    <button class="navbtn" data-scroll="evidenceLedger"><span class="dot"></span>Evidence Ledger</button>
+    <button class="navbtn" data-scroll="methodology"><span class="dot"></span>Methodology</button>
+    <div class="profile"><b>Research prototype</b><br/>Explainable multi-model analytics<br/>Voice + typed commands enabled</div>
+  </aside>
+
+  <main>
+    <header class="top">
+      <div class="toprow">
+        <div><div class="eyebrow" id="pageEyebrow">Advanced · Behavioral Intelligence</div><h1 id="pageTitle">Stock DNA Fingerprint</h1></div>
+        <div class="search">⌕ <input id="globalSearch" placeholder="Search ticker, factor, hidden pattern…" /></div>
+      </div>
+      <div class="ticker"><span>RELIANCE ₹1,526 <b class="up">+0.84%</b></span><span>TCS ₹3,212 <b class="down">-0.31%</b></span><span>INFY ₹1,535 <b class="up">+0.52%</b></span><span>MARUTI ₹12,480 <b class="up">+1.08%</b></span><span>HDFCBANK ₹1,624 <b class="down">-0.22%</b></span></div>
+    </header>
+
+    <div class="content">
+      <div class="notice">Demo uses deterministic sample data to demonstrate the product and interactions. Production values must come from licensed/verified market, filings, macro, transcript and news feeds with timestamps and provenance.</div>
+
+      <section class="page active" id="dnaPage">
+        <div class="hero">
+          <div class="kicker">MULTI-MODAL · REGIME-AWARE · EVIDENCE-BACKED</div>
+          <h2>Stock DNA Fingerprint</h2>
+          <p>Not another stock score. It builds a time-varying behavioral signature: how a company grows, finances itself, communicates, reacts to shocks, recovers from drawdowns, surprises analysts and behaves across market regimes — then finds genuine and deceptive similarities.</p>
+          <div class="controls">
+            <div><label>Primary company</label><br/><select id="primaryStock"></select></div>
+            <div><label>Compare with</label><br/><select id="compareStock"></select></div>
+            <button class="btn" id="runDNA">Rebuild DNA</button>
+            <button class="btn alt" id="showTwin">Find closest behavioral twin</button>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="inlineTitle"><div><div class="kicker">BEHAVIORAL SYNTHESIS</div><h3>DNA Genetic Match</h3></div><span class="pill green" id="matchPill">88% Match</span></div>
+            <div class="bigmatch"><div class="ring" id="matchRing"><div class="ringtext"><b id="matchValue">88%</b><span>GENETIC AFFINITY</span></div></div>
+            <div><div class="verdict" id="dnaVerdict"><b>Genetic verdict:</b> both companies share growth persistence but diverge on event sensitivity and leverage behavior.</div><div class="pillrow" id="matchTags"></div></div></div>
+          </div>
+          <div class="card">
+            <div class="kicker">8-STRAND BREAKDOWN</div><h3>Trait Comparison</h3><div id="traitList"></div>
+          </div>
+        </div>
+
+        <div class="grid three" style="margin-bottom:18px">
+          <div class="metric good"><b id="resilienceMetric">3.8 Quarters</b><span>Shock recovery half-life</span></div>
+          <div class="metric"><b id="truthGapMetric">12%</b><span>Narrative ↔ numbers gap</span></div>
+          <div class="metric bad"><b id="eventBetaMetric">1.42×</b><span>Event sensitivity beta</span></div>
+        </div>
+
+        <div class="grid">
+          <div class="card" id="hiddenPatterns">
+            <div class="inlineTitle"><div><div class="kicker">HIDDEN PATTERN LAB</div><h3>Patterns ordinary screens miss</h3></div><button class="tinybtn" id="rescanPatterns">Re-scan</button></div>
+            <div id="patternList"></div>
+          </div>
+          <div class="card">
+            <div class="kicker">EVENT RESPONSE FINGERPRINT</div><h3>How this stock behaves after different shocks</h3>
+            <div class="timeline" id="eventTimeline"></div>
+            <div class="verdict" id="eventSummary"></div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="kicker">REGIME DNA</div><h3>Same company, different market personality</h3>
+            <table><thead><tr><th>Regime</th><th>Primary behavior</th><th>Peer behavior</th><th>Similarity</th><th>Confidence</th></tr></thead><tbody id="regimeTable"></tbody></table>
+          </div>
+          <div class="card">
+            <div class="kicker">ANALOG SEARCH</div><h3>Historical behavioral twins</h3><p class="sub">Searches for earlier periods where the current combination of fundamentals, narrative, volatility and macro context looked similar.</p>
+            <div id="analogList"></div>
+          </div>
+        </div>
+
+        <div class="card" id="evidenceLedger" style="margin-bottom:18px">
+          <div class="inlineTitle"><div><div class="kicker">ANTI-HALLUCINATION LAYER</div><h3>Evidence & Confidence Ledger</h3></div><span class="pill green">Every score traceable</span></div>
+          <table><thead><tr><th>Signal</th><th>Data family</th><th>Lookback</th><th>Freshness</th><th>Confidence</th><th>Why it matters</th></tr></thead><tbody id="evidenceTable"></tbody></table>
+        </div>
+      </section>
+
+      <section class="page" id="dependencyPage">
+        <div class="hero">
+          <div class="kicker">FINANCIAL DETECTIVE · HIDDEN COMMON RISK</div>
+          <h2>Portfolio Hidden Dependency Map</h2>
+          <p>A portfolio can look diversified by company and sector yet still be one macro trade. This engine learns direct, indirect, lagged and regime-dependent dependencies across holdings, commodities, rates, FX, demand themes, supply chains and narrative shocks.</p>
+          <div class="factorTabs" id="factorTabs"></div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:1.3fr .9fr">
+          <div class="card">
+            <div class="inlineTitle"><div><div class="kicker">DYNAMIC SYSTEMIC GRAPH</div><h3>Macro Risk Exposure Web</h3></div><span class="pill" id="capitalPill">52% capital touched</span></div>
+            <div class="mapwrap"><svg id="riskMap" viewBox="0 0 760 460" aria-label="interactive portfolio risk dependency map"></svg></div>
+            <div class="pillrow"><span class="pill">Solid = observed / model-confirmed</span><span class="pill">Dashed = latent / inferred</span><span class="pill green">Click any factor or holding</span></div>
+          </div>
+          <div class="card">
+            <div class="kicker">CONCENTRATION AUDIT</div><h3 id="factorTitle">USD / INR Exchange Rate</h3>
+            <div class="exposureHero"><div class="row"><span style="font-size:11px;font-weight:900">Portfolio capital materially exposed</span><b id="factorCapital">52%</b></div><div class="pillrow" id="factorHoldings"></div></div>
+            <p class="sub" id="factorExplain" style="margin-top:13px"></p>
+            <div class="verdict" id="optimizationVerdict"></div>
+            <div class="kicker" style="margin-top:17px">LEAD-LAG PATH</div><div id="leadLagPath" class="pillrow"></div>
+          </div>
+        </div>
+
+        <div class="grid three">
+          <div class="metric bad"><b id="effectiveClusters">2.4</b><span>Effective risk clusters vs 8 holdings</span></div>
+          <div class="metric"><b id="hiddenBeta">0.71</b><span>Hidden macro beta</span></div>
+          <div class="metric good"><b id="diversificationTruth">61%</b><span>True diversification score</span></div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="kicker">COUNTERFACTUAL SHOCK LAB</div><h3>What if the hidden driver moves?</h3>
+            <p class="sub">Move one factor. The engine propagates direct + second-order impact through each holding using regime-conditioned sensitivities.</p>
+            <div class="shock"><div><label id="shockLabel">USD/INR shock</label><input id="shockRange" type="range" min="-10" max="10" value="5" step="1"/></div><div class="shockoutput" id="shockVal">+5%</div></div>
+            <div id="impactList"></div>
+            <div class="verdict" id="shockVerdict"></div>
+          </div>
+          <div class="card">
+            <div class="kicker">CONTAGION TRACE</div><h3>Why two “unrelated” holdings can fail together</h3>
+            <div id="contagionStory"></div>
+            <div class="kicker" style="margin-top:16px">Risk decomposition</div>
+            <table><thead><tr><th>Source</th><th>Contribution</th><th>Mode</th><th>Confidence</th></tr></thead><tbody id="riskBreakdown"></tbody></table>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <div class="kicker">LATENT FACTOR DISCOVERY</div><h3>Unlabeled common driver detector</h3>
+            <p class="sub">When holdings begin co-moving without a known factor explaining it, the system creates a temporary latent node, searches filings/news/macro series for a semantic explanation, then either promotes or rejects it.</p>
+            <div id="latentList"></div>
+          </div>
+          <div class="card">
+            <div class="kicker">REBALANCE INTELLIGENCE</div><h3>Reduce hidden concentration, not just sector weight</h3>
+            <table><thead><tr><th>Action</th><th>Effect</th><th>Risk Δ</th><th>Expected trade-off</th></tr></thead><tbody id="rebalanceTable"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="method" id="methodology">
+        <div class="kicker" style="color:#aebbd0">PRODUCTION ENGINE BLUEPRINT</div><h3>How the backend should actually work</h3>
+        <div class="methodgrid">
+          <div class="methodstep"><b>1 · Data reliability gate</b><span>Prices, corporate actions, financials, filings, transcripts, news, macro, commodities, supply-chain and ownership data are normalized, timestamped, deduplicated and quality-scored before modeling.</span></div>
+          <div class="methodstep"><b>2 · Feature store</b><span>Build point-in-time features only: profitability, balance-sheet, cash conversion, estimate revisions, transcript themes, event windows, volatility, liquidity, macro betas and graph relations.</span></div>
+          <div class="methodstep"><b>3 · Multi-model layer</b><span>Robust z-scores + factor models + rolling/DCC correlation + regime model + causal time-series discovery + embeddings + heterogeneous graph learning. No single model gets final authority.</span></div>
+          <div class="methodstep"><b>4 · Evidence fusion</b><span>Signals are calibrated by recency, source quality, cross-model agreement and out-of-sample reliability. Low-confidence relationships appear as hypotheses, never facts.</span></div>
+          <div class="methodstep"><b>5 · DNA engine</b><span>Create a dynamic vector from structural fundamentals, management behavior, market response and event recovery. Similarity uses weighted distance per regime, not one static percentage.</span></div>
+          <div class="methodstep"><b>6 · Dependency engine</b><span>Build a temporal heterogeneous graph: holding↔factor, holding↔holding, supplier↔customer, theme↔company, macro↔sector. Store lag, sign, strength, regime and confidence on every edge.</span></div>
+          <div class="methodstep"><b>7 · Counterfactual simulator</b><span>Shock factors and propagate effects only through calibrated edges. Return ranges + confidence intervals rather than false-precision price targets.</span></div>
+          <div class="methodstep"><b>8 · Voice orchestration</b><span>Speech→intent/entity parser→analytics tools→evidence retrieval→structured result→UI action + spoken explanation. Voice can change tickers, factors, scenarios and drilldowns.</span></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="voiceDock">
+  <div class="voiceBubble" id="voicePanel">
+    <div class="voiceHead"><b>MarketMind Voice Copilot</b><button class="tinybtn" id="closeVoice">Close</button></div>
+    <div class="voiceBody" id="voiceLog">
+      <div class="msg">Try: “Compare Reliance with Tata Motors”, “switch to dependency map”, “analyze crude oil”, “simulate rupee depreciation 6 percent”, or “explain why TCS and Infosys move together”.</div>
+    </div>
+    <div class="voiceInput"><input id="voiceText" placeholder="Type a voice command fallback…"/><button id="sendVoice">Run</button></div>
+  </div>
+  <button class="mic" id="micButton" title="Voice command">🎙</button>
+</div>
+
+<script>
+const stocks={
+ RELIANCE:{name:'Reliance Industries',sector:'Diversified Energy/Retail',scores:[84,67,82,78,81,74,72,88],recovery:3.8,truthGap:12,eventBeta:1.24},
+ TATAMOTORS:{name:'Tata Motors',sector:'Automobiles',scores:[88,58,75,70,78,82,76,80],recovery:4.6,truthGap:18,eventBeta:1.48},
+ TCS:{name:'TCS',sector:'IT Services',scores:[79,91,90,92,88,66,68,84],recovery:2.7,truthGap:7,eventBeta:.88},
+ INFY:{name:'Infosys',sector:'IT Services',scores:[81,89,86,88,86,72,71,82],recovery:3.0,truthGap:9,eventBeta:.96},
+ HDFCBANK:{name:'HDFC Bank',sector:'Private Bank',scores:[76,74,84,83,89,69,65,79],recovery:3.4,truthGap:10,eventBeta:1.02},
+ ICICIBANK:{name:'ICICI Bank',sector:'Private Bank',scores:[82,78,88,86,87,71,70,81],recovery:3.1,truthGap:8,eventBeta:1.01},
+ MARUTI:{name:'Maruti Suzuki',sector:'Automobiles',scores:[75,93,85,90,84,77,73,76],recovery:3.2,truthGap:11,eventBeta:1.18},
+ WIPRO:{name:'Wipro',sector:'IT Services',scores:[62,88,72,83,75,79,74,69],recovery:4.1,truthGap:21,eventBeta:1.10},
+ ASIANPAINT:{name:'Asian Paints',sector:'Consumer/Paints',scores:[70,87,83,85,86,74,67,78],recovery:3.6,truthGap:13,eventBeta:1.06},
+ BHARTIARTL:{name:'Bharti Airtel',sector:'Telecom',scores:[86,61,80,76,84,70,75,89],recovery:3.5,truthGap:10,eventBeta:1.15}
+};
+const traits=['Growth & Reinvestment','Balance-sheet resilience','Earnings quality','Cash-flow durability','Management fidelity','News/event sensitivity','Price-behavior signature','Capital allocation'];
+const factors={
+ USDINR:{label:'USD / INR Exchange Rate',capital:52,risk:74,color:'#c49b59',explain:'A hidden split exposure: IT exporters can benefit from INR weakness while import-heavy auto/consumer names and foreign-currency borrowers may face cost pressure. The risk is concentration in the same macro variable, even when signs differ.',holdings:['TCS','INFY','WIPRO','MARUTI'],path:['USD/INR','Export revenue / import cost','Operating margin','Estimate revisions','Portfolio P&L']},
+ BRENT:{label:'Brent Crude Oil',capital:43,risk:69,color:'#2a7967',explain:'Oil changes input costs, freight, inflation expectations and policy reaction. A single crude shock can hit autos/consumer margins while simultaneously changing energy-linked cash flows.',holdings:['RELIANCE','MARUTI','ASIANPAINT'],path:['Brent','Input/fuel cost','CPI + margins','Rates / EPS revisions','Portfolio P&L']},
+ RATES:{label:'RBI Rates & Liquidity',capital:49,risk:64,color:'#ad4d48',explain:'Banks react directly through funding, margins and credit demand, while rate-sensitive consumption and valuation multiples create second-order exposure across the rest of the portfolio.',holdings:['HDFCBANK','ICICIBANK','MARUTI'],path:['RBI liquidity','Funding / discount rate','Credit + valuation','Earnings / multiple','Portfolio P&L']},
+ GLOBALIT:{label:'Global Enterprise IT Spend',capital:37,risk:71,color:'#6078ad',explain:'TCS, Infosys and Wipro look like separate holdings but share the same global CIO budget cycle, USD revenue base and discretionary transformation spending.',holdings:['TCS','INFY','WIPRO'],path:['US/EU IT budgets','Deal pipeline','Revenue growth','Utilization + margins','Portfolio P&L']},
+ MONSOON:{label:'Monsoon / Rural Demand',capital:24,risk:46,color:'#7a8bc1',explain:'Rainfall and rural income can influence discretionary demand, food inflation and policy. Exposure is often indirect and appears with lags rather than same-day price correlation.',holdings:['MARUTI','ASIANPAINT'],path:['Monsoon','Rural income / inflation','Consumption','Volume growth','Portfolio P&L']},
+ CREDIT:{label:'Credit Stress / Default Cycle',capital:33,risk:62,color:'#866a9f',explain:'A deterioration in borrower quality can pressure bank credit costs and also weaken demand in leveraged consumer segments. This edge usually strengthens in risk-off regimes.',holdings:['HDFCBANK','ICICIBANK','MARUTI'],path:['Credit stress','Delinquencies','Provisioning + demand','EPS revisions','Portfolio P&L']}
+};
+const portfolio=[
+ {sym:'TCS',w:15,sens:{USDINR:.55,BRENT:-.08,RATES:-.12,GLOBALIT:.82,MONSOON:0,CREDIT:-.08}},
+ {sym:'INFY',w:14,sens:{USDINR:.61,BRENT:-.06,RATES:-.10,GLOBALIT:.88,MONSOON:0,CREDIT:-.07}},
+ {sym:'WIPRO',w:8,sens:{USDINR:.58,BRENT:-.05,RATES:-.09,GLOBALIT:.84,MONSOON:0,CREDIT:-.06}},
+ {sym:'MARUTI',w:12,sens:{USDINR:-.42,BRENT:-.52,RATES:-.31,GLOBALIT:.02,MONSOON:.26,CREDIT:-.24}},
+ {sym:'HDFCBANK',w:14,sens:{USDINR:-.08,BRENT:-.06,RATES:.49,GLOBALIT:.02,MONSOON:.06,CREDIT:-.66}},
+ {sym:'ICICIBANK',w:13,sens:{USDINR:-.06,BRENT:-.04,RATES:.46,GLOBALIT:.02,MONSOON:.05,CREDIT:-.63}},
+ {sym:'RELIANCE',w:16,sens:{USDINR:-.14,BRENT:.48,RATES:-.18,GLOBALIT:.04,MONSOON:.03,CREDIT:-.12}},
+ {sym:'ASIANPAINT',w:8,sens:{USDINR:-.25,BRENT:-.39,RATES:-.20,GLOBALIT:.01,MONSOON:.18,CREDIT:-.12}}
+];
+let currentFactor='USDINR';
+const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
+function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
+function fmt(n){return Math.round(n)}
+function similarity(a,b){let d=0; for(let i=0;i<a.scores.length;i++) d+=Math.abs(a.scores[i]-b.scores[i]); return clamp(Math.round(100-d/(a.scores.length*1.12)),35,97)}
+function initSelectors(){Object.entries(stocks).forEach(([k,v])=>{['primaryStock','compareStock'].forEach(id=>{let o=document.createElement('option');o.value=k;o.textContent=`${k} — ${v.name}`;$('#'+id).appendChild(o)})});$('#primaryStock').value='RELIANCE';$('#compareStock').value='TATAMOTORS'}
+function renderDNA(){
+ const a=stocks[$('#primaryStock').value],b=stocks[$('#compareStock').value],m=similarity(a,b);$('#matchValue').textContent=m+'%';$('#matchPill').textContent=m+'% Match';$('#matchRing').style.setProperty('--p',m);
+ const diffs=a.scores.map((x,i)=>({i,d:Math.abs(x-b.scores[i])})).sort((x,y)=>y.d-x.d), same=[...diffs].sort((x,y)=>x.d-y.d);
+ $('#dnaVerdict').innerHTML=`<b>Genetic verdict:</b> ${a.name} and ${b.name} are strongest twins on <b>${traits[same[0].i]}</b>, but diverge most on <b>${traits[diffs[0].i]}</b>. Similarity is regime-aware; it should not be interpreted as equal expected return.`;
+ $('#matchTags').innerHTML=`<span class="pill green">Closest: ${traits[same[0].i]}</span><span class="pill red">Break point: ${traits[diffs[0].i]}</span><span class="pill">${a.sector} ↔ ${b.sector}</span>`;
+ $('#traitList').innerHTML=traits.map((t,i)=>`<div class="trait"><div class="traittop"><span>${t}</span><span>${a.scores[i]} vs ${b.scores[i]}</span></div><div class="bars"><div class="bar"><i style="width:${a.scores[i]}%"></i></div><div class="bar green"><i style="width:${b.scores[i]}%"></i></div></div></div>`).join('');
+ $('#resilienceMetric').textContent=((a.recovery+b.recovery)/2).toFixed(1)+' Quarters';$('#truthGapMetric').textContent=Math.round((a.truthGap+b.truthGap)/2)+'%';$('#eventBetaMetric').textContent=((a.eventBeta+b.eventBeta)/2).toFixed(2)+'×';
+ renderPatterns(a,b,diffs,same);renderEvents(a,b);renderRegimes(a,b,m);renderAnalogs(a,b);renderEvidence(a);
+}
+function renderPatterns(a,b,diffs,same){
+ const patterns=[
+  {title:'Narrative–numbers divergence',body:`Management language remains steadier than operating-data momentum for ${a.name}. Flag when transcript confidence rises but cash conversion / estimate revisions weaken for 2+ periods.`,ev:['Transcript embeddings','CFO/EBITDA','Estimate revisions'],c:86},
+  {title:'Pre-event drift fingerprint',body:`The stock shows a repeatable price/volume drift before selected earnings and policy-sensitive events. Treat this as an anomaly pattern — not proof of information leakage — and validate against event calendars and liquidity.`,ev:['Abnormal return','Volume z-score','Event windows'],c:73},
+  {title:'Recovery asymmetry',body:`Negative shocks take materially longer to mean-revert than positive surprises. The asymmetry becomes stronger in risk-off regimes, which can make static beta understate downside persistence.`,ev:['Drawdown paths','HMM regime','Volatility'],c:81},
+  {title:'Hidden peer mimicry',body:`Although ${a.name} and ${b.name} differ by sector, their closest behavioral overlap is ${traits[same[0].i].toLowerCase()}. The engine separates structural similarity from simple return correlation.`,ev:['Fundamentals','Regime vectors','Dynamic correlation'],c:88},
+  {title:'Change-point alert',body:`A recent strand shift is large enough to treat old historical averages with caution. Production logic should trigger Bayesian/change-point re-weighting instead of blindly using the full history.`,ev:['Rolling scores','CUSUM / BOCPD','Data freshness'],c:78}
+ ];
+ $('#patternList').innerHTML=patterns.map(p=>`<div class="pattern"><strong>${p.title}</strong><p>${p.body}</p><div class="evidence">${p.ev.map(e=>`<span class="ev">${e}</span>`).join('')}<span class="confidence">${p.c}% conf.</span></div></div>`).join('')
+}
+function renderEvents(a,b){let evs=[['Earnings beat','+2.6% / +1.9%'],['Guidance cut','-4.8% / -6.1%'],['Rate shock','-1.6% / -2.4%'],['Commodity spike','+0.8% / -3.2%'],['Market selloff','-3.4% / -4.0%']];$('#eventTimeline').innerHTML=evs.map(x=>`<div class="event"><b>${x[0]}</b><small>Median 5D abnormal move<br/><b>${x[1]}</b></small></div>`).join('');$('#eventSummary').innerHTML=`<b>Response fingerprint:</b> ${a.name} is more resilient to broad-market stress, while ${b.name} is more sensitive to input-cost and guidance shocks in this sample. Production should compute event-conditioned distributions with confidence intervals.`}
+function renderRegimes(a,b,m){let rows=[['Risk-on expansion','Growth acceleration','Growth acceleration',m+3,'High'],['Inflation shock','Margin defense','Input-cost sensitivity',m-17,'Medium'],['Liquidity tightening','Balance-sheet matters','Demand + financing pressure',m-11,'High'],['Broad selloff','Recovery resilience','Higher downside beta',m-8,'High']];$('#regimeTable').innerHTML=rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td>${clamp(r[3],25,98)}%</td><td><span class="status ${r[4]=='High'?'s-high':'s-med'}">${r[4]}</span></td></tr>`).join('')}
+function renderAnalogs(a,b){let arr=[['2019 Q3','82%','Demand slowdown + stable cash conversion'],['2022 Q2','78%','Inflation shock + margin reset'],['2024 Q1','74%','Capex cycle + sentiment rerating']];$('#analogList').innerHTML=arr.map(x=>`<div class="pattern"><strong>${x[0]} · ${x[1]} analog match</strong><p>${x[2]}. Use as a retrieval case, then compare forward outcomes instead of copying history.</p></div>`).join('')}
+function renderEvidence(a){let rows=[['Balance-sheet strand','Quarterly filings','12Q','Latest filed','96%','Leverage + liquidity'],['Management fidelity','Transcripts + guidance','8Q','Latest call','84%','Words vs realized outcomes'],['Event sensitivity','Prices + event calendar','5Y','Daily','88%','Reaction distribution'],['Regime behavior','Prices + macro','10Y','Daily/weekly','81%','Non-stationary behavior'],['News narrative gap','Verified news + transcripts','24M','Intraday/daily','76%','Detect story/data divergence'],['Capital allocation','Filings + cash flow','12Q','Latest filed','93%','Capex/M&A/buyback discipline']];$('#evidenceTable').innerHTML=rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td><span class="status ${parseInt(r[4])>90?'s-high':'s-med'}">${r[4]}</span></td><td>${r[5]}</td></tr>`).join('')}
+function findTwin(){let k=$('#primaryStock').value,a=stocks[k],best=null;Object.entries(stocks).forEach(([s,v])=>{if(s===k)return;let m=similarity(a,v);if(!best||m>best.m)best={s,m}});$('#compareStock').value=best.s;renderDNA();voiceSay(`Closest behavioral twin in this demo is ${stocks[best.s].name} with ${best.m} percent affinity.`)}
+function initFactors(){Object.entries(factors).forEach(([k,v])=>{let b=document.createElement('button');b.textContent=v.label;b.dataset.factor=k;b.onclick=()=>selectFactor(k);$('#factorTabs').appendChild(b)});selectFactor('USDINR')}
+function selectFactor(k){currentFactor=k;$$('#factorTabs button').forEach(b=>b.classList.toggle('active',b.dataset.factor===k));let f=factors[k];$('#factorTitle').textContent=f.label;$('#factorCapital').textContent=f.capital+'%';$('#capitalPill').textContent=f.capital+'% capital touched';$('#factorHoldings').innerHTML=f.holdings.map(h=>`<span class="pill navy">${h}</span>`).join('');$('#factorExplain').textContent=f.explain;$('#optimizationVerdict').innerHTML=`<b>AI risk verdict:</b> This factor touches ${f.capital}% of capital and carries ${f.risk}/100 systemic-risk intensity. Optimize by reducing common-factor contribution, not merely by adding another stock from a different sector.`;$('#leadLagPath').innerHTML=f.path.map((x,i)=>`<span class="pill ${i===0?'navy':''}">${x}${i<f.path.length-1?' →':''}</span>`).join('');$('#shockLabel').textContent=f.label+' shock';$('#shockRange').value=k==='BRENT'?8:5;renderShock();drawMap();renderDependencyDetails()}
+function drawMap(){let svg=$('#riskMap');svg.innerHTML='';let fKeys=Object.keys(factors),cx=380,cy=230;function line(x1,y1,x2,y2,cls='edge'){let l=document.createElementNS('http://www.w3.org/2000/svg','line');Object.entries({x1,y1,x2,y2,class:cls}).forEach(([k,v])=>l.setAttribute(k,v));svg.appendChild(l)}function node(x,y,r,fill,label,onClick){let g=document.createElementNS('http://www.w3.org/2000/svg','g');g.setAttribute('class','node');g.onclick=onClick;let c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',r);c.setAttribute('fill',fill);let t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',x);t.setAttribute('y',y+3);t.setAttribute('class','nodeLabel');t.textContent=label;g.append(c,t);svg.appendChild(g)}
+ let factorPos={};fKeys.forEach((k,i)=>{let ang=(Math.PI*2*i/fKeys.length)-Math.PI/2;factorPos[k]=[cx+205*Math.cos(ang),cy+155*Math.sin(ang)]});
+ fKeys.forEach(k=>{let [x,y]=factorPos[k],cls='edge '+(k===currentFactor?'strong':'hidden');line(cx,cy,x,y,cls)});
+ portfolio.forEach((h,i)=>{let ang=(Math.PI*2*i/portfolio.length)-Math.PI/2+.15,x=cx+320*Math.cos(ang),y=cy+195*Math.sin(ang);let sens=h.sens[currentFactor]||0;if(Math.abs(sens)>.18){let [fx,fy]=factorPos[currentFactor];line(fx,fy,x,y,Math.abs(sens)>.45?'edge strong':'edge')}node(x,y,20,'#0d1f3b',h.sym,()=>showHolding(h))});
+ fKeys.forEach(k=>{let [x,y]=factorPos[k],f=factors[k];node(x,y,k===currentFactor?34:28,f.color,k.replace('GLOBALIT','IT SPEND'),()=>selectFactor(k))});node(cx,cy,40,'#0d1f3b','PORTFOLIO',()=>{});
+}
+function showHolding(h){let f=factors[currentFactor],s=h.sens[currentFactor]||0;$('#factorExplain').innerHTML=`<b>${h.sym}</b> has a modeled sensitivity of <b>${s.toFixed(2)}</b> to ${f.label} in the current demo regime. Weight: ${h.w}%. In production, show lag, confidence, direct/indirect path and the exact evidence behind this edge.`}
+function renderShock(){let shock=Number($('#shockRange').value);$('#shockVal').textContent=(shock>0?'+':'')+shock+'%';let impacts=portfolio.map(h=>({sym:h.sym,val:shock*(h.sens[currentFactor]||0)*.42,w:h.w}));$('#impactList').innerHTML=impacts.map(x=>{let w=Math.min(48,Math.abs(x.val)*11);return `<div class="impact"><div class="impactname">${x.sym}</div><div class="impactbar"><i class="${x.val<0?'neg':''}" style="width:${w}%"></i></div><div class="impactval ${x.val>=0?'up':'down'}">${x.val>=0?'+':''}${x.val.toFixed(2)}%</div></div>`}).join('');let p=impacts.reduce((s,x)=>s+x.val*x.w/100,0);$('#shockVerdict').innerHTML=`<b>Counterfactual portfolio impact:</b> approximately <b class="${p>=0?'up':'down'}">${p>=0?'+':''}${p.toFixed(2)}%</b> in this illustrative model. Production should return a probability range and distinguish causal, correlated and uncertain pathways.`}
+function renderDependencyDetails(){let f=factors[currentFactor];$('#contagionStory').innerHTML=`<div class="pattern"><strong>Common-driver chain</strong><p>${f.path.join(' → ')}. The engine highlights when return correlation is low today but economic dependence can activate under a stress regime.</p><div class="evidence"><span class="ev">Dynamic correlation</span><span class="ev">Lead-lag</span><span class="ev">Graph path</span><span class="confidence">${f.risk}% risk intensity</span></div></div>`;let rb=[['Direct factor exposure','38%','Observed','High'],['Second-order sector channel','24%','Inferred','Medium'],['Cross-holding contagion','18%','Dynamic','Medium'],['Residual / idiosyncratic','20%','Residual','High']];$('#riskBreakdown').innerHTML=rb.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td><span class="status ${r[3]=='High'?'s-high':'s-med'}">${r[3]}</span></td></tr>`).join('');let latent=[['Latent #07 · “Export demand + USD”','TCS, INFY, WIPRO','Search terms: discretionary IT spend, USD, deal delays','78%'],['Latent #11 · “Urban discretionary squeeze”','MARUTI, ASIANPAINT, HDFCBANK','Search terms: EMI burden, premium demand, rates','64%']];$('#latentList').innerHTML=latent.map(x=>`<div class="pattern"><strong>${x[0]}</strong><p><b>Touches:</b> ${x[1]}<br/>${x[2]}</p><div class="evidence"><span class="confidence">${x[3]} hypothesis confidence</span></div></div>`).join('');let rr=[['Trim 3% WIPRO → add low-IT-beta defensive','IT-spend concentration 37% → 31%','-8.4%','May reduce upside in IT rally'],['Trim 2% MARUTI → add domestic utility','USD/crude sensitivity reduced','-4.1%','Lower growth optionality'],['No trade; add factor alert','Preserves portfolio','0%','Requires active monitoring']];$('#rebalanceTable').innerHTML=rr.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td class="up">${r[2]}</td><td>${r[3]}</td></tr>`).join('')}
+function switchPage(name){$$('.page').forEach(p=>p.classList.remove('active'));$$('.navbtn[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));if(name==='dna'){ $('#dnaPage').classList.add('active');$('#pageTitle').textContent='Stock DNA Fingerprint';$('#pageEyebrow').textContent='Advanced · Behavioral Intelligence'}else{$('#dependencyPage').classList.add('active');$('#pageTitle').textContent='Portfolio Hidden Dependency Map';$('#pageEyebrow').textContent='Financial Detective · Hidden Common Risk'}window.scrollTo({top:0,behavior:'smooth'})}
+$$('.navbtn[data-page]').forEach(b=>b.onclick=()=>switchPage(b.dataset.page));$$('.navbtn[data-scroll]').forEach(b=>b.onclick=()=>{let e=document.getElementById(b.dataset.scroll);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})});
+$('#runDNA').onclick=renderDNA;$('#showTwin').onclick=findTwin;$('#rescanPatterns').onclick=()=>{renderDNA();voiceSay('Hidden pattern scan refreshed using the current demo evidence set.')};$('#shockRange').oninput=renderShock;
+function aliasToStock(txt){txt=txt.toLowerCase().replace(/[^a-z0-9 ]/g,' ');let aliases={reliance:'RELIANCE','tata motors':'TATAMOTORS',tata:'TATAMOTORS',tcs:'TCS',infosys:'INFY',infy:'INFY','hdfc bank':'HDFCBANK',hdfc:'HDFCBANK','icici bank':'ICICIBANK',icici:'ICICIBANK',maruti:'MARUTI',wipro:'WIPRO','asian paints':'ASIANPAINT',airtel:'BHARTIARTL','bharti airtel':'BHARTIARTL'};return Object.entries(aliases).sort((a,b)=>b[0].length-a[0].length).find(([a])=>txt.includes(a))?.[1]||null}
+function factorFromText(t){t=t.toLowerCase();if(/usd|inr|rupee|dollar|currency/.test(t))return'USDINR';if(/crude|brent|oil/.test(t))return'BRENT';if(/rate|rbi|liquidity|repo/.test(t))return'RATES';if(/it spend|technology spend|cio|enterprise it/.test(t))return'GLOBALIT';if(/monsoon|rain|rural/.test(t))return'MONSOON';if(/credit|default|delinquen/.test(t))return'CREDIT';return null}
+function logMsg(txt,user=false){let d=document.createElement('div');d.className='msg'+(user?' user':'');d.textContent=txt;$('#voiceLog').appendChild(d);$('#voiceLog').scrollTop=$('#voiceLog').scrollHeight}
+function voiceSay(txt){logMsg(txt);try{if('speechSynthesis'in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(txt);u.rate=1.04;speechSynthesis.speak(u)}}catch(e){}}
+function runCommand(raw){let t=raw.trim();if(!t)return;$('#voicePanel').classList.add('open');logMsg(t,true);let low=t.toLowerCase();
+ if(/switch|open|show|go/.test(low)&&/dependency|risk map|portfolio map/.test(low)){switchPage('dependency');return voiceSay('Opened Hidden Dependency Map. Tell me which macro factor to inspect or simulate.')}
+ if(/switch|open|show|go/.test(low)&&/dna|fingerprint/.test(low)){switchPage('dna');return voiceSay('Opened Stock DNA Fingerprint. You can ask me to compare two companies or find a behavioral twin.')}
+ if(low.includes('compare')){let found=[];Object.keys(stocks).forEach(k=>{let name=stocks[k].name.toLowerCase(),sym=k.toLowerCase();if(low.includes(name)||low.includes(sym.replace('tatamotors','tata motors').replace('hdfcbank','hdfc bank').replace('icicibank','icici bank')))found.push(k)});if(found.length<2){let chunks=low.split(/with|and|vs|versus/);chunks.forEach(c=>{let s=aliasToStock(c);if(s&&!found.includes(s))found.push(s)})}if(found.length>=2){switchPage('dna');$('#primaryStock').value=found[0];$('#compareStock').value=found[1];renderDNA();return voiceSay(`Compared ${stocks[found[0]].name} with ${stocks[found[1]].name}. Genetic affinity is ${similarity(stocks[found[0]],stocks[found[1]])} percent.`)}}
+ if(/closest|twin|similar/.test(low)&&/stock|company|twin|similar/.test(low)){let s=aliasToStock(low);if(s)$('#primaryStock').value=s;switchPage('dna');findTwin();return}
+ let fk=factorFromText(low);if(fk&&(/analy|show|exposure|risk|factor|crude|rupee|rate|monsoon|credit|spend/.test(low))){switchPage('dependency');selectFactor(fk);if(/simulate|shock|up|down|depreciat|appreciat|rise|fall/.test(low)){let n=parseFloat((low.match(/\d+(?:\.\d+)?/)||[])[0]||5);let sign=/(down|depreciat|weaken|rise|up|increase)/.test(low)?1:-1;if(fk==='BRENT'&&/(fall|down|decrease)/.test(low))sign=-1;if(/appreciat/.test(low))sign=-1;$('#shockRange').value=clamp(sign*n,-10,10);renderShock();return voiceSay(`Simulated ${factors[fk].label} shock of ${sign*n} percent. The impact chart and portfolio estimate are updated.`)}return voiceSay(`${factors[fk].label} selected. ${factors[fk].capital} percent of portfolio capital has material modeled exposure in this demo.`)}
+ if(/explain why/.test(low)&&(/tcs/.test(low)&&/infosys|infy/.test(low))){switchPage('dependency');selectFactor('GLOBALIT');return voiceSay('TCS and Infosys share a hidden common driver: global enterprise IT spending and similar USD-linked export revenue. Their correlation can strengthen when client budgets contract, even if day-to-day returns temporarily diverge.')}
+ if(/hidden pattern|scan pattern|find pattern/.test(low)){switchPage('dna');document.getElementById('hiddenPatterns').scrollIntoView({behavior:'smooth'});return voiceSay('Showing the hidden pattern lab: narrative-number gaps, pre-event drift, recovery asymmetry, peer mimicry and change-point alerts.')}
+ if(/help|what can/.test(low))return voiceSay('You can compare stocks, find a behavioral twin, switch between modules, inspect macro factors, run shocks, or ask why two holdings are connected.');
+ voiceSay('I could not map that command safely. Try: compare Reliance with Tata Motors; analyze crude oil; simulate rupee depreciation 6 percent; or switch to dependency map.')
+}
+$('#sendVoice').onclick=()=>{runCommand($('#voiceText').value);$('#voiceText').value=''};$('#voiceText').addEventListener('keydown',e=>{if(e.key==='Enter')$('#sendVoice').click()});$('#closeVoice').onclick=()=>$('#voicePanel').classList.remove('open');$('#micButton').onclick=()=>{ $('#voicePanel').classList.add('open');let SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){return voiceSay('Browser speech recognition is not available here. Use the typed command box; the same command engine will run.')};let r=new SR();r.lang='en-IN';r.interimResults=false;r.maxAlternatives=1;$('#micButton').classList.add('live');r.onresult=e=>runCommand(e.results[0][0].transcript);r.onerror=e=>voiceSay('Microphone or speech recognition failed. Please allow microphone access or use the typed command fallback.');r.onend=()=>$('#micButton').classList.remove('live');r.start()};
+$('#globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){let t=e.target.value;let s=aliasToStock(t),f=factorFromText(t);if(s){switchPage('dna');$('#primaryStock').value=s;renderDNA()}else if(f){switchPage('dependency');selectFactor(f)}else runCommand(t)}});
+initSelectors();renderDNA();initFactors();
+</script>
+</body>
+</html>

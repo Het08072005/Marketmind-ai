@@ -4,7 +4,7 @@
   "sector": "Banking & Finance",
   "price": 402.8,
   "change": "+1.37%",
-  "market_cap": "₹3.5L Cr",
+  "market_cap": "\u20b93.5L Cr",
   "pe_ratio": 20.4,
   "pb_ratio": 2.7,
   "net_margin": 26.8,
@@ -18,13 +18,6 @@
     "environmental": 70,
     "social": 82,
     "governance": 83
-  },
-  "trust_meter": {
-    "score": 85,
-    "promises_kept": 14,
-    "promises_delayed": 2,
-    "promises_broken": 0,
-    "latest_quote": "Tech infrastructure investments fully compliant with regulatory standards."
   },
   "forensic": {
     "reported_profit_growth": "+12%",

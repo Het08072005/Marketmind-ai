@@ -4,7 +4,7 @@
   "sector": "Banking & Finance",
   "price": 1245.8,
   "change": "-0.42%",
-  "market_cap": "₹3.8L Cr",
+  "market_cap": "\u20b93.8L Cr",
   "pe_ratio": 14.5,
   "pb_ratio": 2.1,
   "net_margin": 22.0,
@@ -18,13 +18,6 @@
     "environmental": 68,
     "social": 80,
     "governance": 80
-  },
-  "trust_meter": {
-    "score": 82,
-    "promises_kept": 13,
-    "promises_delayed": 2,
-    "promises_broken": 1,
-    "latest_quote": "Citi consumer portfolio migration achieved with zero customer attrition."
   },
   "forensic": {
     "reported_profit_growth": "+15%",

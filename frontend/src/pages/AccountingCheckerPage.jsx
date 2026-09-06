@@ -51,7 +51,7 @@ export default function AccountingCheckerPage({ goPage }) {
           </div>
         </div>
         <div className="card-foot" style={{ borderTop: "none", paddingTop: "12px" }}>
-          <a className="link-btn" onClick={() => goPage("trust")}>
+          <a className="link-btn" onClick={() => goPage("forensic")}>
             Investigate why <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </a>
         </div>

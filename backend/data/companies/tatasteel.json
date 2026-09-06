@@ -4,7 +4,7 @@
   "sector": "Infrastructure & Metals",
   "price": 183.0,
   "change": "+0.55%",
-  "market_cap": "₹2.2L Cr",
+  "market_cap": "\u20b92.2L Cr",
   "pe_ratio": 28.4,
   "pb_ratio": 2.1,
   "net_margin": 5.2,
@@ -18,13 +18,6 @@
     "environmental": 68,
     "social": 75,
     "governance": 74
-  },
-  "trust_meter": {
-    "score": 80,
-    "promises_kept": 12,
-    "promises_delayed": 3,
-    "promises_broken": 1,
-    "latest_quote": "Kalinganagar Phase 2 blast furnace commissioning completed."
   },
   "forensic": {
     "reported_profit_growth": "+6%",

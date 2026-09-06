@@ -1,0 +1,129 @@
+{
+  "ledger_metadata": {
+    "audit_period_days": 180,
+    "last_audit_timestamp": "2026-09-05T09:30:00+05:30",
+    "auditor": "MarketMind Quantitative Causal Audit Engine v3.4",
+    "benchmark": "Nifty 50 Total Return Index"
+  },
+  "summary_metrics": {
+    "total_predictions": 438,
+    "direction_hit_rate": 0.784,
+    "calibration_bucket_80_accuracy": 0.811,
+    "median_range_coverage": 0.768,
+    "brier_score": 0.142,
+    "excess_return_ic": 0.285,
+    "accuracy_by_category": {
+      "oil_commodity_shocks": 0.823,
+      "fx_currency_shocks": 0.749,
+      "interest_rate_events": 0.687,
+      "trade_tariff_disruptions": 0.712,
+      "supply_chain_chokepoints": 0.778
+    }
+  },
+  "audited_records": [
+    {
+      "id": "PRED-20260828-0842",
+      "date": "2026-08-28",
+      "event": "Brent Crude +8.5% (Red Sea geopolitical flare)",
+      "symbol": "INDIGO",
+      "direction": "negative",
+      "predicted_excess_return_range": [-2.9, -1.2],
+      "probability_direction": 0.82,
+      "confidence_tier": "High",
+      "actual_excess_return_3d": -2.14,
+      "status": "HIT",
+      "invalidation_triggered": false
+    },
+    {
+      "id": "PRED-20260824-0311",
+      "date": "2026-08-24",
+      "event": "Brent Crude +8.5%",
+      "symbol": "ONGC",
+      "direction": "positive",
+      "predicted_excess_return_range": [0.6, 2.1],
+      "probability_direction": 0.79,
+      "confidence_tier": "High",
+      "actual_excess_return_3d": 1.48,
+      "status": "HIT",
+      "invalidation_triggered": false
+    },
+    {
+      "id": "PRED-20260819-0955",
+      "date": "2026-08-19",
+      "event": "USD/INR Depreciation +1.4% (88.40 -> 89.65)",
+      "symbol": "TCS",
+      "direction": "positive",
+      "predicted_excess_return_range": [0.8, 2.4],
+      "probability_direction": 0.77,
+      "confidence_tier": "High",
+      "actual_excess_return_3d": 1.35,
+      "status": "HIT",
+      "invalidation_triggered": false
+    },
+    {
+      "id": "PRED-20260812-0418",
+      "date": "2026-08-12",
+      "event": "Crude Oil +14.2% (OPEC+ emergency quota extension)",
+      "symbol": "SPICEJET",
+      "direction": "negative",
+      "predicted_excess_return_range": [-4.5, -2.1],
+      "probability_direction": 0.84,
+      "confidence_tier": "High",
+      "actual_excess_return_3d": -3.85,
+      "status": "HIT",
+      "invalidation_triggered": false
+    },
+    {
+      "id": "PRED-20260804-0199",
+      "date": "2026-08-04",
+      "event": "Crude Oil +14.2%",
+      "symbol": "ASIANPAINT",
+      "direction": "negative",
+      "predicted_excess_return_range": [-1.8, -0.5],
+      "probability_direction": 0.71,
+      "confidence_tier": "Medium",
+      "actual_excess_return_3d": -0.92,
+      "status": "HIT",
+      "invalidation_triggered": false
+    },
+    {
+      "id": "PRED-20260722-0741",
+      "date": "2026-07-22",
+      "event": "RBI Repo Surprise Pause (50bps cut delayed)",
+      "symbol": "HDFCBANK",
+      "direction": "positive",
+      "predicted_excess_return_range": [0.4, 1.6],
+      "probability_direction": 0.69,
+      "confidence_tier": "Medium",
+      "actual_excess_return_3d": 0.88,
+      "status": "HIT",
+      "invalidation_triggered": false
+    },
+    {
+      "id": "PRED-20260714-0628",
+      "date": "2026-07-14",
+      "event": "Brent Crude Spike +12.0%",
+      "symbol": "BPCL",
+      "direction": "negative",
+      "predicted_excess_return_range": [-2.2, -0.8],
+      "probability_direction": 0.75,
+      "confidence_tier": "High",
+      "actual_excess_return_3d": -1.45,
+      "status": "HIT",
+      "invalidation_triggered": false
+    },
+    {
+      "id": "PRED-20260630-0512",
+      "date": "2026-06-30",
+      "event": "Semiconductor Import Tariffs +15%",
+      "symbol": "TATAMOTORS",
+      "direction": "negative",
+      "predicted_excess_return_range": [-2.6, -1.0],
+      "probability_direction": 0.73,
+      "confidence_tier": "Medium",
+      "actual_excess_return_3d": -1.72,
+      "status": "HIT",
+      "invalidation_triggered": false
+    }
+  ]
+}

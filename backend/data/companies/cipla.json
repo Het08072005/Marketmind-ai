@@ -4,7 +4,7 @@
   "sector": "Pharma & Healthcare",
   "price": 1580.0,
   "change": "+0.25%",
-  "market_cap": "₹1.2L Cr",
+  "market_cap": "\u20b91.2L Cr",
   "pe_ratio": 29.5,
   "pb_ratio": 4.5,
   "net_margin": 16.4,
@@ -18,13 +18,6 @@
     "environmental": 78,
     "social": 82,
     "governance": 80
-  },
-  "trust_meter": {
-    "score": 86,
-    "promises_kept": 15,
-    "promises_delayed": 1,
-    "promises_broken": 0,
-    "latest_quote": "One-India business grew 10% with chronic therapies leading."
   },
   "forensic": {
     "reported_profit_growth": "+13%",

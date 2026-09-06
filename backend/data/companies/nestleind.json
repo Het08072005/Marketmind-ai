@@ -4,7 +4,7 @@
   "sector": "Consumer & FMCG",
   "price": 2450.0,
   "change": "+0.15%",
-  "market_cap": "₹2.3L Cr",
+  "market_cap": "\u20b92.3L Cr",
   "pe_ratio": 72.0,
   "pb_ratio": 58.0,
   "net_margin": 15.8,
@@ -18,13 +18,6 @@
     "environmental": 76,
     "social": 78,
     "governance": 80
-  },
-  "trust_meter": {
-    "score": 86,
-    "promises_kept": 14,
-    "promises_delayed": 2,
-    "promises_broken": 0,
-    "latest_quote": "Prepared dishes and coffee categories delivered strong double-digit growth."
   },
   "forensic": {
     "reported_profit_growth": "+11%",

@@ -4,7 +4,7 @@
   "sector": "Infrastructure & Metals",
   "price": 965.0,
   "change": "+0.40%",
-  "market_cap": "₹2.3L Cr",
+  "market_cap": "\u20b92.3L Cr",
   "pe_ratio": 26.5,
   "pb_ratio": 2.9,
   "net_margin": 6.1,
@@ -18,13 +18,6 @@
     "environmental": 64,
     "social": 74,
     "governance": 72
-  },
-  "trust_meter": {
-    "score": 82,
-    "promises_kept": 13,
-    "promises_delayed": 2,
-    "promises_broken": 1,
-    "latest_quote": "Targeting 38.5 MTPA crude steel capacity by FY25."
   },
   "forensic": {
     "reported_profit_growth": "+12%",

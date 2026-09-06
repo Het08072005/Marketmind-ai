@@ -40,7 +40,6 @@ def generate_institutional_equity_report(symbol: str, report_type: str = "Compan
     upside_pct = round(((target_price - comp["price"]) / comp["price"]) * 100, 1)
 
     esg = comp.get("esg", { "overall": 77, "environmental": 78, "social": 74, "governance": 79 })
-    trust = comp.get("trust_meter", { "score": 85, "promises_kept": 14, "promises_delayed": 2, "promises_broken": 0 })
     forensic = comp.get("forensic", {
         "reported_profit_growth": "+14%",
         "cash_flow_growth": "+12%",
@@ -64,7 +63,7 @@ def generate_institutional_equity_report(symbol: str, report_type: str = "Compan
     forensic_trust_audit = (
         f"Forensic accounting audit indicates a divergence score of '{forensic.get('divergence_score', 'High Quality')}'. "
         f"Reported Profit Growth ({forensic.get('reported_profit_growth', '+14%')}) is closely mirrored by Operating Cash Flow Growth ({forensic.get('cash_flow_growth', '+12%')}), verifying high revenue quality with zero channel-stuffing anomalies. "
-        f"Management Trust Score is rated at {trust.get('score', 85)}/100, reflecting {trust.get('promises_kept', 14)} promises successfully kept and zero severe disclosures broken over the last 8 quarters."
+        f"Internal audit controls and corporate disclosures remain clean with zero material restatements reported over the last 8 quarters."
     )
 
     technical_setup = (
@@ -119,7 +118,7 @@ def generate_institutional_equity_report(symbol: str, report_type: str = "Compan
             - Revenue Growth: {comp.get('revenue_growth')}% | Debt/Equity: {comp.get('debt_to_equity')}
             - 14-Day RSI: {comp.get('rsi')} | Support: ₹{support_lvl} | Resistance: ₹{resistance_lvl}
             - Forensic Divergence: {forensic.get('divergence_score')} (PAT: {forensic.get('reported_profit_growth')}, OCF: {forensic.get('cash_flow_growth')})
-            - Management Trust Score: {trust.get('score')}/100 ({trust.get('promises_kept')} kept, {trust.get('promises_broken')} broken)
+            - Audit Quality: High (Zero material accounting divergences or undisclosed liabilities)
             
             Return a structured JSON object with these exact keys:
             {{

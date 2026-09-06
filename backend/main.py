@@ -8,11 +8,13 @@ from config import settings
 from routes.voice import router as voice_router
 from routes.stocks import router as stocks_router
 from routes.domino import router as domino_router
-from routes.trust import router as trust_router
 from routes.forensic import router as forensic_router
 from routes.news import router as news_router
 from routes.portfolio import router as portfolio_router
 from routes.reports import reports_router
+from routes.thesis import router as thesis_router
+from routes.dna import router as dna_router
+from routes.dependency import router as dependency_router
 
 app = FastAPI(
     title="MarketMind AI — Financial Intelligence Terminal Backend",
@@ -33,7 +35,9 @@ app.add_middleware(
 app.include_router(voice_router)
 app.include_router(stocks_router)
 app.include_router(domino_router)
-app.include_router(trust_router)
+app.include_router(thesis_router)
+app.include_router(dna_router)
+app.include_router(dependency_router)
 app.include_router(forensic_router)
 app.include_router(news_router)
 app.include_router(portfolio_router)

@@ -17,15 +17,14 @@ import ReportsPage from "./pages/ReportsPage";
 import CandlestickPage from "./pages/CandlestickPage";
 import NewsPage from "./pages/NewsPage";
 import DominoPage from "./pages/DominoPage";
-import TrustMeterPage from "./pages/TrustMeterPage";
 import ThesisBreakerPage from "./pages/ThesisBreakerPage";
 import DnaFingerprintPage from "./pages/DnaFingerprintPage";
-import TimeMachinePage from "./pages/TimeMachinePage";
 import StockAutopsyPage from "./pages/StockAutopsyPage";
 import AccountingCheckerPage from "./pages/AccountingCheckerPage";
 import RedFlagDnaPage from "./pages/RedFlagDnaPage";
-import GhostPortfolioPage from "./pages/GhostPortfolioPage";
 import DependencyMapPage from "./pages/DependencyMapPage";
+import SettingsPage from "./pages/SettingsPage";
+import HomePage from "./pages/HomePage";
 
 export default function App() {
   const { currentPage, currentMeta, goPage, sidebarOpen, setSidebarOpen } = useNavigation();
@@ -43,13 +42,32 @@ export default function App() {
 
       console.log("⚡ App received autonomous voice action:", action);
 
-      // Do NOT navigate away if user is in the Voice Stock Assistant & Copilot research terminal
-      if (action.target_page && currentPage !== "voice" && window.location.hash !== "#voice") {
+      if (action.type === "DOMINO_SIMULATE" || action.target_page === "domino") {
+        window.__PENDING_DOMINO_ACTION = action;
+      }
+
+      if (action.type === "THESIS_ACTION" || action.target_page === "thesis") {
+        window.__PENDING_THESIS_ACTION = action;
+      }
+
+      if (action.type?.startsWith("DNA_") || action.target_page === "dna") {
+        window.__PENDING_DNA_ACTION = action;
+      }
+
+      if (action.type === "DEPENDENCY_ACTION" || action.target_page === "dependency") {
+        window.__PENDING_DEPENDENCY_ACTION = action;
+      }
+
+      if (action.target_page) {
         goPage(action.target_page);
       }
 
       if (action.params?.symbol) {
         window.__SELECTED_STOCK_SYMBOL = action.params.symbol;
+        window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: action.params.symbol } }));
+      } else if (action.params?.symbol1) {
+        window.__SELECTED_STOCK_SYMBOL = action.params.symbol1;
+        window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: action.params.symbol1 } }));
       }
     };
 
@@ -173,29 +191,44 @@ export default function App() {
         return <NewsPage goPage={goPage} searchQuery={globalSearch} />;
       case "domino":
         return <DominoPage goPage={goPage} />;
-      case "trust":
-        return <TrustMeterPage />;
       case "breaker":
       case "thesis":
-        return <ThesisBreakerPage />;
+        return <ThesisBreakerPage searchQuery={globalSearch} />;
       case "dna":
         return <DnaFingerprintPage />;
-      case "timemachine":
-        return <TimeMachinePage />;
       case "autopsy":
         return <StockAutopsyPage goPage={goPage} />;
       case "accounting":
         return <AccountingCheckerPage goPage={goPage} />;
       case "redflag":
         return <RedFlagDnaPage />;
-      case "ghost":
-        return <GhostPortfolioPage />;
       case "dependency":
         return <DependencyMapPage />;
+      case "settings":
+        return <SettingsPage goPage={goPage} />;
+      case "home":
+        return <HomePage goPage={goPage} openAssistant={openAssistant} />;
       default:
         return <DashboardPage goPage={goPage} openAssistant={openAssistant} />;
     }
   };
+
+  // If in homepage mode, provide full immersive screen (institutional landing presentation)
+  if (currentPage === "home") {
+    return (
+      <div className="home-fullscreen-view" style={{ minHeight: "100vh", background: "#FAF6EC" }}>
+        <HomePage goPage={goPage} openAssistant={openAssistant} />
+        {/* Floating AI & Voice Assistant accessible */}
+        <FloatingAssistant
+          isOpen={assistantOpen}
+          setIsOpen={setAssistantOpen}
+          initialTab={assistantInitialTab}
+          isMicMuted={isMicMuted}
+          setIsMicMuted={setIsMicMuted}
+        />
+      </div>
+    );
+  }
 
   // If in learning mode, provide full immersive screen (hide app sidebar, topbar, ticker)
   if (currentPage === "learning") {
@@ -225,10 +258,11 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <div className="main">
+      <div className={`main ${currentPage === "settings" ? "main-settings" : ""}`}>
         <Topbar
           eyebrow={currentMeta.eyebrow}
           title={currentMeta.title}
+          subtitle={currentMeta.subtitle}
           onOpenSidebar={() => setSidebarOpen(true)}
           backendOnline={isOnline}
           backendLatency={latency}
@@ -236,23 +270,25 @@ export default function App() {
           onSearchChange={setGlobalSearch}
         />
 
-        {currentPage !== "candles" && <Ticker />}
+        {currentPage !== "candles" && currentPage !== "settings" && <Ticker />}
 
-        <div className="content">
-          <div className="page active" data-page={currentPage}>
+        <div className={`content ${currentPage === "settings" ? "content-settings" : ""}`}>
+          <div className="page active" data-page={currentPage} style={currentPage === "settings" ? { height: "100%" } : undefined}>
             {renderCurrentPage()}
           </div>
         </div>
       </div>
 
-      {/* Floating AI & Voice Assistant with Mute / Privacy controls */}
-      <FloatingAssistant
-        isOpen={assistantOpen}
-        setIsOpen={setAssistantOpen}
-        initialTab={assistantInitialTab}
-        isMicMuted={isMicMuted}
-        setIsMicMuted={setIsMicMuted}
-      />
+      {/* Floating AI & Voice Assistant with Mute / Privacy controls (hidden on settings page) */}
+      {currentPage !== "settings" && (
+        <FloatingAssistant
+          isOpen={assistantOpen}
+          setIsOpen={setAssistantOpen}
+          initialTab={assistantInitialTab}
+          isMicMuted={isMicMuted}
+          setIsMicMuted={setIsMicMuted}
+        />
+      )}
     </div>
   );
 }

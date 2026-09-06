@@ -5,10 +5,13 @@ const PAGE_ALIASES = {
   breaker: "thesis",
   thesisbreaker: "thesis",
   candlestick: "candles",
-  time_machine: "timemachine",
   stock_autopsy: "autopsy",
   hidden_dependency: "dependency",
-  ghost_portfolio: "ghost",
+  setting: "settings",
+  preferences: "settings",
+  config: "settings",
+  landing: "home",
+  homepage: "home",
 };
 
 export function useNavigation() {

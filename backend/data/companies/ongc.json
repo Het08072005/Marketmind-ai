@@ -4,7 +4,7 @@
   "sector": "Energy & Conglomerate",
   "price": 236.4,
   "change": "-0.88%",
-  "market_cap": "₹3.1L Cr",
+  "market_cap": "\u20b93.1L Cr",
   "pe_ratio": 8.6,
   "pb_ratio": 0.9,
   "net_margin": 12.2,
@@ -18,13 +18,6 @@
     "environmental": 62,
     "social": 72,
     "governance": 70
-  },
-  "trust_meter": {
-    "score": 76,
-    "promises_kept": 11,
-    "promises_delayed": 4,
-    "promises_broken": 2,
-    "latest_quote": "KG-DWN-98/2 deepwater block oil production ramped up."
   },
   "forensic": {
     "reported_profit_growth": "+8%",

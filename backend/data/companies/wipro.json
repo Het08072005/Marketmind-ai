@@ -4,7 +4,7 @@
   "sector": "IT Services & Tech",
   "price": 180.79,
   "change": "-0.12%",
-  "market_cap": "₹2.6L Cr",
+  "market_cap": "\u20b92.6L Cr",
   "pe_ratio": 21.2,
   "pb_ratio": 3.4,
   "net_margin": 15.6,
@@ -18,13 +18,6 @@
     "environmental": 74,
     "social": 78,
     "governance": 76
-  },
-  "trust_meter": {
-    "score": 75,
-    "promises_kept": 10,
-    "promises_delayed": 4,
-    "promises_broken": 2,
-    "latest_quote": "Capco consulting business stabilizing across European banking accounts."
   },
   "forensic": {
     "reported_profit_growth": "+4%",

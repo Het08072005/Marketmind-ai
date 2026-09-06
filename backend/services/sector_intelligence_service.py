@@ -186,7 +186,7 @@ def _generate_with_gemini(comp: Dict[str, Any], peers: List[Dict[str, Any]], sec
           {{ "name": "Fundamentals AI", "stance": "Bullish", "score": 82, "color": "#16a34a" }},
           {{ "name": "News & Sentiment AI", "stance": "Bullish", "score": 75, "color": "#16a34a" }},
           {{ "name": "Valuation Multiple AI", "stance": "Neutral", "score": 58, "color": "#f59e0b" }},
-          {{ "name": "Management Trust Meter", "stance": "High Trust", "score": 86, "color": "#16a34a" }},
+          {{ "name": "Governance & Audit Engine", "stance": "High Trust", "score": 86, "color": "#16a34a" }},
           {{ "name": "Forensic & Risk Engine", "stance": "Stable", "score": 74, "color": "#16a34a" }}
         ]
       }},
@@ -567,7 +567,7 @@ def _generate_autonomous_quant_intelligence(comp: Dict[str, Any], peers: List[Di
             {"name": "Fundamentals AI", "stance": "Bullish", "score": min(overall_score + 4, 96), "color": "#16a34a"},
             {"name": "News & Sentiment AI", "stance": "Bullish" if growth >= sec_avg["growth"] else "Neutral", "score": 76, "color": "#16a34a"},
             {"name": "Valuation Multiple AI", "stance": "Neutral", "score": value_score, "color": "#f59e0b"},
-            {"name": "Management Trust Meter", "stance": "High Trust", "score": 86, "color": "#16a34a"},
+            {"name": "Governance & Audit Engine", "stance": "High Quality", "score": 86, "color": "#16a34a"},
             {"name": "Forensic & Risk Engine", "stance": "Stable", "score": risk_score, "color": "#16a34a" if risk_score >= 70 else "#dc2626"}
         ]
     }

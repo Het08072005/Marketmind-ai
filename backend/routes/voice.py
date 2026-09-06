@@ -55,21 +55,14 @@ async def voice_chat(request: ChatRequest):
         reply_text = agent_result["reply"]
         action_payload = agent_result.get("action")
 
-        audio_b64 = None
-        audio_bytes = await synthesize_speech_audio(
-            reply_text,
-            voice_gender=gender,
-            language=lang
-        )
-        if audio_bytes:
-            audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
-            
+        # Return reply immediately for ChatGPT-fast response times.
+        # Audio is synthesized on-demand when client clicks 'Speak' via /api/voice/synthesize.
         return ChatResponse(
             query=request.message,
             reply=reply_text,
             language=lang,
             voice_gender=gender,
-            audio_base64=audio_b64,
+            audio_base64=None,
             action=action_payload
         )
     except Exception as e:
@@ -92,3 +85,22 @@ async def synthesize_voice(request: SynthesizeRequest):
         return {"audio_base64": None, "status": "fallback"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Speech synthesis failed: {str(e)}")
+
+class AutonomousCopilotRequest(BaseModel):
+    query: str
+    language: Optional[str] = "english"
+    context_ticker: Optional[str] = "INDIGO"
+    history: Optional[list] = None
+
+@router.post("/autonomous-copilot")
+async def autonomous_copilot_endpoint(req: AutonomousCopilotRequest):
+    try:
+        from services.domino_service import process_domino_agent_query
+        return await process_domino_agent_query(
+            user_query=req.query,
+            context_ticker=req.context_ticker,
+            history=req.history
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Autonomous copilot error: {str(e)}")
+

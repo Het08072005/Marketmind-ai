@@ -170,11 +170,6 @@ export const apiClient = {
     return await res.json();
   },
 
-  async getTrustAudit(symbol) {
-    const res = await fetch(`${API_BASE_URL}/api/trust/${symbol}`);
-    return await res.json();
-  },
-
   async getForensicAudit(symbol) {
     const res = await fetch(`${API_BASE_URL}/api/forensic/${symbol}`);
     return await res.json();
@@ -199,5 +194,94 @@ export const apiClient = {
     });
     if (!res.ok) throw new Error("Failed to query news copilot");
     return await res.json();
+  },
+
+  // Thesis Intelligence Engine Endpoints
+  async getThesis(symbol) {
+    const res = await fetch(`${API_BASE_URL}/api/thesis/${encodeURIComponent(symbol)}`);
+    if (!res.ok) throw new Error(`Failed to fetch thesis for ${symbol}`);
+    return await res.json();
+  },
+
+  async analyzeThesis(payload) {
+    const res = await fetch(`${API_BASE_URL}/api/thesis/analyze`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error("Failed to analyze thesis");
+    return await res.json();
+  },
+
+  async recheckThesis(symbol) {
+    const res = await fetch(`${API_BASE_URL}/api/thesis/recheck/${encodeURIComponent(symbol)}`, {
+      method: "POST",
+    });
+    if (!res.ok) throw new Error(`Failed to recheck thesis for ${symbol}`);
+    return await res.json();
+  },
+
+  async queryThesisCopilot(payload) {
+    const res = await fetch(`${API_BASE_URL}/api/thesis/copilot-query`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error("Failed to query thesis copilot");
+    return await res.json();
+  },
+
+  // DNA Fingerprint AI Endpoints
+  async getDnaAnalysis(symbol1, symbol2) {
+    const res = await fetch(`${API_BASE_URL}/api/dna/analyze?symbol1=${encodeURIComponent(symbol1)}&symbol2=${encodeURIComponent(symbol2)}`);
+    if (!res.ok) throw new Error("Failed to fetch DNA analysis");
+    return await res.json();
+  },
+
+  async getDnaTwin(symbol) {
+    const res = await fetch(`${API_BASE_URL}/api/dna/twin/${encodeURIComponent(symbol)}`);
+    if (!res.ok) throw new Error(`Failed to find twin for ${symbol}`);
+    return await res.json();
+  },
+
+  async rescanDnaPatterns(symbol1, symbol2) {
+    const res = await fetch(`${API_BASE_URL}/api/dna/rescan`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ symbol1, symbol2 }),
+    });
+    if (!res.ok) throw new Error("Failed to rescan DNA patterns");
+    return await res.json();
+  },
+
+  // Portfolio Hidden Dependency Endpoints
+  async getDependencyMap(factor = "USDINR", symbol = null) {
+    let url = `${API_BASE_URL}/api/dependency/map?factor=${encodeURIComponent(factor)}`;
+    if (symbol) {
+      url += `&symbol=${encodeURIComponent(symbol)}`;
+    }
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch dependency map");
+    return await res.json();
+  },
+
+  async simulateDependencyShock(factor, shock_pct, symbol = null) {
+    const res = await fetch(`${API_BASE_URL}/api/dependency/simulate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ factor, shock_pct, symbol }),
+    });
+    if (!res.ok) throw new Error("Failed to simulate dependency shock");
+    return await res.json();
+  },
+
+  async getDependencyCompanies() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/dependency/companies`);
+      if (!res.ok) return [];
+      return await res.json();
+    } catch (e) {
+      return [];
+    }
   },
 };

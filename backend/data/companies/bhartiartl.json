@@ -19,14 +19,6 @@
     "social": 78,
     "governance": 77
   },
-  "trust_meter": {
-    "score": 85,
-    "promises_kept": 14,
-    "promises_delayed": 1,
-    "promises_broken": 0,
-    "timeline": [],
-    "latest_quote": "ARPU reached \u20b9211 with continuous postpaid upgrades."
-  },
   "forensic": {
     "reported_profit_growth": "+22%",
     "cash_flow_growth": "+19%",

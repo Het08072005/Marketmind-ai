@@ -173,10 +173,10 @@ export default function DashboardPage({ goPage, openAssistant }) {
   const activeStockObj = radarStocks.find((s) => s.symbol === activeCopilotStock);
   const filteredStocks = radarStocks.filter((s) => {
     // Filter tab
-    if (activeFilter === "BUY" && s.signal !== "STRONG BUY") return false;
-    if (activeFilter === "ACCUMULATE" && s.signal !== "ACCUMULATE ON DIP") return false;
-    if (activeFilter === "HOLD" && s.signal !== "HOLD / NEUTRAL") return false;
-    if (activeFilter === "AVOID" && s.signal !== "CAUTION / AVOID") return false;
+    if (activeFilter === "BUY" && !s.signal?.includes("BUY") && s.variant !== "buy") return false;
+    if (activeFilter === "ACCUMULATE" && !s.signal?.includes("ACCUMULATE") && s.variant !== "accumulate") return false;
+    if (activeFilter === "HOLD" && !s.signal?.includes("HOLD") && s.variant !== "hold") return false;
+    if (activeFilter === "AVOID" && !s.signal?.includes("AVOID") && !s.signal?.includes("CAUTION") && s.variant !== "avoid") return false;
 
     // Sector filter
     if (selectedSector !== "ALL" && !s.sector.toLowerCase().includes(selectedSector.toLowerCase())) {
@@ -305,96 +305,136 @@ export default function DashboardPage({ goPage, openAssistant }) {
           </div>
 
           {/* Overview Summary Statistics Bar (Clean Reference Card Layout) */}
+          {/* Overview Summary Statistics Bar (Clean Reference Card Layout - Pure Typography) */}
           <div className="radar-stats-grid">
+            {/* Card 1: TOTAL TRACKED */}
             <div className="radar-stat-box stat-total">
-              <div className="radar-stat-top">
-                <span className="radar-stat-icon icon-total">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              <div className="radar-stat-header">
+                <div className="radar-stat-icon-wrap icon-total">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="6"/>
+                    <circle cx="12" cy="12" r="2"/>
                   </svg>
-                </span>
-                <span className="radar-stat-lbl">TOTAL TRACKED</span>
+                </div>
+                <div className="radar-stat-info">
+                  <span className="radar-stat-lbl">TOTAL TRACKED</span>
+                  <span className="radar-stat-sub">Market leaders</span>
+                </div>
               </div>
               <div className="radar-stat-bottom">
-                <span className="radar-stat-val">{radarData?.summary?.total_tracked || 38}</span>
+                <span className="radar-stat-val val-total">{radarData?.summary?.total_tracked || 38}</span>
+                <span className="radar-stat-sep">|</span>
                 <span className="radar-stat-desc">tracked leaders</span>
               </div>
             </div>
 
+            {/* Card 2: STRONG BUY */}
             <div className="radar-stat-box stat-buy">
-              <div className="radar-stat-top">
-                <span className="radar-stat-icon icon-buy">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="18 15 12 9 6 15"/>
+              <div className="radar-stat-header">
+                <div className="radar-stat-icon-wrap icon-buy">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                    <polyline points="17 6 23 6 23 12"/>
                   </svg>
-                </span>
-                <span className="radar-stat-lbl">STRONG BUY</span>
+                </div>
+                <div className="radar-stat-info">
+                  <span className="radar-stat-lbl">STRONG BUY</span>
+                  <span className="radar-stat-sub">Institutional picks</span>
+                </div>
               </div>
               <div className="radar-stat-bottom">
                 <span className="radar-stat-val val-buy">{radarData?.summary?.strong_buy_count || 16}</span>
+                <span className="radar-stat-sep">|</span>
                 <span className="radar-stat-desc">institutional picks</span>
               </div>
             </div>
 
+            {/* Card 3: ACCUMULATE */}
             <div className="radar-stat-box stat-accumulate">
-              <div className="radar-stat-top">
-                <span className="radar-stat-icon icon-accumulate">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="12 2 22 12 12 22 2 12"/>
+              <div className="radar-stat-header">
+                <div className="radar-stat-icon-wrap icon-accumulate">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
                   </svg>
-                </span>
-                <span className="radar-stat-lbl">ACCUMULATE</span>
+                </div>
+                <div className="radar-stat-info">
+                  <span className="radar-stat-lbl">ACCUMULATE</span>
+                  <span className="radar-stat-sub">Value accumulation</span>
+                </div>
               </div>
               <div className="radar-stat-bottom">
                 <span className="radar-stat-val val-accumulate">{radarData?.summary?.accumulate_count || 10}</span>
+                <span className="radar-stat-sep">|</span>
                 <span className="radar-stat-desc">value accumulation</span>
               </div>
             </div>
 
+            {/* Card 4: HOLD / RANGE */}
             <div className="radar-stat-box stat-hold">
-              <div className="radar-stat-top">
-                <span className="radar-stat-icon icon-hold">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="5" y="5" width="14" height="14" rx="2"/>
+              <div className="radar-stat-header">
+                <div className="radar-stat-icon-wrap icon-hold">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 3v4m0 8v6M9 7h3v8H9zM17 5v2m0 8v6M17 7h3v8h-3zM3 9v2m0 6v4M3 11h3v6H3z"/>
                   </svg>
-                </span>
-                <span className="radar-stat-lbl">HOLD / RANGE</span>
+                </div>
+                <div className="radar-stat-info">
+                  <span className="radar-stat-lbl">HOLD / RANGE</span>
+                  <span className="radar-stat-sub">Sideways trend</span>
+                </div>
               </div>
               <div className="radar-stat-bottom">
                 <span className="radar-stat-val val-hold">{radarData?.summary?.hold_count || 8}</span>
+                <span className="radar-stat-sep">|</span>
                 <span className="radar-stat-desc">range bound</span>
               </div>
             </div>
 
+            {/* Card 5: CAUTION / AVOID */}
             <div className="radar-stat-box stat-avoid">
-              <div className="radar-stat-top">
-                <span className="radar-stat-icon icon-avoid">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+              <div className="radar-stat-header">
+                <div className="radar-stat-icon-wrap icon-avoid">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
                   </svg>
-                </span>
-                <span className="radar-stat-lbl">CAUTION / AVOID</span>
+                </div>
+                <div className="radar-stat-info">
+                  <span className="radar-stat-lbl">CAUTION / AVOID</span>
+                  <span className="radar-stat-sub">Higher risk</span>
+                </div>
               </div>
               <div className="radar-stat-bottom">
                 <span className="radar-stat-val val-avoid">{radarData?.summary?.avoid_count || 4}</span>
+                <span className="radar-stat-sep">|</span>
                 <span className="radar-stat-desc">capital caution</span>
               </div>
             </div>
 
+            {/* Card 6: RISK:REWARD */}
             <div className="radar-stat-box stat-rr">
-              <div className="radar-stat-top">
-                <span className="radar-stat-icon icon-rr">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="9"/>
-                    <path d="M12 3v18M3 12h18"/>
+              <div className="radar-stat-header">
+                <div className="radar-stat-icon-wrap icon-rr">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                    <path d="M4 22h16"/>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/>
                   </svg>
-                </span>
-                <span className="radar-stat-lbl">RISK:REWARD</span>
+                </div>
+                <div className="radar-stat-info">
+                  <span className="radar-stat-lbl">RISK:REWARD</span>
+                  <span className="radar-stat-sub">Opportunity ratio</span>
+                </div>
               </div>
               <div className="radar-stat-bottom">
                 <span className="radar-stat-val val-rr">{radarData?.summary?.avg_risk_reward || "1:3.0"}</span>
+                <span className="radar-stat-sep">|</span>
                 <span className="radar-stat-desc">reward ratio</span>
               </div>
             </div>
@@ -408,35 +448,65 @@ export default function DashboardPage({ goPage, openAssistant }) {
                 className={`radar-filter-tab ${activeFilter === "ALL" ? "active" : ""}`}
                 onClick={() => setActiveFilter("ALL")}
               >
-                All Leaders ({radarStocks.length || (isInitialLoading ? "..." : radarData?.summary?.total_tracked || 38)})
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="filter-tab-icon">
+                  <rect x="3" y="3" width="7" height="7" rx="1.8"/>
+                  <rect x="14" y="3" width="7" height="7" rx="1.8"/>
+                  <rect x="14" y="14" width="7" height="7" rx="1.8"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1.8"/>
+                </svg>
+                <span>All ({radarStocks.length || (isInitialLoading ? "..." : radarData?.summary?.total_tracked || 38)})</span>
               </button>
+
               <button
                 type="button"
                 className={`radar-filter-tab ${activeFilter === "BUY" ? "active" : ""}`}
                 onClick={() => setActiveFilter("BUY")}
               >
-                ▲ Strong Buy ({radarData?.summary?.strong_buy_count || 16})
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="filter-tab-icon icon-buy">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                  <polyline points="17 6 23 6 23 12"/>
+                </svg>
+                <span>Strong Buy ({radarData?.summary?.strong_buy_count || 16})</span>
               </button>
+
               <button
                 type="button"
                 className={`radar-filter-tab ${activeFilter === "ACCUMULATE" ? "active" : ""}`}
                 onClick={() => setActiveFilter("ACCUMULATE")}
               >
-                ◆ Accumulate on Dip ({radarData?.summary?.accumulate_count || 10})
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="filter-tab-icon icon-accumulate">
+                  <ellipse cx="8.5" cy="7" rx="5.5" ry="2.4"/>
+                  <path d="M3 7v4c0 1.3 2.5 2.4 5.5 2.4c.8 0 1.6-.1 2.3-.3"/>
+                  <path d="M3 11v4c0 1.3 2.5 2.4 5.5 2.4c.8 0 1.6-.1 2.3-.3"/>
+                  <line x1="17" y1="13" x2="17" y2="19"/>
+                  <line x1="14" y1="16" x2="20" y2="16"/>
+                </svg>
+                <span>Accumulate ({radarData?.summary?.accumulate_count || 10})</span>
               </button>
+
               <button
                 type="button"
                 className={`radar-filter-tab ${activeFilter === "HOLD" ? "active" : ""}`}
                 onClick={() => setActiveFilter("HOLD")}
               >
-                ■ Hold / Neutral ({radarData?.summary?.hold_count || 8})
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" className="filter-tab-icon icon-hold">
+                  <line x1="4" y1="9" x2="20" y2="9"/>
+                  <line x1="4" y1="15" x2="20" y2="15"/>
+                </svg>
+                <span>Hold ({radarData?.summary?.hold_count || 8})</span>
               </button>
+
               <button
                 type="button"
                 className={`radar-filter-tab ${activeFilter === "AVOID" ? "active" : ""}`}
                 onClick={() => setActiveFilter("AVOID")}
               >
-                ▼ Caution / Avoid ({radarData?.summary?.avoid_count || 4})
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="filter-tab-icon icon-avoid">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>Avoid ({radarData?.summary?.avoid_count || 4})</span>
               </button>
             </div>
 
@@ -463,10 +533,10 @@ export default function DashboardPage({ goPage, openAssistant }) {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
-                <option value="conviction">Sort: Highest Conviction</option>
-                <option value="upside">Sort: Highest Upside %</option>
-                <option value="change">Sort: Today's Gainers</option>
-                <option value="price">Sort: Price (High to Low)</option>
+                <option value="conviction">Sort: Conviction</option>
+                <option value="upside">Sort: Upside %</option>
+                <option value="change">Sort: Gainers</option>
+                <option value="price">Sort: Price</option>
               </select>
             </div>
           </div>
@@ -515,7 +585,44 @@ export default function DashboardPage({ goPage, openAssistant }) {
             ) : (
               sortedStocks.map((stock) => {
                 const isPositive = !stock.change?.startsWith("-") && !stock.change?.startsWith("−");
-                const iconSymbol = stock.variant === "buy" ? "▲" : stock.variant === "accumulate" ? "◆" : stock.variant === "hold" ? "■" : "▼";
+                
+                let signalDisplayName = "STRONG BUY";
+                let signalIcon = (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                    <polyline points="17 6 23 6 23 12"/>
+                  </svg>
+                );
+
+                if (stock.variant === "accumulate" || stock.signal?.includes("ACCUMULATE")) {
+                  signalDisplayName = "ACCUMULATE";
+                  signalIcon = (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                      <ellipse cx="8.5" cy="7" rx="5.5" ry="2.4"/>
+                      <path d="M3 7v4c0 1.3 2.5 2.4 5.5 2.4c.8 0 1.6-.1 2.3-.3"/>
+                      <path d="M3 11v4c0 1.3 2.5 2.4 5.5 2.4c.8 0 1.6-.1 2.3-.3"/>
+                      <line x1="17" y1="13" x2="17" y2="19"/>
+                      <line x1="14" y1="16" x2="20" y2="16"/>
+                    </svg>
+                  );
+                } else if (stock.variant === "hold" || stock.signal?.includes("HOLD")) {
+                  signalDisplayName = "HOLD";
+                  signalIcon = (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+                      <line x1="4" y1="9" x2="20" y2="9"/>
+                      <line x1="4" y1="15" x2="20" y2="15"/>
+                    </svg>
+                  );
+                } else if (stock.variant === "avoid" || stock.signal?.includes("AVOID") || stock.signal?.includes("CAUTION")) {
+                  signalDisplayName = "AVOID";
+                  signalIcon = (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      <line x1="12" y1="8" x2="12" y2="12"/>
+                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                  );
+                }
 
                 return (
                   <div key={stock.symbol} className="radar-stock-row">
@@ -552,8 +659,8 @@ export default function DashboardPage({ goPage, openAssistant }) {
                       {/* 3. AI Verdict Badge & Conviction */}
                       <div className="radar-verdict-group">
                         <div className={`radar-verdict-badge ${stock.variant}`}>
-                          <span>{iconSymbol}</span>
-                          <span>{stock.signal}</span>
+                          <span className="verdict-icon-wrap">{signalIcon}</span>
+                          <span className="verdict-name">{signalDisplayName}</span>
                         </div>
                         <div className="radar-conviction-sub">
                           {stock.conviction}% AI Conviction · {stock.risk_level} Risk
