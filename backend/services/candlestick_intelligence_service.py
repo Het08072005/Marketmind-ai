@@ -213,6 +213,9 @@ def _compute_quant_candle_metrics(
     sector = comp.get("sector", "Core Enterprise")
     sec_strength = 6.4
 
+    invalidation_p = round(support_zone_low * 0.995, 2)
+    confirmation_p = round(resistance_zone_high * 1.003, 2)
+
     return {
         "price": price,
         "change": change_str,
@@ -243,8 +246,10 @@ def _compute_quant_candle_metrics(
         "stance_confidence": stance_conf,
         "sector": sector,
         "sector_strength": sec_strength,
-        "invalidation_price": round(support_zone_low * 0.995, 2),
-        "confirmation_price": round(resistance_zone_low * 1.005, 2)
+        "invalidation_price": invalidation_p,
+        "confirmation_price": confirmation_p,
+        "invalidation_str": f"₹{invalidation_p:,.2f}",
+        "confirmation_str": f"₹{confirmation_p:,.2f}"
     }
 
 
@@ -308,8 +313,8 @@ Return ONLY valid JSON with this schema:
   "price": {price},
   "change": "{change}",
   "change_label": "{change} today",
-  "executive_analysis": "{name} displays {pat} with active buyer absorption near {sup} structural support. Volume reached {vol_r}x 20-day median with 14-day RSI at {rsi}. While the floor is strongly defended, overhead resistance at {res} currently restricts immediate impulsive upside expansion.",
-  "executive_outcome": "Final probabilistic outcome projects {metrics['bullish_prob']}% upside follow-through versus {metrics['bearish_prob']}% breakdown risk. Confirmed breakout targets upside continuation upon a daily close above ₹{conf_p}. A decisive close below ₹{inv} invalidates the setup, triggering high-risk downside defense.",
+  "executive_analysis": "{name} ({sym}, CMP ₹{price:,.2f}, {change}) displays {pat} with active buyer absorption near {sup} structural support. Volume reached {vol_r}x 20-day median with 14-day RSI at {rsi:.1f}. While the floor is strongly defended, overhead resistance at {res} currently restricts immediate impulsive upside expansion.",
+  "executive_outcome": "Final probabilistic outcome projects {metrics['bullish_prob']}% upside follow-through versus {metrics['bearish_prob']}% breakdown risk. Confirmed breakout targets upside continuation upon a daily close above {metrics['confirmation_str']}. A decisive close below {metrics['invalidation_str']} invalidates the setup, triggering high-risk downside defense.",
   "daily_stats": {{
     "open": {metrics['open']},
     "high": {metrics['high']},
@@ -442,14 +447,14 @@ def _generate_autonomous_quant_intelligence(
 
     direction_word = "upside expansion" if metrics["bullish_prob"] > metrics["bearish_prob"] else "downside caution"
     exec_analysis = (
-        f"{name} displays {pat} with active buyer absorption near {sup} structural support. "
-        f"Volume reached {vol_r}x 20-day median with 14-day RSI at {rsi}. "
+        f"{name} ({sym}, CMP ₹{price:,.2f}, {change}) displays {pat} with active buyer absorption near {sup} structural support. "
+        f"Volume reached {vol_r}x 20-day median with 14-day RSI at {rsi:.1f}. "
         f"While the floor is strongly defended, overhead resistance at {res} currently restricts immediate impulsive upside expansion."
     )
     exec_outcome = (
         f"Final probabilistic outcome projects {metrics['bullish_prob']}% {direction_word} versus {metrics['bearish_prob']}% breakdown risk. "
-        f"Confirmed breakout targets upside continuation upon a daily close above ₹{conf_p}. "
-        f"A decisive close below ₹{inv} invalidates the setup, triggering high-risk downside defense."
+        f"Confirmed breakout targets upside continuation upon a daily close above {metrics['confirmation_str']}. "
+        f"A decisive close below {metrics['invalidation_str']} invalidates the setup, triggering high-risk downside defense."
     )
 
     return {
@@ -461,6 +466,17 @@ def _generate_autonomous_quant_intelligence(
         "change_label": f"{change} today",
         "executive_analysis": exec_analysis,
         "executive_outcome": exec_outcome,
+        "quantitative_metrics": {
+            "current_price": price,
+            "cmp": price,
+            "change": change,
+            "support_zone": sup,
+            "resistance_zone": res,
+            "invalidation_price": inv,
+            "confirmation_price": conf_p,
+            "invalidation_str": metrics["invalidation_str"],
+            "confirmation_str": metrics["confirmation_str"]
+        },
         "candles": candles,
         "daily_stats": {
             "open": metrics["open"],

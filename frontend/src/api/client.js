@@ -58,6 +58,18 @@ export const apiClient = {
     return await res.json();
   },
 
+  async searchStocks(query) {
+    const res = await fetch(`${API_BASE_URL}/api/stocks/search?q=${encodeURIComponent(query)}`);
+    if (!res.ok) throw new Error("Search failed");
+    return await res.json();
+  },
+
+  async getStockInstitutionalPrediction(symbol) {
+    const res = await fetch(`${API_BASE_URL}/api/stocks/${symbol}/institutional-prediction`);
+    if (!res.ok) throw new Error("Failed to fetch institutional prediction");
+    return await res.json();
+  },
+
   async getStocks() {
     const res = await fetch(`${API_BASE_URL}/api/stocks`);
     return await res.json();

@@ -134,123 +134,7 @@ export default function PortfolioPage() {
   const [activeTab, setActiveTab] = useState("simulator");
 
   // ==========================================
-  // ==========================================
-  // 1. PORTFOLIO SIMULATOR STATE WITH PERSISTENCE
-  // ==========================================
-  const DEFAULT_BASELINE_SIMULATION = {
-    company: "Adani Enterprises Ltd",
-    symbol: "ADANIENT",
-    initial_investment: 100000,
-    start_date: "2026-08-03",
-    end_date: "2026-09-03",
-    start_date_formatted: "03 Aug 2026",
-    end_date_formatted: "03 Sep 2026",
-    total_days: 31,
-    investment_type: "lumpsum",
-    buy_price: 3068.0,
-    avg_cost: 3068.0,
-    current_price: 2906.5,
-    shares: 32,
-    cash_remaining: 1824.0,
-    stock_value: 93008.0,
-    portfolio_value: 94832.0,
-    profit_loss: -5168.0,
-    return_pct: -5.17,
-    benchmark: "NIFTY 50",
-    benchmark_return: -3.06,
-    alpha: -2.11,
-    investment_snapshot: {
-      buy_price: 3068.0,
-      buy_date: "03 Aug 2026",
-      current_price: 2906.5,
-      shares_purchased: 32,
-      cash_remaining: 1824.0,
-      position_52w: "Trading ~9.5% below 52-week high (₹3,212.00)",
-      high_52w: 3212.0,
-      low_52w: 2680.0,
-    },
-    risk_metrics: {
-      max_drawdown: -6.4,
-      volatility: 31.2,
-      beta: 1.34,
-      sharpe_ratio: -2.66,
-      best_day: 0.5,
-      worst_day: -1.4,
-      cagr: -47.2,
-    },
-    corporate_actions: [
-      {
-        type: "Capital Structure",
-        detail: "No split or rights record dates occurred during 03 Aug – 03 Sep 2026. Core capital structure intact.",
-        date: "03 Sep 2026",
-      },
-      {
-        type: "Dividend Schedule",
-        detail: "Next quarterly dividend review scheduled in accordance with board meeting calendar for Adani Enterprises Ltd.",
-        date: "Upcoming",
-      },
-    ],
-    growth_series: [
-      { date: "03 Aug", portfolio_value: 100000, benchmark_value: 100000 },
-      { date: "08 Aug", portfolio_value: 98400, benchmark_value: 99170 },
-      { date: "15 Aug", portfolio_value: 97800, benchmark_value: 98600 },
-      { date: "22 Aug", portfolio_value: 96100, benchmark_value: 98120 },
-      { date: "28 Aug", portfolio_value: 96150, benchmark_value: 97280 },
-      { date: "03 Sep", portfolio_value: 94832, benchmark_value: 96940 },
-    ],
-    what_if: {
-      bear: { scenario: "Bear Case", pct: -20.0, value: 75865.6, label: "₹75.9K" },
-      base: { scenario: "Base Case", pct: 8.0, value: 102418.5, label: "₹102.4K" },
-      bull: { scenario: "Bull Case", pct: 25.0, value: 118540.0, label: "₹118.5K" },
-    },
-    decision_signals: {
-      investment_signal: { label: "CAUTION", icon: "🟠", color: "orange" },
-      risk_level: { label: "HIGH", icon: "🔴", color: "rose" },
-      market_performance: { label: "WEAK", icon: "🔴", color: "rose" },
-      vs_benchmark: { label: "UNDERPERFORMING", icon: "🔴", color: "rose" },
-      entry_view: { label: "WAIT / WATCH", icon: "🟠", color: "orange" },
-      overall_assessment: { label: "CAUTIOUS", icon: "🟠", color: "orange" },
-    },
-    ai_verdict: [
-      "* **Investment Signal — CAUTION:** Current simulation me stock ne **-5.17% return** diya aur NIFTY 50 ko **2.11% underperform** kiya. Fresh investment se pehle further evaluation warranted hai.",
-      "* **Risk Level — HIGH:** **31.2% volatility** aur meaningful drawdown indicate karta hai ki short-term price swings comparatively high ho sakte hain.",
-      "* **Market Performance — WEAK:** Same period me NIFTY 50 **-3.06%** tha, while ADANIENT **-5.17%** raha—stock broader market se weaker perform hua.",
-      "* **Portfolio Exposure — VERY HIGH:** Single-stock simulation me **100% capital ADANIENT** me hai. Isliye company-specific negative event directly poore portfolio ko impact karega.",
-      "* **Entry Assessment — WAIT / WATCH:** Current performance aur risk profile ko dekhte hue immediate aggressive entry ke bajay price trend, fundamentals aur upcoming company events monitor karna better signal hai.",
-      "* **Overall View — CAUTIOUS:** **Risk: High | Performance: Weak | Benchmark: Underperforming.** Simulator ke basis par concentrated investment attractive nahi dikhta; diversification ya staged allocation comparatively lower-risk approach ho sakti hai."
-    ],
-    marketmind_intelligence: {
-      stock_autopsy: {
-        title: "Stock Autopsy Breakdown",
-        pnl_drivers: [
-          { factor: "Valuation Multiple Adjustment (P/E Re-rating)", impact: "-2.8%", type: "NEGATIVE" },
-          { factor: "Systematic Benchmark Macro Correlation", impact: "-1.8%", type: "NEGATIVE" },
-          { factor: "Operational Cash Flow Yield Component", impact: "+1.2%", type: "POSITIVE" }
-        ],
-        verdict: "The price trajectory in ADANIENT reflects an annualized volatility of 31.2% with a systematic beta sensitivity of 1.34."
-      },
-      red_flag_dna: {
-        title: "Red Flag DNA Audit",
-        governance_score: "72/100",
-        promoter_pledge: "Low (Under 3.5%)",
-        debt_coverage: "2.4x EBITDA (Adequate)",
-        accounting_risk: "Clean unqualified auditor reports"
-      },
-      thesis_breaker: {
-        title: "Thesis Breaker Stress-Test",
-        original_thesis: "Capital growth in ADANIENT through infrastructure leadership, green hydrogen incubation, and airport concession assets.",
-        stress_factor: "Macro tightening and liquidity compression impacting valuation multiples.",
-        status: "Active Monitoring"
-      },
-      domino_contagion: {
-        title: "Domino Contagion Matrix",
-        interconnected_nodes: ["State Bank of India (Banking Credit)", "Larsen & Toubro (Capex Execution)", "NIFTY Index Heavyweights"],
-        systemic_spillover_risk: "Low to Moderate"
-      }
-    },
-    disclaimer: "Simulation-based assessment, not investment advice."
-  };
-
+  // 1. PORTFOLIO SIMULATOR STATE WITH PERSISTENCE (100% Dynamic - Zero Static Mock Fixtures)
   const [simStock, setSimStock] = useState(() => {
     return localStorage.getItem("marketmind_sim_stock") || "ADANIENT";
   });
@@ -275,21 +159,29 @@ export default function PortfolioPage() {
   const [selectedMilestone, setSelectedMilestone] = useState(null);
   const resultsAnchorRef = useRef(null);
 
-  // Loaded from localStorage if available, so user never loses simulation data on reload
+  // Loaded from localStorage only if the stored stock matches current simStock
   const [simResult, setSimResult] = useState(() => {
     try {
       const saved = localStorage.getItem("marketmind_sim_result");
-      if (saved) {
+      const savedStock = localStorage.getItem("marketmind_sim_stock");
+      if (saved && savedStock) {
         const parsed = JSON.parse(saved);
-        if (parsed && parsed.portfolio_value) {
+        if (parsed && parsed.portfolio_value && parsed.symbol === savedStock) {
           return parsed;
         }
       }
     } catch (e) {
       console.warn("Failed to load saved simulation from localStorage", e);
     }
-    return DEFAULT_BASELINE_SIMULATION;
+    return null;
   });
+
+  // Auto-run real simulation on initial mount if not yet cached
+  useEffect(() => {
+    if (!simResult) {
+      handleSimulate();
+    }
+  }, []);
 
   // Persist simulation state to localStorage so it stays intact across reloads
   useEffect(() => {
@@ -324,6 +216,9 @@ export default function PortfolioPage() {
     }, 60);
 
     const sym = (customSymbol || simStock).toUpperCase();
+    if (simResult && simResult.symbol !== sym) {
+      setSimResult(null);
+    }
     const amt = customAmount !== null ? customAmount : simAmount;
     const sDate = customStartDate || simStartDate;
     const eDate = customEndDate || simEndDate;
@@ -391,14 +286,22 @@ export default function PortfolioPage() {
       if (
         action.target_page === "portfolio" ||
         action.command === "RUN_PORTFOLIO_SIMULATION" ||
-        action.command === "CREATE_PORTFOLIO_SIMULATION"
+        action.command === "CREATE_PORTFOLIO_SIMULATION" ||
+        action.command === "VIEW_PORTFOLIO"
       ) {
-        setActiveTab("simulator");
+        if (action.params?.view_mode === "overall" || action.command === "VIEW_PORTFOLIO") {
+          setActiveTab("holdings");
+        } else if (action.params?.view_mode === "sandbox") {
+          setActiveTab("sandbox");
+        } else {
+          setActiveTab("simulator");
+        }
 
         if (action.params?.simulation) {
           setSimResult(action.params.simulation);
           if (action.params.simulation.symbol) {
             setSimStock(action.params.simulation.symbol);
+            localStorage.setItem("marketmind_sim_stock", action.params.simulation.symbol);
           }
           if (action.params.simulation.initial_investment) {
             setSimAmount(action.params.simulation.initial_investment);
@@ -406,11 +309,9 @@ export default function PortfolioPage() {
         } else if (action.params?.symbol) {
           const sym = action.params.symbol;
           setSimStock(sym);
-          handleSimulate(sym, action.params?.amount);
-        }
-
-        if (action.params?.view_mode === "sandbox") {
-          setActiveTab("sandbox");
+          setSimResult(null);
+          localStorage.setItem("marketmind_sim_stock", sym);
+          handleSimulate(sym, action.params?.amount, action.params?.start_date, action.params?.end_date, action.params?.investment_type);
         }
 
         if (action.params?.shares) {
@@ -435,6 +336,7 @@ export default function PortfolioPage() {
       if (sym) {
         setSimStock(sym);
         setSandboxSymbol(sym);
+        setSimResult(null);
         localStorage.setItem("marketmind_sim_stock", sym);
         handleSimulate(sym);
       }
@@ -442,14 +344,21 @@ export default function PortfolioPage() {
 
     window.addEventListener("marketmind:simulate_stock", handleSimulateStockEvent);
 
-    // Also check if initialTarget exists on mount
-    const initialTargetSym = window.__SELECTED_STOCK_SYMBOL;
-    if (initialTargetSym) {
-      setSimStock(initialTargetSym);
-      setSandboxSymbol(initialTargetSym);
-      localStorage.setItem("marketmind_sim_stock", initialTargetSym);
-      handleSimulate(initialTargetSym);
-      window.__SELECTED_STOCK_SYMBOL = null;
+    // Check pending autonomous portfolio action on mount
+    const pendingAction = window.__PENDING_PORTFOLIO_ACTION;
+    if (pendingAction) {
+      window.__PENDING_PORTFOLIO_ACTION = null;
+      handleVoiceEvent({ detail: pendingAction });
+    } else {
+      const initialTargetSym = window.__SELECTED_STOCK_SYMBOL;
+      if (initialTargetSym && initialTargetSym !== simStock) {
+        setSimStock(initialTargetSym);
+        setSandboxSymbol(initialTargetSym);
+        setSimResult(null);
+        localStorage.setItem("marketmind_sim_stock", initialTargetSym);
+        handleSimulate(initialTargetSym);
+        window.__SELECTED_STOCK_SYMBOL = null;
+      }
     }
 
     window.addEventListener("marketmind:voice_action", handleVoiceEvent);
@@ -521,11 +430,11 @@ export default function PortfolioPage() {
     return { stockPts, benchPts, areaPts, sCoords, bCoords };
   }, [simResult]);
 
-  // Sandbox data helpers
-  const nav = portfolio?.nav || 1102459;
-  const cash = portfolio?.cash_balance || 324500;
-  const pnl = portfolio?.overall_pnl || 102459;
-  const pnlPct = portfolio?.overall_pnl_pct || 10.25;
+  // Sandbox data helpers (100% dynamic from backend getPortfolio, never hardcoded dummy numbers)
+  const nav = portfolio?.nav ?? 0;
+  const cash = portfolio?.cash_balance ?? 0;
+  const pnl = portfolio?.overall_pnl ?? 0;
+  const pnlPct = portfolio?.overall_pnl_pct ?? 0;
   const rawHoldings = portfolio?.holdings || [];
 
   return (
@@ -565,6 +474,7 @@ export default function PortfolioPage() {
                   onChange={(e) => {
                     const val = e.target.value;
                     setSimStock(val);
+                    setSimResult(null);
                     handleSimulate(val, simAmount, simStartDate, simEndDate, simType, simBenchmark);
                   }}
                 >
@@ -668,7 +578,7 @@ export default function PortfolioPage() {
           )}
 
           {/* Simulation Results or Pulsing Skeleton Loading State */}
-          {simLoading ? (
+          {simLoading || !simResult ? (
             <SimulationSkeleton symbol={simStock} />
           ) : (
             <>

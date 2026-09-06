@@ -18,20 +18,19 @@ const TRACKED_COMPANIES = [
   { symbol: "MARUTI", name: "Maruti Suzuki India", sector: "Automotive & Mobility" }
 ];
 
-const TICKER_TAPE = [
-  { symbol: "RELIANCE", price: "₹1,302.50", change: "+2.02%" },
-  { symbol: "ASIANPAINT", price: "₹2,541.60", change: "+0.56%" },
-  { symbol: "TCS", price: "₹3,221.80", change: "-1.18%" },
-  { symbol: "HDFCBANK", price: "₹1,684.40", change: "+0.82%" },
-  { symbol: "TATAMOTORS", price: "₹612.70", change: "-2.31%" },
-  { symbol: "SUNPHARMA", price: "₹1,842.20", change: "+1.35%" }
-];
-
-// Storage helpers for persistent caching
+// Storage helpers for persistent caching with real price validation
 function getStoredAlert(sym, lb) {
   try {
     const raw = localStorage.getItem(`mm_smart_alert_${sym}_${lb}`);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.decision_layer && parsed.price) {
+        if (sym === "HDFCBANK" && parsed.price > 1000) return null;
+        if (sym === "TCS" && parsed.price > 3000) return null;
+        if (sym === "RELIANCE" && parsed.price > 2000) return null;
+        return parsed;
+      }
+    }
   } catch (e) {}
   return null;
 }
@@ -718,8 +717,33 @@ function getFallbackAlertData(sym, lookback) {
 
   const name = comp.name;
   const sector = comp.sector;
-  const price = sym === "RELIANCE" ? 1316.0 : sym === "TCS" ? 3221.8 : sym === "HDFCBANK" ? 1684.4 : 1500.0;
-  const change = "+1.25%";
+
+  let liveQuote = null;
+  try {
+    const savedStocks = localStorage.getItem("marketmind_live_stocks");
+    if (savedStocks) {
+      const list = JSON.parse(savedStocks);
+      liveQuote = list.find(s => s.symbol.toUpperCase() === sym.toUpperCase());
+    }
+  } catch (e) {}
+
+  const REAL_PRICE_MAP = {
+    RELIANCE: 1322.0,
+    TCS: 2304.0,
+    HDFCBANK: 712.10,
+    TATAMOTORS: 974.85,
+    INFY: 1130.0,
+    ICICIBANK: 1423.20,
+    COALINDIA: 415.35,
+    TITAN: 5020.0,
+    HCLTECH: 1293.4,
+    ITC: 264.10,
+    ASIANPAINT: 2527.3,
+    SUNPHARMA: 1899.0
+  };
+
+  const price = liveQuote?.price ? Number(liveQuote.price) : (REAL_PRICE_MAP[sym] || 1000.0);
+  const change = liveQuote?.change || "+0.50%";
   const invalStop = Math.round(price * 0.955);
 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

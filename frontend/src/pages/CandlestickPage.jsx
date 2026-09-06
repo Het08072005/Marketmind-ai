@@ -2,25 +2,129 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { apiClient } from "../api/client";
 
 const TRACKED_STOCKS = [
-  { symbol: "RELIANCE", name: "Reliance Industries Ltd", price: "₹1,302.50", change: "-0.81%", up: false },
-  { symbol: "ASIANPAINT", name: "Asian Paints Ltd", price: "₹2,541.60", change: "+0.56%", up: true },
-  { symbol: "TCS", name: "Tata Consultancy Services", price: "₹3,221.80", change: "-1.18%", up: false },
-  { symbol: "HDFCBANK", name: "HDFC Bank Ltd", price: "₹1,684.40", change: "+0.82%", up: true },
-  { symbol: "TATAMOTORS", name: "Tata Motors Ltd", price: "₹612.70", change: "-2.31%", up: false },
-  { symbol: "SUNPHARMA", name: "Sun Pharma Industries", price: "₹1,842.20", change: "+1.35%", up: true }
+  { symbol: "RELIANCE", name: "Reliance Industries Ltd" },
+  { symbol: "ASIANPAINT", name: "Asian Paints Ltd" },
+  { symbol: "TCS", name: "Tata Consultancy Services" },
+  { symbol: "HDFCBANK", name: "HDFC Bank Ltd" },
+  { symbol: "TATAMOTORS", name: "Tata Motors Ltd" },
+  { symbol: "SUNPHARMA", name: "Sun Pharma Industries" }
 ];
 
-// Local persistence helpers - validates that executive fields exist
+export const SECTOR_COMPANIES = [
+  {
+    sector: "IT & Technology Services",
+    stocks: [
+      { symbol: "TCS", name: "Tata Consultancy Services" },
+      { symbol: "INFY", name: "Infosys Ltd" },
+      { symbol: "HCLTECH", name: "HCL Technologies Ltd" },
+      { symbol: "WIPRO", name: "Wipro Ltd" },
+      { symbol: "TECHM", name: "Tech Mahindra Ltd" },
+    ]
+  },
+  {
+    sector: "Banking & Financial Services",
+    stocks: [
+      { symbol: "HDFCBANK", name: "HDFC Bank Ltd" },
+      { symbol: "ICICIBANK", name: "ICICI Bank Ltd" },
+      { symbol: "SBIN", name: "State Bank of India" },
+      { symbol: "AXISBANK", name: "Axis Bank Ltd" },
+      { symbol: "KOTAKBANK", name: "Kotak Mahindra Bank" },
+      { symbol: "BAJFINANCE", name: "Bajaj Finance Ltd" },
+      { symbol: "JIOFIN", name: "Jio Financial Services" },
+    ]
+  },
+  {
+    sector: "Energy, Oil & Power",
+    stocks: [
+      { symbol: "RELIANCE", name: "Reliance Industries Ltd" },
+      { symbol: "ONGC", name: "Oil & Natural Gas Corp" },
+      { symbol: "ADANIENT", name: "Adani Enterprises Ltd" },
+      { symbol: "ATGL", name: "Adani Total Gas Ltd" },
+      { symbol: "ADANIPORTS", name: "Adani Ports & SEZ" },
+      { symbol: "COALINDIA", name: "Coal India Ltd" },
+      { symbol: "NTPC", name: "NTPC Ltd" },
+      { symbol: "POWERGRID", name: "Power Grid Corp" },
+      { symbol: "TATAPOWER", name: "Tata Power Ltd" },
+    ]
+  },
+  {
+    sector: "Automotive & Mobility",
+    stocks: [
+      { symbol: "TATAMOTORS", name: "Tata Motors Ltd" },
+      { symbol: "MARUTI", name: "Maruti Suzuki India" },
+      { symbol: "M&M", name: "Mahindra & Mahindra" },
+      { symbol: "BAJAJ-AUTO", name: "Bajaj Auto Ltd" },
+      { symbol: "EICHERMOT", name: "Eicher Motors Ltd" },
+    ]
+  },
+  {
+    sector: "Consumer & Retail",
+    stocks: [
+      { symbol: "ASIANPAINT", name: "Asian Paints Ltd" },
+      { symbol: "ITC", name: "ITC Ltd" },
+      { symbol: "HINDUNILVR", name: "Hindustan Unilever Ltd" },
+      { symbol: "TITAN", name: "Titan Company Ltd" },
+      { symbol: "NESTLEIND", name: "Nestle India Ltd" },
+      { symbol: "TRENT", name: "Trent Ltd" },
+      { symbol: "VARUNBEV", name: "Varun Beverages Ltd" },
+      { symbol: "PIDILITIND", name: "Pidilite Industries" },
+    ]
+  },
+  {
+    sector: "Infrastructure, Metals & Realty",
+    stocks: [
+      { symbol: "LT", name: "Larsen & Toubro Ltd" },
+      { symbol: "TATASTEEL", name: "Tata Steel Ltd" },
+      { symbol: "JSWSTEEL", name: "JSW Steel Ltd" },
+      { symbol: "VEDL", name: "Vedanta Ltd" },
+      { symbol: "DLF", name: "DLF Ltd" },
+    ]
+  },
+  {
+    sector: "Defense & Heavy Engineering",
+    stocks: [
+      { symbol: "HAL", name: "Hindustan Aeronautics Ltd" },
+      { symbol: "BEL", name: "Bharat Electronics Ltd" },
+      { symbol: "BHEL", name: "Bharat Heavy Electricals" },
+      { symbol: "INDIGO", name: "InterGlobe Aviation (IndiGo)" },
+    ]
+  },
+  {
+    sector: "Pharma & Healthcare",
+    stocks: [
+      { symbol: "SUNPHARMA", name: "Sun Pharma Industries" },
+      { symbol: "DRREDDY", name: "Dr. Reddy's Laboratories" },
+      { symbol: "CIPLA", name: "Cipla Ltd" },
+      { symbol: "DIVISLAB", name: "Divi's Laboratories" },
+      { symbol: "APOLLOHOSP", name: "Apollo Hospitals Ltd" },
+    ]
+  },
+  {
+    sector: "Consumer Internet",
+    stocks: [
+      { symbol: "ZOMATO", name: "Zomato Ltd" },
+    ]
+  }
+];
+
+// Local persistence helpers - validates that executive fields exist and match live numbers
 function getStoredCandleIntel(sym) {
   try {
     const raw = localStorage.getItem(`mm_candle_intel_${sym}`);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.decision_stance && parsed.executive_analysis && parsed.executive_outcome) {
+        // Discard stale cached intel without CMP narrative
+        if (!parsed.executive_analysis.includes("CMP")) return null;
+        if (parsed.symbol && parsed.symbol.toUpperCase() !== sym.toUpperCase()) return null;
+        const curP = parsed.quantitative_metrics?.current_price;
+        if (sym === "HDFCBANK" && curP > 1000) return null;
+        if (sym === "TCS" && curP > 3000) return null;
+        if (sym === "RELIANCE" && curP > 2000) return null;
         return parsed;
       }
     }
-  } catch (e) {}
+  } catch (e) { }
   return null;
 }
 
@@ -29,21 +133,149 @@ function storeCandleIntel(sym, data) {
     if (data && data.decision_stance && data.executive_analysis && data.executive_outcome) {
       localStorage.setItem(`mm_candle_intel_${sym}`, JSON.stringify(data));
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
-export default function CandlestickPage() {
-  const savedSym = localStorage.getItem("mm_selected_candle_symbol") || window.__SELECTED_STOCK_SYMBOL || "RELIANCE";
-  const [selectedSymbol, setSelectedSymbol] = useState(savedSym);
+export default function CandlestickPage({ goPage, searchQuery: propSearchQuery = "" }) {
+  // 1. Determine Initial Symbol prioritizing voice actions, then global state, then storage
+  const getInitialSymbol = () => {
+    if (window.__PENDING_CANDLE_ACTION?.params?.symbol) {
+      const sym = window.__PENDING_CANDLE_ACTION.params.symbol.toUpperCase();
+      window.__PENDING_CANDLE_ACTION = null;
+      try { localStorage.setItem("mm_selected_candle_symbol", sym); } catch (e) { }
+      window.__SELECTED_STOCK_SYMBOL = sym;
+      return sym;
+    }
+    if (window.__SELECTED_STOCK_SYMBOL) {
+      const sym = window.__SELECTED_STOCK_SYMBOL.toUpperCase();
+      try { localStorage.setItem("mm_selected_candle_symbol", sym); } catch (e) { }
+      return sym;
+    }
+    try {
+      const saved = localStorage.getItem("mm_selected_candle_symbol");
+      if (saved) return saved.toUpperCase();
+    } catch (e) { }
+    return "RELIANCE";
+  };
+
+  const initialSym = useMemo(() => getInitialSymbol(), []);
+  const [selectedSymbol, setSelectedSymbol] = useState(initialSym);
+
+  // Search & Dropdown states
+  const [searchQuery, setSearchQuery] = useState(propSearchQuery || "");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [allStocksList, setAllStocksList] = useState([]);
+  const searchContainerRef = useRef(null);
+
+  const [tickerList, setTickerList] = useState(() => {
+    try {
+      const saved = localStorage.getItem("marketmind_live_stocks");
+      if (saved) {
+        const list = JSON.parse(saved);
+        if (Array.isArray(list) && list.length > 0) {
+          return TRACKED_STOCKS.map((ts) => {
+            const match = list.find((s) => s.symbol.toUpperCase() === ts.symbol.toUpperCase());
+            if (match) {
+              const isPos = !match.change.startsWith("-") && !match.change.startsWith("−");
+              return {
+                symbol: match.symbol,
+                name: match.name,
+                price: typeof match.price === "number" ? `₹${match.price.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : match.price,
+                change: match.change,
+                up: isPos,
+              };
+            }
+            return { ...ts, price: "...", change: "", up: true };
+          });
+        }
+      }
+    } catch (e) { }
+    return TRACKED_STOCKS.map((ts) => ({ ...ts, price: "...", change: "", up: true }));
+  });
+
+  // Flat list of all sector catalog stocks for search matching
+  const flatCatalogStocks = useMemo(() => {
+    const list = [];
+    const seen = new Set();
+    SECTOR_COMPANIES.forEach((sec) => {
+      sec.stocks.forEach((stk) => {
+        if (!seen.has(stk.symbol)) {
+          seen.add(stk.symbol);
+          list.push({ ...stk, sector: sec.sector });
+        }
+      });
+    });
+    allStocksList.forEach((stk) => {
+      if (!seen.has(stk.symbol)) {
+        seen.add(stk.symbol);
+        list.push({ symbol: stk.symbol, name: stk.name, price: stk.price, change: stk.change });
+      }
+    });
+    return list;
+  }, [allStocksList]);
+
+  // Set of all symbols in catalog for dropdown optgroup
+  const allCatalogSymbols = useMemo(() => {
+    return new Set(flatCatalogStocks.map((s) => s.symbol));
+  }, [flatCatalogStocks]);
+
+  // Filtered auto-complete suggestions
+  const suggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return flatCatalogStocks.filter(
+      (s) => s.symbol.toLowerCase().includes(q) || (s.name && s.name.toLowerCase().includes(q))
+    );
+  }, [searchQuery, flatCatalogStocks]);
+
+  // Click-outside listener for suggestion box
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Sync propSearchQuery
+  useEffect(() => {
+    if (propSearchQuery && propSearchQuery.trim()) {
+      setSearchQuery(propSearchQuery.trim());
+      setShowSuggestions(true);
+    }
+  }, [propSearchQuery]);
+
+  // Load all stocks for search catalog
+  useEffect(() => {
+    let isMounted = true;
+    const loadAllStocks = async () => {
+      try {
+        const stocks = await apiClient.getStocks();
+        if (isMounted && Array.isArray(stocks) && stocks.length > 0) {
+          setAllStocksList(stocks);
+        }
+      } catch (e) {
+        console.warn("Using fallback stock list for candles", e);
+      }
+    };
+    loadAllStocks();
+    return () => { isMounted = false; };
+  }, []);
 
   // Initialize with persisted data if available for instant 0ms reload
-  const [intelData, setIntelData] = useState(() => getStoredCandleIntel(savedSym));
-  const [loading, setLoading] = useState(!getStoredCandleIntel(savedSym));
+  const [intelData, setIntelData] = useState(() => {
+    const cached = getStoredCandleIntel(initialSym);
+    return cached && (!cached.symbol || cached.symbol.toUpperCase() === initialSym) ? cached : null;
+  });
+  const [loading, setLoading] = useState(!intelData);
   const [hoveredCandle, setHoveredCandle] = useState(null);
 
   // Interactive Voice Copilot chat state
   const [copilotMessages, setCopilotMessages] = useState([]);
   const [inputQuery, setInputQuery] = useState("");
+  const [customInput, setCustomInput] = useState("");
   const [copilotLoading, setCopilotLoading] = useState(false);
   const chatBottomRef = useRef(null);
 
@@ -53,9 +285,11 @@ export default function CandlestickPage() {
 
     const fetchIntel = async () => {
       const cached = getStoredCandleIntel(selectedSymbol);
-      if (cached && !intelData) {
+      if (cached && (!cached.symbol || cached.symbol.toUpperCase() === selectedSymbol)) {
         setIntelData(cached);
-      } else if (!cached && !intelData) {
+        setLoading(false);
+      } else {
+        setIntelData(null);
         setLoading(true);
       }
 
@@ -79,8 +313,76 @@ export default function CandlestickPage() {
     };
   }, [selectedSymbol]);
 
-  // Voice Assistant Global Listener
+  // Live Ticker Bar Real-Time Synchronization
   useEffect(() => {
+    let isMounted = true;
+    const fetchLiveTickerPrices = async () => {
+      try {
+        const liveList = await apiClient.getStocks();
+        if (isMounted && liveList && liveList.length > 0) {
+          const map = {};
+          liveList.forEach((s) => {
+            map[s.symbol.toUpperCase()] = s;
+          });
+          setTickerList((prev) =>
+            prev.map((item) => {
+              const live = map[item.symbol.toUpperCase()];
+              if (live && live.price) {
+                const isPos = !String(live.change).startsWith("-") && !String(live.change).startsWith("−");
+                return {
+                  ...item,
+                  price: typeof live.price === "number" ? `₹${live.price.toLocaleString("en-IN")}` : `₹${live.price}`,
+                  change: live.change,
+                  up: isPos,
+                };
+              }
+              return item;
+            })
+          );
+        }
+      } catch (e) {
+        console.warn("Using fallback ticker prices in candles", e);
+      }
+    };
+
+    fetchLiveTickerPrices();
+    const interval = setInterval(fetchLiveTickerPrices, 15000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  const handleStockChange = (newSym) => {
+    if (!newSym) return;
+    const cleanSym = newSym.toUpperCase().trim();
+    try {
+      localStorage.setItem("mm_selected_candle_symbol", cleanSym);
+    } catch (e) { }
+    window.__SELECTED_STOCK_SYMBOL = cleanSym;
+    setSelectedSymbol(cleanSym);
+    setCopilotMessages([]); // Reset chat to empty state for new stock
+
+    // Immediately trigger skeleton loader
+    const cached = getStoredCandleIntel(cleanSym);
+    if (cached && (!cached.symbol || cached.symbol.toUpperCase() === cleanSym)) {
+      setIntelData(cached);
+      setLoading(false);
+    } else {
+      setIntelData(null);
+      setLoading(true);
+    }
+  };
+
+  // Voice Assistant and Global Stock Changed Listener
+  useEffect(() => {
+    const handleStockChanged = (e) => {
+      const sym = e.detail?.symbol;
+      if (sym && typeof sym === "string") {
+        handleStockChange(sym.toUpperCase());
+      }
+    };
+
     const handleVoiceAction = (e) => {
       const action = e.detail;
       if (!action) return;
@@ -96,21 +398,21 @@ export default function CandlestickPage() {
       }
     };
 
+    window.addEventListener("marketmind:stock_changed", handleStockChanged);
     window.addEventListener("marketmind:voice_action", handleVoiceAction);
-    return () => window.removeEventListener("marketmind:voice_action", handleVoiceAction);
+
+    // Also check pending action on mount/effect
+    if (window.__PENDING_CANDLE_ACTION?.params?.symbol) {
+      const pSym = window.__PENDING_CANDLE_ACTION.params.symbol.toUpperCase();
+      window.__PENDING_CANDLE_ACTION = null;
+      handleStockChange(pSym);
+    }
+
+    return () => {
+      window.removeEventListener("marketmind:stock_changed", handleStockChanged);
+      window.removeEventListener("marketmind:voice_action", handleVoiceAction);
+    };
   }, [selectedSymbol]);
-
-  const handleStockChange = (newSym) => {
-    if (newSym === selectedSymbol) return;
-    localStorage.setItem("mm_selected_candle_symbol", newSym);
-    window.__SELECTED_STOCK_SYMBOL = newSym;
-    setSelectedSymbol(newSym);
-    setCopilotMessages([]); // Reset chat to empty state for new stock
-
-    // Clear data and trigger AI loading spinner immediately for clean transition
-    setIntelData(null);
-    setLoading(true);
-  };
 
   // Ask Copilot question
   const handleAskCopilot = async (qText) => {
@@ -244,10 +546,159 @@ export default function CandlestickPage() {
         </span>
       </div>
 
+      {/* 1.5 Sector-Grouped Dropdown & Real-Time Search Bar for ANY Indian Company */}
+      <div className="candle-search-dropdown-bar">
+        {/* Sector Grouped Dropdown */}
+        <div className="candle-dropdown-wrap">
+          <label htmlFor="candle-sector-select" className="candle-control-label">
+            🏢 Select Company (Sectors)
+          </label>
+          <select
+            id="candle-sector-select"
+            className="candle-select-dropdown"
+            value={selectedSymbol}
+            onChange={(e) => {
+              if (e.target.value) {
+                handleStockChange(e.target.value);
+                setSearchQuery("");
+                setShowSuggestions(false);
+              }
+            }}
+          >
+            {SECTOR_COMPANIES.map((sec) => (
+              <optgroup key={sec.sector} label={sec.sector}>
+                {sec.stocks.map((stk) => (
+                  <option key={stk.symbol} value={stk.symbol}>
+                    {stk.name} ({stk.symbol})
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+            {!allCatalogSymbols.has(selectedSymbol) && (
+              <optgroup label="Custom Searched Stock">
+                <option value={selectedSymbol}>
+                  {selectedSymbol} (NSE)
+                </option>
+              </optgroup>
+            )}
+          </select>
+        </div>
+
+        {/* Real-Time Search Bar with Auto-Complete Dropdown */}
+        <div className="candle-search-wrap" ref={searchContainerRef}>
+          <label htmlFor="candle-search-box" className="candle-control-label">
+            🔍 Search Any Indian Company (NSE)
+          </label>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                const target = suggestions.length > 0 ? suggestions[0].symbol : searchQuery.trim().toUpperCase();
+                handleStockChange(target);
+                setShowSuggestions(false);
+                setSearchQuery("");
+              }
+            }}
+            className="candle-search-input-box"
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              id="candle-search-box"
+              type="text"
+              className="candle-search-input"
+              placeholder="Search ticker or name (e.g. HCL, Zomato, BHEL, Tata, Reliance...)"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => {
+                if (searchQuery.trim()) setShowSuggestions(true);
+              }}
+              autoComplete="off"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="candle-search-clear-btn"
+                onClick={() => {
+                  setSearchQuery("");
+                  setShowSuggestions(false);
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </form>
+
+          {/* Auto-complete suggestions dropdown */}
+          {showSuggestions && searchQuery.trim() && (
+            <div className="candle-suggestions-dropdown">
+              {suggestions.slice(0, 8).map((item) => (
+                <div
+                  key={item.symbol}
+                  className="candle-suggestion-item"
+                  onClick={() => {
+                    handleStockChange(item.symbol);
+                    setSearchQuery("");
+                    setShowSuggestions(false);
+                  }}
+                >
+                  <div className="sug-left">
+                    <span className="sug-sym">{item.symbol}</span>
+                    <span className="sug-name">{item.name}</span>
+                  </div>
+                  <div className="sug-right">
+                    {item.price && <span className="sug-price">{typeof item.price === "number" ? `₹${item.price.toLocaleString("en-IN")}` : item.price}</span>}
+                    {item.change && (
+                      <span className={`sug-change ${!String(item.change).startsWith("-") && !String(item.change).startsWith("−") ? "up" : "down"}`}>
+                        {item.change}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {/* Fallback option to inspect custom query */}
+              {!suggestions.some((s) => s.symbol.toUpperCase() === searchQuery.trim().toUpperCase()) && (
+                <div
+                  className="candle-suggestion-item custom-ticker"
+                  onClick={() => {
+                    handleStockChange(searchQuery.trim().toUpperCase());
+                    setSearchQuery("");
+                    setShowSuggestions(false);
+                  }}
+                >
+                  <div className="sug-left">
+                    <span className="sug-sym">⚡ Inspect &ldquo;{searchQuery.trim().toUpperCase()}&rdquo;</span>
+                    <span className="sug-name">Fetch live NSE candlestick intelligence for any Indian equity</span>
+                  </div>
+                  <div className="sug-right">
+                    <span className="sug-badge">Live NSE</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* 2. Interactive Ticker Bar */}
       <div className="candle-ticker-bar">
-        {TRACKED_STOCKS.map((stock) => {
+        {tickerList.map((stock) => {
           const isSelected = stock.symbol === selectedSymbol;
+          const displayPrice = isSelected && intelData?.quantitative_metrics?.current_price
+            ? `₹${Number(intelData.quantitative_metrics.current_price).toLocaleString("en-IN")}`
+            : stock.price;
+          const displayChange = isSelected && intelData?.quantitative_metrics?.day_change_pct !== undefined
+            ? `${intelData.quantitative_metrics.day_change_pct >= 0 ? "+" : ""}${intelData.quantitative_metrics.day_change_pct}%`
+            : stock.change;
+          const isUp = isSelected && intelData?.quantitative_metrics?.day_change_pct !== undefined
+            ? intelData.quantitative_metrics.day_change_pct >= 0
+            : stock.up;
+
           return (
             <button
               key={stock.symbol}
@@ -256,24 +707,78 @@ export default function CandlestickPage() {
               onClick={() => handleStockChange(stock.symbol)}
             >
               <span className="ticker-sym">{stock.symbol}</span>
-              <span className="ticker-p">{stock.price}</span>
-              <span className={`ticker-c ${stock.up ? "positive" : "negative"}`}>{stock.change}</span>
+              <span className="ticker-p">{displayPrice}</span>
+              <span className={`ticker-c ${isUp ? "positive" : "negative"}`}>{displayChange}</span>
             </button>
           );
         })}
+
+        {/* If active symbol is a searched/custom stock not in default 6 pills, render active pill */}
+        {!tickerList.some((s) => s.symbol === selectedSymbol) && (
+          <button
+            type="button"
+            className="candle-ticker-item active"
+            onClick={() => handleStockChange(selectedSymbol)}
+          >
+            <span className="ticker-sym">{selectedSymbol}</span>
+            <span className="ticker-p">₹{intelData?.quantitative_metrics?.current_price ? Number(intelData.quantitative_metrics.current_price).toLocaleString("en-IN") : "—"}</span>
+            <span className="ticker-c positive">Live</span>
+          </button>
+        )}
       </div>
 
-      {/* Loading State Spinner if switching stock without cache */}
+      {/* Loading Skeleton Loader State when switching stock */}
       {loading && !intelData ? (
-        <div className="candle-ai-loading-card">
-          <div className="candle-loading-spinner" />
-          <h3>MarketMind Autonomous AI Chart Copilot Ingesting Microstructure...</h3>
-          <p>Auditing 30-day candlestick anatomy, support defense zones, and volume participation for <strong>{selectedSymbol}</strong></p>
-          <div className="candle-loading-tags">
-            <span>✓ Extracting candle wicks</span>
-            <span>✓ Calculating zone defense</span>
-            <span>✓ Running 24-case backtest</span>
-            <span>✓ Synthesizing Copilot</span>
+        <div className="candle-skeleton-container">
+          <div className="candle-skeleton-loading-badge">
+            <span className="candle-skeleton-spinner" />
+            <span>MarketMind Autonomous Engine Synchronizing Live Microstructure for {selectedSymbol}...</span>
+          </div>
+
+          {/* Shimmering Analysis Banner Skeleton */}
+          <div className="candle-skeleton-banner">
+            <div className="candle-skeleton-block">
+              <div className="candle-skeleton-line short" />
+              <div className="candle-skeleton-line full" />
+              <div className="candle-skeleton-line medium" />
+            </div>
+            <div className="candle-skeleton-block">
+              <div className="candle-skeleton-line short" />
+              <div className="candle-skeleton-line full" />
+              <div className="candle-skeleton-line medium" />
+            </div>
+          </div>
+
+          {/* Shimmering Chart & Probabilistic Outlook Skeleton */}
+          <div className="candle-skeleton-top-grid">
+            <div className="candle-skeleton-card">
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  <div style={{ width: 42, height: 42, borderRadius: 8, background: "rgba(255,255,255,0.08)" }} />
+                  <div>
+                    <div className="candle-skeleton-line" style={{ width: 140, height: 20, marginBottom: 6 }} />
+                    <div className="candle-skeleton-line" style={{ width: 220, height: 12 }} />
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div className="candle-skeleton-line" style={{ width: 100, height: 24, marginBottom: 6 }} />
+                  <div className="candle-skeleton-line" style={{ width: 70, height: 14 }} />
+                </div>
+              </div>
+              <div className="candle-skeleton-chart-area">
+                <span style={{ color: "#94A3B8", fontSize: "13px" }}>
+                  Constructing 30-session OHLC candle wicks &amp; support/resistance zones for {selectedSymbol}...
+                </span>
+              </div>
+            </div>
+
+            <div className="candle-skeleton-card">
+              <div className="candle-skeleton-line short" style={{ height: 18 }} />
+              <div className="candle-skeleton-line full" style={{ height: 50, borderRadius: 8 }} />
+              <div className="candle-skeleton-line full" />
+              <div className="candle-skeleton-line medium" />
+              <div className="candle-skeleton-line full" style={{ height: 36, borderRadius: 8, marginTop: 10 }} />
+            </div>
           </div>
         </div>
       ) : (
@@ -722,7 +1227,7 @@ export default function CandlestickPage() {
               <div className="copilot-card-header">
                 <div className="copilot-avatar-wrap">
                   <div className="copilot-avatar-circle">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></svg>
                   </div>
                   <div>
                     <h3 className="copilot-title">MarketMind Voice Copilot</h3>
@@ -739,7 +1244,7 @@ export default function CandlestickPage() {
                 {copilotMessages.length === 0 ? (
                   <div className="copilot-empty-state">
                     <div className="empty-copilot-icon">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></svg>
                     </div>
                     <div className="empty-copilot-title">Candlestick Copilot Ready</div>
                     <p className="empty-copilot-desc">
@@ -800,7 +1305,7 @@ export default function CandlestickPage() {
                   title="Voice trigger active"
                   onClick={() => handleAskCopilot("Explain today's candle")}
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></svg>
                 </button>
                 <input
                   type="text"
@@ -814,7 +1319,7 @@ export default function CandlestickPage() {
                   className="copilot-send-btn"
                   disabled={!inputQuery.trim() || copilotLoading}
                 >
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
                 </button>
               </form>
             </div>

@@ -1,35 +1,53 @@
 import React, { useState, useEffect } from "react";
 import { apiClient } from "../api/client";
-import { tickers as fallbackTickers } from "../data/mockData";
+
+const getStoredTickers = () => {
+  try {
+    const raw = localStorage.getItem("marketmind_live_tickers");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return [];
+};
 
 export default function Ticker() {
-  const [tickerList, setTickerList] = useState(fallbackTickers);
+  const [tickerList, setTickerList] = useState(getStoredTickers);
   const [activeSymbol, setActiveSymbol] = useState(() => window.__SELECTED_STOCK_SYMBOL || "RELIANCE");
 
   useEffect(() => {
+    let isMounted = true;
     const fetchLivePrices = async () => {
       try {
         const stocks = await apiClient.getStocks();
-        if (stocks && stocks.length > 0) {
-          const formatted = stocks.slice(0, 12).map((s) => {
+        if (isMounted && stocks && stocks.length > 0) {
+          const formatted = stocks.slice(0, 14).map((s) => {
             const isPos = !s.change.startsWith("-") && !s.change.startsWith("−");
             return {
               s: s.symbol,
-              p: typeof s.price === "number" ? s.price.toLocaleString("en-IN") : s.price,
+              p: typeof s.price === "number" ? s.price.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : s.price,
               c: s.change,
               up: isPos,
             };
           });
           setTickerList(formatted);
+          try {
+            localStorage.setItem("marketmind_live_tickers", JSON.stringify(formatted));
+            localStorage.setItem("marketmind_live_stocks", JSON.stringify(stocks));
+          } catch (e) {}
         }
       } catch (e) {
-        console.warn("Using fallback tickers", e);
+        console.warn("Live ticker synchronization note:", e);
       }
     };
 
     fetchLivePrices();
     const interval = setInterval(fetchLivePrices, 20000);
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
@@ -48,8 +66,17 @@ export default function Ticker() {
     window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: sym } }));
   };
 
-  const renderTicks = (list, keyPrefix) =>
-    list.map((t, idx) => {
+  const renderTicks = (list, keyPrefix) => {
+    if (!list || list.length === 0) {
+      return (
+        <span className="tick" style={{ opacity: 0.75 }}>
+          <span className="pulse-dot" style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "var(--teal)", marginRight: 6 }}></span>
+          <b>NSE LIVE FEED</b> Connecting to real-time market data...
+        </span>
+      );
+    }
+
+    return list.map((t, idx) => {
       const isSelected = activeSymbol && (t.s.toUpperCase() === activeSymbol.toUpperCase());
       return (
         <span
@@ -64,13 +91,14 @@ export default function Ticker() {
             background: isSelected ? "rgba(255, 255, 255, 0.08)" : "transparent",
             transition: "all 0.2s ease"
           }}
-          title={`Click to analyze ${t.s}`}
+          title={`Click to analyze ${t.s} (Real Live Quote)`}
         >
           <b>{t.s}</b> ₹{t.p}{" "}
           <span className={t.up ? "up" : "down"}>{t.c}</span>
         </span>
       );
     });
+  };
 
   return (
     <div className="ticker-wrap">

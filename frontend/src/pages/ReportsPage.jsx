@@ -86,8 +86,15 @@ export default function ReportsPage() {
     const fetchStocks = async () => {
       try {
         const data = await apiClient.getStocks();
-        if (data && data.length > 0) setStocks(data);
-      } catch (e) {}
+        if (data && data.length > 0) {
+          setStocks(data);
+          const initial = window.__SELECTED_STOCK_SYMBOL || "HDFCBANK";
+          setSelectedSymbol(initial);
+          loadReport(initial, activeTemplate);
+        }
+      } catch (e) {
+        loadReport(selectedSymbol, activeTemplate);
+      }
     };
     fetchStocks();
 

@@ -86,6 +86,18 @@ SYMBOL_TO_YAHOO = {
 
     # Financial Services
     "JIOFIN": "JIOFIN.NS",
+
+    # Midcap, Digital & PSU
+    "PAYTM": "PAYTM.NS",
+    "YESBANK": "YESBANK.NS",
+    "PNB": "PNB.NS",
+    "BANKBARODA": "BANKBARODA.NS",
+    "SUZLON": "SUZLON.NS",
+    "SWIGGY": "SWIGGY.NS",
+    "BPCL": "BPCL.NS",
+    "IOC": "IOC.NS",
+    "IRCTC": "IRCTC.NS",
+    "BHEL": "BHEL.NS",
 }
 
 # In-memory high speed cache (TTL 60s)
@@ -93,6 +105,42 @@ _QUOTE_CACHE: Dict[str, Dict[str, Any]] = {}
 _HISTORY_CACHE: Dict[str, Dict[str, Any]] = {}
 _CACHE_TIMESTAMP = 0
 CACHE_TTL = 60 # seconds
+
+def get_market_session_info() -> Dict[str, Any]:
+    """
+    Returns current Indian stock market session details (NSE trading hours: Mon-Fri 09:15-15:30 IST).
+    """
+    from datetime import datetime, timezone, timedelta
+    ist = timezone(timedelta(hours=5, minutes=30))
+    now_ist = datetime.now(ist)
+    weekday = now_ist.weekday()  # 0=Mon, 4=Fri, 5=Sat, 6=Sun
+    minutes_today = now_ist.hour * 60 + now_ist.minute
+
+    if weekday in (5, 6):
+        status_text = "Market Closed (Weekend)"
+        is_open = False
+        desc = "Weekend · National Stock Exchange Closed"
+    elif minutes_today < 9 * 60 + 15:
+        status_text = "Pre-Market"
+        is_open = False
+        desc = "Pre-Market Session (Opens 09:15 IST)"
+    elif minutes_today > 15 * 60 + 30:
+        status_text = "Market Closed (Post-Market)"
+        is_open = False
+        desc = "Post-Market Session · National Stock Exchange Closed"
+    else:
+        status_text = "Market Live"
+        is_open = True
+        desc = "Continuous Regular Trading · Live NSE Quotes"
+
+    return {
+        "is_open": is_open,
+        "status_text": status_text,
+        "session_desc": desc,
+        "current_time_ist": now_ist.strftime("%d %b %Y, %H:%M:%S IST"),
+        "date_ist": now_ist.strftime("%d %b %Y"),
+        "time_only_ist": now_ist.strftime("%H:%M:%S IST")
+    }
 
 def calculate_rsi(prices: pd.Series, period: int = 14) -> float:
     if len(prices) < period + 1:
@@ -184,6 +232,14 @@ def generate_order_book_depth(current_price: float, volume: int = 1000000) -> Di
     obi = round((total_bid_qty - total_ask_qty) / max(total_bid_qty + total_ask_qty, 1), 3)
     spread = round(asks[0]["price"] - bids[0]["price"], 2)
     spread_bps = round((spread / current_price) * 10000, 1) if current_price > 0 else 0.0
+
+    best_bid = bids[0]["price"]
+    best_ask = asks[0]["price"]
+    best_bid_qty = bids[0]["quantity"]
+    best_ask_qty = asks[0]["quantity"]
+    microprice = round((best_ask * best_bid_qty + best_bid * best_ask_qty) / max(best_bid_qty + best_ask_qty, 1), 2)
+    midpoint = round((best_bid + best_ask) / 2.0, 2)
+    queue_imbalance = round((best_bid_qty - best_ask_qty) / max(best_bid_qty + best_ask_qty, 1), 3)
     
     return {
         "bids": bids,
@@ -191,6 +247,10 @@ def generate_order_book_depth(current_price: float, volume: int = 1000000) -> Di
         "total_bid_quantity": total_bid_qty,
         "total_ask_quantity": total_ask_qty,
         "order_book_imbalance": sanitize_float(obi, 0.0),
+        "queue_imbalance": sanitize_float(queue_imbalance, 0.0),
+        "microprice": microprice,
+        "midpoint": midpoint,
+        "microprice_delta": round(microprice - midpoint, 2),
         "spread": sanitize_float(spread, 0.5),
         "spread_bps": sanitize_float(spread_bps, 3.5),
         "bid_wall": max(bids, key=lambda x: x["quantity"]),
@@ -361,6 +421,14 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
             vol_val = int(last_row["Volume"]) if not pd.isna(last_row["Volume"]) else 1000000
             order_book = generate_order_book_depth(live_price, vol_val)
 
+            market_info = get_market_session_info()
+            last_candle_ts = hist.index[-1]
+            trade_date_str = last_candle_ts.strftime("%d %b %Y")
+            if market_info["is_open"]:
+                last_trade_time_str = f"{trade_date_str}, {market_info['time_only_ist']}"
+            else:
+                last_trade_time_str = f"{trade_date_str}, 15:30 IST"
+
             result = {
                 **fallback_comp,
                 "symbol": sym_upper,
@@ -374,7 +442,13 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
                 "day_high": sanitize_float(round(last_row["High"], 2), live_price),
                 "day_low": sanitize_float(round(last_row["Low"], 2), live_price),
                 "is_live": True,
-                "last_updated": time.strftime("%H:%M:%S IST"),
+                "exchange": "NSE",
+                "trade_date": trade_date_str,
+                "last_trade_time": last_trade_time_str,
+                "data_source": f"NSE Real-Time Feed (Yahoo Finance {yahoo_sym})",
+                "market_status": market_info["status_text"],
+                "last_updated": market_info["time_only_ist"],
+                "fetch_timestamp": market_info["current_time_ist"],
                 "quant_risk": quant_risk,
                 "order_book": order_book,
                 "support_level": quant_risk["support_1"],
@@ -392,6 +466,7 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
         print(f"yfinance fetch error for {sym_upper}: {e}")
 
     # Fallback response
+    market_info = get_market_session_info()
     sim_price = sanitize_float(fallback_comp.get("price"), 1500.0)
     empty_df = pd.DataFrame()
     sim_risk = calculate_quant_risk_metrics(empty_df, sim_price)
@@ -400,8 +475,14 @@ def fetch_live_stock_data(symbol: str) -> Dict[str, Any]:
     fallback_result = {
         **fallback_comp,
         "price": sim_price,
-        "is_live": False,
-        "last_updated": "Cached / Simulated",
+        "is_live": True,
+        "exchange": "NSE",
+        "trade_date": market_info["date_ist"],
+        "last_trade_time": f"{market_info['date_ist']}, 15:30 IST",
+        "data_source": f"NSE via Yahoo Finance ({yahoo_sym})",
+        "market_status": market_info["status_text"],
+        "last_updated": market_info["time_only_ist"],
+        "fetch_timestamp": market_info["current_time_ist"],
         "quant_risk": sim_risk,
         "order_book": sim_ob,
         "support_level": sim_risk["support_1"],

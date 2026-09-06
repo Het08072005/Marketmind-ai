@@ -9,6 +9,24 @@ async def get_market_radar_recommendations():
     from services.recommendations_service import get_ai_market_radar_recommendations
     return get_ai_market_radar_recommendations()
 
+@router.get("/search")
+def search_stocks(q: str = Query(..., description="Stock symbol or company name")):
+    from services.recommendations_service import get_stock_institutional_profile
+    q_clean = q.upper().replace(".NS", "").replace(".BO", "").strip()
+    try:
+        profile = get_stock_institutional_profile(q_clean)
+        return {"success": True, "stock": profile}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{symbol}/institutional-prediction")
+def get_stock_prediction_route(symbol: str):
+    from services.recommendations_service import get_stock_institutional_profile
+    profile = get_stock_institutional_profile(symbol)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Stock prediction profile not found")
+    return profile
+
 @router.get("")
 def list_stocks():
     return get_all_live_companies()

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { pageMeta } from "../data/mockData";
+import { pageMeta } from "../data/pageMetadata";
 
 const PAGE_ALIASES = {
   breaker: "thesis",

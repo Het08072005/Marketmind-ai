@@ -58,16 +58,44 @@ export default function App() {
         window.__PENDING_DEPENDENCY_ACTION = action;
       }
 
+      if (action.command?.includes("CANDLE") || action.target_page === "candles") {
+        window.__PENDING_CANDLE_ACTION = action;
+      }
+
+      if (action.target_page === "portfolio" || action.type?.includes("PORTFOLIO") || action.command?.includes("PORTFOLIO")) {
+        window.__PENDING_PORTFOLIO_ACTION = action;
+      }
+
+      if (action.target_page === "alerts" || action.command?.includes("ALERT")) {
+        window.__PENDING_ALERTS_ACTION = action;
+      }
+
+      if (action.target_page === "sector" || action.command?.includes("SECTOR")) {
+        window.__PENDING_SECTOR_ACTION = action;
+      }
+
+      if (action.target_page === "reports" || action.command?.includes("REPORT")) {
+        window.__PENDING_REPORTS_ACTION = action;
+      }
+
+      if (action.target_page === "news" || action.command?.includes("NEWS")) {
+        window.__PENDING_NEWS_ACTION = action;
+      }
+
+      const sym = (action.params?.symbol || action.params?.symbol1 || "").toUpperCase();
+      if (sym) {
+        window.__SELECTED_STOCK_SYMBOL = sym;
+        try {
+          localStorage.setItem("mm_selected_candle_symbol", sym);
+        } catch (e) {}
+      }
+
       if (action.target_page) {
         goPage(action.target_page);
       }
 
-      if (action.params?.symbol) {
-        window.__SELECTED_STOCK_SYMBOL = action.params.symbol;
-        window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: action.params.symbol } }));
-      } else if (action.params?.symbol1) {
-        window.__SELECTED_STOCK_SYMBOL = action.params.symbol1;
-        window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: action.params.symbol1 } }));
+      if (sym) {
+        window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: sym } }));
       }
     };
 
@@ -172,7 +200,7 @@ export default function App() {
   const renderCurrentPage = () => {
     switch (currentPage) {
       case "dashboard":
-        return <DashboardPage goPage={goPage} openAssistant={openAssistant} />;
+        return <DashboardPage goPage={goPage} openAssistant={openAssistant} searchQuery={globalSearch} onSearchChange={setGlobalSearch} />;
       case "portfolio":
         return <PortfolioPage />;
       case "voice":
@@ -186,7 +214,7 @@ export default function App() {
       case "reports":
         return <ReportsPage />;
       case "candles":
-        return <CandlestickPage />;
+        return <CandlestickPage goPage={goPage} searchQuery={globalSearch} />;
       case "news":
         return <NewsPage goPage={goPage} searchQuery={globalSearch} />;
       case "domino":

@@ -55,14 +55,22 @@ async def voice_chat(request: ChatRequest):
         reply_text = agent_result["reply"]
         action_payload = agent_result.get("action")
 
-        # Return reply immediately for ChatGPT-fast response times.
-        # Audio is synthesized on-demand when client clicks 'Speak' via /api/voice/synthesize.
+        # Synthesize Deepgram studio-grade audio for natural human speech if available
+        audio_b64 = None
+        if lang not in ["hindi", "hi"]:
+            try:
+                audio_bytes = await synthesize_speech_audio(reply_text, voice_gender=gender, language=lang)
+                if audio_bytes:
+                    audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
+            except Exception as e:
+                print(f"Direct voice chat audio synthesis notice: {e}")
+
         return ChatResponse(
             query=request.message,
             reply=reply_text,
             language=lang,
             voice_gender=gender,
-            audio_base64=None,
+            audio_base64=audio_b64,
             action=action_payload
         )
     except Exception as e:

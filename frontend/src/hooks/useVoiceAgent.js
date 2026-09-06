@@ -104,7 +104,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     isListeningRef.current = isListening;
   }, [isListening]);
 
-  // Voice selector helper for Indian male voice in Hindi
+  // Premium voice selector helper: filters out ancient robotic/novelty voices and prioritizes natural studio voices
   const getSelectedSpeechVoice = useCallback((langMode) => {
     const voices = cachedVoicesRef.current.length > 0
       ? cachedVoicesRef.current
@@ -112,20 +112,64 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
 
     if (!voices || voices.length === 0) return null;
 
+    // Strict blacklist of legacy/novelty/robotic synthesizer voices (e.g. 1996 Mac OS Alex, Fred, Zarvox)
+    const isRobotic = (v) => {
+      const name = (v.name || "").toLowerCase();
+      return /fred|ralph|albert|zarvox|trinoids|whisper|deranged|bells|boing|cellos|good news|bad news|bubbles|organ|hysterical|pipe/i.test(name) ||
+        (name === "alex" && !name.includes("enhanced") && !name.includes("natural"));
+    };
+
+    const cleanVoices = voices.filter((v) => !isRobotic(v));
+    const pool = cleanVoices.length > 0 ? cleanVoices : voices;
+
     if (langMode === "hindi") {
-      const hiVoices = voices.filter(
-        (v) => v.lang.startsWith("hi") || v.name.toLowerCase().includes("hindi")
+      // 1. Direct Hindi voices (hi-IN)
+      const hiVoices = pool.filter(
+        (v) => (v.lang && v.lang.startsWith("hi")) || /hindi|हिन्दी/i.test(v.name)
       );
       if (hiVoices.length > 0) {
-        const m = hiVoices.find((v) => /neel|male|man/i.test(v.name));
-        return m || hiVoices[0];
+        const preferred = hiVoices.find((v) => /google|lekha|kalpana|swara|madhur|neel|prabhat/i.test(v.name));
+        return preferred || hiVoices[0];
+      }
+      // 2. Indian English fallback with natural cadence
+      const inVoices = pool.filter(
+        (v) => (v.lang && (v.lang === "en-IN" || v.lang.startsWith("en_IN"))) || /india|indian/i.test(v.name)
+      );
+      if (inVoices.length > 0) {
+        const preferred = inVoices.find((v) => /google|rishi|neerja|prabhat|heera/i.test(v.name));
+        return preferred || inVoices[0];
       }
     }
 
-    const m = voices.find((v) =>
-      /rishi|neel|male|man|daniel|alex|david|fred|george/i.test(v.name)
+    // English / General mode:
+    // Priority 1: High-definition Neural / Enhanced / Natural voices
+    const enhancedVoice = pool.find((v) =>
+      /enhanced|natural|neural|premium/i.test(v.name) &&
+      /samantha|ava|rishi|oliver|daniel|evan|tom|serena|karen/i.test(v.name)
     );
-    return m || null;
+    if (enhancedVoice) return enhancedVoice;
+
+    // Priority 2: Google Cloud voices built into Chrome (very smooth, human-like)
+    const googleVoice = pool.find((v) =>
+      /google uk english male|google us english|google uk english female/i.test(v.name)
+    );
+    if (googleVoice) return googleVoice;
+
+    // Priority 3: Crisp Indian English voices for authentic Dalal Street market feel
+    const indianEnVoice = pool.find((v) =>
+      (v.lang === "en-IN" || v.lang === "en_IN") && /rishi|neerja|prabhat|google/i.test(v.name)
+    );
+    if (indianEnVoice) return indianEnVoice;
+
+    // Priority 4: Premium native OS voices
+    const nativeCleanVoice = pool.find((v) =>
+      /daniel|samantha|ava|karen|oliver|serena|moira|arthur/i.test(v.name)
+    );
+    if (nativeCleanVoice) return nativeCleanVoice;
+
+    // Priority 5: Any clean English voice
+    const anyEn = pool.find((v) => v.lang && v.lang.startsWith("en"));
+    return anyEn || pool[0];
   }, []);
 
   // Stop any active speech/audio externally or on demand
@@ -196,7 +240,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     return () => window.removeEventListener("marketmind:stop_speech", handleExternalStop);
   }, [stopAudioPlayback]);
 
-  // Spoken voice playback via Web Speech API (fallback/Hindi) - Deep Male Pitch
+  // Spoken voice playback via Web Speech API (fallback/Hindi) - Natural Human Cadence
   const speakText = useCallback((text, langMode) => {
     if (!text || !("speechSynthesis" in window)) {
       handlePlaybackFinished();
@@ -217,7 +261,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     }
 
     utterance.pitch = 1.0;
-    utterance.rate = 1.02;
+    utterance.rate = 1.0;
 
     utterance.onstart = () => {
       setIsPlayingAudio(true);

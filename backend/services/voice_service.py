@@ -10,7 +10,7 @@ from services.market_data_service import fetch_live_stock_data, get_all_live_com
 from services.stock_service import get_company_by_symbol, get_all_companies
 from services.portfolio_service import execute_trade, get_portfolio_summary, simulate_investment
 from services.domino_service import get_domino_events
-from services.recommendations_service import STOCK_THESIS_REGISTRY
+from services.recommendations_service import get_stock_institutional_profile
 
 gemini_client = None
 if settings.GEMINI_API_KEY:
@@ -70,32 +70,50 @@ COMPANY_ALIASES = {
     "adani total": "ATGL",
     "अडानी गैस": "ATGL",
     "adani ports": "ADANIPORTS",
+    "adani port": "ADANIPORTS",
     "अडानी पोर्ट्स": "ADANIPORTS",
     "adani enterprises": "ADANIENT",
+    "adani green": "ADANIGREEN",
+    "adani power": "ADANIPOWER",
+    "adani wilmar": "AWL",
+    "adani energy": "ADANIENSOL",
     "adani": "ADANIENT",
     "अडानी": "ADANIENT",
     "अदानी": "ADANIENT",
+    "reliance industries": "RELIANCE",
     "reliance": "RELIANCE",
     "ril": "RELIANCE",
     "jio": "RELIANCE",
     "रिलायंस": "RELIANCE",
     "tata motors": "TATAMOTORS",
+    "tata steel": "TATASTEEL",
+    "tata power": "TATAPOWER",
+    "tata consumer": "TATACONSUM",
+    "tata elxsi": "TATAELXSI",
+    "tata tech": "TATATECH",
+    "tata technologies": "TATATECH",
+    "tata chemicals": "TATACHEM",
+    "tata communications": "TATACOMM",
+    "tata consultancy services": "TCS",
+    "tata consultancy": "TCS",
     "tata": "TATAMOTORS",
     "टाटा मोटर्स": "TATAMOTORS",
-    "टाटा": "TATAMOTORS",
-    "tata steel": "TATASTEEL",
     "टाटा स्टील": "TATASTEEL",
-    "hdfc": "HDFCBANK",
+    "टाटा पावर": "TATAPOWER",
+    "टाटा": "TATAMOTORS",
     "hdfc bank": "HDFCBANK",
-    "एचडीएफसी": "HDFCBANK",
+    "hdfc life": "HDFCLIFE",
+    "hdfc amc": "HDFCAMC",
+    "hdfc": "HDFCBANK",
     "एचडीएफसी बैंक": "HDFCBANK",
+    "एचडीएफसी": "HDFCBANK",
     "tcs": "TCS",
     "टीसीएस": "TCS",
     "infosys": "INFY",
     "infy": "INFY",
     "इन्फोसिस": "INFY",
-    "icici": "ICICIBANK",
     "icici bank": "ICICIBANK",
+    "icici": "ICICIBANK",
     "आईसीआईसीआई": "ICICIBANK",
     "itc": "ITC",
     "आईटीसी": "ITC",
@@ -103,20 +121,29 @@ COMPANY_ALIASES = {
     "ओएनजीसी": "ONGC",
     "spicejet": "SPICEJET",
     "स्पाइसजेट": "SPICEJET",
-    "sbi": "SBIN",
+    "sbi bank": "SBIN",
+    "sbi life": "SBILIFE",
+    "sbi card": "SBICARD",
+    "sbi cards": "SBICARD",
+    "state bank of india": "SBIN",
     "state bank": "SBIN",
+    "sbi": "SBIN",
     "एसबीआई": "SBIN",
+    "larsen and toubro": "LT",
+    "larsen & toubro": "LT",
     "l&t": "LT",
+    "l and t": "LT",
     "larsen": "LT",
     "लार्सन": "LT",
+    "maruti suzuki": "MARUTI",
     "maruti": "MARUTI",
     "मारुति": "MARUTI",
     "bajaj finance": "BAJFINANCE",
+    "bajaj finserv": "BAJAJFINSV",
+    "bajaj auto": "BAJAJ-AUTO",
     "bajaj": "BAJFINANCE",
     "बजाज फाइनेंस": "BAJFINANCE",
     "बजाज": "BAJFINANCE",
-    "bajaj auto": "BAJAJ-AUTO",
-    "बजाज ऑटो": "BAJAJ-AUTO",
     "airtel": "BHARTIARTL",
     "bharti airtel": "BHARTIARTL",
     "एयरटेल": "BHARTIARTL",
@@ -141,15 +168,19 @@ COMPANY_ALIASES = {
     "एचसीएल": "HCLTECH",
     "tech mahindra": "TECHM",
     "टेक महिंद्रा": "TECHM",
-    "kotak": "KOTAKBANK",
+    "kotak mahindra": "KOTAKBANK",
     "kotak bank": "KOTAKBANK",
+    "kotak": "KOTAKBANK",
     "कोटक": "KOTAKBANK",
-    "axis": "AXISBANK",
     "axis bank": "AXISBANK",
+    "axis": "AXISBANK",
     "एक्सिस": "AXISBANK",
+    "mahindra & mahindra": "M&M",
+    "mahindra and mahindra": "M&M",
     "mahindra": "M&M",
     "m&m": "M&M",
     "महिंद्रा": "M&M",
+    "nestle india": "NESTLEIND",
     "nestle": "NESTLEIND",
     "नेस्ले": "NESTLEIND",
     "hindustan unilever": "HINDUNILVR",
@@ -164,7 +195,7 @@ COMPANY_ALIASES = {
     "jsw steel": "JSWSTEEL",
     "जेएसडब्ल्यू": "JSWSTEEL",
     "indigo": "INDIGO",
-    "interglobe": "INDIGO",
+    "interglobe aviation": "INDIGO",
     "इंडिगो": "INDIGO",
     "zomato": "ZOMATO",
     "ज़ोमाटो": "ZOMATO",
@@ -173,7 +204,142 @@ COMPANY_ALIASES = {
     "स्वीगी": "SWIGGY",
     "bpcl": "BPCL",
     "ioc": "IOC",
+    "hindustan aeronautics": "HAL",
+    "hal stock": "HAL",
+    "hal share": "HAL",
+    "hal": "HAL",
+    "हिंदुस्तान एयरोनॉटिक्स": "HAL",
+    "bharat electronics": "BEL",
+    "bel stock": "BEL",
+    "bel share": "BEL",
+    "bel": "BEL",
+    "भारत इलेक्ट्रॉनिक्स": "BEL",
+    "bharat heavy electricals": "BHEL",
+    "bhel": "BHEL",
+    "भेल": "BHEL",
+    "irctc": "IRCTC",
+    "आईआरसीटीसी": "IRCTC",
+    "trent": "TRENT",
+    "ट्रेंट": "TRENT",
+    "vedl": "VEDL",
+    "vedanta": "VEDL",
+    "वेदांता": "VEDL",
+    "dlf": "DLF",
+    "डीएलएफ": "DLF",
+    "jio finance": "JIOFIN",
+    "jiofin": "JIOFIN",
+    "जियो फाइनेंस": "JIOFIN",
+    "varun beverages": "VARUNBEV",
+    "vbl": "VARUNBEV",
+    "वरुण बेवरेजेस": "VARUNBEV",
+    "pidilite industries": "PIDILITIND",
+    "pidilite": "PIDILITIND",
+    "पिडिलाइट": "PIDILITIND",
+    "apollo hospitals": "APOLLOHOSP",
+    "apollo": "APOLLOHOSP",
+    "अपोलो": "APOLLOHOSP",
+    "suzlon": "SUZLON",
+    "सुजलॉन": "SUZLON",
+    "one97 communications": "PAYTM",
+    "one97": "PAYTM",
+    "one 97": "PAYTM",
+    "paytm": "PAYTM",
+    "पेटीएम": "PAYTM",
+    "yes bank": "YESBANK",
+    "यस बैंक": "YESBANK",
+    "punjab national bank": "PNB",
+    "pnb": "PNB",
+    "पीएनबी": "PNB",
+    "bank of baroda": "BANKBARODA",
+    "bob": "BANKBARODA",
+    "eicher motors": "EICHERMOT",
+    "eicher": "EICHERMOT",
+    "hero motocorp": "HEROMOTOCO",
+    "hero": "HEROMOTOCO",
 }
+
+def normalize_spoken_query(query: str) -> str:
+    """Normalizes acronyms with dots, spaces, and phonetic quirks from speech recognition."""
+    q = query
+    # Normalize acronyms with dots: "H.D.F.C." -> "HDFC", "T.C.S." -> "TCS"
+    q = re.sub(r'\b([a-zA-Z])\s*\.\s*([a-zA-Z])\s*\.\s*([a-zA-Z])\s*\.\s*([a-zA-Z])\b', r'\1\2\3\4', q)
+    q = re.sub(r'\b([a-zA-Z])\s*\.\s*([a-zA-Z])\s*\.\s*([a-zA-Z])\b', r'\1\2\3', q)
+    q = re.sub(r'\b([a-zA-Z])\s*\.\s*([a-zA-Z])\b', r'\1\2', q)
+    # Acronyms with spaces like "H D F C" -> "HDFCBANK", "T C S" -> "TCS", "S B I" -> "SBIN"
+    q = re.sub(r'\bH\s+D\s+F\s+C\b', 'HDFCBANK', q, flags=re.IGNORECASE)
+    q = re.sub(r'\bT\s+C\s+S\b', 'TCS', q, flags=re.IGNORECASE)
+    q = re.sub(r'\bS\s+B\s+I\b', 'SBIN', q, flags=re.IGNORECASE)
+    q = re.sub(r'\bI\s+C\s+I\s+C\s+I\b', 'ICICIBANK', q, flags=re.IGNORECASE)
+    q = re.sub(r'\bI\s+T\s+C\b', 'ITC', q, flags=re.IGNORECASE)
+    # "l and t", "l & t" -> "l&t"
+    q = re.sub(r'\bl\s*(?:and|&|\+)\s*t\b', 'l&t', q, flags=re.IGNORECASE)
+    q = re.sub(r'\bm\s*(?:and|&|\+)\s*m\b', 'm&m', q, flags=re.IGNORECASE)
+    return q
+
+def extract_simulation_parameters(query: str) -> Dict[str, Any]:
+    """Dynamically parses investment amount and duration/start-date from voice queries (no hardcoding)."""
+    q = query.lower()
+    amount = 100000.0
+    lakh_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:lakh|lac|लाख)", q)
+    if lakh_match:
+        amount = float(lakh_match.group(1)) * 100000.0
+    elif any(w in q for w in ["ek lakh", "1 lakh", "एक लाख"]):
+        amount = 100000.0
+    elif any(w in q for w in ["do lakh", "2 lakh", "दो लाख"]):
+        amount = 200000.0
+    elif any(w in q for w in ["paanch lakh", "5 lakh", "पांच लाख"]):
+        amount = 500000.0
+    elif any(w in q for w in ["das lakh", "10 lakh", "दस लाख"]):
+        amount = 1000000.0
+    else:
+        crore_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:cr|crore|करोड़)", q)
+        if crore_match:
+            amount = float(crore_match.group(1)) * 10000000.0
+        else:
+            hazaar_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:k|hazaar|hazar|thousand|हज़ार)", q)
+            if hazaar_match:
+                amount = float(hazaar_match.group(1)) * 1000.0
+            else:
+                num_match = re.search(r"\b(\d{4,9})\b", q)
+                if num_match:
+                    amount = float(num_match.group(1))
+
+    from datetime import date, timedelta
+    today = date.today()
+    days_back = 30
+    if any(w in q for w in ["5 saal", "5 year", "5 years", "five years", "5 साल"]):
+        days_back = 1825
+    elif any(w in q for w in ["3 saal", "3 year", "3 years", "three years", "3 साल"]):
+        days_back = 1095
+    elif any(w in q for w in ["2 saal", "2 year", "2 years", "two years", "2 साल"]):
+        days_back = 730
+    elif any(w in q for w in ["1 saal", "1 year", "one year", "ek saal", "1 साल", "एक साल", "year ago", "1 yr"]):
+        days_back = 365
+    elif any(w in q for w in ["6 mahine", "6 month", "6 months", "six months", "6 महीने"]):
+        days_back = 180
+    elif any(w in q for w in ["3 mahine", "3 month", "3 months", "three months", "3 महीने"]):
+        days_back = 90
+    elif any(w in q for w in ["1 mahina", "1 month", "one month", "ek mahina", "1 महीना", "month ago"]):
+        days_back = 30
+    else:
+        custom_yr = re.search(r"(\d+)\s*(?:saal|year|years|साल)", q)
+        if custom_yr:
+            days_back = int(custom_yr.group(1)) * 365
+        else:
+            custom_mo = re.search(r"(\d+)\s*(?:mahine|month|months|महीने)", q)
+            if custom_mo:
+                days_back = int(custom_mo.group(1)) * 30
+
+    start_dt = today - timedelta(days=days_back)
+    end_dt = today
+    inv_type = "sip" if any(w in q for w in ["sip", "monthly", "har mahine", "हर महीने"]) else "lumpsum"
+    return {
+        "amount": amount,
+        "start_date": start_dt.strftime("%Y-%m-%d"),
+        "end_date": end_dt.strftime("%Y-%m-%d"),
+        "investment_type": inv_type,
+        "days_back": days_back
+    }
 
 STOCK_CORE_THESES = {
     "RELIANCE": {
@@ -242,34 +408,103 @@ STOCK_CORE_THESES = {
     }
 }
 
-def resolve_target_symbol(query: str) -> Optional[str]:
-    q = query.lower()
-    for alias, sym in sorted(COMPANY_ALIASES.items(), key=lambda x: len(x[0]), reverse=True):
-        if alias in q:
-            return sym
-    return None
+PREFIX_NEGATION_REGEX = re.compile(
+    r"\b(?:not|don\x27t|dont|except|excluding|other\s+than|without|skip|never)\s*(?:show|open|display|load|batao|dekhna)?\s*$",
+    re.IGNORECASE
+)
 
-def resolve_all_symbols(query: str) -> List[str]:
-    """
-    Extracts all distinct company symbols mentioned in the query in order of their appearance,
-    taking care of multi-word alias precedence (e.g. 'tata motors' before 'tata').
-    """
-    q = query.lower()
-    matches = []
+POSTFIX_NEGATION_REGEX = re.compile(
+    r"^\s*(?:ko|ka|ki|ke)?\s*(?:nahi|nahin|mat|mat\s+dikhao|mat\s+dekho|chhodkar|chhod\s+ke|chhod\s+kar|ke\s+alawa|bina|hatao|ko\s+hatao|chodo|chhod\s+do|chhod|nahi\s+dekhna|nahi\s+chahiye)\b",
+    re.IGNORECASE
+)
+
+def resolve_all_symbols_with_spans(query: str):
+    norm_q = normalize_spoken_query(query)
+    q = norm_q.lower()
+    is_market_health = bool(re.search(r"\b(?:market\s+ka\s+h[a]*l|kya\s+h[a]*l|h[a]*l\s+kya|h[a]*l\s*chal|haal\s+kya)\b", q))
     matched_spans = []
+    matches = []
     for alias, sym in sorted(COMPANY_ALIASES.items(), key=lambda x: len(x[0]), reverse=True):
+        if sym == "HAL" and alias == "hal" and is_market_health:
+            continue
         pattern = r"(?:\b|^)" + re.escape(alias) + r"(?:\b|$)"
         for m in re.finditer(pattern, q):
             start, end = m.span()
             if not any(max(start, s) < min(end, e) for s, e in matched_spans):
                 matched_spans.append((start, end))
-                matches.append((start, sym))
+                matches.append((start, end, sym))
     matches.sort(key=lambda x: x[0])
+    return q, matches
+
+def resolve_target_symbol(query: str) -> Optional[str]:
+    """
+    Resolves explicit company ticker with negation awareness ('Reliance nahi, TCS dikhao' -> TCS),
+    strict word boundary matching, and abbreviation safety.
+    """
+    q, matches = resolve_all_symbols_with_spans(query)
+    if matches:
+        if len(matches) == 1:
+            s, e, sym = matches[0]
+            prefix = q[:s]
+            suffix = q[e:]
+            if PREFIX_NEGATION_REGEX.search(prefix) or POSTFIX_NEGATION_REGEX.search(suffix):
+                return None
+            return sym
+
+        valid_symbols = []
+        for s, e, sym in matches:
+            prefix = q[max(0, s - 30):s]
+            suffix = q[e:min(len(q), e + 30)]
+            is_negated = bool(PREFIX_NEGATION_REGEX.search(prefix) or POSTFIX_NEGATION_REGEX.search(suffix))
+            if not is_negated:
+                valid_symbols.append(sym)
+
+        if valid_symbols:
+            return valid_symbols[0]
+        return None
+
+    # Uppercase ticker fallback
+    try:
+        from services.market_data_service import SYMBOL_TO_YAHOO
+        tokens = re.findall(r"[A-Za-z0-9]+", query.upper())
+        for tok in tokens:
+            if tok in SYMBOL_TO_YAHOO:
+                return tok
+    except Exception:
+        pass
+    return None
+
+def resolve_all_symbols(query: str) -> List[str]:
+    """
+    Extracts all distinct company symbols in order of appearance.
+    """
+    q, matches = resolve_all_symbols_with_spans(query)
     deduped = []
-    for _, s in matches:
-        if s not in deduped:
-            deduped.append(s)
+    for _, _, sym in matches:
+        if sym not in deduped:
+            deduped.append(sym)
     return deduped
+
+def extract_symbols_from_history(history: Optional[List[Dict[str, Any]]], max_items: int = 5) -> List[str]:
+    """
+    Extracts stock symbols discussed in recent conversation turns for multi-turn pronoun memory.
+    """
+    if not history or not isinstance(history, list):
+        return []
+    found_symbols = []
+    for msg in reversed(history[-10:]):
+        text = msg.get("text") or msg.get("message") or msg.get("reply") or ""
+        if not text:
+            continue
+        syms = resolve_all_symbols(text)
+        for s in syms:
+            if s not in found_symbols:
+                found_symbols.append(s)
+            if len(found_symbols) >= 2:
+                break
+        if len(found_symbols) >= 2:
+            break
+    return list(reversed(found_symbols))
 
 async def transcribe_audio_bytes(audio_bytes: bytes, content_type: str = "audio/webm", language: str = "en") -> str:
     if not settings.DEEPGRAM_API_KEY:
@@ -309,6 +544,9 @@ async def generate_autonomous_agent_response(
 
     # 1. Resolve target symbol: Priority: Explicit in query > context_ticker > Global session state > RELIANCE
     explicit_symbol = resolve_target_symbol(q_lower)
+    is_tata_generic = bool(re.search(r"\b(tata|टाटा)\b", q_lower)) and not any(k in q_lower for k in ["motor", "motors", "steel", "power", "tcs", "consultancy", "consumer", "elxsi", "tech", "chem", "comm"])
+    is_adani_generic = bool(re.search(r"\b(adani|अडानी|अदानी)\b", q_lower)) and not any(k in q_lower for k in ["port", "ports", "green", "power", "gas", "total", "wilmar", "enterprises", "ent"])
+
     if explicit_symbol:
         detected_symbol = explicit_symbol
         GLOBAL_SESSION_STATE["active_symbol"] = explicit_symbol
@@ -363,20 +601,159 @@ async def generate_autonomous_agent_response(
         "hello", "hi", "hey", "नमस्ते", "मार्केटपल्स", "yes", "ok", "okay", "haan", "bol",
         "how can i help you", "how can i help", "yes how can i help you", "yes how can i help",
         "how can i help you today", "madad", "help", "who are you", "start", "opening",
-        "marketmind", "marketmind ai", "hey marketmind", "alex copilot"
+        "marketmind", "marketmind ai", "hey marketmind", "alex copilot", "who is alex", "tum kaun ho"
     ]
     if q_lower in wake_triggers or any(q_lower == w for w in wake_triggers):
-        if is_hindi:
-            reply_text = "MarketMind AI में आपका स्वागत है। मैं एलेक्स हूँ, आपका फाइनेंशियल कोपायलट। आज मैं आपके मार्केट विश्लेषण में कैसे सहायता कर सकता हूँ?"
-        elif is_hinglish:
-            reply_text = "MarketMind AI me aapka swagat hai. Main Alex hoon, aapka financial copilot. Aaj aapke market analysis me kaise assist kar sakta hoon?"
+        is_identity_query = any(w in q_lower for w in ["who are you", "who is alex", "tum kaun ho", "kaun ho"])
+        if is_identity_query:
+            if is_hindi:
+                reply_text = "मैं एलेक्स हूँ, आपका मार्केटमाइंड वित्तीय कोपायलट। मैं संस्थागत ऑर्डर फ्लो, जोखिम मेट्रिक्स और पोर्टफोलियो सिमुलेशन का विश्लेषण करता हूँ।"
+            elif is_hinglish:
+                reply_text = "Main Alex hoon, aapka MarketMind financial copilot. Main institutional order flow, risk metrics aur macro simulations analyze karta hoon."
+            else:
+                reply_text = "I am Alex, your MarketMind financial copilot. I analyze institutional order flow, risk metrics, macro dominoes, and trade simulations."
         else:
-            reply_text = "Welcome to MarketMind AI. I am Alex, your financial copilot. How can I assist with your market analysis today?"
+            if is_hindi:
+                reply_text = "हाँजी, मैं सुन रहा हूँ। बताइए, आज किस शेयर या सेक्टर का विश्लेषण करना है?"
+            elif is_hinglish:
+                reply_text = "Haanji! Boliye, main sun raha hoon. Kis stock ya sector ka analysis karna hai?"
+            else:
+                reply_text = "Yes! I'm here. Which stock, sector, or market setup would you like to analyze?"
         
         return {
             "reply": reply_text,
             "action": None,
             "detected_symbol": detected_symbol,
+            "language": language
+        }
+
+    # =========================================================================
+    # 0A. NEGATION SKIP CONFIRMATION ("Mujhe Reliance nahi dekhna")
+    # =========================================================================
+    _, all_spanned_matches = resolve_all_symbols_with_spans(q_lower)
+    if all_spanned_matches and explicit_symbol is None:
+        negated_syms = []
+        for s, e, sym in all_spanned_matches:
+            prefix = q_lower[max(0, s - 30):s]
+            suffix = q_lower[e:min(len(q_lower), e + 30)]
+            if PREFIX_NEGATION_REGEX.search(prefix) or POSTFIX_NEGATION_REGEX.search(suffix):
+                negated_syms.append(sym)
+        if negated_syms:
+            neg_sym = negated_syms[0]
+            c_neg = fetch_live_stock_data(neg_sym) or get_company_by_symbol(neg_sym) or {"name": neg_sym}
+            if is_hindi:
+                reply_text = f"समझ गया, {c_neg.get('name', neg_sym)} को छोड़ रहे हैं। आप किस दूसरे स्टॉक या सेक्टर का विश्लेषण करना चाहेंगे?"
+            elif is_hinglish:
+                reply_text = f"Samajh gaya, {c_neg.get('name', neg_sym)} skip kar rahe hain. Aap kis doosre stock ya sector ko dekhna chahenge?"
+            else:
+                reply_text = f"Understood, skipping {c_neg.get('name', neg_sym)}. Which other stock or sector would you like to analyze instead?"
+            return {
+                "reply": reply_text,
+                "action": None,
+                "detected_symbol": detected_symbol,
+                "language": language
+            }
+
+    # =========================================================================
+    # 0B. OFF-TOPIC PERSONA BOUNDARY (Cricket, Weather, Jokes, Movies, Recipes)
+    # =========================================================================
+    OFF_TOPIC_KEYWORDS = [
+        "cricket", "match", "world cup", "ipl", "football", "messi", "ronaldo", "virat", "kohli", "rohit sharma",
+        "dhoni", "sports", "score", "batsman", "bowler", "wicket", "stadium",
+        "weather", "mausam", "rain", "barish", "temperature",
+        "movie", "cinema", "film", "bollywood", "hollywood", "actor", "actress", "song", "gaana", "gana", "music",
+        "joke", "chutkula", "tell me a joke",
+        "recipe", "khana", "biryani", "cake", "cook", "cooking",
+        "poem", "poetry", "shayari", "shairi",
+        "dating", "girlfriend", "boyfriend"
+    ]
+    is_off_topic = (
+        any(re.search(rf"\b{re.escape(k)}\b", q_lower) for k in OFF_TOPIC_KEYWORDS) and
+        not any(f in q_lower for f in ["stock", "share", "market", "portfolio", "nifty", "sensex", "macro", "crude", "oil", "inflation", "domino", "thesis"])
+    )
+    if is_off_topic:
+        if is_hindi:
+            reply_text = "मैं मार्केटमाइंड एआई पर आपका वित्तीय कोपायलट हूँ। मैं केवल शेयर बाजार, पोर्टफोलियो और व्यापक आर्थिक विश्लेषण में मदद कर सकता हूँ। कृपया किसी स्टॉक, सेक्टर या बाजार परिदृश्य के बारे में पूछें।"
+        elif is_hinglish:
+            reply_text = "Main MarketMind AI par aapka dedicated financial copilot hoon. Main sirf stock market analysis, macro risk aur portfolio simulations me assist kar sakta hoon. Aap kisi bhi stock, sector ya market setup ke baare me pooch sakte hain."
+        else:
+            reply_text = "I am Alex, your dedicated financial copilot on MarketMind AI. I specialize exclusively in stock market intelligence, macro risk analysis, and portfolio simulations. Please ask about any Indian stock, sector, or market scenario!"
+        return {
+            "reply": reply_text,
+            "action": None,
+            "detected_symbol": detected_symbol,
+            "language": language
+        }
+
+    # =========================================================================
+    # 0C. FINANCIAL PRUDENCE & GUARANTEE GUARDRAIL ("Paisa double", "Guarantee do")
+    # =========================================================================
+    is_guarantee_or_loan = (
+        any(re.search(rf"\b{re.escape(k)}\b", q_lower) for k in [
+            "guarantee", "guaranteed", "pakka", "sure shot", "100%", "paisa double", "double kab hoga", "double hoga",
+            "loan leke", "karza leke", "karz leke", "borrow money"
+        ]) and
+        any(w in q_lower for w in ["return", "returns", "profit", "double", "trading", "trade", "f&o", "option", "share", "stock", "kal", "badhega", "hoga", "do", "kya", "invest"])
+    )
+    if is_guarantee_or_loan:
+        if is_hindi:
+            reply_text = "शेयर बाजार में 100% गारंटी या निश्चित रिटर्न जैसा कुछ नहीं होता। मार्केटमाइंड केवल सांख्यिकीय संभावनाओं और सख्त इनवैलिडेशन स्टॉप-लॉस पर काम करता है। कभी भी कर्ज लेकर ट्रेडिंग न करें और रिस्क मैनेजमेंट का पालन करें।"
+        elif is_hinglish:
+            reply_text = "Stock market me koi 100% guarantee ya assured double returns nahi hote. MarketMind strictly probabilistic setups aur structural invalidation par kaam karta hai. Kabhi bhi loan leke trading mat karein aur hamesha stop loss maintain karein."
+        else:
+            reply_text = "In equity markets, there are no 100% guarantees or assured double returns. MarketMind operates strictly on probabilistic quant setups and structural invalidation floors. Never trade using borrowed capital, and always honor your stop loss."
+        return {
+            "reply": reply_text,
+            "action": None,
+            "detected_symbol": detected_symbol,
+            "language": language
+        }
+
+    # =========================================================================
+    # 0D. GENERAL BUY RECOMMENDATIONS / TOP PICKS INTENT ("Which stock to buy tomorrow")
+    # =========================================================================
+    is_recommendation_query = (
+        explicit_symbol is None and
+        (
+            any(phrase in q_lower for phrase in [
+                "which of will be buy", "which will be buy", "which stock to buy", "what to buy tomorrow",
+                "which stock should i buy", "what should i buy", "what to buy", "which to buy", "which share to buy",
+                "which shares to buy", "top buy", "top picks", "best stocks to buy", "best stock to buy",
+                "stock recommendations", "buy recommendations", "kaunsa share khareedein", "kaunsa stock khareedein",
+                "kaunsa share khareede", "kaunsa stock le", "kal kaunsa share", "kal kya khareedein",
+                "kal ke liye best stock", "best shares for tomorrow", "top buy picks"
+            ]) or (
+                any(w in q_lower for w in ["which", "what", "kaunsa", "top", "best"]) and
+                any(w in q_lower for w in ["buy", "purchase", "khareed", "picks", "recommend"]) and
+                any(w in q_lower for w in ["tomorrow", "today", "now", "kal", "aaj", "stock", "stocks", "share", "shares"])
+            )
+        )
+    )
+    if is_recommendation_query:
+        from services.recommendations_service import get_ai_market_radar_recommendations
+        radar = get_ai_market_radar_recommendations()
+        all_recs = radar.get("recommendations", [])
+        buys = [r for r in all_recs if r.get("signal") in ["STRONG BUY", "ACCUMULATE ON DIP"]]
+        if not buys and all_recs:
+            buys = all_recs[:2]
+        p1 = buys[0] if len(buys) > 0 else {"name": "Bajaj Auto", "symbol": "BAJAJ-AUTO", "directional_probability_up": 58.6, "target_price": 12157.0}
+        p2 = buys[1] if len(buys) > 1 else {"name": "ICICI Bank", "symbol": "ICICIBANK", "directional_probability_up": 57.2, "target_price": 1435.0}
+
+        action_payload = {
+            "type": "NAVIGATE",
+            "target_page": "dashboard"
+        }
+        if is_hindi:
+            reply_text = f"हमारे संस्थागत क्वांटिटेटिव रडार के अनुसार, शीर्ष पिक्स {p1.get('name')} ({p1.get('directional_probability_up')}% अपवर्ड प्रोबेबिलिटी, टारगेट ₹{p1.get('target_price', 0):,.2f}) और {p2.get('name')} हैं। मैंने आपके डैशबोर्ड पर पूरा विवरण खोल दिया है।"
+        elif is_hinglish:
+            reply_text = f"Institutional quantitative radar ke mutabiq, kal ke liye top picks {p1.get('name')} ({p1.get('directional_probability_up')}% P-Up, target ₹{p1.get('target_price', 0):,.2f}) aur {p2.get('name')} hain jisme strong buyer absorption dikh rahi hai. Full conviction thesis Dashboard par check kar sakte hain."
+        else:
+            reply_text = f"Based on our institutional quantitative radar, the top picks for tomorrow are {p1.get('name')} with a {p1.get('directional_probability_up')}% upward probability (target ₹{p1.get('target_price', 0):,.2f}) and {p2.get('name')} with {p2.get('directional_probability_up')}% probability. I have opened the full conviction thesis on your Dashboard."
+
+        return {
+            "reply": reply_text,
+            "action": action_payload,
+            "detected_symbol": p1.get("symbol", detected_symbol),
             "language": language
         }
 
@@ -725,15 +1102,32 @@ async def generate_autonomous_agent_response(
         any(w in q_lower for w in ["dna", "dna fingerprint", "genetic", "fingerprint", "double helix", "रेजीम डीएनए", "डीएनए"]) or
         (
             len(resolve_all_symbols(q_lower)) >= 2 and
-            any(w in q_lower for w in ["compare", "vs", "versus", "against", "and", "with", "तुलना", "मुकाबला"]) and
+            any(w in q_lower for w in [
+                "compare", "vs", "versus", "against", "and", "with", "तुलना", "मुकाबला",
+                "aur", "ya", "behtar", "kisme", "dono me", "dono mein", "better", "choose",
+                "which one", "difference", "अंतर", "फर्क", "kaunsa", "kisme invest"
+            ]) and
             not any(w in q_lower for w in ["sector", "industry", "peer universe", "सेक्टर"])
+        ) or
+        (
+            any(w in q_lower for w in ["dono me se", "dono mein se", "dono me", "dono mein", "both of them", "which of the two", "compare both", "dono", "kaunsa behtar", "which is better"]) and
+            len(extract_symbols_from_history(history)) >= 2
         )
     ):
         dna_matched_syms = resolve_all_symbols(q_lower)
+        if len(dna_matched_syms) < 2 and any(w in q_lower for w in ["dono", "both", "in dono", "kaunsa behtar", "which is better", "compare them", "which one", "kisme invest", "kisme lagayein"]):
+            hist_syms = extract_symbols_from_history(history)
+            if len(hist_syms) >= 2:
+                dna_matched_syms = hist_syms[-2:]
+
         is_twin_query = any(w in q_lower for w in ["twin", "behavioral twin", "genetic twin", "twins", "closest twin", "ट्विन"])
         is_two_stock_compare = (
             len(dna_matched_syms) >= 2 and
-            any(w in q_lower for w in ["compare", "vs", "versus", "against", "and", "with", "तुलना", "मुकाबला"]) and
+            any(w in q_lower for w in [
+                "compare", "vs", "versus", "against", "and", "with", "तुलना", "मुकाबला",
+                "aur", "ya", "behtar", "kisme", "dono me", "dono mein", "better", "choose",
+                "which one", "difference", "अंतर", "फर्क", "kaunsa", "kisme invest", "dono"
+            ]) and
             not any(w in q_lower for w in ["sector", "industry", "peer universe", "सेक्टर"])
         )
 
@@ -1127,13 +1521,16 @@ INSTRUCTIONS:
     # =========================================================================
     elif any(w in q_lower for w in [
         "candlestick", "candle", "pattern", "hammer", "doji", "engulfing", "rejection",
+        "chart", "charts", "technical chart", "technicals", "graph", "candle chart",
         "chart intelligence", "chart copilot", "कैंडल", "कैंडलस्टिक", "पैटर्न", "कैंडल पैटर्न",
-        "support resistance", "breakout", "fake breakout", "bull trap", "outcome probability",
-        "probabilistic outlook", "counterfactual", "today's candle", "todays candle"
+        "चार्ट", "सपोर्ट", "रेजिस्टेंस", "support resistance", "breakout", "fake breakout",
+        "bull trap", "outcome probability", "probabilistic outlook", "counterfactual",
+        "today's candle", "todays candle"
     ]):
         from services.candlestick_intelligence_service import get_candlestick_intelligence
         c_intel = get_candlestick_intelligence(detected_symbol)
         
+        c_price = c_intel.get("price", comp.get("price", 1000.0))
         c_stance = c_intel.get("decision_stance", {}).get("stance", "WATCH")
         c_conf = c_intel.get("decision_stance", {}).get("stance_confidence", 72)
         pat_conf = c_intel.get("probabilistic_outlook", {}).get("pattern_confidence", 81)
@@ -1154,11 +1551,11 @@ INSTRUCTIONS:
         }
 
         if is_hindi:
-            reply_text = f"{comp['name']} में {pat_name} डिटेक्ट हुआ है {sup_str} के पास। पैटर्न मैच {pat_conf}% है, लेकिन आउटकम कॉन्फिडेंस {out_conf}% है। करंट रुख {c_stance} है। {upg_rule} होने पर रुख बेहतर होगा, और {inv_rule} होने पर इनवैलिडेट हो जाएगा।"
+            reply_text = f"{comp['name']} (CMP ₹{c_price:,.2f}) में {pat_name} डिटेक्ट हुआ है {sup_str} के पास। पैटर्न मैच {pat_conf}% है, लेकिन आउटकम कॉन्फिडेंस {out_conf}% है। करंट रुख {c_stance} है। {upg_rule} होने पर रुख बेहतर होगा, और {inv_rule} होने पर इनवैलिडेट हो जाएगा।"
         elif is_hinglish:
-            reply_text = f"{comp['name']} me {pat_name} observe hua hai near {sup_str}. Pattern Confidence {pat_conf}% hai, but empirical Outcome Confidence {out_conf}% hai. AI Stance {c_stance} ({c_conf}%). {upg_rule} par conviction upgrade hogi aur {inv_rule} par view invalid ho jayega."
+            reply_text = f"{comp['name']} (CMP ₹{c_price:,.2f}) me {pat_name} observe hua hai near {sup_str}. Pattern Confidence {pat_conf}% hai, but empirical Outcome Confidence {out_conf}% hai. AI Stance {c_stance} ({c_conf}%). {upg_rule} par conviction upgrade hogi aur {inv_rule} par view invalid ho jayega."
         else:
-            reply_text = f"Displaying Candlestick Intelligence for {comp['name']}. Detected {pat_name} near {sup_str}. Pattern Confidence is {pat_conf}% while Outcome Confidence is {out_conf}%. Current Stance is {c_stance} ({c_conf}%). Invalidation level is {inv_rule}."
+            reply_text = f"Displaying Candlestick Intelligence for {comp['name']} (CMP ₹{c_price:,.2f}). Detected {pat_name} near {sup_str}. Pattern Confidence is {pat_conf}% while Outcome Confidence is {out_conf}%. Current Stance is {c_stance} ({c_conf}%). Invalidation level is {inv_rule}."
 
     # =========================================================================
     # 2C. FINANCIAL NEWS & CATALYST IMPACT INTENT
@@ -1274,22 +1671,33 @@ INSTRUCTIONS:
             reply_text = "Decision Time Machine has been removed to prioritize core decisions. Opening Thesis Intelligence Engine."
 
     # =========================================================================
-    # 6. EXPLICIT SIMULATED TRADE EXECUTION ONLY (With digit or explicit command)
+    # 6. EXPLICIT SIMULATED TRADE EXECUTION ONLY (With safety checks & quantity indicators)
     # =========================================================================
     elif (
-        any(w in q_lower for w in ["simulate trade", "execute trade", "add to portfolio", "पोर्टफोलियो में ट्रेड"])
-        or (
-            any(w in q_lower for w in ["buy", "sell", "kharido", "becho", "खरीद", "बेच"])
-            and any(char.isdigit() for char in q_lower)
-            and not (set(re.findall(r'\b[a-zA-Z]+\b', q_lower)) & {"should", "kya", "karu", "chahiye", "upar", "niche", "ya", "or", "target", "advisable", "opinion", "recommend"})
+        # Check if query is an advisory/question query rather than an execution order
+        not bool(re.search(
+            r"\b(?:should|kya|karu|kare|karna|chahiye|upar|niche|ya|or|target|advisable|opinion|recommend|recommendation|safe|good|can|could|would|worth|sahi|theek|view|idea|suggestion|salah|soch|lagta|kaisa|level|stoploss|sl)\b",
+            q_lower
+        ))
+        # Differentiate limit price: "at 2800", "pe 2800", "@ 2800", "price 2800"
+        and not bool(re.search(r"\b(?:at|pe|@|price|bhav|rate)\s*\d+\b", q_lower))
+        and (
+            any(w in q_lower for w in [
+                "simulate trade", "execute trade", "add to portfolio", "पोर्टफोलियो में ट्रेड",
+                "place order", "buy order", "sell order", "trade execute"
+            ])
+            or (
+                any(w in q_lower for w in ["buy", "sell", "kharido", "becho", "खरीद", "बेच"])
+                and (
+                    bool(re.search(r"\b\d+\s*(?:shares?|stocks?|शेयर|qty|quantity)\b", q_lower))
+                    or any(w in q_lower for w in ["order", "execute", "simulate"])
+                )
+            )
         )
     ):
         side = "SELL" if any(w in q_lower for w in ["sell", "बेच", "becho"]) else "BUY"
-        shares = 20
-        for word in q_lower.split():
-            if word.isdigit():
-                shares = int(word)
-                break
+        explicit_share_match = re.search(r"\b(\d+)\s*(?:shares?|stocks?|शेयर|qty|quantity)\b", q_lower)
+        shares = int(explicit_share_match.group(1)) if explicit_share_match else 20
 
         trade_res = execute_trade(detected_symbol, shares, side)
         action_payload = {
@@ -1312,13 +1720,14 @@ INSTRUCTIONS:
             reply_text = f"Simulating {side} order of {shares} shares for {comp['name']} at ₹{comp['price']:,.2f}. Navigating to Portfolio Simulator."
 
     # =========================================================================
-    # 6B. PORTFOLIO PAGE & INVESTMENT SIMULATOR INTENT
+    # 6B. PORTFOLIO PAGE & INVESTMENT SIMULATOR INTENT (DYNAMIC PARAMETERS)
     # =========================================================================
     elif any(w in q_lower for w in [
         "portfolio", "portfoli", "holdings", "mera portfolio", "पोर्टफोलियो", 
         "होल्डिंग्स", "generate portfolio", "portfolio dikhao", "show portfolio",
         "simulator", "simulat", "सिम्युलेटर", "सिमुलेटर", "invest kiya hota", 
-        "lagaya hota", "1 lakh", "100000", "sip"
+        "lagaya hota", "1 lakh", "100000", "sip", "dale the", "dala hota",
+        "daale hote", "khareeda hota", "invested", "agar maine", "kya hota"
     ]):
         port_sum = get_portfolio_summary()
         nav_val = port_sum.get("nav", 1000000.0)
@@ -1344,17 +1753,20 @@ INSTRUCTIONS:
         is_sim_req = any(w in q_lower for w in [
             "simulator", "simulat", "सिम्युलेटर", "सिमुलेटर", "invest kiya hota", 
             "lagaya hota", "1 lakh", "100000", "sip", "what if", "lumpsum", 
-            "agar maine", "kya hota"
+            "agar maine", "kya hota", "dale the", "dala hota", "daale hote",
+            "khareeda hota", "invested"
         ])
 
         if is_sim_req:
             sim_sym = explicit_symbol or detected_symbol or "ADANIENT"
+            sim_params = extract_simulation_parameters(user_query)
+
             sim_res = simulate_investment(
                 symbol=sim_sym,
-                investment=100000.0,
-                start_date="2026-08-03",
-                end_date="2026-09-03",
-                investment_type="lumpsum",
+                investment=sim_params["amount"],
+                start_date=sim_params["start_date"],
+                end_date=sim_params["end_date"],
+                investment_type=sim_params["investment_type"],
                 benchmark="NIFTY 50"
             )
             detected_symbol = sim_res["symbol"]
@@ -1369,17 +1781,25 @@ INSTRUCTIONS:
                     "amount": sim_res["initial_investment"],
                     "start_date": sim_res["start_date"],
                     "end_date": sim_res["end_date"],
+                    "investment_type": sim_res["investment_type"],
                     "view_mode": "simulator",
                     "simulation": sim_res
                 }
             }
 
+            try:
+                from datetime import datetime
+                s_dt_obj = datetime.strptime(sim_res["start_date"], "%Y-%m-%d")
+                s_date_speech = s_dt_obj.strftime("%d %b %Y")
+            except Exception:
+                s_date_speech = sim_res["start_date"]
+
             if is_hindi:
-                reply_text = f"{sim_res['company']} में 3 अगस्त 2026 को ₹{sim_res['initial_investment']:,.0f} का निवेश आज ₹{sim_res['portfolio_value']:,.0f} होता ({sim_res['profit_loss']:+,.0f} या {sim_res['return_pct']:+.2f}%)। निफ्टी 50 का रिटर्न {sim_res['benchmark_return']:+.2f}% रहा, जिससे अल्फा {sim_res['alpha']:+.2f}% है।"
+                reply_text = f"{sim_res['company']} में {s_date_speech} को ₹{sim_res['initial_investment']:,.0f} का निवेश आज ₹{sim_res['portfolio_value']:,.0f} होता ({sim_res['profit_loss']:+,.0f} या {sim_res['return_pct']:+.2f}%)। निफ्टी 50 का रिटर्न {sim_res['benchmark_return']:+.2f}% रहा, जिससे अल्फा {sim_res['alpha']:+.2f}% है।"
             elif is_hinglish:
-                reply_text = f"{sim_res['company']} me 03 Aug ko ₹{sim_res['initial_investment']:,.0f} invest kiya hota to aaj value ₹{sim_res['portfolio_value']:,.0f} ({sim_res['return_pct']:+.2f}%) hoti. NIFTY 50 benchmark {sim_res['benchmark_return']:+.2f}% raha, jisse alpha {sim_res['alpha']:+.2f}% mila."
+                reply_text = f"{sim_res['company']} me {s_date_speech} ko ₹{sim_res['initial_investment']:,.0f} invest kiya hota to aaj value ₹{sim_res['portfolio_value']:,.0f} ({sim_res['return_pct']:+.2f}%) hoti. NIFTY 50 benchmark {sim_res['benchmark_return']:+.2f}% raha, jisse alpha {sim_res['alpha']:+.2f}% mila."
             else:
-                reply_text = f"In {sim_res['company']}, a ₹{sim_res['initial_investment']:,.0f} investment on 03 Aug would yield {sim_res['shares']} shares. Today's value is ₹{sim_res['portfolio_value']:,.0f} ({sim_res['profit_loss']:+,.0f} or {sim_res['return_pct']:+.2f}%). NIFTY 50 returned {sim_res['benchmark_return']:+.2f}%, with alpha of {sim_res['alpha']:+.2f}%."
+                reply_text = f"In {sim_res['company']}, a ₹{sim_res['initial_investment']:,.0f} investment on {s_date_speech} would yield {sim_res['shares']} shares. Today's value is ₹{sim_res['portfolio_value']:,.0f} ({sim_res['profit_loss']:+,.0f} or {sim_res['return_pct']:+.2f}%). NIFTY 50 returned {sim_res['benchmark_return']:+.2f}%, with alpha of {sim_res['alpha']:+.2f}%."
         elif specific_holding:
             sh_val = specific_holding.get("current_value", 0)
             sh_shares = specific_holding.get("shares", 0)
@@ -1426,6 +1846,56 @@ INSTRUCTIONS:
                 reply_text = f"Opening Portfolio Simulator. Current NAV is ₹{nav_val:,.2f} with an overall return of {pnl_pct_val:+,.1f}% across {h_count} holdings."
 
     # =========================================================================
+    # 7. BROAD MARKET & INDEX OVERVIEW INTENT (NIFTY / SENSEX / BREADTH)
+    # =========================================================================
+    elif (
+        not explicit_symbol and (
+            any(w in q_lower for w in [
+                "nifty", "sensex", "banknifty", "bank nifty", "market breadth", "overall market",
+                "market kaisa", "market update", "market overview", "market ka haal", "market hal",
+                "aaj market", "market view", "market direction", "market mood", "market me kya",
+                "bazaar ka haal", "bazaar kaisa", "bazar", "top gainer", "top loser", "top gainers",
+                "top losers", "overall breadth", "निफ्टी", "सेंसेक्स", "मार्केट का हाल", "बाजार"
+            ]) or (
+                "market" in q_lower and any(w in q_lower for w in ["kaisa", "kya", "update", "overview", "trend", "chal raha", "direction", "mood", "outlook"])
+            )
+        )
+    ):
+        from services.market_data_service import get_all_live_companies, get_market_session_info
+        all_comps = get_all_live_companies()
+        session_info = get_market_session_info()
+
+        advances = sum(1 for c in all_comps if "+" in str(c.get("change", "")))
+        declines = len(all_comps) - advances
+
+        sorted_by_change = sorted(
+            all_comps,
+            key=lambda x: float(str(x.get("change", "0%")).replace("+", "").replace("%", "") or 0),
+            reverse=True
+        )
+        top_gainer = sorted_by_change[0] if sorted_by_change else {"symbol": "TCS", "change": "+2.1%"}
+        top_loser = sorted_by_change[-1] if sorted_by_change else {"symbol": "INFY", "change": "-1.4%"}
+
+        action_payload = {
+            "type": "NAVIGATE",
+            "target_page": "dashboard",
+            "command": "SHOW_MARKET_OVERVIEW",
+            "params": {
+                "advances": advances,
+                "declines": declines,
+                "top_gainer": top_gainer.get("symbol"),
+                "top_loser": top_loser.get("symbol")
+            }
+        }
+
+        if is_hindi:
+            reply_text = f"भारतीय बाजार में आज {session_info.get('status_text', 'मार्केट सक्रिय')} है। कुल {len(all_comps)} ट्रैक्ड कंपनियों में से {advances} बढ़त पर और {declines} गिरावट पर हैं। टॉप गेनर {top_gainer.get('symbol')} ({top_gainer.get('change')}) है जबकि {top_loser.get('symbol')} ({top_loser.get('change')}) में दबाव देखा गया है।"
+        elif is_hinglish:
+            reply_text = f"Market session: {session_info.get('status_text', 'Active')}. Advance-Decline breadth me {advances} stocks advancing aur {declines} declining hain. Top gainer {top_gainer.get('symbol')} ({top_gainer.get('change')}) lead kar raha hai, jabki {top_loser.get('symbol')} ({top_loser.get('change')}) lag kar raha hai."
+        else:
+            reply_text = f"Market session reports {session_info.get('status_text', 'Active')}. Market breadth records {advances} advances versus {declines} declines across tracked institutional equities. Leading gainer is {top_gainer.get('symbol')} ({top_gainer.get('change')}), with {top_loser.get('symbol')} ({top_loser.get('change')}) trailing."
+
+    # =========================================================================
     # PRIMARY INTELLIGENCE ENGINE: GEMINI AI COPILOT REASONING (ZERO HARDCODING)
     # =========================================================================
     else:
@@ -1447,16 +1917,27 @@ INSTRUCTIONS:
             "levels", "outlook", "stance", "analysis", "analyze", "explain", "detail", "detailed", "summary",
             "bhav", "kimat", "teji", "mandi", "kharide", "beche", "kitna", "kya hai"
         ])
-        has_context_followup = any(w in q_lower for w in ["what", "how", "why", "when", "is it", "will it", "kya", "kyu", "kaise", "kab", "batao", "bataiye"]) and len(q_lower.split()) >= 2
+        STOP_FILLER_WORDS = set([
+            "what", "is", "the", "a", "an", "why", "did", "how", "to", "tell", "me", "about",
+            "can", "you", "will", "it", "kya", "hai", "kyu", "kaise", "batao", "bataiye", "aur",
+            "main", "niche", "upar", "se", "ko", "ki", "ka", "ke", "tha", "thi", "gaya"
+        ])
+        query_words = [w for w in re.findall(r"\b[a-zA-Z0-9\u0900-\u097F]+\b", q_lower)]
+        is_filler_only = len(query_words) <= 3 and all(w in STOP_FILLER_WORDS for w in query_words)
+        has_context_followup = (
+            not is_filler_only and
+            any(w in q_lower for w in ["what", "how", "why", "when", "is it", "will it", "kya", "kyu", "kaise", "kab", "batao", "bataiye"]) and
+            len(query_words) >= 2
+        )
 
         if not has_stock_mention and not has_market_intent and not has_context_followup:
-            # Query is ambiguous, incomplete, or random text (e.g. "tujhko", "asdf", random phrases)
+            # Query is ambiguous, incomplete, or random text (e.g. "Main Aur Niche", "what is the", "asdfgh")
             if is_hindi:
-                reply_text = "मुझे आपका प्रश्न पूरी तरह समझ नहीं आया। क्या आप स्पष्ट कर सकते हैं कि आप किस स्टॉक, सेक्टर या मार्केट मीट्रिक का विश्लेषण करना चाहते हैं? (जैसे: रिलायंस VWAP, टाटा मोटर्स Buy/Sell फैसला, या क्रूड 30% डोमिनो रिपल)"
+                reply_text = "माफ कीजिए, आपका सवाल समझ नहीं आया। कृपया स्पष्ट रूप से बताएं कि आप क्या देखना चाहते हैं?"
             elif is_hinglish:
-                reply_text = "Mujhe aapka question clear nahi hua. Kya aap clarify kar sakte hain ki aap kis stock, sector ya metric ko analyze karna chahte hain? (Jaise Reliance VWAP, Tata Motors Buy/Sell verdict, ya Crude 30% Domino Ripple)"
+                reply_text = "Aapka sawaal samajh nahi aaya. Kripya thoda saaf batayein ki aap kya dekhna chahte hain?"
             else:
-                reply_text = "Could you please clarify which stock, sector, or market metric you would like to analyze? For example, ask about Reliance VWAP, Tata Motors buy/sell verdict, or Crude Oil domino cascades."
+                reply_text = "I didn't quite catch that. Could you please specify what you'd like to check?"
             
             return {
                 "reply": reply_text,
@@ -1465,12 +1946,20 @@ INSTRUCTIONS:
                 "language": language
             }
 
-        thesis = STOCK_THESIS_REGISTRY.get(detected_symbol) or {}
-        up = thesis.get("upside_pct", 2.8)
-        dn = thesis.get("downside_pct", 1.0)
-        tgt_p = round(comp["price"] * (1 + up / 100), 2)
-        stp_p = round(comp["price"] * (1 - dn / 100), 2)
-        rr_ratio = round(up / max(dn, 0.1), 1)
+        from services.recommendations_service import get_stock_institutional_profile
+        quant_prof = get_stock_institutional_profile(detected_symbol)
+        p_up = quant_prof.get("directional_probability_up", 58.5)
+        hit_rate = quant_prof.get("historical_hit_rate", 56.2)
+        sample_sz = quant_prof.get("sample_size", 2500)
+        stance = quant_prof.get("stance", "MODERATELY BULLISH · 1 DAY")
+        inv_str = quant_prof.get("invalidation_str", f"₹{round(comp['price']*0.99, 2)}")
+        range_str = quant_prof.get("range_80_str", f"₹{round(comp['price']*0.985, 2)} – ₹{round(comp['price']*1.02, 2)}")
+
+        up = quant_prof.get("upside_pct", 1.8)
+        dn = quant_prof.get("downside_pct", 1.0)
+        tgt_p = quant_prof.get("target_price", round(comp["price"] * (1 + up / 100), 2))
+        stp_p = quant_prof.get("stop_loss", round(comp["price"] * (1 - dn / 100), 2))
+        rr_ratio = quant_prof.get("risk_reward", "1:1.8")
 
         action_payload = {
             "type": "QUANT_HIGHLIGHT",
@@ -1480,7 +1969,7 @@ INSTRUCTIONS:
                 "resistance": tgt_p,
                 "vwap": vwap_lvl,
                 "obi": obi_val,
-                "bias": f"{thesis.get('signal', 'STRONG BUY')} ({thesis.get('conviction', 95)}% Conviction)"
+                "bias": f"{stance} (P(Up) {p_up}%, Hit Rate {hit_rate}%)"
             }
         }
 
@@ -1516,18 +2005,20 @@ Speak with decisive institutional authority, mathematical precision, clarity, an
 
 LIVE DATA FOR {comp['name']} ({detected_symbol}):
 - Price: ₹{comp['price']:,.2f} ({comp.get('change', '+0.0%')}) | Sector: {comp.get('sector', 'Core Industry')}
+- Stance: {stance} | Directional Probability: {p_up}% (Empirical Hit Rate: {hit_rate}%, n={sample_sz})
 - 20D VWAP: ₹{vwap_lvl:,.2f} | 14D RSI: {rsi_val} | Pattern: {pattern_name}
 - Order Book Imbalance (OBI): {obi_val:+.2f} ({'Net Buyer Accumulation' if obi_val >= 0 else 'Seller Overhang'})
-- 95% Daily VaR: ₹{var_95_val:,.2f} | Support: ₹{stp_p:,.2f} | Target: ₹{tgt_p:,.2f} | R:R 1:{rr_ratio}
+- Expected 80% Range: {range_str} | Structural Invalidation: {inv_str}
+- Targets: Target ₹{tgt_p:,.2f} | Stop Floor ₹{stp_p:,.2f} | R:R {rr_ratio}
 - Quality: P/E {comp.get('pe_ratio', 24.5)}x | ROE {comp.get('roe', 16.5)}%
-- Stance: {thesis.get('signal', 'STRONG BUY')} with {thesis.get('conviction', 95)}% Conviction
 
 STRICT RULES:
 1. WORD LIMIT CONSTRAINT: Your answer MUST be {target_words} (2-3 concise, complete, easily understandable sentences).
 2. Only provide more detail if the client explicitly requests 'detailed' or 'explain in detail'.
-3. State the exact numbers directly (Price, VWAP, VaR, OBI, Support or Target).
-4. No markdown asterisks (never use '**').
-5. {lang_rule}"""
+3. State exact numbers directly (P(Up), Hit Rate, VWAP, Support or Invalidation level).
+4. NEVER cite 90%+ confidence.
+5. No markdown asterisks (never use '**').
+6. {lang_rule}"""
 
                 prompt_content = f"""Recent Chat History:\n{hist_context}\n\nClient Question: {user_query}\n\nDeliver an institutional answer in {target_words} for {comp['name']} ({detected_symbol}):"""
 
@@ -1545,26 +2036,20 @@ STRICT RULES:
 
         # Dynamic high-precision fallback computed from active stock telemetry if Gemini is offline/slow
         if not reply_text:
-            sig = thesis.get("signal", "STRONG BUY")
-            conv = thesis.get("conviction", 95)
-            cat = thesis.get("catalyst", "Institutional block buying above 20D VWAP")
-            exp = thesis.get("explanation", f"Active buyer accumulation observed for {comp['name']}.")
-            hft = thesis.get("hft_pattern", "⚡ Order Block Inflow")
-
             if any(w in q_lower for w in ["vwap", "var", "imbalance", "order book", "quant"]):
                 if is_hindi:
-                    reply_text = f"{comp['name']} का 20-दिन वीडब्ल्यूपी ₹{vwap_lvl:,.2f} और दैनिक 95% वीएआर ₹{var_95_val:,.2f} है। {obi_val:+.2f} ऑर्डर बुक इम्बैलेंस बायर्स की मजबूती दिखाता है, जिससे मॉडल का टारगेट ₹{tgt_p:,.2f} बना हुआ है।"
+                    reply_text = f"{comp['name']} का 20-दिन वीडब्ल्यूपी ₹{vwap_lvl:,.2f} और दैनिक 95% वीएआर ₹{var_95_val:,.2f} है। {obi_val:+.2f} ऑर्डर बुक इम्बैलेंस बायर्स की मजबूती दिखाता है, जिससे मॉडल का 1-डे पी(अप) {p_up}% बना हुआ है।"
                 elif is_hinglish:
-                    reply_text = f"{comp['name']} ka 20-day VWAP ₹{vwap_lvl:,.2f} aur 95% daily VaR ₹{var_95_val:,.2f} hai. Order book imbalance {obi_val:+.2f} steady institutional buyer absorption confirm karta hai, targeting ₹{tgt_p:,.2f}."
+                    reply_text = f"{comp['name']} ka 20-day VWAP ₹{vwap_lvl:,.2f} aur 95% daily VaR ₹{var_95_val:,.2f} hai. Order book imbalance {obi_val:+.2f} steady institutional buyer absorption confirm karta hai, with P(Up) {p_up}%."
                 else:
-                    reply_text = f"{comp['name']} trades at a 20-day VWAP of ₹{vwap_lvl:,.2f} with a 95% daily VaR of ₹{var_95_val:,.2f}. Order book imbalance stands at {obi_val:+.2f}, confirming institutional buy-side depth targeting ₹{tgt_p:,.2f}."
-            elif any(w in q_lower for w in ["target", "stop", "sl", "level", "floor", "resistance", "risk", "downside"]):
+                    reply_text = f"{comp['name']} trades at a 20-day VWAP of ₹{vwap_lvl:,.2f} with a 95% daily VaR of ₹{var_95_val:,.2f}. Order book imbalance stands at {obi_val:+.2f}, supporting {p_up}% directional probability."
+            elif any(w in q_lower for w in ["target", "stop", "sl", "level", "floor", "resistance", "risk", "downside", "invalidation"]):
                 if is_hindi:
-                    reply_text = f"{comp['name']} के लिए ₹{stp_p:,.2f} (-{dn}%) पर मजबूत संस्थागत सपोर्ट है और टारगेट रेजिस्टेंस ₹{tgt_p:,.2f} (+{up}%) पर है। 20-डे वीडब्ल्यूपी के साथ रिस्क-टू-रिवॉर्ड 1:{rr_ratio} सुरक्षित है।"
+                    reply_text = f"{comp['name']} के लिए संरचनात्मक इनवैलिडेशन फ्लोर {inv_str} पर है और 80% अपेक्षित रेंज {range_str} है। रिस्क-टू-रिवॉर्ड {rr_ratio} पर सुरक्षित है।"
                 elif is_hinglish:
-                    reply_text = f"{comp['name']} me primary support ₹{stp_p:,.2f} (-{dn}%) par solidly defended hai aur target resistance ₹{tgt_p:,.2f} (+{up}%) par anchored hai. 1:{rr_ratio} risk-to-reward ratio maintain hota hai."
+                    reply_text = f"{comp['name']} me structural invalidation floor {inv_str} par anchored hai aur expected 80% forecast range {range_str} hai. Risk-to-reward ratio {rr_ratio} maintain hota hai."
                 else:
-                    reply_text = f"For {comp['name']}, primary support is defended at ₹{stp_p:,.2f} (-{dn}%) with target resistance at ₹{tgt_p:,.2f} (+{up}%). Risk-to-reward is 1:{rr_ratio}, anchored above the 20-day VWAP."
+                    reply_text = f"For {comp['name']}, structural invalidation is anchored strictly at {inv_str} with an 80% forecast range of {range_str}. Risk-to-reward stands at {rr_ratio}."
             elif any(w in q_lower for w in ["valuation", "pe", "roe", "p/b", "fair value", "multiple"]):
                 pe_r = comp.get("pe_ratio", 24.5)
                 roe_r = comp.get("roe", 16.5)
@@ -1583,14 +2068,21 @@ STRICT RULES:
                     reply_text = f"{comp['name']} relative to sector peers maintains an industry-leading {comp.get('roe', 16.5)}% ROE and resilient operating margins, delivering disciplined capital compounding."
             else:
                 if is_hindi:
-                    reply_text = f"{comp['name']} में 20-दिन वीडब्ल्यूपी ₹{vwap_lvl:,.2f} के ऊपर मजबूत संस्थागत संचय जारी है। क्वांट मॉडल {conv}% विश्वास के साथ {sig} बनाए हुए है और सपोर्ट ₹{stp_p:,.2f} पर सुरक्षित है।"
+                    reply_text = f"{comp['name']} में 20-दिन वीडब्ल्यूपी ₹{vwap_lvl:,.2f} के ऊपर संस्थागत संचय जारी है। क्वांट मॉडल {p_up}% दिशात्मक संभावना (ऐतिहासिक हिट रेट {hit_rate}%) का अनुमान लगाता है with invalidation at {inv_str}."
                 elif is_hinglish:
-                    reply_text = f"{comp['name']} me 20-day VWAP ₹{vwap_lvl:,.2f} ke upar institutional buying active hai. Model {conv}% conviction ke saath {sig} maintain karta hai with support at ₹{stp_p:,.2f}."
+                    reply_text = f"{comp['name']} me 20-day VWAP ₹{vwap_lvl:,.2f} ke upar institutional buying active hai. Quant model {p_up}% directional probability ({hit_rate}% hit rate) maintain karta hai with invalidation floor at {inv_str}."
                 else:
-                    reply_text = f"For {comp['name']}, active institutional accumulation is sustained above 20-day VWAP ₹{vwap_lvl:,.2f}. Quantitative factor scoring confirms buy-side depth, underwriting a high-conviction {sig} stance targeting ₹{tgt_p:,.2f}."
+                    reply_text = f"For {comp['name']}, active institutional accumulation is sustained above 20-day VWAP ₹{vwap_lvl:,.2f}. Quantitative scoring indicates a calibrated {p_up}% upward probability ({hit_rate}% hit rate) with structural invalidation at {inv_str}."
 
-    # Strip markdown bold asterisks so no raw ** ever appears in chat bubbles
+    # Strip markdown bold asterisks and attach group disambiguation if needed
     if reply_text:
+        if is_tata_generic:
+            disambig = " (टाटा मोटर्स का प्राथमिक विश्लेषण; टीसीएस, टाटा स्टील या टाटा पावर के लिए नाम बताएं।)" if is_hindi else (" (Showing Tata Motors as flagship; specify TCS, Tata Steel or Tata Power if needed.)" if not is_hinglish else " (Tata Motors ka primary analysis; TCS, Tata Steel ya Tata Power ke liye specify karein.)")
+            reply_text += disambig
+        elif is_adani_generic:
+            disambig = " (अडानी एंटरप्राइजेज का प्राथमिक विश्लेषण; अडानी पोर्ट्स या ग्रीन के लिए नाम बताएं।)" if is_hindi else (" (Showing Adani Enterprises as flagship; specify Adani Ports or Green if needed.)" if not is_hinglish else " (Adani Enterprises ka primary analysis; Adani Ports ya Green ke liye specify karein.)")
+            reply_text += disambig
+
         reply_text = re.sub(r'\*\*(.*?)\*\*', r'\1', reply_text)
         reply_text = reply_text.replace("**", "")
 
