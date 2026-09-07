@@ -774,18 +774,15 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         silenceTimerRef.current = null;
       }
 
-      // Natural Conversational Speech Flow:
-      // If user is actively pronouncing words (hasInterim is true), keep accumulating transcript and do not submit.
-      if (hasInterim) {
-        return;
-      }
+      // Check for standalone wake word greeting (strip punctuation like "Hey, Alex!")
+      const cleanLower = cleanTranscript.toLowerCase().replace(/[.,!?;:]/g, "").trim();
+      const isStandaloneGreeting = ["hey alex", "hey alexa", "alex", "alexa", "hello", "hi", "hey", "नमस्ते"].includes(cleanLower);
 
-      // Wait until the user genuinely stops talking:
-      // - Standalone wake greeting: 350ms (responsive wake)
-      // - Full conversational queries: 1300ms of true silence after speech ends,
-      //   giving the user plenty of natural pause time without cutting their sentence in half.
-      const isStandaloneGreeting = ["hey alex", "hey alexa", "alex", "alexa", "hello", "hi", "hey"].includes(currentLower);
-      const vadDelay = isStandaloneGreeting ? 350 : 1300;
+      // Adaptive speech silence delay:
+      // - Standalone greeting ("Hey Alex"): 250ms (ultra-responsive wake)
+      // - If interim speech is in-flight: 1400ms (gives user continuous speaking time without cutting off)
+      // - When finalized: 1000ms of true silence
+      const vadDelay = isStandaloneGreeting ? 250 : (hasInterim ? 1400 : 1000);
 
       silenceTimerRef.current = setTimeout(() => {
         if (isMicMutedRef.current || isPlayingAudioRef.current) return;
@@ -794,13 +791,6 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
           submitQuery(finalCandidate, true);
         }
       }, vadDelay);
-    };
-
-    recognition.onspeechstart = () => {
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
-      }
     };
 
     recognition.onerror = (e) => {
