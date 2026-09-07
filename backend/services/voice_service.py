@@ -31,7 +31,7 @@ async def call_fast_gemini(
     system_instruction: Optional[str] = None,
     max_tokens: int = 100,
     temperature: float = 0.2,
-    timeout_secs: float = 2.2
+    timeout_secs: float = 3.5
 ) -> Optional[str]:
     if not gemini_client:
         return None
@@ -655,8 +655,17 @@ async def generate_autonomous_agent_response(
     try:
         candles_info = await asyncio.wait_for(
             asyncio.to_thread(get_stock_historical_candles, detected_symbol),
-            timeout=1.6
+            timeout=2.2
         )
+        if candles_info and candles_info.get("candles") and len(candles_info["candles"]) > 0:
+            live_candle_close = float(candles_info["candles"][-1]["close"])
+            if live_candle_close and live_candle_close > 0:
+                comp["price"] = live_candle_close
+                if len(candles_info["candles"]) >= 2:
+                    prev_candle_close = float(candles_info["candles"][-2]["close"])
+                    diff = round(live_candle_close - prev_candle_close, 2)
+                    diff_pct = round((diff / prev_candle_close) * 100, 2)
+                    comp["change"] = f"{'+' if diff >= 0 else ''}{diff_pct:.2f}%"
     except Exception:
         candles_info = {}
     rsi_val = candles_info.get("rsi") or comp.get("rsi") or 55.0
@@ -2203,7 +2212,7 @@ STRICT RULES:
                     system_instruction=system_inst,
                     max_tokens=max_tokens_val,
                     temperature=0.2,
-                    timeout_secs=2.2
+                    timeout_secs=4.0
                 )
                 if res_text:
                     reply_text = res_text
