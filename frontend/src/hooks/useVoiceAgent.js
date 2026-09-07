@@ -396,6 +396,51 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       return;
     }
 
+    // Instant zero-latency greeting check ("Hey Alex", "Hello", "Hi")
+    const wakeWords = ["hey alex", "hey alexa", "alex", "alexa", "hey marketmind", "marketmind", "hello", "hi", "hey", "नमस्ते"];
+    const isWake = wakeWords.includes(lower) || wakeWords.some(w => lower === w || lower.startsWith(w + " ") || lower.endsWith(" " + w));
+    if (isWake) {
+      setIsListening(false);
+      isListeningRef.current = false;
+      setLiveTranscript("");
+      transcriptRef.current = "";
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch (e) { }
+      }
+
+      const greetReply = languageRef.current === "hindi"
+        ? "हाँजी, मैं सुन रहा हूँ। बताइए, आज किस शेयर या सेटअप का विश्लेषण करना है?"
+        : "Yes, I'm listening! Which stock or setup would you like to analyze?";
+
+      const userMsg = {
+        id: `user-${Date.now()}`,
+        sender: "user",
+        text: cleanText,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        isVoice: isVoice,
+      };
+      const botMsg = {
+        id: `bot-${Date.now() + 1}`,
+        sender: "bot",
+        text: greetReply,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        isVoice: isVoice,
+      };
+      setMessages((prev) => [...prev, userMsg, botMsg]);
+
+      // Enable hands-free continuous loop if voice was used and not muted
+      if (isVoice && !isMicMutedRef.current) {
+        continuousModeRef.current = true;
+        setIsContinuousMode(true);
+      }
+
+      if (!isSpeakerMutedRef.current) {
+        speakText(greetReply, languageRef.current);
+      }
+      return;
+    }
+
     isSubmittingRef.current = true;
 
     if (silenceTimerRef.current) {
