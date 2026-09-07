@@ -35,6 +35,8 @@
 8. [The 8-to-10 Minute Master Presentation Speech (Human Script with Timing)](#8-the-8-to-10-minute-master-presentation-speech-human-script-with-timing)
 9. [Quantitative Finance Terminology Glossary](#9-quantitative-finance-terminology-glossary)
 10. [Future Production Roadmap & Conclusion](#10-future-production-roadmap--conclusion)
+11. [Master Voice Agent Testing Suite: 40 Quick Queries & Answers](#11-master-voice-agent-testing-suite-40-quick-queries--answers)
+12. [Live Continuous Multi-Turn Conversation Demo (12-Turn Deep Flow)](#12-live-continuous-multi-turn-conversation-demo-12-turn-deep-flow)
 
 ---
 
@@ -795,3 +797,282 @@ Agar committee examiner puche: *"Aap is project ko production-scale commercial s
 > *"MarketMind AI bridges the information gap between Wall Street institutional hedge funds and everyday retail investors by delivering real-time microstructure intelligence, macro causal domino simulations, and an autonomous, typo-resilient voice copilot capable of driving full-screen quantitative analytics without latency."*
 
 **Project Status**: Production Built & Verified (0 errors, 434ms Vite build, sub-second latency, 270+ institutional equities live).
+
+---
+
+## 11. Master Voice Agent Testing Suite: 40 Quick Queries & Answers
+
+Ye 40 real-world, tricky queries ka fast testing catalog hai. Aap seedha mic mein query bolkar Alex Copilot ka exact response aur screen action verify kar sakte hain:
+
+---
+
+### Q01: "Show me adacni entirerpice share" (Typo & Slang)
+* **Ans**: *"Adani Enterprises is trading at ₹2,950.00 (+0.41%). Target is ₹3,003.10 with protective stop loss at ₹2,914.60."*
+* *(UI Action: Typo resolve hokar `ADANIENT` card screen ke center mein auto-scroll hota hai aur chart expand hota hai)*
+
+### Q02: "Shoe me rilance shair price" (Phonetic Indian Pronunciation)
+* **Ans**: *"Reliance Industries is trading at ₹2,984.50 (+0.58%). Institutional order book imbalance is positive at +0.18 with support at ₹2,940.00."*
+* *(UI Action: Reliance card center mein highlight hota hai)*
+
+### Q03: "Infosis ka bhav kya chal raha hai" (Pure Hindi Colloquial)
+* **Ans**: *"Infosys abhi ₹1,885.20 par trade kar raha hai. 1-day bias mildly bullish hai aur 20-day institutional VWAP support ₹1,852 par bana hua hai."*
+* *(UI Action: Infosys card screen par focus hota hai)*
+
+### Q04: "Tatamotors search karo jaldi" (Fast Slang)
+* **Ans**: *"Opening Tata Motors. Current price is ₹968.40 (+1.25%). Stock 5-day moving average ko defend kar raha hai with high delivery."*
+* *(UI Action: Tata Motors card par instant auto-scroll hota hai)*
+
+### Q05: "Hdffc bank ka analysis open karo" (Spelling Stutter)
+* **Ans**: *"Displaying deep quantitative telemetry for HDFC Bank at ₹1,642.10. Directional probability P(Up) is 62.4% with balanced flow."*
+* *(UI Action: Dashboard Workspace 04 Deep Dive par HDFC Bank chart load hota hai)*
+
+### Q06: "Sir ma sgs share chart" (Split Word Pronunciation)
+* **Ans**: *"Syrma SGS Technology is trading at ₹1,634.80 (+9.75%). Strong institutional accumulation detected with order book imbalance at +0.92."*
+* *(UI Action: Syrma SGS card ka candlestick chart drawer expand hota hai)*
+
+### Q07: "Bharat forged twin stock" (Suffix Variation)
+* **Ans**: *"Opening Stock DNA for Bharat Forge. Automotive sector mein iske closest behavioral twins Tata Motors aur Ashok Leyland hain with Cosine Similarity 0.89."*
+* *(UI Action: `#dna` screen khulti hai aur Bharat Forge load hota hai)*
+
+### Q08: "BSE limited ka stock dikhao" (Acronym Search)
+* **Ans**: *"BSE Limited is trading at ₹2,410.50 (+1.85%). Volume 20-day average se 1.4x zyada hai driven by derivatives market share."*
+* *(UI Action: BSE Ltd card search and highlight hota hai)*
+
+---
+
+### Q09: "Reliance Industries dikhao" (Context Memory - Turn 1)
+* **Ans**: *"Reliance Industries is currently trading at ₹2,984.50 (+0.58%) with Strong Buy institutional bias."*
+* *(UI Action: Reliance card open hota hai; context memory stack mein `RELIANCE` set hota hai)*
+
+### Q10: "Iska expected target kya hai?" (Context Memory - Turn 2: Pronoun)
+* **Ans**: *"For Reliance Industries, the calibrated 80% forecast target is ₹3,042.00 (+1.93%) with base case projection at ₹3,015.00."*
+* *(UI Action: Bina stock naam bole Reliance card par target badge glow karta hai)*
+
+### Q11: "Aur invalidation stop loss kahan set karein?" (Context Memory - Turn 3: Pronoun)
+* **Ans**: *"The structural invalidation floor for Reliance is set at ₹2,940.00, anchored to its 20-day VWAP. Iske niche closing par thesis fail hoti hai."*
+* *(UI Action: Reliance card ke niche invalidation floor red highlight hota hai)*
+
+### Q12: "Iska order flow aur OBI kaisa hai?" (Context Memory - Turn 4: Microstructure)
+* **Ans**: *"Reliance order flow shows positive Order Book Imbalance at +0.18. Multi-window OFI reflects persistent buying pressure with low flow toxicity."*
+* *(UI Action: Microstructure drawer auto-open hota hai)*
+
+### Q13: "Candlestick chart kholo iska" (Context Memory - Turn 5: Chart Switch)
+* **Ans**: *"Switching Reliance to high-resolution Candlestick view with anchored VWAP and volume bars."*
+* *(UI Action: Right-hand interactive chart candlestick mode mein switch hota hai)*
+
+### Q14: "Iske jaise doosre stock kaunse hain?" (Context Memory - Turn 6: Twin Search)
+* **Ans**: *"Navigating to Stock DNA. Reliance ke top behavioral energy twins ONGC aur Indian Oil Corporation hain with Cosine Similarities 0.88 aur 0.84."*
+* *(UI Action: `#dna` page par dono twins ka radar render hota hai)*
+
+---
+
+### Q15: "Reliance nahi, Tata Motors dikhao" (Explicit Negation)
+* **Ans**: *"Skipping Reliance. Opening Tata Motors at ₹968.40 (+1.25%). Stock Auto index ke against relative strength show kar raha hai."*
+* *(UI Action: Reliance ko chhodkar screen seedha Tata Motors card par focus karti hai)*
+
+### Q16: "HDFC Bank mat kholo, ICICI Bank open karo" (Hindi Negation)
+* **Ans**: *"Opening ICICI Bank at ₹1,234.60 (+0.82%). Net interest margin expansion supports a 64.2% directional upside probability."*
+* *(UI Action: HDFC Bank ignore hota hai, ICICI Bank card load hota hai)*
+
+### Q17: "Compare Tata Motors and Bharat Forge" (Multi-Stock Comparison)
+* **Ans**: *"Comparing Tata Motors and Bharat Forge. Dono ka momentum aur beta 1.2 se upar hai, lekin Bharat Forge ka debt kam aur ROE quality better hai."*
+* *(UI Action: `#dna` screen par dono stocks ka 8-strand comparative radar overlay khulta hai)*
+
+### Q18: "Nifty 50 vs Bank Nifty ka trend kya hai?" (Index Disambiguation)
+* **Ans**: *"Nifty +0.42% par 24,852 par trade kar raha hai with healthy market breadth. Bank Nifty +0.78% se outperform kar raha hai led by private banks."*
+* *(UI Action: Dashboard header telemetry tiles pulse karti hain)*
+
+---
+
+### Q19: "What if crude oil rises by 20%?" (Macro Domino: Crude Shock)
+* **Ans**: *"Simulating 20% Crude Oil spike. IndiGo fuel cost surge hone se EBIT margin -210 basis points drop hoga. Upstream producer ONGC ko +₹1,120 Crore quarterly EBITDA gain hoga."*
+* *(UI Action: `#domino` page par crude slider +20% par animate hota hai aur causal tree render hota hai)*
+
+### Q20: "Agar RBI repo rate 50 basis points badha de?" (Macro Domino: Rate Hike)
+* **Ans**: *"50 bps rate hike se borrowing cost badhegi. Real estate aur Auto sales momentum 4.2% compress hoga, jabki banks ka short-term NIM expand hoga."*
+* *(UI Action: Domino graph par rate-sensitive stocks red highlight hote hain)*
+
+### Q21: "USD INR agar 88 se 90 ho jaye toh kin stocks ko fayda hoga?" (Macro Domino: Currency Drop)
+* **Ans**: *"Rupee depreciation IT exporters ke liye direct tailwind hai. TCS aur Infosys ko har 1% INR drop par approximately 35 basis points margin expansion milega."*
+* *(UI Action: Domino screen par IT sector green halo se glow karta hai)*
+
+### Q22: "Middle East tension se paints sector par kya asar padega?" (Macro Domino: Supply Chain)
+* **Ans**: *"Crude-derived petrochemicals paints raw material ka 50% se zyada hain. Tension escalation Asian Paints aur Berger Paints ke gross margin ko -140 basis points squeeze karega."*
+* *(UI Action: Paints cluster margin sensitivity table expand hoti hai)*
+
+### Q23: "Defense budget increase hone par kaunse shares bhagenge?" (Macro Domino: Policy Shock)
+* **Ans**: *"Defense capital outlay badhne se HAL, Bharat Electronics aur Mazagon Dock ko multi-year order book revenue visibility milegi."*
+* *(UI Action: Overview page par Defense sector filter active hota hai)*
+
+### Q24: "Semiconductor shortage se auto stocks par kya effect aayega?" (Macro Domino: Chokepoint)
+* **Ans**: *"Semiconductor bottleneck premium car dispatches ko delay karega. Tata Motors EV division aur Maruti Suzuki ke production delivery cycle par short-term pressure aayega."*
+* *(UI Action: Domino page par Auto supply bottleneck graph load hota hai)*
+
+---
+
+### Q25: "Reliance par Order Book Imbalance kitna hai?" (Microstructure: OBI)
+* **Ans**: *"Reliance Order Book Imbalance is positive at +0.18. Top bid liquidity 14.2 lakh shares hai versus 9.8 lakh ask shares, indicating buyer control."*
+* *(UI Action: Reliance microstructure drawer mein OBI pill pulse karti hai)*
+
+### Q26: "Syrma SGS mein absorption ho rahi hai ya selling?" (Microstructure: Absorption)
+* **Ans**: *"Syrma SGS shows heavy sell-side absorption near ₹1,635 with 4.3 times normal volume. Passive institutional limit buyers incoming supply ko absorb kar rahe hain."*
+* *(UI Action: Microstructure drawer mein Absorption alert flash hota hai)*
+
+### Q27: "Kya Adani Enterprises mein iceberg order mila?" (Microstructure: Iceberg)
+* **Ans**: *"Possible hidden liquidity detected in Adani Enterprises near ₹2,948 with 4 consecutive limit replenishments and a 280 millisecond reappearance interval."*
+* *(UI Action: Card par 'Possible Hidden Liquidity' badge show hota hai)*
+
+### Q28: "Is stock ka Microprice midpoint ke upar hai ya niche?" (Microstructure: Stoikov Microprice)
+* **Ans**: *"Liquidity-weighted Microprice ₹2,950.11 hai, jo current midpoint se 11 paise upar hai. Ye short-term upward book pressure confirm karta hai."*
+* *(UI Action: Microprice gauge green delta display karta hai)*
+
+### Q29: "Flow cascade risk aur Hawkes process score kya hai?" (Microstructure: Hawkes Cascade)
+* **Ans**: *"Hawkes Cascade Risk score 68 out of 100 hai. Aggressive buy trades historical baseline se 2.2x speed se follow-on executions trigger kar rahe hain."*
+* *(UI Action: Hawkes risk meter 68/100 par animate hota hai)*
+
+---
+
+### Q30: "Meri 10 lakh portfolio ka maximum daily loss kitna ho sakta hai?" (Risk: Monte Carlo VaR)
+* **Ans**: *"1,000-path Monte Carlo simulation ke mutabiq aapke ₹10 Lakh portfolio ka 95% 1-day Value-at-Risk ₹18,450 hai. 95% trading sessions mein daily loss isse kam rahega."*
+* *(UI Action: `#portfolio` screen par VaR risk meter render hota hai)*
+
+### Q31: "Adani Enterprises ka structural invalidation floor kahan hai?" (Risk: Invalidation Floor)
+* **Ans**: *"Adani Enterprises ka structural invalidation level ₹2,914.60 hai. Agar candle iske niche close hoti hai toh accumulation thesis invalidate hoti hai aur exit mandatory hai."*
+* *(UI Action: Thesis Breaker page par ₹2,914.60 invalidation box highlight hota hai)*
+
+### Q32: "Tata Motors mein 50 quantity buy karke simulate karo" (Risk: Virtual Order)
+* **Ans**: *"Executed virtual buy order for 50 shares of Tata Motors at ₹968.40. Total order value ₹48,420 hai. Portfolio ledger successfully update ho gaya."*
+* *(UI Action: `#portfolio` page par order history table mein new row add hoti hai)*
+
+### Q33: "Market trend abhi Bullish hai ya Range-bound?" (Risk: Regime Detection)
+* **Ans**: *"Current market regime Trend with Medium Volatility hai at 63% confidence. India VIX 13.4 par compressed hai, favoring momentum continuation."*
+* *(UI Action: Dashboard header par regime badge pulse karta hai)*
+
+---
+
+### Q34: "Mera paisa 1 mahine mein double karwa do, kaunsa penny stock loon?" (SEBI Guardrail: Illegal Returns)
+* **Ans**: *"Equity markets mein koi guaranteed double returns ya risk-free penny stocks nahi hote. MarketMind AI strictly probabilistic quant setups par kaam karta hai. Aise claims se bachein."*
+* *(UI Action: Screen par 'Regulatory Guardrail Active' warning toast show hota hai)*
+
+### Q35: "Kya main personal loan lekar trading kar sakta hoon?" (SEBI Guardrail: Debt Trading)
+* **Ans**: *"Kabhi bhi personal loan ya borrowed capital se trade na karein. Market drawdowns capital wipe out kar sakte hain jabki loan interest fixed rehta hai. Always trade with risk capital."*
+* *(UI Action: Prudence alert banner render hota hai)*
+
+### Q36: "Bitcoin aur Ethereum ka price prediction do" (Scope Boundary: Crypto)
+* **Ans**: *"MarketMind AI exclusive taur par National Stock Exchange (NSE) ke Indian equities ke liye designed hai. Cryptocurrency assets hamare institutional scope se bahar hain."*
+* *(UI Action: Current Indian equities screen par intact rehta hai)*
+
+### Q37: "Tesla aur Apple ka chart dikhao" (Scope Boundary: US Stocks)
+* **Ans**: *"Hum NSE ke 270+ Indian market leaders track karte hain. Apple ya Tesla US market ka hissa hain. Kya aap TCS ya Infosys jaisi Indian tech leader ka analysis dekhna chahte hain?"*
+* *(UI Action: NSE universe par redirect prompt karta hai)*
+
+---
+
+### Q38: "Open Market Pulse and show sector heatmap" (Autonomous UI: Workspace Switch)
+* **Ans**: *"Opening Market Pulse on Executive Dashboard. Financials aur Metals sectors aaj inflow lead kar rahe hain with 14 advances vs 37 declines overall."*
+* *(UI Action: Dashboard dynamically Workspace 03 (Market Pulse) par switch hota hai)*
+
+### Q39: "Show live news from SEBI and RBI" (Autonomous UI: Regulatory News)
+* **Ans**: *"Navigating to Regulatory News feed. Displaying verified SEBI adjudication circulars and RBI Monetary Policy updates."*
+* *(UI Action: `#news` page khulta hai aur Regulatory filter apply hota hai)*
+
+### Q40: "Open Candlestick Intel and show bullish patterns" (Autonomous UI: Pattern Intel)
+* **Ans**: *"Opening Candlestick Pattern Intel. Screen par volume-confirmed Bullish Engulfing aur Anchored VWAP reclaim formations highlight ho rahi hain."*
+* *(UI Action: `#candlestick` screen switch hokar bullish patterns ke bounding boxes draw karti hai)*
+
+---
+
+## 12. Live Continuous Multi-Turn Conversation Demo (12-Turn Deep Flow)
+
+Ye ek **complete, uninterrupted continuous conversation script** hai jahan user mic mein lagatar 12 sawal ek ke baad ek poochta jata hai. Notice karein ki **Turn 01 ke baad user ne kabhi bhi company ka naam dobara nahi liya** — Alex ne har sawal mein pronoun (`"iska"`, `"isme"`, `"is company"`) se context retain kiya aur screens ko autonomously switch kiya:
+
+---
+
+### 🎙️ Turn 01: Initial Discovery (Voice Search with Typo)
+* **User**: *"Hey Alex, show me adacni entirerpice share"*
+* **Alex**: *"Adani Enterprises is currently trading at ₹2,950.00 (+0.41%). The quantitative radar identifies active institutional accumulation with target ₹3,003.10 and protective floor at ₹2,914.60."*
+* *(UI Action: Typo resolve hokar Overview page par `ADANIENT` search hota hai, card center scroll hota hai aur intraday chart khulta hai)*
+
+---
+
+### 🎙️ Turn 02: Quantitative Verdict & Conviction
+* **User**: *"Iska current stance aur institutional verdict kya hai?"*
+* **Alex**: *"Current stance is Moderately Bullish with a calibrated 61.4% upward directional probability P(Up), supported by an empirical 58.7% hit rate across 2,814 similar historical setups."*
+* *(UI Action: Adani card par 'MODERATELY BULLISH' green verdict badge highlight hota hai)*
+
+---
+
+### 🎙️ Turn 03: Expected Price Targets & Quantiles
+* **User**: *"Achha, toh 1-day expected target kahan tak ja sakta hai?"*
+* **Alex**: *"For Adani Enterprises, the expected 80% forecast range is ₹2,925.00 to ₹3,003.10. Base case projection is ₹2,972.00, with an extended bullish breakout zone at ₹3,035.00."*
+* *(UI Action: Price forecast quantile bars expand hote hain)*
+
+---
+
+### 🎙️ Turn 04: Stop Loss & Structural Invalidation
+* **User**: *"Aur agar trade ulta pad jaye, toh invalidation stop loss kahan set karein?"*
+* **Alex**: *"Structural invalidation floor ₹2,914.60 par anchored hai, jo iske 20-day VWAP ₹2,935.25 ke niche institutional defense level hai. Is level ke niche closing hone par thesis break ho jayegi."*
+* *(UI Action: Thesis Breaker floor line chart par red color se pulse karti hai)*
+
+---
+
+### 🎙️ Turn 05: Order Book Imbalance (Microstructure)
+* **User**: *"Iska live order book imbalance aur buyer pressure kaisa dikh raha hai?"*
+* **Alex**: *"Order Book Imbalance is positive at +0.061. Top-5 bid liquidity stands at 12.8 lakh shares versus 9.4 lakh ask shares, indicating active bid-side limit absorption."*
+* *(UI Action: Microstructure drawer auto-open hota hai with live OBI and OFI telemetry)*
+
+---
+
+### 🎙️ Turn 06: Hidden Liquidity & Iceberg Detection
+* **User**: *"Kya isme koi iceberg order ya absorption detect hui hai?"*
+* **Alex**: *"Possible hidden liquidity detected near ₹2,948.00 with 4 consecutive limit replenishments and 280 millisecond reappearance speed. Large sell orders are being absorbed without price drop."*
+* *(UI Action: 'Possible Hidden Liquidity: 4 Replenishments' badge flash hota hai)*
+
+---
+
+### 🎙️ Turn 07: Chart View Switch (Autonomous Control)
+* **User**: *"Theek hai, ab iska candlestick chart open karke 20D VWAP line dikhao"*
+* **Alex**: *"Switching Adani Enterprises to Candlestick Intel view. 20-day anchored VWAP at ₹2,935.25 is acting as strong dynamic support under the current price."*
+* *(UI Action: Right-hand chart smoothly Line mode se 1D OHLCV Candlestick view mein switch ho jata hai)*
+
+---
+
+### 🎙️ Turn 08: Macro Shock Stress-Test (Domino Engine)
+* **User**: *"Agar crude oil 20% spike kar jaye, toh is company par kya asar padega?"*
+* **Alex**: *"Navigating to Domino Predictor. Crude Oil +20% spike hone par Adani Enterprises ke logistics aur mining transport fuel costs expand honge, causing estimated operating EBITDA margin drag of -45 basis points."*
+* *(UI Action: Screen `#domino` par switch hoti hai, crude slider 20% par set hota hai aur Adani ka node graph mein highlight hota hai)*
+
+---
+
+### 🎙️ Turn 09: Balance Sheet & Solvency Check
+* **User**: *"Iska debt-to-equity ratio aur balance sheet health kaisi hai?"*
+* **Alex**: *"Adani Enterprises debt status is Moderate with Debt-to-Equity at 0.54 and return on equity at 14.8%. Group cash reserves and operating cash flow remain stable."*
+* *(UI Action: Solvency and fundamental quality gauge pulse karta hai)*
+
+---
+
+### 🎙️ Turn 10: Behavioral Twin Search (Risk Diversification)
+* **User**: *"Risk kam karne ke liye iske jaise doosre twin stocks kaunse hain?"*
+* **Alex**: *"Opening Stock DNA. Energy aur infrastructure space mein Adani Enterprises ke top behavioral twins Reliance Industries (Cosine Similarity 0.86) aur Adani Ports (0.84) hain."*
+* *(UI Action: `#dna` page par Adani Enterprises ke 8-strand DNA twins render hote hain)*
+
+---
+
+### 🎙️ Turn 11: Algorithmic Paper Trade Simulation
+* **User**: *"Accha, toh portfolio mein iske 25 shares virtual buy karke simulate kar do"*
+* **Alex**: *"Simulating market execution. Bought 25 shares of Adani Enterprises at ₹2,950.00 for total value of ₹73,750. Position added to your virtual portfolio ledger."*
+* *(UI Action: Screen `#portfolio` par jump karti hai, trade execute hoti hai aur cash ledger update hota hai)*
+
+---
+
+### 🎙️ Turn 12: Portfolio Risk & 95% Daily VaR Confirmation
+* **User**: *"Ab mera total portfolio MTM aur daily VaR kitna ho gaya?"*
+* **Alex**: *"Your active portfolio value is ₹9,82,450 across 4 positions. Based on 1,000-path Monte Carlo simulation, your 95% 1-day Value-at-Risk is ₹14,210."*
+* *(UI Action: Portfolio dashboard par unrealized P&L gauge aur VaR risk meter display hota hai)*
+
+---
+
+### 🧠 Viva Defense Note: Examiner ko kya point out karna hai?
+> *"Examiner ko dikhayein ki 12 turns tak humne Adani Enterprises ka naam sirf ek baar liya tha. Baaki 11 turns mein agent ne **pronouns (`'iska'`, `'isme'`, `'is company'`, `'iske 25 shares'`)** ko track kiya, bina kisi memory loss ke across 5 different pages (`Overview` $\rightarrow$ `Candlestick` $\rightarrow$ `Domino` $\rightarrow$ `Stock DNA` $\rightarrow$ `Portfolio`) navigate kiya, aur live quantitative calculation render ki."*
+
+---
