@@ -443,12 +443,29 @@ def resolve_all_symbols_with_spans(query: str):
     for alias, sym in sorted(COMPANY_ALIASES.items(), key=lambda x: len(x[0]), reverse=True):
         if sym == "HAL" and alias == "hal" and is_market_health:
             continue
-        pattern = r"(?:\b|^)" + re.escape(alias) + r"(?:\b|$)"
+        pattern = r"(?<![\w\u0900-\u097F])" + re.escape(alias) + r"(?![\w\u0900-\u097F])"
         for m in re.finditer(pattern, q):
             start, end = m.span()
             if not any(max(start, s) < min(end, e) for s, e in matched_spans):
                 matched_spans.append((start, end))
                 matches.append((start, end, sym))
+    # Recover misspelled names independently, including the second stock in a pair.
+    # Only accept an unambiguous close alias; never guess a short ticker.
+    import difflib
+    for token in re.finditer(r"[a-z]{5,}", q):
+        start, end = token.span()
+        if any(max(start, a) < min(end, b) for a, b in matched_spans):
+            continue
+        scores = {}
+        for alias, sym in COMPANY_ALIASES.items():
+            if " " in alias or len(alias) < 5:
+                continue
+            ratio = difflib.SequenceMatcher(None, token.group(), alias).ratio()
+            scores[sym] = max(scores.get(sym, 0), ratio)
+        ranked = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+        if ranked and ranked[0][1] >= 0.80 and (len(ranked) == 1 or ranked[0][1] - ranked[1][1] >= 0.08):
+            matches.append((start, end, ranked[0][0]))
+            matched_spans.append((start, end))
     matches.sort(key=lambda x: x[0])
     return q, matches
 
@@ -551,7 +568,9 @@ def resolve_all_symbols(query: str) -> List[str]:
     """
     q, matches = resolve_all_symbols_with_spans(query)
     deduped = []
-    for _, _, sym in matches:
+    for start, end, sym in matches:
+        if PREFIX_NEGATION_REGEX.search(q[max(0, start - 30):start]) or POSTFIX_NEGATION_REGEX.search(q[end:end + 30]):
+            continue
         if sym not in deduped:
             deduped.append(sym)
     return deduped
@@ -1266,7 +1285,7 @@ async def generate_autonomous_agent_response(
         (
             len(resolve_all_symbols(q_lower)) >= 2 and
             any(w in q_lower for w in [
-                "compare", "vs", "versus", "against", "and", "with", "तुलना", "मुकाबला",
+                "compare", "comparison", "vs", "versus", "against", "and", "with", "तुलना", "मुकाबला",
                 "aur", "ya", "behtar", "kisme", "dono me", "dono mein", "better", "choose",
                 "which one", "difference", "अंतर", "फर्क", "kaunsa", "kisme invest"
             ]) and
@@ -1287,7 +1306,7 @@ async def generate_autonomous_agent_response(
         is_two_stock_compare = (
             len(dna_matched_syms) >= 2 and
             any(w in q_lower for w in [
-                "compare", "vs", "versus", "against", "and", "with", "तुलना", "मुकाबला",
+                "compare", "comparison", "vs", "versus", "against", "and", "with", "तुलना", "मुकाबला",
                 "aur", "ya", "behtar", "kisme", "dono me", "dono mein", "better", "choose",
                 "which one", "difference", "अंतर", "फर्क", "kaunsa", "kisme invest", "dono"
             ]) and

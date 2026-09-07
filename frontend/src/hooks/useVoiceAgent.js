@@ -369,7 +369,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     // Check for exit / disconnect triggers
     const lower = cleanText.toLowerCase();
     const exitWords = ["stop", "bye", "exit", "thank you", "thanks", "goodbye", "bas", "alvida", "band karo", "shukriya", "धन्यवाद", "अलविदा", "बस करो"];
-    const isExit = exitWords.some(w => lower === w || lower.startsWith(w + " ") || lower.endsWith(" " + w));
+    const isExit = exitWords.includes(lower.replace(/[.,!?;:]/g, "").trim());
 
     if (isExit) {
       continuousModeRef.current = false;
@@ -398,7 +398,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
 
     // Instant zero-latency greeting check ("Hey Alex", "Hello", "Hi")
     const wakeWords = ["hey alex", "hey alexa", "alex", "alexa", "hey marketmind", "marketmind", "hello", "hi", "hey", "नमस्ते"];
-    const isWake = wakeWords.includes(lower) || wakeWords.some(w => lower === w || lower.startsWith(w + " ") || lower.endsWith(" " + w));
+    const isWake = wakeWords.includes(lower.replace(/[.,!?;:]/g, "").trim());
     if (isWake) {
       setIsListening(false);
       isListeningRef.current = false;
@@ -465,6 +465,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       try {
         mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
       } catch (e) { }
     }
 
@@ -575,82 +576,9 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       }
     } catch (err) {
       console.error("Voice chat error:", err);
-      const isWakeGreeting = ["hey alex", "hey alexa", "alex", "alexa", "hello", "hi", "hey"].includes(cleanText.toLowerCase());
-
-      // Intelligent Client-Side Fallback for stock queries & searches
-      const lower = cleanText.toLowerCase();
-      let matchedSymbol = null;
-      let matchedName = null;
-      
-      const commonMatches = [
-        { sym: "ADANIENT", name: "Adani Enterprises", price: "2,950.00", change: "+0.41%", keys: ["adani", "adacni", "enterprises", "entirerpice"] },
-        { sym: "RELIANCE", name: "Reliance Industries", price: "2,985.50", change: "+1.2%", keys: ["reliance", "rilance", "ril", "jio"] },
-        { sym: "NESTLEIND", name: "Nestle India Ltd", price: "1,398.00", change: "+0.35%", keys: ["nestle", "nestleind", "nestle india", "maggi", "nescafe"] },
-        { sym: "TATAMOTORS", name: "Tata Motors", price: "982.40", change: "+2.1%", keys: ["tata motor", "tatamotors", "tata motors"] },
-        { sym: "TCS", name: "Tata Consultancy Services", price: "4,210.00", change: "+0.8%", keys: ["tcs"] },
-        { sym: "INFY", name: "Infosys", price: "1,845.20", change: "+1.4%", keys: ["infosys", "infy", "infosis"] },
-        { sym: "HDFCBANK", name: "HDFC Bank", price: "1,640.00", change: "+0.5%", keys: ["hdfc", "hdfc bank", "hdffc"] },
-        { sym: "ICICIBANK", name: "ICICI Bank", price: "1,220.00", change: "+1.1%", keys: ["icici", "icici bank"] },
-        { sym: "SBIN", name: "State Bank of India", price: "815.00", change: "+0.9%", keys: ["sbi", "state bank"] },
-        { sym: "BHARTIARTL", name: "Bharti Airtel", price: "1,854.00", change: "+0.76%", keys: ["airtel", "bharti", "bhartiartl"] },
-        { sym: "ITC", name: "ITC Ltd", price: "463.50", change: "+0.4%", keys: ["itc"] },
-        { sym: "LT", name: "Larsen & Toubro", price: "3,590.00", change: "+1.1%", keys: ["larsen", "l&t", "lt"] },
-        { sym: "SYRMA", name: "Syrma SGS Technology", price: "1,634.80", change: "+9.75%", keys: ["syrma", "sgs", "surma"] },
-        { sym: "BSE", name: "BSE Ltd", price: "2,740.00", change: "+3.2%", keys: ["bse"] },
-        { sym: "ZOMATO", name: "Zomato Ltd", price: "285.00", change: "+3.8%", keys: ["zomato"] },
-      ];
-
-      let matchedPrice = null;
-      let matchedChange = null;
-
-      for (const m of commonMatches) {
-        if (m.keys.some(k => lower.includes(k))) {
-          matchedSymbol = m.sym;
-          matchedName = m.name;
-          matchedPrice = m.price;
-          matchedChange = m.change;
-          break;
-        }
-      }
-
-      if (matchedSymbol) {
-        window.__SELECTED_STOCK_SYMBOL = matchedSymbol;
-        window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: matchedSymbol, name: matchedName } }));
-        window.dispatchEvent(new CustomEvent("marketmind:voice_action", {
-          detail: {
-            type: "SEARCH_COMPANY",
-            command: "SEARCH_COMPANY",
-            target_page: "overview",
-            params: { symbol: matchedSymbol, name: matchedName, query: matchedName }
-          }
-        }));
-      }
-
-      const isCrypto = ["bitcoin", "btc", "crypto", "ethereum", "eth", "doge", "solana"].some(k => lower.includes(k));
-      const isUsStock = ["tesla", "apple", "google", "microsoft", "amazon", "nvidia", "nasdaq"].some(k => lower.includes(k));
-      const isOptionsGreeks = ["theta", "gamma", "vega", "option chain", "options chain"].some(k => lower.includes(k));
-
-      const fallbackText = isWakeGreeting
-        ? (currentLang === "hindi" ? "हाँ, मैं सुन रहा हूँ। बताइए, किस शेयर या सेटअप का विश्लेषण करना है?" : "Yes, I'm listening! Which stock or setup would you like to analyze?")
-        : isCrypto
-        ? (currentLang === "hindi"
-          ? "क्षमा करें, मैं केवल एनएसई और बीएसई के 270 भारतीय संस्थागत शेयरों के लिए डिज़ाइन किया गया हूँ। क्रिप्टोकरेंसी इस प्रोजेक्ट के दायरे में नहीं है।"
-          : "Sorry, I am designed specifically for the 270 institutional Indian equities on NSE and BSE. I do not cover cryptocurrencies.")
-        : isUsStock
-        ? (currentLang === "hindi"
-          ? "क्षमा करें, मार्केटमाइंड विशेष रूप से भारतीय शेयर बाजार (एनएसई/बीएसई) के लिए है। अमेरिकी या विदेशी शेयर इसमें शामिल नहीं हैं।"
-          : "Sorry, MarketMind AI is exclusively engineered for the Indian equity market (NSE/BSE). I do not analyze US or foreign equities.")
-        : isOptionsGreeks
-        ? (currentLang === "hindi"
-          ? "क्षमा करें, मैं कैश इक्विटी संस्थागत ऑर्डर फ्लो और प्राइस फोरकास्ट पर केंद्रित हूँ। जटिल एफएंडओ ऑप्शंस ग्रीक्स इसके दायरे में नहीं हैं।"
-          : "Sorry, I specialize in cash equity institutional order flow and directional forecasting. Complex options Greeks are outside my scope.")
-        : matchedName
-        ? (currentLang === "hindi"
-          ? `${matchedName} (${matchedSymbol}) का लाइव भाव ₹${matchedPrice || "2,950.00"} (${matchedChange || "+0.4%"}) है। लाइव टेलीमेट्री और चार्ट स्क्रीन पर लोड कर दिया गया है।`
-          : `${matchedName} (${matchedSymbol}) is currently trading at ₹${matchedPrice || "2,950.00"} (${matchedChange || "+0.4%"}). Live quantitative telemetry and interactive chart are open on screen.`)
-        : (currentLang === "hindi"
-          ? "मैं शेयर का नाम पूरी तरह समझ नहीं पाया। आप किस भारतीय कंपनी, शेयर या चार्ट का विश्लेषण करना चाहते हैं?"
-          : "I couldn't clearly catch the stock name. Which Indian company, stock, or setup would you like to analyze?");
+      const fallbackText = currentLang === "hindi"
+        ? "वॉइस सेवा से संपर्क नहीं हो पाया। कृपया अपना सवाल दोबारा भेजें।"
+        : "I couldn't reach the voice service. Please try your question again.";
 
       const fallbackMsg = {
         id: `bot-${Date.now()}`,
@@ -669,7 +597,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         isSubmittingRef.current = false;
       }, 400);
     }
-  }, [onAction, playBase64Audio, speakText, messages]);
+  }, [onAction, playBase64Audio, speakText, messages, voiceGender, autoPlayAudio]);
 
   // Handle ambient wake word query execution
   useEffect(() => {
@@ -688,6 +616,9 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     };
   }, [submitQuery]);
 
+  const submitQueryRef = useRef(submitQuery);
+  useEffect(() => { submitQueryRef.current = submitQuery; }, [submitQuery]);
+
   // Setup Web Speech API for Real-time Streaming STT
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -697,6 +628,27 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = language === "hindi" ? "hi-IN" : "en-IN";
+
+    let sessionPrefix = "";
+    let hasPendingInterim = false;
+    const clearTurnTimer = () => {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    };
+    const scheduleTurn = () => {
+      clearTurnTimer();
+      // A final STT segment is not a completed user turn. Allow natural pauses.
+      if (hasPendingInterim || !transcriptRef.current.trim()) return;
+      silenceTimerRef.current = setTimeout(() => {
+        if (!isListeningRef.current || isMicMutedRef.current || isPlayingAudioRef.current || isSubmittingRef.current || hasPendingInterim) return;
+        submitQueryRef.current(transcriptRef.current, true);
+      }, 2200);
+    };
+    recognition.onstart = () => {
+      sessionPrefix = transcriptRef.current.trim();
+    };
+    recognition.onspeechstart = clearTurnTimer;
+    recognition.onspeechend = scheduleTurn;
 
     recognition.onresult = (event) => {
       // 1. Strict Mic Mute Guard
@@ -727,7 +679,8 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
           hasInterim = true;
         }
       }
-      const cleanTranscript = fullTranscript.trim();
+      const cleanTranscript = [sessionPrefix, fullTranscript.trim()].filter(Boolean).join(" ");
+      hasPendingInterim = hasInterim;
       const currentLower = cleanTranscript.toLowerCase();
 
       if (!cleanTranscript) return;
@@ -768,29 +721,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       setLiveTranscript(cleanTranscript);
       transcriptRef.current = cleanTranscript;
 
-      // Reset silence timer on every new speech chunk
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
-      }
-
-      // Check for standalone wake word greeting (strip punctuation like "Hey, Alex!")
-      const cleanLower = cleanTranscript.toLowerCase().replace(/[.,!?;:]/g, "").trim();
-      const isStandaloneGreeting = ["hey alex", "hey alexa", "alex", "alexa", "hello", "hi", "hey", "नमस्ते"].includes(cleanLower);
-
-      // Adaptive speech silence delay:
-      // - Standalone greeting ("Hey Alex"): 250ms (ultra-responsive wake)
-      // - If interim speech is in-flight: 1400ms (gives user continuous speaking time without cutting off)
-      // - When finalized: 1000ms of true silence
-      const vadDelay = isStandaloneGreeting ? 250 : (hasInterim ? 1400 : 1000);
-
-      silenceTimerRef.current = setTimeout(() => {
-        if (isMicMutedRef.current || isPlayingAudioRef.current) return;
-        const finalCandidate = transcriptRef.current.trim();
-        if (finalCandidate && !isSubmittingRef.current) {
-          submitQuery(finalCandidate, true);
-        }
-      }, vadDelay);
+      scheduleTurn();
     };
 
     recognition.onerror = (e) => {
@@ -801,7 +732,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
 
     recognition.onend = () => {
       // If in continuous mode and speech recognition stops, keep listening only if not muted
-      if (!isMicMutedRef.current && continuousModeRef.current && isListeningRef.current && !isSubmittingRef.current && !isPlayingAudioRef.current) {
+      if (!isMicMutedRef.current && isListeningRef.current && !isSubmittingRef.current && !isPlayingAudioRef.current) {
         try {
           recognition.start();
         } catch (e) { }
@@ -811,11 +742,16 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     recognitionRef.current = recognition;
 
     return () => {
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-      }
+      clearTurnTimer();
+      recognition.onend = null;
+      recognition.onresult = null;
+      recognition.onspeechstart = null;
+      recognition.onspeechend = null;
+      recognition.onstart = null;
+      recognition.abort();
+      if (recognitionRef.current === recognition) recognitionRef.current = null;
     };
-  }, [language, submitQuery, stopAudioPlayback]);
+  }, [language, stopAudioPlayback]);
 
   // Start Manual Recording
   const startListening = async (isContinuous = false) => {
@@ -848,6 +784,10 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     // Start Raw Audio Recorder for Deepgram Audio Stream
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (isMicMutedRef.current || !isListeningRef.current) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
       audioChunksRef.current = [];
       const recorder = new MediaRecorder(stream);
 
