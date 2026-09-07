@@ -1,32 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { apiClient } from "../api/client";
 
-// Detect if a spoken phrase ends with an incomplete connector or dangling preposition
-const isIncompleteUtterance = (text) => {
-  const clean = (text || "").trim().toLowerCase();
-  if (!clean) return true;
-  const words = clean.split(/\s+/);
-  const lastWord = words[words.length - 1];
-
-  const danglingEndings = new Set([
-    "the", "a", "an", "of", "to", "for", "in", "on", "at", "about", "with", "and", "or",
-    "is", "are", "was", "were", "what", "which", "how", "show", "tell", "check", "find",
-    "can", "could", "will", "would", "should", "me", "my", "your", "its", "our",
-    "ka", "ki", "ke", "ko", "me", "mein", "par", "se", "aur", "ya", "kya", "hai", "hain", "batao", "dikhao"
-  ]);
-
-  if (danglingEndings.has(lastWord)) return true;
-
-  const incompleteStarters = [
-    "show me the", "show me", "tell me about", "tell me", "what is the", "what is",
-    "what about", "how is the", "can you show", "can you tell", "please show",
-    "mujhe dikhao", "mujhe batao", "kya chal raha", "bataiye", "bhav kya", "price of"
-  ];
-  if (incompleteStarters.includes(clean)) return true;
-
-  return false;
-};
-
 export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMuted = false) {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -467,41 +441,6 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       return;
     }
 
-    // Incomplete phrase check (e.g. user stopped after saying "show me the" or "tell me about")
-    const words = cleanText.split(/\s+/);
-    const isIncomplete = isIncompleteUtterance(cleanText);
-    if (isIncomplete && words.length <= 3) {
-      const askClarify = languageRef.current === "hindi"
-        ? "हाँजी, बताइए आप किस शेयर, चार्ट या सेटअप को देखना चाहते हैं?"
-        : "I'm listening! Which stock, chart, or setup would you like me to show?";
-
-      const userMsg = {
-        id: `user-${Date.now()}`,
-        sender: "user",
-        text: cleanText,
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        isVoice: isVoice,
-      };
-      const botMsg = {
-        id: `bot-${Date.now() + 1}`,
-        sender: "bot",
-        text: askClarify,
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        isVoice: isVoice,
-      };
-      setMessages((prev) => [...prev, userMsg, botMsg]);
-
-      if (isVoice && !isMicMutedRef.current) {
-        continuousModeRef.current = true;
-        setIsContinuousMode(true);
-      }
-
-      if (!isSpeakerMutedRef.current) {
-        speakText(askClarify, languageRef.current);
-      }
-      return;
-    }
-
     isSubmittingRef.current = true;
 
     if (silenceTimerRef.current) {
@@ -835,21 +774,18 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         silenceTimerRef.current = null;
       }
 
-      // If user is still actively uttering an interim word or phrase, DO NOT SUBMIT!
-      // Give them space to complete their sentence cleanly.
+      // Natural Conversational Speech Flow:
+      // If user is actively pronouncing words (hasInterim is true), keep accumulating transcript and do not submit.
       if (hasInterim) {
         return;
       }
 
-      // Adaptive Natural Voice Activity Detection (VAD)
-      const lower = cleanTranscript.toLowerCase().trim();
-      const isStandaloneGreeting = ["hey alex", "hey alexa", "alex", "alexa", "hello", "hi", "hey", "नमस्ते"].includes(lower);
-      const incomplete = isIncompleteUtterance(cleanTranscript);
-
-      // - Standalone greeting ("Hey Alex"): 350ms (quick response)
-      // - Incomplete sentence ("show me the", "tell me about"): 2200ms (ample room to speak next word without interruption)
-      // - Complete sentences: 1100ms (natural, comfortable conversation pause so words are never cut in half)
-      const vadDelay = isStandaloneGreeting ? 350 : (incomplete ? 2200 : 1100);
+      // Wait until the user genuinely stops talking:
+      // - Standalone wake greeting: 350ms (responsive wake)
+      // - Full conversational queries: 1300ms of true silence after speech ends,
+      //   giving the user plenty of natural pause time without cutting their sentence in half.
+      const isStandaloneGreeting = ["hey alex", "hey alexa", "alex", "alexa", "hello", "hi", "hey"].includes(currentLower);
+      const vadDelay = isStandaloneGreeting ? 350 : 1300;
 
       silenceTimerRef.current = setTimeout(() => {
         if (isMicMutedRef.current || isPlayingAudioRef.current) return;
@@ -858,6 +794,13 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
           submitQuery(finalCandidate, true);
         }
       }, vadDelay);
+    };
+
+    recognition.onspeechstart = () => {
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
     };
 
     recognition.onerror = (e) => {
