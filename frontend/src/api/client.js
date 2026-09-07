@@ -12,9 +12,19 @@ export const apiClient = {
 
   async getStockChart(symbol, timeframe = "1D") {
     const cleanSym = (symbol || "").toUpperCase().replace(".NS", "").replace(".BO", "").trim();
-    const res = await fetch(`${API_BASE_URL}/api/stocks/${cleanSym}/chart?timeframe=${timeframe}`);
-    if (!res.ok) throw new Error(`GET chart for ${cleanSym} failed: ${res.status}`);
-    return await res.json();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/stocks/${cleanSym}/chart?timeframe=${timeframe}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error(`GET chart for ${cleanSym} failed: ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      clearTimeout(timeoutId);
+      throw e;
+    }
   },
 
   async post(endpoint, data = {}) {
@@ -42,7 +52,7 @@ export const apiClient = {
 
   async sendVoiceChat({ message, language = "english", voice_gender = "male", ticker = null, history = [] }) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 7500);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(`${API_BASE_URL}/api/voice/chat`, {
         method: "POST",

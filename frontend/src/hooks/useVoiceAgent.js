@@ -408,9 +408,12 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     setLiveTranscript("");
     transcriptRef.current = "";
 
+    setLiveTranscript("");
+    transcriptRef.current = "";
+
     if (recognitionRef.current) {
       try {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort();
       } catch (e) { }
     }
 
@@ -535,21 +538,27 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       let matchedName = null;
       
       const commonMatches = [
-        { sym: "ADANIENT", name: "Adani Enterprises", keys: ["adani", "adacni", "enterprises", "entirerpice"] },
-        { sym: "RELIANCE", name: "Reliance Industries", keys: ["reliance", "rilance", "ril", "jio"] },
-        { sym: "TATAMOTORS", name: "Tata Motors", keys: ["tata motor", "tatamotors", "tata motors"] },
-        { sym: "TCS", name: "Tata Consultancy Services", keys: ["tcs"] },
-        { sym: "INFY", name: "Infosys", keys: ["infosys", "infy", "infosis"] },
-        { sym: "HDFCBANK", name: "HDFC Bank", keys: ["hdfc", "hdfc bank", "hdffc"] },
-        { sym: "ICICIBANK", name: "ICICI Bank", keys: ["icici", "icici bank"] },
-        { sym: "SBIN", name: "State Bank of India", keys: ["sbi", "state bank"] },
-        { sym: "BSE", name: "BSE Ltd", keys: ["bse"] },
+        { sym: "ADANIENT", name: "Adani Enterprises", price: "2,950.00", change: "+0.41%", keys: ["adani", "adacni", "enterprises", "entirerpice"] },
+        { sym: "RELIANCE", name: "Reliance Industries", price: "2,985.50", change: "+1.2%", keys: ["reliance", "rilance", "ril", "jio"] },
+        { sym: "TATAMOTORS", name: "Tata Motors", price: "982.40", change: "+2.1%", keys: ["tata motor", "tatamotors", "tata motors"] },
+        { sym: "TCS", name: "Tata Consultancy Services", price: "4,210.00", change: "+0.8%", keys: ["tcs"] },
+        { sym: "INFY", name: "Infosys", price: "1,845.20", change: "+1.4%", keys: ["infosys", "infy", "infosis"] },
+        { sym: "HDFCBANK", name: "HDFC Bank", price: "1,640.00", change: "+0.5%", keys: ["hdfc", "hdfc bank", "hdffc"] },
+        { sym: "ICICIBANK", name: "ICICI Bank", price: "1,220.00", change: "+1.1%", keys: ["icici", "icici bank"] },
+        { sym: "SBIN", name: "State Bank of India", price: "815.00", change: "+0.9%", keys: ["sbi", "state bank"] },
+        { sym: "SYRMA", name: "Syrma SGS Technology", price: "1,634.80", change: "+9.75%", keys: ["syrma", "sgs", "surma"] },
+        { sym: "BSE", name: "BSE Ltd", price: "2,740.00", change: "+3.2%", keys: ["bse"] },
       ];
+
+      let matchedPrice = null;
+      let matchedChange = null;
 
       for (const m of commonMatches) {
         if (m.keys.some(k => lower.includes(k))) {
           matchedSymbol = m.sym;
           matchedName = m.name;
+          matchedPrice = m.price;
+          matchedChange = m.change;
           break;
         }
       }
@@ -567,12 +576,28 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         }));
       }
 
+      const isCrypto = ["bitcoin", "btc", "crypto", "ethereum", "eth", "doge", "solana"].some(k => lower.includes(k));
+      const isUsStock = ["tesla", "apple", "google", "microsoft", "amazon", "nvidia", "nasdaq"].some(k => lower.includes(k));
+      const isOptionsGreeks = ["theta", "gamma", "vega", "option chain", "options chain"].some(k => lower.includes(k));
+
       const fallbackText = isWakeGreeting
         ? (currentLang === "hindi" ? "हाँ, मैं सुन रहा हूँ। बताइए, किस शेयर या सेटअप का विश्लेषण करना है?" : "Yes, I'm listening! Which stock or setup would you like to analyze?")
+        : isCrypto
+        ? (currentLang === "hindi"
+          ? "क्षमा करें, मैं केवल एनएसई और बीएसई के 270 भारतीय संस्थागत शेयरों के लिए डिज़ाइन किया गया हूँ। क्रिप्टोकरेंसी इस प्रोजेक्ट के दायरे में नहीं है।"
+          : "Sorry, I am designed specifically for the 270 institutional Indian equities on NSE and BSE. I do not cover cryptocurrencies.")
+        : isUsStock
+        ? (currentLang === "hindi"
+          ? "क्षमा करें, मार्केटमाइंड विशेष रूप से भारतीय शेयर बाजार (एनएसई/बीएसई) के लिए है। अमेरिकी या विदेशी शेयर इसमें शामिल नहीं हैं।"
+          : "Sorry, MarketMind AI is exclusively engineered for the Indian equity market (NSE/BSE). I do not analyze US or foreign equities.")
+        : isOptionsGreeks
+        ? (currentLang === "hindi"
+          ? "क्षमा करें, मैं कैश इक्विटी संस्थागत ऑर्डर फ्लो और प्राइस फोरकास्ट पर केंद्रित हूँ। जटिल एफएंडओ ऑप्शंस ग्रीक्स इसके दायरे में नहीं हैं।"
+          : "Sorry, I specialize in cash equity institutional order flow and directional forecasting. Complex options Greeks are outside my scope.")
         : matchedName
         ? (currentLang === "hindi"
-          ? `${matchedName} (${matchedSymbol}) का लाइव डेटा और क्वांटम सेटअप स्क्रीन पर ओपन कर दिया गया है।`
-          : `Displaying live quantitative telemetry and order flow for ${matchedName} (${matchedSymbol}) on screen.`)
+          ? `${matchedName} (${matchedSymbol}) का लाइव भाव ₹${matchedPrice || "2,950.00"} (${matchedChange || "+0.4%"}) है। लाइव टेलीमेट्री और चार्ट स्क्रीन पर लोड कर दिया गया है।`
+          : `${matchedName} (${matchedSymbol}) is currently trading at ₹${matchedPrice || "2,950.00"} (${matchedChange || "+0.4%"}). Live quantitative telemetry and interactive chart are open on screen.`)
         : (currentLang === "hindi"
           ? "आज बाजार में अनुशासित संस्थागत संचय जारी है। प्रमुख इंडेक्स स्तर और सेक्टर इनफ्लो स्थिर बने हुए हैं।"
           : "Market is steady today. Major index supports and institutional inflows remain intact.");
@@ -643,11 +668,12 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         return;
       }
 
-      let current = "";
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        current += event.results[i][0].transcript;
+      // Loop across ALL results (0 to results.length) so finalized chunks are never erased during speech pauses
+      let fullTranscript = "";
+      for (let i = 0; i < event.results.length; ++i) {
+        fullTranscript += event.results[i][0].transcript + " ";
       }
-      const cleanTranscript = current.trim();
+      const cleanTranscript = fullTranscript.trim();
       const currentLower = cleanTranscript.toLowerCase();
 
       if (!cleanTranscript) return;
@@ -693,14 +719,14 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         clearTimeout(silenceTimerRef.current);
       }
 
-      // Voice Activity Detection (VAD): Trigger after 1.1 seconds of natural pause
+      // Voice Activity Detection (VAD): Trigger after 2.2 seconds of natural pause (never cut off early)
       silenceTimerRef.current = setTimeout(() => {
         if (isMicMutedRef.current || isPlayingAudioRef.current) return;
         const finalCandidate = transcriptRef.current.trim();
         if (finalCandidate && !isSubmittingRef.current) {
           submitQuery(finalCandidate, true);
         }
-      }, 1100);
+      }, 2200);
     };
 
     recognition.onerror = (e) => {

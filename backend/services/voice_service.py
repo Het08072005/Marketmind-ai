@@ -619,14 +619,25 @@ async def generate_autonomous_agent_response(
     is_tata_generic = bool(re.search(r"\b(tata|टाटा)\b", q_lower)) and not any(k in q_lower for k in ["motor", "motors", "steel", "power", "tcs", "consultancy", "consumer", "elxsi", "tech", "chem", "comm"])
     is_adani_generic = bool(re.search(r"\b(adani|अडानी|अदानी)\b", q_lower)) and not any(k in q_lower for k in ["port", "ports", "green", "power", "gas", "total", "wilmar", "enterprises", "ent"])
 
+    detected_symbol = None
     if explicit_symbol:
         detected_symbol = explicit_symbol
         GLOBAL_SESSION_STATE["active_symbol"] = explicit_symbol
-    elif context_ticker:
+    elif context_ticker and context_ticker.upper() not in ["NONE", "NULL", ""]:
         detected_symbol = context_ticker.upper()
         GLOBAL_SESSION_STATE["active_symbol"] = detected_symbol
     else:
-        detected_symbol = GLOBAL_SESSION_STATE.get("active_symbol") or "RELIANCE"
+        # Check history for previously mentioned ticker if any
+        if history and isinstance(history, list):
+            for item in reversed(history):
+                txt = (item.get("text") or item.get("message") or "").lower()
+                s = resolve_target_symbol(txt)
+                if s:
+                    detected_symbol = s
+                    GLOBAL_SESSION_STATE["active_symbol"] = s
+                    break
+        if not detected_symbol:
+            detected_symbol = GLOBAL_SESSION_STATE.get("active_symbol") or "RELIANCE"
 
     # Fetch live verified company data (instant memory lookup first, zero delay)
     comp = get_company_by_symbol(detected_symbol) or fetch_live_stock_data(detected_symbol) or {
@@ -639,8 +650,15 @@ async def generate_autonomous_agent_response(
         "pe_ratio": 24.5
     }
 
-    # Fetch technical candle indicators and institutional quant metrics
-    candles_info = get_stock_historical_candles(detected_symbol)
+    # Fetch technical candle indicators and institutional quant metrics with non-blocking fast timeout
+    candles_info = {}
+    try:
+        candles_info = await asyncio.wait_for(
+            asyncio.to_thread(get_stock_historical_candles, detected_symbol),
+            timeout=1.6
+        )
+    except Exception:
+        candles_info = {}
     rsi_val = candles_info.get("rsi") or comp.get("rsi") or 55.0
     pattern_name = candles_info.get("patterns", [{}])[0].get("name") if candles_info.get("patterns") else comp.get("pattern", "Consolidation Range")
     
@@ -750,6 +768,66 @@ async def generate_autonomous_agent_response(
             reply_text = "Main MarketMind AI par aapka dedicated financial copilot hoon. Main sirf stock market analysis, macro risk aur portfolio simulations me assist kar sakta hoon. Aap kisi bhi stock, sector ya market setup ke baare me pooch sakte hain."
         else:
             reply_text = "I am Alex, your dedicated financial copilot on MarketMind AI. I specialize exclusively in stock market intelligence, macro risk analysis, and portfolio simulations. Please ask about any Indian stock, sector, or market scenario!"
+        return {
+            "reply": reply_text,
+            "action": None,
+            "detected_symbol": detected_symbol,
+            "language": language
+        }
+
+    # =========================================================================
+    # 0B1. SCOPE BOUNDARY: CRYPTOCURRENCY & DIGITAL ASSETS
+    # =========================================================================
+    is_crypto_query = any(re.search(rf"\b{re.escape(k)}\b", q_lower) for k in [
+        "bitcoin", "btc", "ethereum", "eth", "crypto", "cryptocurrency", "doge", "dogecoin", "solana", "usdt", "binance", "coin"
+    ])
+    if is_crypto_query:
+        if is_hindi:
+            reply_text = "क्षमा करें, मैं विशेष रूप से एनएसई और बीएसई के 270 संस्थागत भारतीय शेयरों के लिए डिज़ाइन किया गया हूँ। मैं क्रिप्टोकरेंसी या डिजिटल संपत्तियों को कवर नहीं करता। कृपया किसी भारतीय शेयर, सेक्टर या बाजार सेटअप के बारे में पूछें।"
+        elif is_hinglish:
+            reply_text = "Sorry, main specifically Indian stock market (NSE/BSE) ke 270 institutional equities aur order flow ke liye designed hoon. Cryptocurrency MarketMind ke scope me nahi aati. Aap kisi bhi Indian stock, sector ya risk setup ke baare me pooch sakte hain."
+        else:
+            reply_text = "Sorry, I am calibrated specifically for the 270 institutional Indian equities on NSE and BSE. I do not provide analysis for cryptocurrencies or digital assets. Please ask about any Indian stock, sector flow, or market risk setup."
+        return {
+            "reply": reply_text,
+            "action": None,
+            "detected_symbol": detected_symbol,
+            "language": language
+        }
+
+    # =========================================================================
+    # 0B2. SCOPE BOUNDARY: US & FOREIGN EQUITIES
+    # =========================================================================
+    is_us_stock_query = any(re.search(rf"\b{re.escape(k)}\b", q_lower) for k in [
+        "tesla", "apple", "google", "alphabet", "microsoft", "amazon", "meta", "nvidia", "nasdaq", "s&p", "s&p 500", "dow jones", "us stock", "american stock"
+    ])
+    if is_us_stock_query:
+        if is_hindi:
+            reply_text = "क्षमा करें, मार्केटमाइंड विशेष रूप से भारतीय शेयर बाजार (एनएसई/बीएसई) के संस्थागत शेयरों का विश्लेषण करता है। अमेरिकी या विदेशी शेयर इसमें शामिल नहीं हैं। कृपया किसी भारतीय शेयर (जैसे रिलायंस, टाटा, सिर्मा, इंफोसिस) के बारे में पूछें।"
+        elif is_hinglish:
+            reply_text = "Sorry, MarketMind exclusively Indian stock market (NSE/BSE) ke liye engineered hai. US ya international stocks hamare institutional universe me nahi aate. Aap kisi bhi Indian stock ya sector ke baare me pooch sakte hain."
+        else:
+            reply_text = "Sorry, MarketMind AI is exclusively engineered for the Indian equity market (NSE/BSE). I do not analyze US or foreign equities. Please ask about any benchmark Indian stock or sector!"
+        return {
+            "reply": reply_text,
+            "action": None,
+            "detected_symbol": detected_symbol,
+            "language": language
+        }
+
+    # =========================================================================
+    # 0B3. SCOPE BOUNDARY: COMPLEX F&O OPTIONS GREEKS
+    # =========================================================================
+    is_options_greeks = any(re.search(rf"\b{re.escape(k)}\b", q_lower) for k in [
+        "theta", "gamma", "vega", "option chain", "options chain", "implied volatility", "iv skew", "straddle", "strangle", "call option", "put option"
+    ])
+    if is_options_greeks:
+        if is_hindi:
+            reply_text = "क्षमा करें, मैं कैश इक्विटी संस्थागत ऑर्डर फ्लो, वीडब्ल्यूपी और 1-डे दिशात्मक संभावनाओं पर केंद्रित हूँ। जटिल एफएंडओ ऑप्शंस ग्रीक्स (जैसे थीटा या गामा) इस प्रोजेक्ट के दायरे में नहीं हैं। आप किसी शेयर के ऑर्डर फ्लो, सपोर्ट या टारगेट के बारे में पूछ सकते हैं।"
+        elif is_hinglish:
+            reply_text = "Sorry, main cash equity institutional order flow (VWAP, OBI, VaR) aur directional price forecasting par focus karta hoon. Complex F&O options Greeks (jaise theta ya gamma decay) MarketMind ke scope me nahi aate. Aap stock ke institutional setup ya invalidation floor ke baare me pooch sakte hain."
+        else:
+            reply_text = "Sorry, I specialize in cash equity institutional order flow (VWAP, OBI, microprice, VaR) and directional forecasting. Complex F&O options Greeks like theta or gamma are outside my scope. Please ask about any stock's institutional order flow, target, or stop loss!"
         return {
             "reply": reply_text,
             "action": None,
@@ -2093,6 +2171,14 @@ INSTRUCTIONS:
                 system_inst = f"""You are Alex Copilot — Senior Institutional Quantitative Strategist for MarketMind AI.
 Speak with decisive institutional authority, mathematical precision, clarity, and easy-to-understand explanations.
 
+STRICT SCOPE & GUARDRAIL BOUNDARIES:
+1. You are engineered EXCLUSIVELY for top 270 institutional Indian equities listed on NSE/BSE, institutional order flow (OBI, 20D VWAP, Microprice, 95% Daily VaR), Macro Dominoes, and Trade Simulations.
+2. If the client asks about Cryptocurrency (Bitcoin, Ethereum), US/foreign stocks (Tesla, Apple), complex Options Chain Greeks (Theta, Gamma), or unrelated/unclear topics:
+   Politely decline with a clear, respectful boundary:
+   "Sorry, I am designed specifically for institutional Indian equities on NSE/BSE. I cannot provide analysis for [topic]. Please ask about any Indian stock, sector flow, or market risk setup." in the specified language ({lang_rule}).
+3. If the user query is unclear, ambiguous, or does not match our financial intelligence project:
+   Politely clarify what you cover: "Sorry, I am designed specifically for Indian equity analysis, order flow, and risk forecasting. Could you please specify which Indian stock or sector you would like to analyze?" in {lang_rule}.
+
 LIVE DATA FOR {comp['name']} ({detected_symbol}):
 - Price: ₹{comp['price']:,.2f} ({comp.get('change', '+0.0%')}) | Sector: {comp.get('sector', 'Core Industry')}
 - Stance: {stance} | Directional Probability: {p_up}% (Empirical Hit Rate: {hit_rate}%, n={sample_sz})
@@ -2156,13 +2242,20 @@ STRICT RULES:
                     reply_text = f"{comp['name']} sector peers ke mukable {comp.get('roe', 16.5)}% ROE aur consistent operating margins deliver karta hai with 1.12 beta."
                 else:
                     reply_text = f"{comp['name']} relative to sector peers maintains an industry-leading {comp.get('roe', 16.5)}% ROE and resilient operating margins, delivering disciplined capital compounding."
+            elif any(w in q_lower for w in ["price", "bhav", "rate", "cmp", "kitna", "value", "cost"]):
+                if is_hindi:
+                    reply_text = f"{comp['name']} का वर्तमान भाव ₹{comp['price']:,.2f} ({comp.get('change', '+0.0%')}) है। अपेक्षित लक्ष्य ₹{tgt_p:,.2f} और स्टॉप-लॉस ₹{stp_p:,.2f} पर सुरक्षित है।"
+                elif is_hinglish:
+                    reply_text = f"{comp['name']} ka current market price ₹{comp['price']:,.2f} ({comp.get('change', '+0.0%')}) hai. Expected target ₹{tgt_p:,.2f} aur stop loss ₹{stp_p:,.2f} par anchored hai."
+                else:
+                    reply_text = f"{comp['name']} is currently trading at ₹{comp['price']:,.2f} ({comp.get('change', '+0.0%')}). Expected target is ₹{tgt_p:,.2f} with risk stop loss at ₹{stp_p:,.2f}."
             else:
                 if is_hindi:
-                    reply_text = f"{comp['name']} में 20-दिन वीडब्ल्यूपी ₹{vwap_lvl:,.2f} के ऊपर संस्थागत संचय जारी है। क्वांट मॉडल {p_up}% दिशात्मक संभावना (ऐतिहासिक हिट रेट {hit_rate}%) का अनुमान लगाता है with invalidation at {inv_str}."
+                    reply_text = f"{comp['name']} का वर्तमान भाव ₹{comp['price']:,.2f} ({comp.get('change', '+0.0%')}) है। 20-दिन वीडब्ल्यूपी ₹{vwap_lvl:,.2f} के ऊपर संस्थागत संचय जारी है। 1-डे पी(अप) {p_up}% (हिट रेट {hit_rate}%) लक्ष्य ₹{tgt_p:,.2f} और इनवैलिडेशन {inv_str} के साथ है।"
                 elif is_hinglish:
-                    reply_text = f"{comp['name']} me 20-day VWAP ₹{vwap_lvl:,.2f} ke upar institutional buying active hai. Quant model {p_up}% directional probability ({hit_rate}% hit rate) maintain karta hai with invalidation floor at {inv_str}."
+                    reply_text = f"{comp['name']} currently ₹{comp['price']:,.2f} ({comp.get('change', '+0.0%')}) par trade kar raha hai. 20-day VWAP ₹{vwap_lvl:,.2f} ke upar institutional buying active hai, with {p_up}% directional probability towards target ₹{tgt_p:,.2f} and stop loss at {inv_str}."
                 else:
-                    reply_text = f"For {comp['name']}, active institutional accumulation is sustained above 20-day VWAP ₹{vwap_lvl:,.2f}. Quantitative scoring indicates a calibrated {p_up}% upward probability ({hit_rate}% hit rate) with structural invalidation at {inv_str}."
+                    reply_text = f"{comp['name']} is currently trading at ₹{comp['price']:,.2f} ({comp.get('change', '+0.0%')}). Institutional accumulation is sustained above 20-day VWAP ₹{vwap_lvl:,.2f}, with {p_up}% directional probability towards target ₹{tgt_p:,.2f} and structural stop floor at {inv_str}."
 
     # Strip markdown bold asterisks and attach group disambiguation if needed
     if reply_text:
