@@ -5,6 +5,7 @@ import Ticker from "./components/Ticker";
 import FloatingAssistant from "./components/FloatingAssistant";
 import { useNavigation } from "./hooks/useNavigation";
 import { useBackendStatus } from "./hooks/useBackendStatus";
+import { apiClient } from "./api/client";
 
 // Page Components
 import DashboardPage from "./pages/DashboardPage";
@@ -34,6 +35,73 @@ export default function App() {
   const [assistantInitialTab, setAssistantInitialTab] = useState("chat");
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [globalSearch, setGlobalSearch] = useState("");
+
+  // Route every microphone request to the single Deepgram-backed Alex capture flow.
+  useEffect(() => {
+    const openVoiceAssistant = () => {
+      setAssistantInitialTab("chat");
+      setAssistantOpen(true);
+    };
+    window.addEventListener("marketmind:open_voice_assistant", openVoiceAssistant);
+    return () => window.removeEventListener("marketmind:open_voice_assistant", openVoiceAssistant);
+  }, []);
+
+  // Dashboard ambient wake word listener ("Hey Alex")
+  useEffect(() => {
+    if (assistantOpen || isMicMuted) return undefined;
+    const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognitionClass) return undefined;
+
+    let recognition = null;
+    let disposed = false;
+
+    const startWakeRecognition = () => {
+      if (disposed) return;
+      try {
+        recognition = new SpeechRecognitionClass();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-IN";
+
+        recognition.onresult = (event) => {
+          let heard = "";
+          for (let i = 0; i < event.results.length; ++i) {
+            heard += event.results[i][0].transcript + " ";
+          }
+          const lower = heard.toLowerCase().trim();
+          const match = lower.match(/\b(?:hey|hi|hello)?\s*(?:alex|alexa)\b\s*(.*)/i);
+          if (match) {
+            const query = match[1]?.trim() || "Hey Alex";
+            window.dispatchEvent(new CustomEvent("marketmind:voice_wake_query", { detail: query }));
+            setAssistantInitialTab("chat");
+            setAssistantOpen(true);
+            try { recognition.abort(); } catch (e) {}
+          }
+        };
+
+        recognition.onerror = () => {};
+
+        recognition.onend = () => {
+          if (!disposed && !assistantOpen && !isMicMuted) {
+            setTimeout(startWakeRecognition, 1200);
+          }
+        };
+
+        recognition.start();
+      } catch (err) {
+        // Browser mic access policy or already running
+      }
+    };
+
+    startWakeRecognition();
+
+    return () => {
+      disposed = true;
+      if (recognition) {
+        try { recognition.abort(); } catch (e) {}
+      }
+    };
+  }, [assistantOpen, isMicMuted]);
 
   // Global Autonomous Voice Action Listener
   useEffect(() => {
@@ -114,171 +182,6 @@ export default function App() {
       window.removeEventListener("marketmind:voice_action", handleAutonomousVoiceAction);
     };
   }, [goPage, currentPage]);
-
-  // Ambient Hands-Free Wake Word Detector ("Hey Alex", "Hey Alexa", "Hey MarketPulse", "Hey Pulse")
-  useEffect(() => {
-    if (assistantOpen || isMicMuted) return;
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-
-    let ambientRec = null;
-    let isDisposed = false;
-    let isListening = false;
-    let retryTimeout = null;
-    let watchdogTimer = null;
-    let lastLiveHeardAt = Date.now();
-
-    const stopExisting = () => {
-      isListening = false;
-      if (ambientRec) {
-        try {
-          ambientRec.onresult = null;
-          ambientRec.onerror = null;
-          ambientRec.onend = null;
-          ambientRec.onstart = null;
-          ambientRec.stop();
-        } catch (e) {}
-        try {
-          ambientRec.abort();
-        } catch (e) {}
-        ambientRec = null;
-      }
-    };
-
-    const scheduleRetry = (delayMs = 600) => {
-      if (isDisposed) return;
-      if (retryTimeout) clearTimeout(retryTimeout);
-      retryTimeout = setTimeout(() => {
-        if (!isDisposed && !assistantOpen && !isMicMuted) {
-          startWakeWordListener();
-        }
-      }, delayMs);
-    };
-
-    const startWakeWordListener = () => {
-      if (isDisposed || assistantOpen || isMicMuted) return;
-      stopExisting();
-
-      try {
-        ambientRec = new SpeechRecognition();
-        ambientRec.continuous = true;
-        ambientRec.interimResults = true;
-        ambientRec.lang = "en-IN";
-
-        ambientRec.onstart = () => {
-          isListening = true;
-          lastLiveHeardAt = Date.now();
-        };
-
-        ambientRec.onsoundstart = () => {
-          lastLiveHeardAt = Date.now();
-        };
-
-        ambientRec.onresult = (event) => {
-          lastLiveHeardAt = Date.now();
-          let text = "";
-          for (let i = event.resultIndex; i < event.results.length; ++i) {
-            text += event.results[i][0].transcript;
-          }
-          const lower = text.toLowerCase().trim();
-          const wakeKeywords = [
-            "hey alex",
-            "hey alexa",
-            "alex",
-            "alexa",
-            "hey elix",
-            "hey alix",
-            "hey alice",
-            "ay alex",
-            "hai alex",
-            "oye alex",
-            "alex suno",
-            "sun alex",
-            "hey pulse",
-            "hey market pulse",
-            "hey marketpulse",
-            "marketpulse",
-            "hey marketmind",
-            "marketmind",
-            "मार्केटपल्स"
-          ];
-
-          const foundWake = wakeKeywords.find((w) => lower.includes(w));
-          if (foundWake) {
-            console.log("🎙️ Ambient Wake Word Triggered:", text);
-            isListening = false;
-            stopExisting();
-
-            setAssistantOpen(true);
-            setAssistantInitialTab("chat");
-
-            // Extract query payload after the wake keyword
-            const remaining = lower.split(foundWake).pop().trim();
-            const finalQuery = remaining.length > 1 ? remaining : "hey alex";
-
-            setTimeout(() => {
-              window.dispatchEvent(
-                new CustomEvent("marketmind:voice_wake_query", { detail: finalQuery })
-              );
-            }, 300);
-          }
-        };
-
-        ambientRec.onerror = () => {
-          isListening = false;
-          scheduleRetry(800);
-        };
-
-        ambientRec.onend = () => {
-          isListening = false;
-          if (!isDisposed && !assistantOpen && !isMicMuted) {
-            scheduleRetry(400);
-          }
-        };
-
-        ambientRec.start();
-        isListening = true;
-        lastLiveHeardAt = Date.now();
-      } catch (err) {
-        console.warn("Ambient mic status (scheduling recovery):", err);
-        isListening = false;
-        scheduleRetry(1000);
-      }
-    };
-
-    // 400ms breathing room when modal closes to allow hardware mic release
-    const initialStartTimer = setTimeout(() => {
-      startWakeWordListener();
-    }, 400);
-
-    // Watchdog: Runs every 2.5s. If idle for >25s, seamlessly refreshes Chrome recognition to avoid silent zombie state
-    watchdogTimer = setInterval(() => {
-      if (isDisposed || assistantOpen || isMicMuted) return;
-      if (!isListening || Date.now() - lastLiveHeardAt > 25000) {
-        startWakeWordListener();
-      }
-    }, 2500);
-
-    const handleVisibilityOrFocus = () => {
-      if (!document.hidden && !assistantOpen && !isMicMuted) {
-        startWakeWordListener();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
-    window.addEventListener("focus", handleVisibilityOrFocus);
-
-    return () => {
-      isDisposed = true;
-      clearTimeout(initialStartTimer);
-      if (retryTimeout) clearTimeout(retryTimeout);
-      if (watchdogTimer) clearInterval(watchdogTimer);
-      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
-      window.removeEventListener("focus", handleVisibilityOrFocus);
-      stopExisting();
-    };
-  }, [assistantOpen, isMicMuted]);
 
   const openAssistant = (tab = "chat") => {
     setAssistantInitialTab(tab);
