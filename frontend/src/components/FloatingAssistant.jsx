@@ -194,6 +194,14 @@ export default function FloatingAssistant({
     }
   }, [isPlayingAudio]);
 
+  // When assistant panel closes, immediately stop speech recognition & audio to completely release microphone
+  useEffect(() => {
+    if (!isOpen) {
+      if (typeof stopListening === "function") stopListening();
+      if (typeof stopAudioPlayback === "function") stopAudioPlayback();
+    }
+  }, [isOpen, stopListening, stopAudioPlayback]);
+
   // Close assistant when clicking outside of panel
   useEffect(() => {
     if (!isOpen) return;

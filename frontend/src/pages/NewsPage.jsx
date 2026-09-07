@@ -598,12 +598,47 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
   const [expandedRippleId, setExpandedRippleId] = useState(null);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   const [selectedNewsArticle, setSelectedNewsArticle] = useState(null);
-  const [expandedDetailNewsId, setExpandedDetailNewsId] = useState("seed-sebi-cas-derivative");
+  const [expandedDetailNewsId, setExpandedDetailNewsId] = useState(null);
+  const [expandedStoryIds, setExpandedStoryIds] = useState(() => new Set());
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const top = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      setIsScrolled(top > 80);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+    handleScroll();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, []);
+
+  const toggleStoryExpand = (id) => {
+    setExpandedStoryIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  // Pagination: 30 stories per page (< > controls at top)
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 30;
 
   // Dynamic category switch handler with real-time sector telemetry update
   const handleCategoryChange = async (c) => {
     if (filter === c) return;
     setFilter(c);
+    setCurrentPage(1);
     setIsCategoryLoading(true);
     try {
       const res = await apiClient.get(`/api/news?filter=${encodeURIComponent(c)}`);
@@ -705,7 +740,7 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
     };
 
     fetchNews();
-    const interval = setInterval(fetchNews, 25000); // Poll every 25 seconds for rapid arrival
+    const interval = setInterval(fetchNews, 60000); // Poll once per minute (gentle background sync, no spam)
     return () => {
       mounted = false;
       clearInterval(interval);
@@ -845,6 +880,16 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
 
     return result;
   })();
+
+  // Reset pagination to page 1 whenever category filter or search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, activeSearch]);
+
+  const totalPages = Math.max(1, Math.ceil(displayedNews.length / ITEMS_PER_PAGE));
+  const currentSafePage = Math.min(currentPage, totalPages);
+  const startIndex = (currentSafePage - 1) * ITEMS_PER_PAGE;
+  const paginatedNews = displayedNews.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handleTickerClick = (sym) => {
     window.__SELECTED_STOCK_SYMBOL = sym;
@@ -996,6 +1041,72 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
 
   return (
     <div className="grid">
+      {/* Floating Top-Right Popup Widget when Scrolled (On Top + Page Switch) */}
+      {isScrolled && displayedNews.length > 0 && (
+        <div className="news-floating-scroll-popup" title={`Page ${currentSafePage} of ${totalPages}`}>
+          {/* 1. On Top Button */}
+          <button
+            type="button"
+            className="scroll-popup-top-btn"
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            title="Scroll to Top of News Page"
+          >
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5" />
+              <polyline points="5 12 12 5 19 12" />
+            </svg>
+            <span>Top</span>
+          </button>
+
+          {/* 2. Vertical Divider */}
+          <span className="scroll-popup-divider" />
+
+          {/* 3. Page Switch (Email style 1-30 of 62 < >) */}
+          <div className="scroll-popup-page-switch">
+            <span className="scroll-popup-page-text">
+              {startIndex + 1}–{Math.min(startIndex + ITEMS_PER_PAGE, displayedNews.length)} <span className="scroll-popup-of">of</span> {displayedNews.length}
+            </span>
+            <div className="scroll-popup-nav-btns">
+              <button
+                type="button"
+                className="scroll-popup-nav-btn"
+                disabled={currentSafePage <= 1}
+                onClick={() => {
+                  setCurrentPage((p) => Math.max(1, p - 1));
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                title="Previous page"
+                aria-label="Previous page"
+              >
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="scroll-popup-nav-btn"
+                disabled={currentSafePage >= totalPages}
+                onClick={() => {
+                  setCurrentPage((p) => Math.min(totalPages, p + 1));
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                title="Next page"
+                aria-label="Next page"
+              >
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {selectedNewsArticle ? (
         <div className="c12 news-detail-fullwidth-wrapper" style={{ gridColumn: "1 / -1", width: "100%" }}>
           <NewsDetailView
@@ -1010,7 +1121,48 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
           {/* 1. Header & Search / Filter Controls */}
           <div className="page-banner news-banner-header">
             <div className="news-header-titles">
-              <h2>Institutional Financial News &amp; Impact Engine</h2>
+              <div className="news-header-top-row">
+                <h2>Institutional Financial News &amp; Impact Engine</h2>
+                {displayedNews.length > 0 && (
+                  <div className="news-email-pagination" title={`Showing page ${currentSafePage} of ${totalPages}`}>
+                    <span className="email-page-info">
+                      {startIndex + 1}–{Math.min(startIndex + ITEMS_PER_PAGE, displayedNews.length)} of {displayedNews.length}
+                    </span>
+                    <div className="email-page-nav-btns">
+                      <button
+                        type="button"
+                        className="email-nav-btn"
+                        disabled={currentSafePage <= 1}
+                        onClick={() => {
+                          setCurrentPage((p) => Math.max(1, p - 1));
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        title="Previous page"
+                        aria-label="Previous page"
+                      >
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="15 18 9 12 15 6" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        className="email-nav-btn"
+                        disabled={currentSafePage >= totalPages}
+                        onClick={() => {
+                          setCurrentPage((p) => Math.min(totalPages, p + 1));
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        title="Next page"
+                        aria-label="Next page"
+                      >
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <p>Real-time algorithmic ingestion from NSE Disclosures, BSE Announcements, SEBI Circulars, RBI Monetary Policy, Google News RSS, and Company IR pages.</p>
             </div>
 
@@ -1127,8 +1279,9 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
             </div>
           ) : null}
 
-          {/* 4. Feed of News Articles */}
-          {displayedNews.map((n, i) => {
+
+          {/* 4. Feed of News Articles (Exactly 30 per page) */}
+          {paginatedNews.map((n, i) => {
             const isBullish = n.sentiment === "Bullish" || n.impact?.includes("+");
             const isBearish = n.sentiment === "Bearish" || n.impact?.includes("-");
             const sentimentClass = isBullish ? "benefit" : isBearish ? "loss" : "neutral";
@@ -1136,7 +1289,7 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
             const isRippleOpen = expandedRippleId === (n.id || i);
             const isCopilotActive = activeNewsForCopilot?.id === n.id;
             const cardKey = n.id || n.title || i;
-            const isDetailOpen = expandedDetailNewsId === cardKey || (expandedDetailNewsId === "seed-sebi-cas-derivative" && (n.id === "seed-sebi-cas-derivative" || n.title?.includes("Settlement Price")));
+            const isDetailOpen = expandedDetailNewsId === cardKey;
             const sourceUrl = n.link && n.link.startsWith("http")
               ? n.link
               : `https://news.google.com/search?q=${encodeURIComponent(n.title)}`;
@@ -1198,12 +1351,24 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
                     </div>
                   </div>
 
-                  <span className={`impact-tag ${sentimentClass}`}>
-                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                      {sentimentClass === "neutral" ? <path d="M8 12h8" /> : isBullish ? <path d="M5 12h14M13 6l6 6-6 6" /> : <path d="M19 12H5M11 18l-6-6 6-6" />}
+                  {/* Top-Right Direct Source Link Button */}
+                  <a
+                    href={sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="news-top-source-btn"
+                    onClick={(e) => e.stopPropagation()}
+                    title={`View original story on ${n.source || 'Verified Source'}`}
+                  >
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                     </svg>
-                    {n.sentiment || (isBullish ? "Bullish Catalyst" : "Macro Neutral")}
-                  </span>
+                    <span>Source: {n.source ? n.source.split('&')[0].trim() : "Verified Article"}</span>
+                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" />
+                    </svg>
+                  </a>
                 </div>
 
                 {/* Headline */}
@@ -1215,24 +1380,98 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
                   {n.title}
                 </h3>
 
-                {/* Exact Actual News Story / Official Disclosure Content */}
-                {(n.full_content || n.what_happened || n.summary) && (
-                  <div
-                    className="news-exact-story-card news-clickable-headline"
-                    onClick={() => setExpandedDetailNewsId(isDetailOpen ? null : cardKey)}
-                    style={{ cursor: "pointer" }}
-                    title="Click to toggle full Institutional News Detail Analysis inside this box"
-                  >
-                    <div className="exact-story-badge-row">
-                      <span className="exact-story-badge">
-                        News Article :
-                      </span>
+                {/* Exact Actual News Story / Official Disclosure Content (3-4 lines default with Read More...) */}
+                {(() => {
+                  const rawStory = n.full_content || n.what_happened || n.summary || "";
+                  // Strip PDF/regulatory page header/footer artifacts like "Page 1 of 2", "Page 2 of 2", "PR No.53/2026"
+                  const storyText = rawStory
+                    .replace(/\bPage\s+\d+\s+of\s+\d+\b/gi, "")
+                    .replace(/\bPR\s+No\.?\s*[\w\d\.\-/]+/gi, "")
+                    .replace(/\bPage\s+\d+\b/gi, "")
+                    .replace(/\s{2,}/g, " ")
+                    .trim();
+
+                  const paragraphs = storyText
+                    .split(/\n\n+|\r\n\r\n+/)
+                    .map((p) => {
+                      let cleaned = p.trim();
+                      cleaned = cleaned.replace(/^\s*(?:and|also|moreover)\s+/i, "");
+                      if (cleaned.length > 0) {
+                        cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+                      }
+                      return cleaned;
+                    })
+                    .filter((p) => p.length > 0);
+                  if (paragraphs.length === 0) return null;
+
+                  const isStoryOpen = expandedStoryIds.has(cardKey);
+                  const isLongStory = paragraphs.length > 1 || (paragraphs[0] && paragraphs[0].length > 200);
+
+                  return (
+                    <div className="news-exact-story-card">
+                      <div className="exact-story-badge-row">
+                        <span className="exact-story-badge">
+                          News Article :
+                        </span>
+                        {paragraphs.length > 1 && (
+                          <span className="exact-story-full-pill">
+                            {isStoryOpen ? `Full Article (${paragraphs.length} paragraphs)` : `${paragraphs.length} paragraphs`}
+                          </span>
+                        )}
+                      </div>
+
+                      {!isStoryOpen ? (
+                        <div className="exact-story-collapsed-wrap">
+                          <div
+                            className="exact-story-collapsed-text"
+                            onClick={() => isLongStory && toggleStoryExpand(cardKey)}
+                            title={isLongStory ? "Click to expand full article" : undefined}
+                          >
+                            <p className="exact-story-paragraph exact-story-clamped-3">
+                              {paragraphs[0]}
+                            </p>
+                          </div>
+                          {isLongStory && (
+                            <button
+                              type="button"
+                              className="exact-story-read-more-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleStoryExpand(cardKey);
+                              }}
+                              title="Read full article"
+                            >
+                              Read more...
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="exact-story-expanded-wrap">
+                          <div className="exact-story-body">
+                            {paragraphs.map((para, pIdx) => (
+                              <p key={pIdx} className="exact-story-paragraph">
+                                {para}
+                              </p>
+                            ))}
+                          </div>
+                          {isLongStory && (
+                            <button
+                              type="button"
+                              className="exact-story-read-more-btn show-less-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleStoryExpand(cardKey);
+                              }}
+                              title="Collapse article"
+                            >
+                              Show less ▲
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <p className="exact-story-paragraph">
-                      {n.full_content || n.what_happened || n.summary}
-                    </p>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Pointwise Institutional Takeaways */}
                 {Array.isArray(n.points) && n.points.length > 0 && (
@@ -1468,18 +1707,6 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
                       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 5L6 9H2v6h4l5 4V5z" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" /></svg>
                       {isCurrentlySpeaking ? "Stop Voice Brief" : "Listen to AI Brief"}
                     </button>
-
-                    {/* Verified Direct Source Link */}
-                    <a
-                      href={sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="news-footer-btn source-link-btn"
-                      title={`View original story on ${n.source || 'News Source'}`}
-                    >
-                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
-                      Source: {n.source ? n.source.split('&')[0].trim() : "Verified Disclosure"} ↗
-                    </a>
                   </div>
                 </div>
 
@@ -1498,6 +1725,7 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
               </div>
             );
           })}
+
         </>
       )}
 

@@ -107,21 +107,57 @@ export default function App() {
 
   // Ambient Hands-Free Wake Word Detector ("Hey Alex", "Hey Alexa", "Hey MarketPulse", "Hey Pulse")
   useEffect(() => {
-    if (assistantOpen || isMicMuted) return; // Release mic when assistant modal is active or mic is muted
+    if (assistantOpen || isMicMuted) return;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
     let ambientRec = null;
-    let isStopped = false;
+    let isDisposed = false;
+    let isListening = false;
+    let retryTimeout = null;
+    let watchdogTimer = null;
+
+    const stopExisting = () => {
+      isListening = false;
+      if (ambientRec) {
+        try {
+          ambientRec.onresult = null;
+          ambientRec.onerror = null;
+          ambientRec.onend = null;
+          ambientRec.onstart = null;
+          ambientRec.stop();
+        } catch (e) {}
+        try {
+          ambientRec.abort();
+        } catch (e) {}
+        ambientRec = null;
+      }
+    };
+
+    const scheduleRetry = (delayMs = 1000) => {
+      if (isDisposed) return;
+      if (retryTimeout) clearTimeout(retryTimeout);
+      retryTimeout = setTimeout(() => {
+        if (!isDisposed && !assistantOpen && !isMicMuted) {
+          startWakeWordListener();
+        }
+      }, delayMs);
+    };
 
     const startWakeWordListener = () => {
-      if (isStopped) return;
+      if (isDisposed || assistantOpen || isMicMuted) return;
+      stopExisting();
+
       try {
         ambientRec = new SpeechRecognition();
         ambientRec.continuous = true;
         ambientRec.interimResults = true;
         ambientRec.lang = "en-IN";
+
+        ambientRec.onstart = () => {
+          isListening = true;
+        };
 
         ambientRec.onresult = (event) => {
           let text = "";
@@ -144,10 +180,8 @@ export default function App() {
           const foundWake = wakeKeywords.find((w) => lower.includes(w));
           if (foundWake) {
             console.log("🎙️ Ambient Wake Word Triggered:", text);
-            isStopped = true;
-            try {
-              ambientRec.stop();
-            } catch (e) {}
+            isListening = false;
+            stopExisting();
 
             setAssistantOpen(true);
             setAssistantInitialTab("chat");
@@ -165,32 +199,57 @@ export default function App() {
         };
 
         ambientRec.onerror = () => {
-          // Keep ambient listener silent on transient mic pauses
+          isListening = false;
+          scheduleRetry(1000);
         };
 
         ambientRec.onend = () => {
-          if (!isStopped) {
-            setTimeout(startWakeWordListener, 1000);
+          isListening = false;
+          if (!isDisposed && !assistantOpen && !isMicMuted) {
+            scheduleRetry(800);
           }
         };
 
         ambientRec.start();
+        isListening = true;
       } catch (err) {
-        console.warn("Ambient mic status:", err);
+        console.warn("Ambient mic status (scheduling recovery):", err);
+        isListening = false;
+        scheduleRetry(1500);
       }
     };
 
-    startWakeWordListener();
+    // 450ms breathing room when modal closes to allow hardware mic release
+    const initialStartTimer = setTimeout(() => {
+      startWakeWordListener();
+    }, 450);
+
+    // Watchdog: Runs every 2.5s to revive listener if Chrome silently kills it after long idle periods
+    watchdogTimer = setInterval(() => {
+      if (!isDisposed && !assistantOpen && !isMicMuted && !isListening) {
+        startWakeWordListener();
+      }
+    }, 2500);
+
+    const handleVisibilityOrFocus = () => {
+      if (!document.hidden && !assistantOpen && !isMicMuted && !isListening) {
+        startWakeWordListener();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+    window.addEventListener("focus", handleVisibilityOrFocus);
 
     return () => {
-      isStopped = true;
-      if (ambientRec) {
-        try {
-          ambientRec.stop();
-        } catch (e) {}
-      }
+      isDisposed = true;
+      clearTimeout(initialStartTimer);
+      if (retryTimeout) clearTimeout(retryTimeout);
+      if (watchdogTimer) clearInterval(watchdogTimer);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      stopExisting();
     };
-  }, [assistantOpen]);
+  }, [assistantOpen, isMicMuted]);
 
   const openAssistant = (tab = "chat") => {
     setAssistantInitialTab(tab);
