@@ -1,6 +1,32 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { apiClient } from "../api/client";
 
+// Detect if a spoken phrase ends with an incomplete connector or dangling preposition
+const isIncompleteUtterance = (text) => {
+  const clean = (text || "").trim().toLowerCase();
+  if (!clean) return true;
+  const words = clean.split(/\s+/);
+  const lastWord = words[words.length - 1];
+
+  const danglingEndings = new Set([
+    "the", "a", "an", "of", "to", "for", "in", "on", "at", "about", "with", "and", "or",
+    "is", "are", "was", "were", "what", "which", "how", "show", "tell", "check", "find",
+    "can", "could", "will", "would", "should", "me", "my", "your", "its", "our",
+    "ka", "ki", "ke", "ko", "me", "mein", "par", "se", "aur", "ya", "kya", "hai", "hain", "batao", "dikhao"
+  ]);
+
+  if (danglingEndings.has(lastWord)) return true;
+
+  const incompleteStarters = [
+    "show me the", "show me", "tell me about", "tell me", "what is the", "what is",
+    "what about", "how is the", "can you show", "can you tell", "please show",
+    "mujhe dikhao", "mujhe batao", "kya chal raha", "bataiye", "bhav kya", "price of"
+  ];
+  if (incompleteStarters.includes(clean)) return true;
+
+  return false;
+};
+
 export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMuted = false) {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -441,6 +467,41 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       return;
     }
 
+    // Incomplete phrase check (e.g. user stopped after saying "show me the" or "tell me about")
+    const words = cleanText.split(/\s+/);
+    const isIncomplete = isIncompleteUtterance(cleanText);
+    if (isIncomplete && words.length <= 3) {
+      const askClarify = languageRef.current === "hindi"
+        ? "हाँजी, बताइए आप किस शेयर, चार्ट या सेटअप को देखना चाहते हैं?"
+        : "I'm listening! Which stock, chart, or setup would you like me to show?";
+
+      const userMsg = {
+        id: `user-${Date.now()}`,
+        sender: "user",
+        text: cleanText,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        isVoice: isVoice,
+      };
+      const botMsg = {
+        id: `bot-${Date.now() + 1}`,
+        sender: "bot",
+        text: askClarify,
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        isVoice: isVoice,
+      };
+      setMessages((prev) => [...prev, userMsg, botMsg]);
+
+      if (isVoice && !isMicMutedRef.current) {
+        continuousModeRef.current = true;
+        setIsContinuousMode(true);
+      }
+
+      if (!isSpeakerMutedRef.current) {
+        speakText(askClarify, languageRef.current);
+      }
+      return;
+    }
+
     isSubmittingRef.current = true;
 
     if (silenceTimerRef.current) {
@@ -649,8 +710,8 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
           ? `${matchedName} (${matchedSymbol}) का लाइव भाव ₹${matchedPrice || "2,950.00"} (${matchedChange || "+0.4%"}) है। लाइव टेलीमेट्री और चार्ट स्क्रीन पर लोड कर दिया गया है।`
           : `${matchedName} (${matchedSymbol}) is currently trading at ₹${matchedPrice || "2,950.00"} (${matchedChange || "+0.4%"}). Live quantitative telemetry and interactive chart are open on screen.`)
         : (currentLang === "hindi"
-          ? "आज बाजार में अनुशासित संस्थागत संचय जारी है। प्रमुख इंडेक्स स्तर और सेक्टर इनफ्लो स्थिर बने हुए हैं।"
-          : "Market is steady today. Major index supports and institutional inflows remain intact.");
+          ? "मैं शेयर का नाम पूरी तरह समझ नहीं पाया। आप किस भारतीय कंपनी, शेयर या चार्ट का विश्लेषण करना चाहते हैं?"
+          : "I couldn't clearly catch the stock name. Which Indian company, stock, or setup would you like to analyze?");
 
       const fallbackMsg = {
         id: `bot-${Date.now()}`,
@@ -720,8 +781,12 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
 
       // Loop across ALL results (0 to results.length) so finalized chunks are never erased during speech pauses
       let fullTranscript = "";
+      let hasInterim = false;
       for (let i = 0; i < event.results.length; ++i) {
         fullTranscript += event.results[i][0].transcript + " ";
+        if (!event.results[i].isFinal) {
+          hasInterim = true;
+        }
       }
       const cleanTranscript = fullTranscript.trim();
       const currentLower = cleanTranscript.toLowerCase();
@@ -767,14 +832,24 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       // Reset silence timer on every new speech chunk
       if (silenceTimerRef.current) {
         clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
       }
 
-      // Ultra-low-latency Adaptive Voice Activity Detection (VAD)
-      // Instant wake triggers (120ms), rapid stock queries (380ms), full queries (520ms)
+      // If user is still actively uttering an interim word or phrase, DO NOT SUBMIT!
+      // Give them space to complete their sentence cleanly.
+      if (hasInterim) {
+        return;
+      }
+
+      // Adaptive Natural Voice Activity Detection (VAD)
       const lower = cleanTranscript.toLowerCase().trim();
-      const isGreeting = ["hey alex", "hey alexa", "alex", "alexa", "hello", "hi", "hey", "नमस्ते"].includes(lower);
-      const words = cleanTranscript.trim().split(/\s+/);
-      const vadDelay = isGreeting ? 120 : (words.length <= 3 ? 380 : 520);
+      const isStandaloneGreeting = ["hey alex", "hey alexa", "alex", "alexa", "hello", "hi", "hey", "नमस्ते"].includes(lower);
+      const incomplete = isIncompleteUtterance(cleanTranscript);
+
+      // - Standalone greeting ("Hey Alex"): 350ms (quick response)
+      // - Incomplete sentence ("show me the", "tell me about"): 2200ms (ample room to speak next word without interruption)
+      // - Complete sentences: 1100ms (natural, comfortable conversation pause so words are never cut in half)
+      const vadDelay = isStandaloneGreeting ? 350 : (incomplete ? 2200 : 1100);
 
       silenceTimerRef.current = setTimeout(() => {
         if (isMicMutedRef.current || isPlayingAudioRef.current) return;
