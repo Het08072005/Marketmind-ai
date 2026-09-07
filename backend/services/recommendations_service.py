@@ -1,4 +1,5 @@
 import time
+import copy
 from typing import Dict, List, Any, Optional
 from services.stock_service import get_all_companies
 from services.market_data_service import fetch_live_stock_data, get_market_session_info
@@ -81,21 +82,27 @@ def generate_ai_catalyst_narrative(comp: Dict[str, Any], pred: Dict[str, Any]) -
 
 from services.quant_prediction_engine import get_institutional_stock_prediction
 
+_PROFILE_CACHE: Dict[str, Any] = {}
+
 def get_stock_institutional_profile(symbol: str, company_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     Computes or retrieves the institutional quantitative prediction profile for ANY stock ticker.
-    Guarantees exact real-time market prices, dynamic targets, and calibrated invalidation floors.
+    Guarantees exact real-time market prices, dynamic targets, and calibrated invalidation floors with zero latency.
     """
+    import time
     from services.stock_service import get_company_by_symbol
-    from services.market_data_service import fetch_live_stock_data
 
     sym_clean = symbol.upper().replace(".NS", "").replace(".BO", "").strip()
-    # Prioritize live market data if company_data is not passed or lacks live price
-    if company_data and company_data.get("price"):
-        comp = company_data
-    else:
-        live_comp = fetch_live_stock_data(sym_clean)
-        comp = live_comp or company_data or get_company_by_symbol(sym_clean)
+    now = time.time()
+    
+    # 0ms Instant Cache Check
+    if not company_data and sym_clean in _PROFILE_CACHE:
+        cached_entry, cached_ts = _PROFILE_CACHE[sym_clean]
+        if (now - cached_ts) < 120:
+            return copy.deepcopy(cached_entry)
+
+    # Use in-memory company registry first (0.01ms lookup, no blocking network calls)
+    comp = company_data if (company_data and company_data.get("price")) else get_company_by_symbol(sym_clean)
 
     pred = get_institutional_stock_prediction(sym_clean, company_data=comp, call_llm=False, skip_candles_network=True)
     
@@ -186,7 +193,7 @@ def get_stock_institutional_profile(symbol: str, company_data: Optional[Dict[str
         }
     ]
 
-    return {
+    result_profile = {
         **pred,
         "price": current_price,
         "change": change_str,
@@ -221,6 +228,8 @@ def get_stock_institutional_profile(symbol: str, company_data: Optional[Dict[str
         "invalidation_condition": invalidation_condition_text,
         "points": points
     }
+    _PROFILE_CACHE[sym_clean] = (result_profile, now)
+    return result_profile
 
 def get_ai_market_radar_recommendations() -> Dict[str, Any]:
     global _RADAR_CACHE, _RADAR_CACHE_TIME

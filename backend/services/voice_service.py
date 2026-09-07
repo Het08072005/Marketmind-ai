@@ -22,7 +22,6 @@ if settings.GEMINI_API_KEY:
 FAST_GEMINI_MODELS = [
     "gemini-flash-lite-latest",
     "gemini-3.1-flash-lite-preview",
-    "gemini-2.5-flash-lite",
     "gemini-flash-latest"
 ]
 
@@ -682,12 +681,12 @@ async def generate_autonomous_agent_response(
         "pe_ratio": 24.5
     }
 
-    # Fetch technical candle indicators with ultra-fast 0.8s timeout so Gemini responds in <1.5s
+    # Fetch technical candle indicators from memory cache (0ms) or background warm (max 0.15s) so voice response is instantaneous
     candles_info = {}
     try:
         candles_info = await asyncio.wait_for(
             asyncio.to_thread(get_stock_historical_candles, detected_symbol),
-            timeout=0.8
+            timeout=0.15
         )
         if candles_info and candles_info.get("candles") and len(candles_info["candles"]) > 0:
             live_candle_close = float(candles_info["candles"][-1]["close"])
@@ -700,6 +699,8 @@ async def generate_autonomous_agent_response(
                     comp["change"] = f"{'+' if diff >= 0 else ''}{diff_pct:.2f}%"
     except Exception:
         candles_info = {}
+        # Warm candle cache in background without delaying the active voice response
+        asyncio.create_task(asyncio.to_thread(get_stock_historical_candles, detected_symbol))
     rsi_val = candles_info.get("rsi") or comp.get("rsi") or 55.0
     pattern_name = candles_info.get("patterns", [{}])[0].get("name") if candles_info.get("patterns") else comp.get("pattern", "Consolidation Range")
     
@@ -2113,7 +2114,7 @@ INSTRUCTIONS:
             }
 
         from services.recommendations_service import get_stock_institutional_profile
-        quant_prof = get_stock_institutional_profile(detected_symbol)
+        quant_prof = get_stock_institutional_profile(detected_symbol, company_data=comp)
         p_up = quant_prof.get("directional_probability_up", 58.5)
         hit_rate = quant_prof.get("historical_hit_rate", 56.2)
         sample_sz = quant_prof.get("sample_size", 2500)
@@ -2171,8 +2172,8 @@ INSTRUCTIONS:
                     "The client has selected ENGLISH. Deliver your complete answer in crisp, professional institutional English without retail fluff."
                 )
                 is_detailed = any(w in q_lower for w in ["detail", "detailed", "explain more", "in-depth", "विस्तार", "vistrit", "deep dive", "pura samjhao"])
-                target_words = "between 60 and 75 words" if is_detailed else "EXACTLY 35 to 40 words"
-                max_tokens_val = 150 if is_detailed else 100
+                target_words = "between 50 and 65 words" if is_detailed else "EXACTLY 25 to 35 words"
+                max_tokens_val = 120 if is_detailed else 88
 
                 # Streamlined, ultra-fast institutional quantitative telemetry
                 system_inst = f"""You are Alex Copilot — Senior Institutional Quantitative Strategist for MarketMind AI.

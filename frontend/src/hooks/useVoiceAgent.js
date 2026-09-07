@@ -724,14 +724,20 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         clearTimeout(silenceTimerRef.current);
       }
 
-      // Voice Activity Detection (VAD): Trigger after 2.2 seconds of natural pause (never cut off early)
+      // Ultra-low-latency Adaptive Voice Activity Detection (VAD)
+      // Instant wake triggers (120ms), rapid stock queries (380ms), full queries (520ms)
+      const lower = cleanTranscript.toLowerCase().trim();
+      const isGreeting = ["hey alex", "hey alexa", "alex", "alexa", "hello", "hi", "hey", "नमस्ते"].includes(lower);
+      const words = cleanTranscript.trim().split(/\s+/);
+      const vadDelay = isGreeting ? 120 : (words.length <= 3 ? 380 : 520);
+
       silenceTimerRef.current = setTimeout(() => {
         if (isMicMutedRef.current || isPlayingAudioRef.current) return;
         const finalCandidate = transcriptRef.current.trim();
         if (finalCandidate && !isSubmittingRef.current) {
           submitQuery(finalCandidate, true);
         }
-      }, 2200);
+      }, vadDelay);
     };
 
     recognition.onerror = (e) => {
