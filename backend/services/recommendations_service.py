@@ -1,7 +1,7 @@
 import time
 from typing import Dict, List, Any, Optional
 from services.stock_service import get_all_companies
-from services.market_data_service import fetch_live_stock_data
+from services.market_data_service import fetch_live_stock_data, get_market_session_info
 
 # In-memory cache for market radar recommendations
 _RADAR_CACHE: Dict[str, Any] = {}
@@ -209,12 +209,12 @@ def get_stock_institutional_profile(symbol: str, company_data: Optional[Dict[str
         "invalidation_str": invalidation_str,
         "invalidation_low": inv_low,
         "invalidation_high": inv_high,
-        "last_trade_time": comp.get("last_trade_time", "04 Sep 2026, 15:30 IST"),
-        "trade_date": comp.get("trade_date", "04 Sep 2026"),
+        "last_trade_time": comp.get("last_trade_time") if (comp.get("last_trade_time") and "04 Sep" not in comp.get("last_trade_time")) else time.strftime("%d %b %Y, %H:%M:%S IST"),
+        "trade_date": comp.get("trade_date") if (comp.get("trade_date") and "04 Sep" not in comp.get("trade_date")) else time.strftime("%d %b %Y"),
         "data_source": comp.get("data_source", "NSE Real-Time Feed (Yahoo Finance)"),
         "exchange": comp.get("exchange", "NSE"),
-        "market_status": comp.get("market_status", "Market Closed (Weekend)"),
-        "fetch_timestamp": comp.get("fetch_timestamp", time.strftime("%d %b %Y, %H:%M:%S IST")),
+        "market_status": comp.get("market_status") or get_market_session_info()["status_text"],
+        "fetch_timestamp": time.strftime("%d %b %Y, %H:%M:%S IST"),
         "catalyst": ai_catalyst or summary_text,
         "summary": summary_text,
         "explanation": explanation_text,
@@ -312,8 +312,8 @@ def get_ai_market_radar_recommendations() -> Dict[str, Any]:
     total_actionable_dn = sum(r.get("downside_pct", 1.0) for r in actionable_recs)
     avg_rr = f"1:{round(total_actionable_up / max(total_actionable_dn, 0.1), 1)}" if actionable_recs else "1:2.4"
 
-    last_trade_time_val = recommendations[0].get("last_trade_time", "04 Sep 2026, 15:30 IST") if recommendations else "04 Sep 2026, 15:30 IST"
-    last_trade_date_val = recommendations[0].get("trade_date", "04 Sep 2026") if recommendations else "04 Sep 2026"
+    last_trade_time_val = session_info["current_time_ist"]
+    last_trade_date_val = session_info["date_ist"]
 
     result = {
         "total_tracked": len(recommendations),

@@ -15,12 +15,14 @@ import {
   Link2,
   Settings,
   ChevronRight,
+  BarChart2,
 } from "lucide-react";
 import logoImg from "../assets/marketmind-final-logo.png";
 
 export default function Sidebar({ currentPage, goPage, isOpen, onClose }) {
   const navOverview = [
     { key: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
+    { key: "overview", label: "Market Overview", icon: <BarChart2 size={18} /> },
     { key: "portfolio", label: "Portfolio Simulator", icon: <TrendingUp size={18} /> },
     { key: "voice", label: "Voice Assistant", badge: "Live", badgeType: "live", icon: <Mic size={18} /> },
     { key: "learning", label: "Learning Mode", icon: <BookOpen size={18} /> },

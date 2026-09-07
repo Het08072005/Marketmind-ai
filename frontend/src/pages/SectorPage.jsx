@@ -110,6 +110,18 @@ export default function SectorPage() {
     return () => window.removeEventListener("marketmind:voice_action", handleVoiceAction);
   }, []);
 
+  // Sync selected symbol from global stock changed events
+  useEffect(() => {
+    const handleStockChanged = (e) => {
+      const sym = (e.detail?.symbol || "").toUpperCase();
+      if (sym) {
+        setSelectedSymbol(sym);
+      }
+    };
+    window.addEventListener("marketmind:stock_changed", handleStockChanged);
+    return () => window.removeEventListener("marketmind:stock_changed", handleStockChanged);
+  }, []);
+
   // Fetch intelligence data whenever selectedSymbol changes
   useEffect(() => {
     let isMounted = true;

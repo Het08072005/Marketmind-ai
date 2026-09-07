@@ -547,15 +547,12 @@ export default function DominoPage({ goPage }) {
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
           <div>
-            <div style={{ fontSize: "11px", letterSpacing: "1.5px", textTransform: "uppercase", color: "#D9BC8B", fontWeight: 700, marginBottom: "4px" }}>
+            <div style={{ fontSize: "11px", letterSpacing: "1.5px", textTransform: "uppercase", color: "#D9BC8B", fontWeight: 700, marginBottom: "6px" }}>
               FLAGSHIP · CAUSAL MARKET INTELLIGENCE
             </div>
-            <h1 style={{ fontFamily: "EB Garamond, serif", fontSize: "32px", fontWeight: 600, margin: "0 0 8px 0", color: "#FFFEFB" }}>
-              Market Domino Predictor
-            </h1>
-            <h3 style={{ fontFamily: "Inter, sans-serif", fontSize: "18px", fontWeight: 600, margin: "0 0 8px 0", color: "#D9BC8B" }}>
+            <h2 style={{ fontFamily: "EB Garamond, serif", fontSize: "24px", fontWeight: 600, margin: "0 0 8px 0", color: "#FFFEFB" }}>
               From “what moved?” to “what moves next — and why?”
-            </h3>
+            </h2>
             <p style={{ color: "#AFB6CC", fontSize: "13.5px", maxWidth: "880px", margin: 0, lineHeight: 1.55 }}>
               Convert any economic shock into a traceable, multi-order causal graph. Every edge carries impact direction, estimated excess-return range, lag, and calibrated confidence derived from corporate filings, historical event studies, and statistical models — while the LLM strictly serves as controller and explainer.
             </p>

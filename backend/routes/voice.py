@@ -56,10 +56,15 @@ async def voice_chat(request: ChatRequest):
         action_payload = agent_result.get("action")
 
         # Synthesize Deepgram studio-grade audio for natural human speech if available
+        # with a 2.0s fast timeout so chat response is returned immediately without waiting
         audio_b64 = None
         if lang not in ["hindi", "hi"]:
             try:
-                audio_bytes = await synthesize_speech_audio(reply_text, voice_gender=gender, language=lang)
+                import asyncio
+                audio_bytes = await asyncio.wait_for(
+                    synthesize_speech_audio(reply_text, voice_gender=gender, language=lang),
+                    timeout=2.0
+                )
                 if audio_bytes:
                     audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
             except Exception as e:

@@ -254,9 +254,26 @@ COMPANY_ALIASES = {
     "bob": "BANKBARODA",
     "eicher motors": "EICHERMOT",
     "eicher": "EICHERMOT",
-    "hero motocorp": "HEROMOTOCO",
-    "hero": "HEROMOTOCO",
 }
+
+# Automatically register all 270+ Indian equities into voice and query resolver
+try:
+    from data.companies_universe_270 import COMPREHENSIVE_270_COMPANIES
+    for c in COMPREHENSIVE_270_COMPANIES:
+        sym = c.get("symbol", "").upper()
+        name = c.get("name", "").lower()
+        if sym:
+            sym_key = sym.lower()
+            if sym_key not in COMPANY_ALIASES:
+                COMPANY_ALIASES[sym_key] = sym
+        if name:
+            if name not in COMPANY_ALIASES:
+                COMPANY_ALIASES[name] = sym
+            clean_name = name.replace("ltd", "").replace("limited", "").replace("industries", "").strip()
+            if clean_name and len(clean_name) > 2 and clean_name not in COMPANY_ALIASES:
+                COMPANY_ALIASES[clean_name] = sym
+except Exception:
+    pass
 
 def normalize_spoken_query(query: str) -> str:
     """Normalizes acronyms with dots, spaces, and phonetic quirks from speech recognition."""
@@ -472,6 +489,61 @@ def resolve_target_symbol(query: str) -> Optional[str]:
                 return tok
     except Exception:
         pass
+
+    # 3. High-precision fuzzy n-gram matching for speech recognition errors & typos
+    # Handles: "adacni entirerpice" -> ADANIENT, "relianse" -> RELIANCE, "infosis" -> INFY, etc.
+    try:
+        import difflib
+        from data.companies_universe_270 import COMPREHENSIVE_270_COMPANIES
+
+        fuzzy_targets = {}
+        for alias, sym in COMPANY_ALIASES.items():
+            fuzzy_targets[alias.lower()] = sym
+        for c in COMPREHENSIVE_270_COMPANIES:
+            sym = c["symbol"].upper()
+            name = c["name"].lower()
+            fuzzy_targets[name] = sym
+            fuzzy_targets[sym.lower()] = sym
+
+        clean_q = re.sub(r"[^a-zA-Z0-9\s]", " ", query.lower())
+        tokens = [w for w in clean_q.split() if w not in {
+            "show", "shoe", "me", "the", "share", "stock", "stocks", "shares",
+            "price", "search", "about", "ka", "ki", "ke", "ko", "dikhao",
+            "karo", "hai", "batao", "dekhna", "kholna", "please", "can",
+            "you", "tell", "what", "is", "aaj", "kal", "kaunsa", "shair"
+        }]
+
+        if tokens:
+            best_sym = None
+            best_ratio = 0.0
+            for i in range(len(tokens)):
+                for j in range(i + 1, min(i + 4, len(tokens) + 1)):
+                    candidate = " ".join(tokens[i:j])
+                    for target_name, sym in fuzzy_targets.items():
+                        if len(target_name) < 3:
+                            continue
+                        if abs(len(candidate) - len(target_name)) > 7:
+                            continue
+                        ratio = difflib.SequenceMatcher(None, candidate, target_name).ratio()
+                        if ratio > best_ratio:
+                            best_ratio = ratio
+                            best_sym = sym
+
+            if best_ratio >= 0.70:
+                # Guard 1: Do NOT match 'HAL' if query is asking for market status / 'market ka haal'
+                is_market_health = bool(re.search(r"\b(?:market\s+ka\s+h[a]*l|kya\s+h[a]*l|h[a]*l\s+kya|h[a]*l\s*chal|haal\s+kya|market\s+kaisa|market\s+overview|market\s+update)\b", clean_q))
+                if is_market_health and best_sym == "HAL":
+                    return None
+
+                # Guard 2: Do NOT match 'OIL' (Oil India) if query is asking a macro crude shock question
+                is_macro_domino = bool(re.search(r"\b(?:crude\s+oil|brent|what\s+if|oil\s+shock|crude\s+shock|rises\s+by|hikes)\b", clean_q))
+                if is_macro_domino and best_sym == "OIL":
+                    return None
+
+                return best_sym
+    except Exception as e:
+        print(f"Fuzzy symbol matching notice: {e}")
+
     return None
 
 def resolve_all_symbols(query: str) -> List[str]:
@@ -556,8 +628,8 @@ async def generate_autonomous_agent_response(
     else:
         detected_symbol = GLOBAL_SESSION_STATE.get("active_symbol") or "RELIANCE"
 
-    # Fetch live verified company data & technical candles
-    comp = fetch_live_stock_data(detected_symbol) or get_company_by_symbol(detected_symbol) or {
+    # Fetch live verified company data (instant memory lookup first, zero delay)
+    comp = get_company_by_symbol(detected_symbol) or fetch_live_stock_data(detected_symbol) or {
         "symbol": detected_symbol,
         "name": f"{detected_symbol} Ltd",
         "price": 1000.0,
@@ -969,8 +1041,13 @@ async def generate_autonomous_agent_response(
         "why is indigo", "why indigo", "why spicejet", "why is spicejet", "why ongc",
         "margin assumption", "evidence behind margin", "supporting evidence", "causal path",
         "prediction ledger", "calibrated probability", "historical analogs",
+        "what if crude", "what if oil", "what if repo", "what if rate", "what if rupee",
+        "crude rises", "oil rises", "crude oil rises", "crude badhega", "oil badhega",
         "डोमिनो", "कॉजल", "क्रूड शॉक", "ऑयल शॉक", "इंडिगो"
     ]) or (
+        ("crude" in q_lower or "oil" in q_lower or "rupee" in q_lower) and
+        any(w in q_lower for w in ["what if", "rises", "hikes", "shock", "increase", "jump", "badhe", "gire", "simulate", "impact"])
+    ) or (
         any(w in q_lower for w in ["simulate", "simule", "सिमुलेट"]) and any(w in q_lower for w in ["oil", "crude", "rate", "tariff", "shock", "domino", "रुपया"])
     ):
         from services.domino_service import simulate_domino_event
@@ -1855,9 +1932,13 @@ INSTRUCTIONS:
                 "market kaisa", "market update", "market overview", "market ka haal", "market hal",
                 "aaj market", "market view", "market direction", "market mood", "market me kya",
                 "bazaar ka haal", "bazaar kaisa", "bazar", "top gainer", "top loser", "top gainers",
-                "top losers", "overall breadth", "निफ्टी", "सेंसेक्स", "मार्केट का हाल", "बाजार"
+                "top losers", "overall breadth", "निफ्टी", "सेंसेक्स", "मार्केट का हाल", "बाजार",
+                "dashboard", "open dashboard", "go to dashboard", "open market overview",
+                "go to market overview", "show market overview", "market overview page", "dashboard page"
             ]) or (
                 "market" in q_lower and any(w in q_lower for w in ["kaisa", "kya", "update", "overview", "trend", "chal raha", "direction", "mood", "outlook"])
+            ) or (
+                q_lower in ["dashboard", "market overview", "overview", "markets"]
             )
         )
     ):
@@ -1878,7 +1959,7 @@ INSTRUCTIONS:
 
         action_payload = {
             "type": "NAVIGATE",
-            "target_page": "dashboard",
+            "target_page": "dashboard" if any(w in q_lower for w in ["dashboard", "executive", "financials", "multiples", "statements", "debt to capital"]) else "overview",
             "command": "SHOW_MARKET_OVERVIEW",
             "params": {
                 "advances": advances,
@@ -1961,10 +2042,19 @@ INSTRUCTIONS:
         stp_p = quant_prof.get("stop_loss", round(comp["price"] * (1 - dn / 100), 2))
         rr_ratio = quant_prof.get("risk_reward", "1:1.8")
 
+        is_search_intent = any(k in q_lower for k in [
+            "search", "show", "shoe", "find", "dikhao", "batao", "dekhna", "kholna",
+            "open", "filter", "dhundho", "dekho", "look", "display", "navigate", "share", "stock"
+        ])
+
         action_payload = {
-            "type": "QUANT_HIGHLIGHT",
+            "type": "SEARCH_COMPANY" if is_search_intent else "QUANT_HIGHLIGHT",
+            "command": "SEARCH_COMPANY" if is_search_intent else "QUANT_HIGHLIGHT",
+            "target_page": "overview",
             "params": {
                 "symbol": detected_symbol,
+                "name": comp.get("name", detected_symbol),
+                "query": comp.get("name", detected_symbol),
                 "support": stp_p,
                 "resistance": tgt_p,
                 "vwap": vwap_lvl,
@@ -2136,7 +2226,7 @@ async def synthesize_speech_audio(text: str, voice_gender: str = "male", languag
     payload = {"text": cleaned}
     
     try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
+        async with httpx.AsyncClient(timeout=8.0) as client:
             response = await client.post(url, headers=headers, json=payload)
             if response.status_code == 200:
                 return response.content

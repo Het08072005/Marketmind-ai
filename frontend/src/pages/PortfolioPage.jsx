@@ -439,28 +439,6 @@ export default function PortfolioPage() {
 
   return (
     <div className="grid">
-      {/* Top Banner with Mode Switcher */}
-      <div className="page-banner">
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <h2>Portfolio Simulator</h2>
-            <span
-              className="tag live"
-              style={{
-                background: "rgba(184,147,90,.15)",
-                color: "var(--gold)",
-                border: "1px solid rgba(184,147,90,.3)",
-                fontWeight: 700,
-              }}
-            >
-              ● {(simLoading ? simStock : (simResult?.symbol || simStock))} · HISTORICAL BACKTEST &amp; WHAT-IF ENGINE
-            </span>
-          </div>
-          <p>
-            Virtually replay past investments with real historical prices, benchmark comparisons, corporate action adjustments, and probabilistic scenario testing.
-          </p>
-        </div>
-      </div>
 
       {activeTab === "simulator" ? (
         <>

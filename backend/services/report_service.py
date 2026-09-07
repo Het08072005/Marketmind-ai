@@ -134,11 +134,16 @@ def generate_institutional_equity_report(symbol: str, report_type: str = "Compan
             }}
             Return JSON only. No markdown fences.
             """
-            res = gemini_client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt,
-                config={"response_mime_type": "application/json"}
-            )
+            import concurrent.futures
+            def _call_gemini():
+                return gemini_client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=prompt,
+                    config={"response_mime_type": "application/json"}
+                )
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_call_gemini)
+                res = future.result(timeout=2.0)
             if res and res.text:
                 parsed = json.loads(res.text.strip())
                 if "executive_summary" in parsed and parsed["executive_summary"]:

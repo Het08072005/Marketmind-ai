@@ -8,6 +8,7 @@ import { useBackendStatus } from "./hooks/useBackendStatus";
 
 // Page Components
 import DashboardPage from "./pages/DashboardPage";
+import MarketOverviewPage from "./pages/MarketOverviewPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import VoiceAssistantPage from "./pages/VoiceAssistantPage";
 import LearningPage from "./pages/LearningPage";
@@ -83,6 +84,15 @@ export default function App() {
       }
 
       const sym = (action.params?.symbol || action.params?.symbol1 || "").toUpperCase();
+      const companyName = action.params?.name || sym;
+
+      if (action.command === "SEARCH_COMPANY" || action.type === "SEARCH_COMPANY") {
+        setGlobalSearch(action.params?.query || companyName || sym);
+        if (currentPage !== "overview") {
+          goPage("overview");
+        }
+      }
+
       if (sym) {
         window.__SELECTED_STOCK_SYMBOL = sym;
         try {
@@ -90,12 +100,12 @@ export default function App() {
         } catch (e) {}
       }
 
-      if (action.target_page) {
+      if (action.target_page && action.target_page !== currentPage) {
         goPage(action.target_page);
       }
 
       if (sym) {
-        window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: sym } }));
+        window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: sym, name: companyName, action } }));
       }
     };
 
@@ -117,6 +127,7 @@ export default function App() {
     let isListening = false;
     let retryTimeout = null;
     let watchdogTimer = null;
+    let lastLiveHeardAt = Date.now();
 
     const stopExisting = () => {
       isListening = false;
@@ -135,7 +146,7 @@ export default function App() {
       }
     };
 
-    const scheduleRetry = (delayMs = 1000) => {
+    const scheduleRetry = (delayMs = 600) => {
       if (isDisposed) return;
       if (retryTimeout) clearTimeout(retryTimeout);
       retryTimeout = setTimeout(() => {
@@ -157,9 +168,15 @@ export default function App() {
 
         ambientRec.onstart = () => {
           isListening = true;
+          lastLiveHeardAt = Date.now();
+        };
+
+        ambientRec.onsoundstart = () => {
+          lastLiveHeardAt = Date.now();
         };
 
         ambientRec.onresult = (event) => {
+          lastLiveHeardAt = Date.now();
           let text = "";
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             text += event.results[i][0].transcript;
@@ -168,12 +185,22 @@ export default function App() {
           const wakeKeywords = [
             "hey alex",
             "hey alexa",
+            "alex",
+            "alexa",
+            "hey elix",
+            "hey alix",
+            "hey alice",
+            "ay alex",
+            "hai alex",
+            "oye alex",
+            "alex suno",
+            "sun alex",
             "hey pulse",
             "hey market pulse",
             "hey marketpulse",
-            "alexa",
-            "alex",
             "marketpulse",
+            "hey marketmind",
+            "marketmind",
             "मार्केटपल्स"
           ];
 
@@ -200,39 +227,41 @@ export default function App() {
 
         ambientRec.onerror = () => {
           isListening = false;
-          scheduleRetry(1000);
+          scheduleRetry(800);
         };
 
         ambientRec.onend = () => {
           isListening = false;
           if (!isDisposed && !assistantOpen && !isMicMuted) {
-            scheduleRetry(800);
+            scheduleRetry(400);
           }
         };
 
         ambientRec.start();
         isListening = true;
+        lastLiveHeardAt = Date.now();
       } catch (err) {
         console.warn("Ambient mic status (scheduling recovery):", err);
         isListening = false;
-        scheduleRetry(1500);
+        scheduleRetry(1000);
       }
     };
 
-    // 450ms breathing room when modal closes to allow hardware mic release
+    // 400ms breathing room when modal closes to allow hardware mic release
     const initialStartTimer = setTimeout(() => {
       startWakeWordListener();
-    }, 450);
+    }, 400);
 
-    // Watchdog: Runs every 2.5s to revive listener if Chrome silently kills it after long idle periods
+    // Watchdog: Runs every 2.5s. If idle for >25s, seamlessly refreshes Chrome recognition to avoid silent zombie state
     watchdogTimer = setInterval(() => {
-      if (!isDisposed && !assistantOpen && !isMicMuted && !isListening) {
+      if (isDisposed || assistantOpen || isMicMuted) return;
+      if (!isListening || Date.now() - lastLiveHeardAt > 25000) {
         startWakeWordListener();
       }
     }, 2500);
 
     const handleVisibilityOrFocus = () => {
-      if (!document.hidden && !assistantOpen && !isMicMuted && !isListening) {
+      if (!document.hidden && !assistantOpen && !isMicMuted) {
         startWakeWordListener();
       }
     };
@@ -260,6 +289,8 @@ export default function App() {
     switch (currentPage) {
       case "dashboard":
         return <DashboardPage goPage={goPage} openAssistant={openAssistant} searchQuery={globalSearch} onSearchChange={setGlobalSearch} />;
+      case "overview":
+        return <MarketOverviewPage goPage={goPage} openAssistant={openAssistant} searchQuery={globalSearch} onSearchChange={setGlobalSearch} />;
       case "portfolio":
         return <PortfolioPage />;
       case "voice":
@@ -296,7 +327,7 @@ export default function App() {
       case "home":
         return <HomePage goPage={goPage} openAssistant={openAssistant} />;
       default:
-        return <DashboardPage goPage={goPage} openAssistant={openAssistant} />;
+        return <DashboardPage goPage={goPage} openAssistant={openAssistant} searchQuery={globalSearch} />;
     }
   };
 
@@ -374,6 +405,13 @@ export default function App() {
           initialTab={assistantInitialTab}
           isMicMuted={isMicMuted}
           setIsMicMuted={setIsMicMuted}
+          onFabClick={() => {
+            if (currentPage === "dashboard") {
+              window.dispatchEvent(new CustomEvent("marketmind:open_dashboard_copilot"));
+              return;
+            }
+            setAssistantOpen(true);
+          }}
         />
       )}
     </div>

@@ -12,12 +12,15 @@ from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone, timedelta
 import io
+import logging
 try:
-    import pypdf
+    import pypdf  # type: ignore
 except ImportError:
     pypdf = None
 from email.utils import parsedate_to_datetime
 from typing import List, Dict, Any, Optional
+
+logger = logging.getLogger("live_news_service")
 
 from google import genai
 from config import settings
@@ -2219,35 +2222,13 @@ def get_news_intelligence(filter_category: str = "All") -> Dict[str, Any]:
     Unified institutional news feed returning 50+ live ingested articles
     across SEBI, RBI, NSE, BSE, Company IR, ET, and Livemint.
     """
-    global _LIVE_NEWS_CACHE, _LIVE_NEWS_INTEL_CACHE, _LAST_SCRAPE_TIME
+    global _LIVE_NEWS_CACHE, _LIVE_NEWS_INTEL_CACHE, _LAST_SCRAPE_TIME, _IS_BACKGROUND_SCRAPING
     now = time.time()
 
-    # If cache is empty or has fewer than 15 articles or is older than TTL, scrape full parallel feeds
+    # Trigger background worker if cache is empty or stale without blocking the request
     if not _LIVE_NEWS_CACHE or len(_LIVE_NEWS_CACHE) < 15 or (now - _LAST_SCRAPE_TIME) > SCRAPE_CACHE_TTL:
-        try:
-            fresh_articles = scrape_live_financial_news_parallel()
-            if fresh_articles and len(fresh_articles) >= 15:
-                _LIVE_NEWS_CACHE = fresh_articles
-                _LAST_SCRAPE_TIME = now
-                exec_intel = _generate_news_executive_intelligence(fresh_articles)
-                bullish_count = len([a for a in fresh_articles if a.get("sentiment") == "Bullish"])
-                macro_count = len([a for a in fresh_articles if a.get("category") == "Macro & Economy" or a.get("sentiment") == "Neutral"])
-                high_impact_count = len([a for a in fresh_articles if a.get("materiality") == "High" or a.get("sentiment_score", 0) >= 0.75])
-                bullish_pct = int((bullish_count / max(1, len(fresh_articles))) * 100)
-
-                _LIVE_NEWS_INTEL_CACHE = {
-                    "sentiment_sentinel": {
-                        "bullish_pct": bullish_pct,
-                        "positive_catalysts": bullish_count,
-                        "macro_watch": macro_count,
-                        "high_impact_alerts": high_impact_count,
-                        "sentiment_label": f"{bullish_pct}% Bullish Dominance" if bullish_pct >= 60 else "Balanced Market Stance"
-                    },
-                    "executive_analysis": exec_intel.get("executive_analysis"),
-                    "executive_outcome": exec_intel.get("executive_outcome")
-                }
-        except Exception as e:
-            print(f"Parallel news scrape error: {e}")
+        if not _IS_BACKGROUND_SCRAPING:
+            threading.Thread(target=_background_refresh_worker, daemon=True).start()
 
     raw_articles = _LIVE_NEWS_CACHE if (_LIVE_NEWS_CACHE and len(_LIVE_NEWS_CACHE) >= 15) else PRE_WARMED_INITIAL_SEED
     all_articles = []

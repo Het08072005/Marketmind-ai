@@ -12,6 +12,10 @@ const PAGE_ALIASES = {
   config: "settings",
   landing: "home",
   homepage: "home",
+  market_overview: "overview",
+  marketoverview: "overview",
+  market_summary: "overview",
+  radar: "overview",
 };
 
 export function useNavigation() {

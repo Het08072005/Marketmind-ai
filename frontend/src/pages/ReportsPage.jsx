@@ -1,8 +1,65 @@
 import React, { useState, useEffect } from "react";
 import { apiClient } from "../api/client";
 
+const DEFAULT_STOCKS = [
+  { symbol: "HDFCBANK", name: "HDFC Bank Ltd", sector: "Banking & Finance" },
+  { symbol: "RELIANCE", name: "Reliance Industries Ltd", sector: "Energy & Conglomerate" },
+  { symbol: "TCS", name: "Tata Consultancy Services", sector: "Information Technology" },
+  { symbol: "INFY", name: "Infosys Ltd", sector: "Information Technology" },
+  { symbol: "ICICIBANK", name: "ICICI Bank Ltd", sector: "Banking & Finance" },
+  { symbol: "SBIN", name: "State Bank of India", sector: "Banking & Finance" },
+  { symbol: "BHARTIARTL", name: "Bharti Airtel Ltd", sector: "Telecommunications" },
+  { symbol: "ITC", name: "ITC Ltd", sector: "Consumer Goods" },
+  { symbol: "LT", name: "Larsen & Toubro Ltd", sector: "Capital Goods & Infra" },
+  { symbol: "TATAMOTORS", name: "Tata Motors Ltd", sector: "Automobile" },
+  { symbol: "SUNPHARMA", name: "Sun Pharmaceutical Industries", sector: "Healthcare & Pharma" },
+  { symbol: "BAJFINANCE", name: "Bajaj Finance Ltd", sector: "NBFC & Finance" },
+  { symbol: "AXISBANK", name: "Axis Bank Ltd", sector: "Banking & Finance" },
+  { symbol: "KOTAKBANK", name: "Kotak Mahindra Bank Ltd", sector: "Banking & Finance" },
+  { symbol: "MARUTI", name: "Maruti Suzuki India Ltd", sector: "Automobile" },
+  { symbol: "TITAN", name: "Titan Company Ltd", sector: "Consumer Discretionary" },
+  { symbol: "ASIANPAINT", name: "Asian Paints Ltd", sector: "Paints & Chemicals" },
+  { symbol: "ADANIENT", name: "Adani Enterprises Ltd", sector: "Diversified Infrastructure" },
+  { symbol: "ADANIPORTS", name: "Adani Ports & SEZ Ltd", sector: "Ports & Shipping" },
+  { symbol: "TATASTEEL", name: "Tata Steel Ltd", sector: "Metals & Mining" },
+  { symbol: "WIPRO", name: "Wipro Ltd", sector: "Information Technology" },
+  { symbol: "TECHM", name: "Tech Mahindra Ltd", sector: "Information Technology" },
+  { symbol: "HCLTECH", name: "HCL Technologies Ltd", sector: "Information Technology" },
+  { symbol: "ONGC", name: "Oil & Natural Gas Corp", sector: "Energy" },
+  { symbol: "JSWSTEEL", name: "JSW Steel Ltd", sector: "Metals" },
+  { symbol: "CIPLA", name: "Cipla Ltd", sector: "Pharma" },
+  { symbol: "DRREDDY", name: "Dr. Reddy's Laboratories", sector: "Pharma" }
+];
+
+function RadialSpinner({ size = 16, color = "#ffffff" }) {
+  const opacities = [1.0, 0.88, 0.77, 0.66, 0.55, 0.45, 0.36, 0.28, 0.21, 0.15, 0.1, 0.06];
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      className="sim-radial-spinner"
+    >
+      {opacities.map((op, i) => (
+        <line
+          key={i}
+          x1="12"
+          y1="2.4"
+          x2="12"
+          y2="6.6"
+          stroke={color}
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          transform={`rotate(${i * 30} 12 12)`}
+          opacity={op}
+        />
+      ))}
+    </svg>
+  );
+}
+
 export default function ReportsPage() {
-  const [stocks, setStocks] = useState([]);
+  const [stocks, setStocks] = useState(DEFAULT_STOCKS);
   const [selectedSymbol, setSelectedSymbol] = useState("HDFCBANK");
   const [generating, setGenerating] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState("Company Snapshot");
@@ -117,12 +174,40 @@ export default function ReportsPage() {
 
   return (
     <div className="grid">
-      <div className="page-banner">
-        <div>
-          <h2>AI Report Generator</h2>
-          <p>Generate one-click institutional grade equity research briefs, multi-peer sector outlooks, and forensic audits.</p>
-        </div>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+      {/* Research Action Bar - 1 Single Clean Row, Justify Between */}
+      <div
+        className="page-banner"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "nowrap",
+          padding: "12px 20px",
+          gap: "16px",
+          minHeight: "unset",
+          height: "auto",
+          boxSizing: "border-box"
+        }}
+      >
+        {/* Left Side: Enhanced Stock Dropdown with Icon */}
+        <div style={{ position: "relative", display: "flex", alignItems: "center", width: "320px", flexShrink: 0 }}>
+          <div
+            style={{
+              position: "absolute",
+              left: "14px",
+              pointerEvents: "none",
+              display: "flex",
+              alignItems: "center",
+              color: "var(--gold)",
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+          </div>
           <select
             value={selectedSymbol}
             onChange={(e) => {
@@ -130,16 +215,67 @@ export default function ReportsPage() {
               setSelectedSymbol(sym);
               loadReport(sym, activeTemplate);
             }}
-            style={{ border: "1px solid var(--line)", background: "var(--paper)", borderRadius: "10px", padding: "8px 12px", fontSize: "12.5px", fontWeight: 600 }}
+            style={{
+              height: "40px",
+              width: "100%",
+              paddingLeft: "38px",
+              paddingRight: "34px",
+              background: "var(--cream)",
+              border: "1px solid var(--line)",
+              borderRadius: "9px",
+              color: "var(--ink)",
+              fontSize: "13.5px",
+              fontWeight: 600,
+              outline: "none",
+              cursor: "pointer",
+              appearance: "none",
+              WebkitAppearance: "none",
+              backgroundImage: `url("data:image/svg+xml;utf8,<svg fill='%23B8935A' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right 12px center"
+            }}
           >
             {stocks.map((s) => (
-              <option key={s.symbol} value={s.symbol}>{s.name} ({s.symbol})</option>
+              <option key={s.symbol} value={s.symbol}>
+                {s.name} ({s.symbol})
+              </option>
             ))}
           </select>
-          <button className="pill-btn" onClick={() => loadReport(selectedSymbol, activeTemplate)} disabled={generating}>
-            {generating ? "Synthesizing AI Intelligence..." : "⚡ Generate Live Report"}
-          </button>
         </div>
+
+        {/* Right Side: Generate Live Report Button */}
+        <button
+          className="sim-btn-primary"
+          onClick={() => loadReport(selectedSymbol, activeTemplate)}
+          disabled={generating}
+          style={{
+            height: "40px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "0 22px",
+            fontSize: "13.5px",
+            fontWeight: 700,
+            borderRadius: "9px",
+            whiteSpace: "nowrap",
+            cursor: generating ? "not-allowed" : "pointer",
+            flexShrink: 0
+          }}
+        >
+          {generating ? (
+            <>
+              <RadialSpinner size={14} color="#ffffff" />
+              <span>Synthesizing...</span>
+            </>
+          ) : (
+            <>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+              <span>Generate Live Report</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* 3 Interactive Report Templates */}

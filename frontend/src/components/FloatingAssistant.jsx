@@ -134,6 +134,7 @@ export default function FloatingAssistant({
   isMicMuted = false,
   setIsMicMuted = () => {},
   initialTab,
+  onFabClick,
 }) {
   const [chatInput, setChatInput] = useState("");
   const [playingMsgId, setPlayingMsgId] = useState(null);
@@ -321,8 +322,13 @@ export default function FloatingAssistant({
       setPlayingMsgId(null);
       return;
     }
+    if (isSpeakerMuted) {
+      setIsSpeakerMuted(false);
+      localStorage.setItem("alex_speaker_muted", "false");
+    }
     setPlayingMsgId(msg.id);
     await playMessageAudio(msg);
+    setPlayingMsgId(null);
   };
 
   const toggleExpand = () => {
@@ -357,7 +363,13 @@ export default function FloatingAssistant({
           <button
             className="fab alex-copilot-fab"
             title="Open Alex Copilot"
-            onClick={() => setIsOpen(true)}
+            onClick={() => {
+              if (onFabClick) {
+                onFabClick();
+              } else {
+                setIsOpen(true);
+              }
+            }}
             style={{
               width: "52px",
               height: "52px",
@@ -594,19 +606,32 @@ export default function FloatingAssistant({
                 className={`alex-pill-btn ${
                   isPlayingAudio
                     ? "audio-playing"
-                    : "audio-muted"
+                    : isSpeakerMuted
+                    ? "audio-muted"
+                    : "audio-active"
                 }`}
-                title={isSpeakerMuted ? "Speaker is MUTED. Click to unmute." : "Speaker is ACTIVE. Click to mute."}
+                title={
+                  isPlayingAudio
+                    ? "Voice is currently speaking. Click to stop."
+                    : isSpeakerMuted
+                    ? "Voice is MUTED. Click to turn voice sound ON."
+                    : "Voice is ACTIVE. Click to mute voice."
+                }
               >
                 {isPlayingAudio ? (
                   <>
                     <SpeakerOffIcon size={14} color="#2563EB" />
                     <span>Stop</span>
                   </>
+                ) : isSpeakerMuted ? (
+                  <>
+                    <SpeakerOffIcon size={14} color="#DC2626" />
+                    <span>Muted</span>
+                  </>
                 ) : (
                   <>
-                    <SpeakerOffIcon size={14} color="#991B1B" />
-                    <span>{isSpeakerMuted ? "Muted" : "Mute"}</span>
+                    <SpeakerOnIcon size={14} color="#15803D" />
+                    <span>Voice On</span>
                   </>
                 )}
               </button>

@@ -592,12 +592,15 @@ def get_all_live_companies() -> List[Dict[str, Any]]:
         return _ALL_COMPANIES_CACHE
 
     static_comps = get_all_companies()
-    from concurrent.futures import ThreadPoolExecutor
-    try:
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            results = list(executor.map(_fetch_company_worker, static_comps))
-    except Exception:
-        results = static_comps
+    results = []
+    for c in static_comps:
+        sym = c.get("symbol")
+        if sym in _QUOTE_CACHE and (now - _QUOTE_CACHE[sym]["_ts"]) < 300:
+            cached_data = _QUOTE_CACHE[sym]["data"]
+            merged = {**c, **cached_data}
+            results.append(merged)
+        else:
+            results.append(c)
 
     _ALL_COMPANIES_CACHE = results
     _ALL_COMPANIES_TS = now

@@ -789,6 +789,19 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
     return () => window.removeEventListener("marketmind:voice_action", handleVoiceAction);
   }, [news]);
 
+  // Listen for global stock change and voice search to filter news feed
+  useEffect(() => {
+    const handleStockChanged = (e) => {
+      const sym = e.detail?.symbol;
+      const name = e.detail?.name;
+      if (sym || name) {
+        setInternalSearch(name || sym);
+      }
+    };
+    window.addEventListener("marketmind:stock_changed", handleStockChanged);
+    return () => window.removeEventListener("marketmind:stock_changed", handleStockChanged);
+  }, []);
+
   // Cleanup speech recognition on unmount
   useEffect(() => {
     return () => {

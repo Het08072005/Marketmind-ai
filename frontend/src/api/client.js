@@ -41,23 +41,41 @@ export const apiClient = {
   },
 
   async sendVoiceChat({ message, language = "english", voice_gender = "male", ticker = null, history = [] }) {
-    const response = await fetch(`${API_BASE_URL}/api/voice/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, language, voice_gender, ticker, history }),
-    });
-    if (!response.ok) throw new Error("Voice chat failed");
-    return await response.json();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 7500);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/voice/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, language, voice_gender, ticker, history }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) throw new Error("Voice chat failed");
+      return await response.json();
+    } catch (e) {
+      clearTimeout(timeoutId);
+      throw e;
+    }
   },
 
   async synthesizeSpeech({ text, language = "english", voice_gender = "male" }) {
-    const response = await fetch(`${API_BASE_URL}/api/voice/synthesize`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, language, voice_gender }),
-    });
-    if (!response.ok) throw new Error("Speech synthesis failed");
-    return await response.json();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/voice/synthesize`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, language, voice_gender }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) throw new Error("Speech synthesis failed");
+      return await response.json();
+    } catch (e) {
+      clearTimeout(timeoutId);
+      throw e;
+    }
   },
 
   // Live Stock Quotes & 30-Day Historical Candles

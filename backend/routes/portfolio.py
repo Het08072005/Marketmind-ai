@@ -41,7 +41,7 @@ async def reset_virtual_portfolio():
     return reset_portfolio()
 
 @router.post("/simulate")
-async def post_simulate_investment(req: SimulateRequest):
+def post_simulate_investment(req: SimulateRequest):
     return simulate_investment(
         symbol=req.symbol or "ADANIENT",
         investment=req.investment or 100000.0,
@@ -53,7 +53,7 @@ async def post_simulate_investment(req: SimulateRequest):
     )
 
 @router.get("/simulate")
-async def get_simulate_investment(
+def get_simulate_investment(
     symbol: str = Query("ADANIENT"),
     investment: float = Query(100000.0),
     start_date: str = Query("2026-08-03"),

@@ -8,8 +8,16 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
   const [isContinuousMode, setIsContinuousMode] = useState(false);
   const [language, setLanguageState] = useState("english"); // Default English
   const [voiceGender, setVoiceGender] = useState("female");
-  const [autoPlayAudio, setAutoPlayAudio] = useState(false);
+  const [autoPlayAudio, setAutoPlayAudioState] = useState(() => {
+    const saved = localStorage.getItem("alex_autoplay_audio");
+    return saved !== null ? saved === "true" : true;
+  });
   const [liveTranscript, setLiveTranscript] = useState("");
+
+  const setAutoPlayAudio = (val) => {
+    setAutoPlayAudioState(val);
+    localStorage.setItem("alex_autoplay_audio", String(val));
+  };
   const [messages, setMessages] = useState([
     {
       id: "alex-welcome-msg",
@@ -278,7 +286,10 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
   const playBase64Audio = useCallback((base64String, replyText = "") => {
     try {
       if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
+        try {
+          currentAudioRef.current.pause();
+          currentAudioRef.current.currentTime = 0;
+        } catch (e) {}
       }
       lastSpokenTextRef.current = (replyText || "").toLowerCase();
       const audioUrl = `data:audio/mp3;base64,${base64String}`;
@@ -290,31 +301,49 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       window.dispatchEvent(new CustomEvent("marketmind:voice_speaking_state", { detail: { isSpeaking: true } }));
 
       audio.onended = () => handlePlaybackFinished();
-      audio.onerror = () => handlePlaybackFinished();
-      audio.play().catch((e) => {
-        console.warn("Audio autoplay blocked by browser:", e);
+      audio.onerror = (err) => {
+        console.warn("Audio element error, falling back to browser TTS:", err);
         handlePlaybackFinished();
-      });
+        speakText(replyText, languageRef.current);
+      };
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((e) => {
+          console.warn("Audio autoplay blocked by browser policy, falling back to Web Speech:", e);
+          handlePlaybackFinished();
+          speakText(replyText, languageRef.current);
+        });
+      }
     } catch (e) {
       console.error("Audio playback error:", e);
       handlePlaybackFinished();
+      speakText(replyText, languageRef.current);
     }
-  }, [handlePlaybackFinished]);
+  }, [handlePlaybackFinished, speakText]);
 
   // Replay speech with Male voice on demand
   const playMessageAudio = async (msg) => {
     const currentLang = languageRef.current;
+    const textToSpeak = (msg?.fullText || msg?.text || "").trim();
+    if (!textToSpeak) return;
 
+    // 1. Direct instant playback if server already returned pre-synthesized Deepgram audio
+    if (msg?.audioBase64) {
+      playBase64Audio(msg.audioBase64, textToSpeak);
+      return;
+    }
+
+    // 2. Synthesize on demand via Deepgram API if not Hindi
     if (currentLang !== "hindi") {
       try {
         setIsPlayingAudio(true);
         const synthRes = await apiClient.synthesizeSpeech({
-          text: msg.text,
+          text: textToSpeak,
           language: currentLang,
           voice_gender: "male",
         });
         if (synthRes?.audio_base64) {
-          playBase64Audio(synthRes.audio_base64, msg.text);
+          playBase64Audio(synthRes.audio_base64, textToSpeak);
           return;
         }
       } catch (err) {
@@ -322,7 +351,8 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       }
     }
 
-    speakText(msg.text, currentLang);
+    // 3. Fallback to browser Web Speech API
+    speakText(textToSpeak, currentLang);
   };
 
   // Submit query directly to Gemini AI & Deepgram
@@ -498,12 +528,54 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     } catch (err) {
       console.error("Voice chat error:", err);
       const isWakeGreeting = ["hey alex", "hey alexa", "alex", "alexa", "hello", "hi", "hey"].includes(cleanText.toLowerCase());
+
+      // Intelligent Client-Side Fallback for stock queries & searches
+      const lower = cleanText.toLowerCase();
+      let matchedSymbol = null;
+      let matchedName = null;
       
+      const commonMatches = [
+        { sym: "ADANIENT", name: "Adani Enterprises", keys: ["adani", "adacni", "enterprises", "entirerpice"] },
+        { sym: "RELIANCE", name: "Reliance Industries", keys: ["reliance", "rilance", "ril", "jio"] },
+        { sym: "TATAMOTORS", name: "Tata Motors", keys: ["tata motor", "tatamotors", "tata motors"] },
+        { sym: "TCS", name: "Tata Consultancy Services", keys: ["tcs"] },
+        { sym: "INFY", name: "Infosys", keys: ["infosys", "infy", "infosis"] },
+        { sym: "HDFCBANK", name: "HDFC Bank", keys: ["hdfc", "hdfc bank", "hdffc"] },
+        { sym: "ICICIBANK", name: "ICICI Bank", keys: ["icici", "icici bank"] },
+        { sym: "SBIN", name: "State Bank of India", keys: ["sbi", "state bank"] },
+        { sym: "BSE", name: "BSE Ltd", keys: ["bse"] },
+      ];
+
+      for (const m of commonMatches) {
+        if (m.keys.some(k => lower.includes(k))) {
+          matchedSymbol = m.sym;
+          matchedName = m.name;
+          break;
+        }
+      }
+
+      if (matchedSymbol) {
+        window.__SELECTED_STOCK_SYMBOL = matchedSymbol;
+        window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: matchedSymbol, name: matchedName } }));
+        window.dispatchEvent(new CustomEvent("marketmind:voice_action", {
+          detail: {
+            type: "SEARCH_COMPANY",
+            command: "SEARCH_COMPANY",
+            target_page: "overview",
+            params: { symbol: matchedSymbol, name: matchedName, query: matchedName }
+          }
+        }));
+      }
+
       const fallbackText = isWakeGreeting
-        ? (currentLang === "hindi" ? "हाँ, मैं आपकी क्या मदद कर सकता हूँ?" : "Yes, how can I help you?")
+        ? (currentLang === "hindi" ? "हाँ, मैं सुन रहा हूँ। बताइए, किस शेयर या सेटअप का विश्लेषण करना है?" : "Yes, I'm listening! Which stock or setup would you like to analyze?")
+        : matchedName
+        ? (currentLang === "hindi"
+          ? `${matchedName} (${matchedSymbol}) का लाइव डेटा और क्वांटम सेटअप स्क्रीन पर ओपन कर दिया गया है।`
+          : `Displaying live quantitative telemetry and order flow for ${matchedName} (${matchedSymbol}) on screen.`)
         : (currentLang === "hindi"
-          ? "आज मार्केट में मिला-जुला रुख दिख रहा है। रिलायंस और आईटी सेक्टर मजबूती के साथ ट्रेड कर रहे हैं।"
-          : "Market is steady today. Reliance and IT stocks are leading gains with positive sector breadth.");
+          ? "आज बाजार में अनुशासित संस्थागत संचय जारी है। प्रमुख इंडेक्स स्तर और सेक्टर इनफ्लो स्थिर बने हुए हैं।"
+          : "Market is steady today. Major index supports and institutional inflows remain intact.");
 
       const fallbackMsg = {
         id: `bot-${Date.now()}`,
@@ -716,20 +788,27 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
 
     if (recognitionRef.current) {
       try {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort();
       } catch (e) { }
+    }
+
+    // ALWAYS release microphone hardware media stream tracks immediately
+    if (mediaRecorderRef.current) {
+      try {
+        if (mediaRecorderRef.current.stream) {
+          mediaRecorderRef.current.stream.getTracks().forEach((t) => t.stop());
+        }
+        if (mediaRecorderRef.current.state !== "inactive") {
+          mediaRecorderRef.current.stop();
+        }
+      } catch (e) { }
+      mediaRecorderRef.current = null;
     }
 
     // Process buffered speech if available
     const spokenQuery = transcriptRef.current.trim();
     if (spokenQuery && !isSubmittingRef.current) {
       submitQuery(spokenQuery, true);
-      return;
-    }
-
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream?.getTracks().forEach((t) => t.stop());
     }
   };
 

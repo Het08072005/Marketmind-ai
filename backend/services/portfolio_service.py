@@ -512,40 +512,7 @@ def build_portfolio_decision_summary(
         f"* **Overall View — {overall_vw['label']}:** **Risk: {risk_lvl['label']} | Performance: {mkt_perf['label']} | Benchmark: {vs_bench['label']}.** Simulator ke basis par {overall_reason}."
     ]
 
-    global _gemini_client
-    if _gemini_client:
-        try:
-            prompt = f"""You are MarketPulse AI Chief Quantitative Investment Officer.
-A client simulated an equity investment in {company} ({symbol}) from {start_d} to {end_d}.
-Quant Results:
-- Absolute Strategy Return: {ret_pct:+.2f}%
-- Benchmark ({bench_name}): {bench_ret:+.2f}%
-- Alpha Generated: {alpha:+.2f}%
-- Max Drawdown: {max_dd:.1f}%
-- Annualized Volatility: {vol:.1f}%
-- Calculated Signal: {inv_sig['label']} | Risk: {risk_lvl['label']} | Entry: {entry_vw['label']} | Overall: {overall_vw['label']}
-
-Generate an institutional Portfolio Decision Summary in exactly 6 points with this exact structure:
-* **Investment Signal — {inv_sig['label']}:** Current simulation me stock ne {ret_pct:+.2f}% return diya aur {bench_name} ko {outperform_str} kiya. Fresh investment se pehle further evaluation warranted hai.
-* **Risk Level — {risk_lvl['label']}:** {vol:.1f}% volatility aur {abs(max_dd):.1f}% drawdown indicate karta hai ki short-term price swings comparatively elevated ho sakte hain.
-* **Market Performance — {mkt_perf['label']}:** Same period me {bench_name} {bench_ret:+.2f}% tha, while {symbol} {ret_pct:+.2f}% raha—stock {compare_str}.
-* **Portfolio Exposure — VERY HIGH:** Single-stock simulation me 100% capital {symbol} me hai. Company-specific risk directly poore portfolio ko impact karega.
-* **Entry Assessment — {entry_vw['label']}:** Current performance aur risk profile ke basis par immediate entry vs monitoring advice.
-* **Overall View — {overall_vw['label']}:** Executive risk-adjusted synthesis with diversification advice.
-
-Constraints: DO NOT give direct 'BUY' or 'SELL' trading commands. Output only these 6 structured bullet points starting with '* **'."""
-            res = _gemini_client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt,
-                config={"temperature": 0.2}
-            )
-            if res and res.text:
-                parsed = [line.strip() for line in res.text.strip().split("\n") if line.strip().startswith("*") or line.strip().startswith("•")]
-                if len(parsed) >= 5:
-                    return {"signals": signals, "points": parsed}
-        except Exception as e:
-            print(f"Gemini decision summary generation error: {e}")
-
+    # Return dynamic, quantitative institutional points directly for instant sub-millisecond response
     return {"signals": signals, "points": grounded_points}
 
 def generate_ai_simulation_verdict(

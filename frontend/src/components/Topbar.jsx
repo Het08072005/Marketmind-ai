@@ -1,6 +1,16 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { getIndianMarketStatus } from "../utils/marketHours";
 
 export default function Topbar({ eyebrow, title, subtitle, onOpenSidebar, backendOnline, backendLatency, searchQuery, onSearchChange }) {
+  const [marketInfo, setMarketInfo] = useState(() => getIndianMarketStatus());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setMarketInfo(getIndianMarketStatus());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="topbar">
       <button className="hamburger" onClick={onOpenSidebar} aria-label="Open navigation">
@@ -17,7 +27,7 @@ export default function Topbar({ eyebrow, title, subtitle, onOpenSidebar, backen
             className="page-subtitle"
             style={{
               margin: "2px 0 0 0",
-              fontSize: "13.5px",
+              fontSize: "13px",
               color: "#64748B",
               fontFamily: "var(--sans)",
               fontWeight: 400,
@@ -29,84 +39,73 @@ export default function Topbar({ eyebrow, title, subtitle, onOpenSidebar, backen
         ) : null}
       </div>
 
-      <div className="search-box">
-        <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round">
-          <circle cx="11" cy="11" r="7"/>
-          <path d="M21 21l-4.3-4.3"/>
-        </svg>
-        <input
-          type="text"
-          placeholder="Search tickers, reports, sectors, news…"
-          value={searchQuery || ""}
-          onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-        />
-        {searchQuery && (
-          <button
-            type="button"
-            onClick={() => onSearchChange && onSearchChange("")}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: "var(--ink-soft)",
-              fontSize: "12px",
-              padding: "0 6px",
-              lineHeight: 1
-            }}
-            title="Clear search"
-          >
-            ✕
-          </button>
-        )}
-      </div>
-
-      <button className="icon-btn" aria-label="Notifications" style={{ position: "relative" }}>
-        <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 18, height: 18, stroke: "currentColor" }}>
-          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.7 21a2 2 0 0 1-3.4 0"/>
-        </svg>
-        <span
-          style={{
-            position: "absolute",
-            top: "5px",
-            right: "5px",
-            background: "#EF4444",
-            color: "#FFFFFF",
-            fontSize: "10px",
-            fontWeight: 700,
-            width: "16px",
-            height: "16px",
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            lineHeight: 1,
-            boxShadow: "0 1px 3px rgba(239, 68, 68, 0.4)"
-          }}
+      {/* Right Cluster: Exchange Telemetry, Global Search, Notifications & User */}
+      <div className="topbar-actions-cluster">
+        {/* Institutional Indian Exchange Live Clock & Market Hours Status */}
+        <div
+          className="topbar-market-capsule"
+          title={`National Stock Exchange of India (NSE) / BSE\nRegular Session: 09:15 – 15:30 IST (Mon–Fri)\nStatus: ${marketInfo.sessionDesc}`}
         >
-          1
-        </span>
-      </button>
+          <div
+            className={`topbar-status-tag ${marketInfo.isOpen ? "tag-open" : marketInfo.isPostMarket || marketInfo.isPreMarket ? "tag-post" : "tag-closed"}`}
+          >
+            <span className={`topbar-dot ${marketInfo.isOpen ? "dot-pulsing" : ""}`} />
+            <span className="topbar-status-text">{marketInfo.shortLabel}</span>
+          </div>
 
-      <div
-        style={{
-          width: "38px",
-          height: "38px",
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #2563EB, #1D4ED8)",
-          color: "#FFFFFF",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: "600",
-          fontSize: "14px",
-          cursor: "pointer",
-          flexShrink: 0,
-          boxShadow: "0 2px 8px rgba(37, 99, 235, 0.25)"
-        }}
-        title="Test User"
-      >
-        T
+          <div className="topbar-capsule-divider" />
+
+          <div className="topbar-datetime-block">
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="topbar-clock-icon">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span className="topbar-date-part">{marketInfo.weekday}, {marketInfo.dateStr}</span>
+            <span className="topbar-time-sep">·</span>
+            <span className="topbar-time-part">{marketInfo.timeStr}</span>
+            <span className="topbar-tz-pill">IST</span>
+          </div>
+        </div>
+
+        {/* Global Search Box */}
+        <div className="search-box">
+          <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="M21 21l-4.3-4.3"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search tickers, sectors, news…"
+            value={searchQuery || ""}
+            onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+          />
+          {searchQuery ? (
+            <button
+              type="button"
+              onClick={() => onSearchChange && onSearchChange("")}
+              className="search-clear-btn"
+              title="Clear search"
+            >
+              ✕
+            </button>
+          ) : (
+            <span className="search-kbd-hint">⌘K</span>
+          )}
+        </div>
+
+        {/* Notification Bell */}
+        <button className="icon-btn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 17, height: 17, stroke: "currentColor" }}>
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.7 21a2 2 0 0 1-3.4 0"/>
+          </svg>
+          <span className="notification-badge-dot">1</span>
+        </button>
+
+        {/* User Monogram Profile */}
+        <div className="topbar-user-avatar" title="Institutional Trader">
+          <span>T</span>
+        </div>
       </div>
     </div>
   );

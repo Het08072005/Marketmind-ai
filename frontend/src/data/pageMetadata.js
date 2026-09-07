@@ -1,5 +1,6 @@
 export const pageMeta = {
-  dashboard: { eyebrow: "", title: "Market Overview" },
+  dashboard: { eyebrow: "Institutional Terminal · Multi-Asset Analytics", title: "Executive Dashboard" },
+  overview: { eyebrow: "00 · Quantitative AI Signal Radar", title: "Market Overview" },
   portfolio: { eyebrow: "01 · Sandbox trading", title: "Portfolio Simulator" },
   voice: { eyebrow: "02 · Speak to your terminal", title: "Voice Stock Assistant" },
   learning: { eyebrow: "03 · Beginner-friendly", title: "Learning Mode" },
