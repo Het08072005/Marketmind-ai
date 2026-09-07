@@ -610,9 +610,41 @@ async def generate_autonomous_agent_response(
     q_lower = user_query.lower().strip()
     req_lang = (language or "english").lower().strip()
     is_hindi = req_lang in ["hindi", "hi"]
-    # Strict rule: When English is selected in the UI dropdown, ALWAYS respond in English,
-    # even if the user spoke Hinglish or mixed words!
     is_hinglish = (req_lang == "hinglish")
+
+    # =========================================================================
+    # 0. INSTANT WAKE UP & GREETING INTENT ("Hey Alex", "Hello", "Hi") — ZERO LATENCY (1ms)
+    # =========================================================================
+    wake_triggers = [
+        "hey alex", "hey alexa", "alex", "alexa", "hey pulse", "hey marketpulse", "marketpulse",
+        "hello", "hi", "hey", "नमस्ते", "मार्केटपल्स", "yes", "ok", "okay", "haan", "bol",
+        "how can i help you", "how can i help", "yes how can i help you", "yes how can i help",
+        "how can i help you today", "madad", "help", "who are you", "start", "opening",
+        "marketmind", "marketmind ai", "hey marketmind", "alex copilot", "who is alex", "tum kaun ho"
+    ]
+    if q_lower in wake_triggers or any(q_lower == w for w in wake_triggers):
+        is_identity_query = any(w in q_lower for w in ["who are you", "who is alex", "tum kaun ho", "kaun ho"])
+        if is_identity_query:
+            if is_hindi:
+                reply_text = "मैं एलेक्स हूँ, आपका मार्केटमाइंड वित्तीय कोपायलट। मैं संस्थागत ऑर्डर फ्लो, जोखिम मेट्रिक्स और पोर्टफोलियो सिमुलेशन का विश्लेषण करता हूँ।"
+            elif is_hinglish:
+                reply_text = "Main Alex hoon, aapka MarketMind financial copilot. Main institutional order flow, risk metrics aur macro simulations analyze karta hoon."
+            else:
+                reply_text = "I am Alex, your MarketMind financial copilot. I analyze institutional order flow, risk metrics, macro dominoes, and trade simulations."
+        else:
+            if is_hindi:
+                reply_text = "हाँजी, मैं सुन रहा हूँ। बताइए, आज किस शेयर या सेक्टर का विश्लेषण करना है?"
+            elif is_hinglish:
+                reply_text = "Haanji! Boliye, main sun raha hoon. Kis stock ya sector ka analysis karna hai?"
+            else:
+                reply_text = "Yes! I'm here. Which stock, sector, or market setup would you like to analyze?"
+        
+        return {
+            "reply": reply_text,
+            "action": None,
+            "detected_symbol": GLOBAL_SESSION_STATE.get("active_symbol") or "RELIANCE",
+            "language": language
+        }
 
     # 1. Resolve target symbol: Priority: Explicit in query > context_ticker > Global session state > RELIANCE
     explicit_symbol = resolve_target_symbol(q_lower)
@@ -650,12 +682,12 @@ async def generate_autonomous_agent_response(
         "pe_ratio": 24.5
     }
 
-    # Fetch technical candle indicators and institutional quant metrics with non-blocking fast timeout
+    # Fetch technical candle indicators with ultra-fast 0.8s timeout so Gemini responds in <1.5s
     candles_info = {}
     try:
         candles_info = await asyncio.wait_for(
             asyncio.to_thread(get_stock_historical_candles, detected_symbol),
-            timeout=2.2
+            timeout=0.8
         )
         if candles_info and candles_info.get("candles") and len(candles_info["candles"]) > 0:
             live_candle_close = float(candles_info["candles"][-1]["close"])
@@ -691,40 +723,6 @@ async def generate_autonomous_agent_response(
     ocf_growth = forensic_info.get("cash_flow_growth", "+10%")
 
     GLOBAL_SESSION_STATE["last_pattern"] = pattern_name
-
-    # =========================================================================
-    # 0. WAKE UP & CONVERSATIONAL GREETING INTENT ("Hey Alex", "Hello", "Hi")
-    # =========================================================================
-    wake_triggers = [
-        "hey alex", "hey alexa", "alex", "alexa", "hey pulse", "hey marketpulse", "marketpulse",
-        "hello", "hi", "hey", "नमस्ते", "मार्केटपल्स", "yes", "ok", "okay", "haan", "bol",
-        "how can i help you", "how can i help", "yes how can i help you", "yes how can i help",
-        "how can i help you today", "madad", "help", "who are you", "start", "opening",
-        "marketmind", "marketmind ai", "hey marketmind", "alex copilot", "who is alex", "tum kaun ho"
-    ]
-    if q_lower in wake_triggers or any(q_lower == w for w in wake_triggers):
-        is_identity_query = any(w in q_lower for w in ["who are you", "who is alex", "tum kaun ho", "kaun ho"])
-        if is_identity_query:
-            if is_hindi:
-                reply_text = "मैं एलेक्स हूँ, आपका मार्केटमाइंड वित्तीय कोपायलट। मैं संस्थागत ऑर्डर फ्लो, जोखिम मेट्रिक्स और पोर्टफोलियो सिमुलेशन का विश्लेषण करता हूँ।"
-            elif is_hinglish:
-                reply_text = "Main Alex hoon, aapka MarketMind financial copilot. Main institutional order flow, risk metrics aur macro simulations analyze karta hoon."
-            else:
-                reply_text = "I am Alex, your MarketMind financial copilot. I analyze institutional order flow, risk metrics, macro dominoes, and trade simulations."
-        else:
-            if is_hindi:
-                reply_text = "हाँजी, मैं सुन रहा हूँ। बताइए, आज किस शेयर या सेक्टर का विश्लेषण करना है?"
-            elif is_hinglish:
-                reply_text = "Haanji! Boliye, main sun raha hoon. Kis stock ya sector ka analysis karna hai?"
-            else:
-                reply_text = "Yes! I'm here. Which stock, sector, or market setup would you like to analyze?"
-        
-        return {
-            "reply": reply_text,
-            "action": None,
-            "detected_symbol": detected_symbol,
-            "language": language
-        }
 
     # =========================================================================
     # 0A. NEGATION SKIP CONFIRMATION ("Mujhe Reliance nahi dekhna")
