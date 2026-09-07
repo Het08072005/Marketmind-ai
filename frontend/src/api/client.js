@@ -67,7 +67,7 @@ export const apiClient = {
 
   async sendVoiceChat({ message, language = "english", voice_gender = "male", ticker = null, history = [] }) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
     try {
       const response = await fetch(apiUrl("/api/voice/chat"), {
         method: "POST",

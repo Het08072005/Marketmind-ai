@@ -540,14 +540,19 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       const commonMatches = [
         { sym: "ADANIENT", name: "Adani Enterprises", price: "2,950.00", change: "+0.41%", keys: ["adani", "adacni", "enterprises", "entirerpice"] },
         { sym: "RELIANCE", name: "Reliance Industries", price: "2,985.50", change: "+1.2%", keys: ["reliance", "rilance", "ril", "jio"] },
+        { sym: "NESTLEIND", name: "Nestle India Ltd", price: "1,398.00", change: "+0.35%", keys: ["nestle", "nestleind", "nestle india", "maggi", "nescafe"] },
         { sym: "TATAMOTORS", name: "Tata Motors", price: "982.40", change: "+2.1%", keys: ["tata motor", "tatamotors", "tata motors"] },
         { sym: "TCS", name: "Tata Consultancy Services", price: "4,210.00", change: "+0.8%", keys: ["tcs"] },
         { sym: "INFY", name: "Infosys", price: "1,845.20", change: "+1.4%", keys: ["infosys", "infy", "infosis"] },
         { sym: "HDFCBANK", name: "HDFC Bank", price: "1,640.00", change: "+0.5%", keys: ["hdfc", "hdfc bank", "hdffc"] },
         { sym: "ICICIBANK", name: "ICICI Bank", price: "1,220.00", change: "+1.1%", keys: ["icici", "icici bank"] },
         { sym: "SBIN", name: "State Bank of India", price: "815.00", change: "+0.9%", keys: ["sbi", "state bank"] },
+        { sym: "BHARTIARTL", name: "Bharti Airtel", price: "1,854.00", change: "+0.76%", keys: ["airtel", "bharti", "bhartiartl"] },
+        { sym: "ITC", name: "ITC Ltd", price: "463.50", change: "+0.4%", keys: ["itc"] },
+        { sym: "LT", name: "Larsen & Toubro", price: "3,590.00", change: "+1.1%", keys: ["larsen", "l&t", "lt"] },
         { sym: "SYRMA", name: "Syrma SGS Technology", price: "1,634.80", change: "+9.75%", keys: ["syrma", "sgs", "surma"] },
         { sym: "BSE", name: "BSE Ltd", price: "2,740.00", change: "+3.2%", keys: ["bse"] },
+        { sym: "ZOMATO", name: "Zomato Ltd", price: "285.00", change: "+3.8%", keys: ["zomato"] },
       ];
 
       let matchedPrice = null;
