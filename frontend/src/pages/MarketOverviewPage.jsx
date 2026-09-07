@@ -1079,55 +1079,59 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
     ? radarData.summary.avg_risk_reward
     : "1:3.4";
 
-  const filteredStocks = uniqueStocks.filter((s) => {
-    // Filter tab
-    if (activeFilter === "BUY" && !s.signal?.includes("BUY") && s.variant !== "buy") return false;
-    if (activeFilter === "ACCUMULATE" && !s.signal?.includes("ACCUMULATE") && s.variant !== "accumulate") return false;
-    if (activeFilter === "HOLD" && !s.signal?.includes("HOLD") && s.variant !== "hold") return false;
-    if (activeFilter === "AVOID" && !s.signal?.includes("AVOID") && !s.signal?.includes("CAUTION") && s.variant !== "avoid") return false;
+  const filteredStocks = useMemo(() => {
+    return uniqueStocks.filter((s) => {
+      // Filter tab
+      if (activeFilter === "BUY" && !s.signal?.includes("BUY") && s.variant !== "buy") return false;
+      if (activeFilter === "ACCUMULATE" && !s.signal?.includes("ACCUMULATE") && s.variant !== "accumulate") return false;
+      if (activeFilter === "HOLD" && !s.signal?.includes("HOLD") && s.variant !== "hold") return false;
+      if (activeFilter === "AVOID" && !s.signal?.includes("AVOID") && !s.signal?.includes("CAUTION") && s.variant !== "avoid") return false;
 
-    // Sector filter
-    if (selectedSector !== "ALL" && !s.sector.toLowerCase().includes(selectedSector.toLowerCase())) {
-      return false;
-    }
+      // Sector filter
+      if (selectedSector !== "ALL" && !s.sector.toLowerCase().includes(selectedSector.toLowerCase())) {
+        return false;
+      }
 
-    // Search with clean tokens, alias handling, and selected stock preservation
-    if (effectiveSearch) {
-      const q = effectiveSearch.toLowerCase().trim();
-      const qTokens = q.split(/\s+/).filter((w) => !["show", "shoe", "me", "the", "share", "stock", "stocks", "shares", "price", "search", "about", "ltd", "limited", "ka", "ki", "ke", "ko"].includes(w));
-      const match =
-        s.symbol.toLowerCase().includes(q) ||
-        s.name.toLowerCase().includes(q) ||
-        (q.includes(s.name.toLowerCase()) && s.name.length >= 4) ||
-        (q.includes(s.symbol.toLowerCase()) && s.symbol.length >= 3) ||
-        (qTokens.length > 0 && qTokens.some((tok) => tok.length >= 3 && (s.symbol.toLowerCase().includes(tok) || s.name.toLowerCase().includes(tok)))) ||
-        (selectedStockSymbol && s.symbol.toUpperCase() === selectedStockSymbol.toUpperCase()) ||
-        s.sector.toLowerCase().includes(q);
-      if (!match) return false;
-    }
+      // Search with clean tokens, alias handling, and selected stock preservation
+      if (effectiveSearch) {
+        const q = effectiveSearch.toLowerCase().trim();
+        const qTokens = q.split(/\s+/).filter((w) => !["show", "shoe", "me", "the", "share", "stock", "stocks", "shares", "price", "search", "about", "ltd", "limited", "ka", "ki", "ke", "ko"].includes(w));
+        const match =
+          s.symbol.toLowerCase().includes(q) ||
+          s.name.toLowerCase().includes(q) ||
+          (q.includes(s.name.toLowerCase()) && s.name.length >= 4) ||
+          (q.includes(s.symbol.toLowerCase()) && s.symbol.length >= 3) ||
+          (qTokens.length > 0 && qTokens.some((tok) => tok.length >= 3 && (s.symbol.toLowerCase().includes(tok) || s.name.toLowerCase().includes(tok)))) ||
+          (selectedStockSymbol && s.symbol.toUpperCase() === selectedStockSymbol.toUpperCase()) ||
+          s.sector.toLowerCase().includes(q);
+        if (!match) return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [uniqueStocks, activeFilter, selectedSector, effectiveSearch, selectedStockSymbol]);
 
-  const sortedStocks = [...filteredStocks].sort((a, b) => {
-    if (sortBy === "conviction") {
-      const pA = a.directional_probability_up || a.conviction || 50;
-      const pB = b.directional_probability_up || b.conviction || 50;
-      return pB - pA;
-    }
-    if (sortBy === "upside") {
-      const uA = a.expected_median_return_pct || a.upside_pct || 0;
-      const uB = b.expected_median_return_pct || b.upside_pct || 0;
-      return uB - uA;
-    }
-    if (sortBy === "change") {
-      const cA = parseFloat((a.change || "0").replace("%", "").replace("+", "").replace("−", "-")) || 0;
-      const cB = parseFloat((b.change || "0").replace("%", "").replace("+", "").replace("−", "-")) || 0;
-      return cB - cA;
-    }
-    if (sortBy === "price") return b.price - a.price;
-    return 0;
-  });
+  const sortedStocks = useMemo(() => {
+    return [...filteredStocks].sort((a, b) => {
+      if (sortBy === "conviction") {
+        const pA = a.directional_probability_up || a.conviction || 50;
+        const pB = b.directional_probability_up || b.conviction || 50;
+        return pB - pA;
+      }
+      if (sortBy === "upside") {
+        const uA = a.expected_median_return_pct || a.upside_pct || 0;
+        const uB = b.expected_median_return_pct || b.upside_pct || 0;
+        return uB - uA;
+      }
+      if (sortBy === "change") {
+        const cA = parseFloat((a.change || "0").replace("%", "").replace("+", "").replace("−", "-")) || 0;
+        const cB = parseFloat((b.change || "0").replace("%", "").replace("+", "").replace("−", "-")) || 0;
+        return cB - cA;
+      }
+      if (sortBy === "price") return b.price - a.price;
+      return 0;
+    });
+  }, [filteredStocks, sortBy]);
 
   // Top Pagination for Market Overview: 30 stocks per page
   const OVERVIEW_PAGE_SIZE = 30;
@@ -1141,15 +1145,17 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
   const overviewStartIndex = (overviewPage - 1) * OVERVIEW_PAGE_SIZE;
   const paginatedStocks = useMemo(() => {
     return sortedStocks.slice(overviewStartIndex, overviewStartIndex + OVERVIEW_PAGE_SIZE);
-  }, [sortedStocks, overviewStartIndex, OVERVIEW_PAGE_SIZE]);
+  }, [sortedStocks, overviewStartIndex]);
 
-  // ── Background Live Price Prefetch ──────────────────────────────────────────
-  // Proactively fetch real Yahoo Finance prices for all visible cards so the
-  // card header ALWAYS shows the correct price, even before the chart is opened.
+  // ── Background Live Price Prefetch (Single fetch per symbol per session) ────
   const prefetchAbortRef = useRef(null);
+  const prefetchedSymbolsRef = useRef(new Set());
+
+  const paginatedSymbolsKey = useMemo(() => {
+    return paginatedStocks.map((s) => s.symbol).join(",");
+  }, [paginatedStocks]);
 
   useEffect(() => {
-    // Cancel any in-flight prefetch from the previous page
     if (prefetchAbortRef.current) {
       prefetchAbortRef.current.aborted = true;
     }
@@ -1158,14 +1164,21 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
 
     if (!paginatedStocks || paginatedStocks.length === 0) return;
 
-    // Fetch in batches of 4 concurrent requests to avoid rate limiting
+    // Filter out stocks already prefetched during this session
+    const stocksToFetch = paginatedStocks.filter(
+      (s) => s?.symbol && !prefetchedSymbolsRef.current.has(s.symbol.toUpperCase())
+    );
+    if (stocksToFetch.length === 0) return;
+
+    // Mark as pending to prevent duplicate concurrent calls
+    stocksToFetch.forEach((s) => prefetchedSymbolsRef.current.add(s.symbol.toUpperCase()));
+
     const BATCH = 4;
     let idx = 0;
-    const stocks = [...paginatedStocks]; // snapshot
 
     const fetchNext = async () => {
       if (ctrl.aborted) return;
-      const batch = stocks.slice(idx, idx + BATCH);
+      const batch = stocksToFetch.slice(idx, idx + BATCH);
       if (batch.length === 0) return;
       idx += BATCH;
 
@@ -1190,17 +1203,15 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
         })
       );
 
-      // 300ms gap between batches to avoid hammering the backend
-      if (!ctrl.aborted && idx < stocks.length) {
-        await new Promise((r) => setTimeout(r, 300));
+      if (!ctrl.aborted && idx < stocksToFetch.length) {
+        await new Promise((r) => setTimeout(r, 400));
         fetchNext();
       }
     };
 
     fetchNext();
     return () => { ctrl.aborted = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paginatedStocks]);
+  }, [paginatedSymbolsKey]);
 
   // Automatically keep selected company in sync with active filter/search list
   useEffect(() => {

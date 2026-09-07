@@ -4557,7 +4557,7 @@ COMPREHENSIVE_270_COMPANIES = [
         "risk": "Low"
     },
     {
-        "symbol": "TIPSINDLTD",
+        "symbol": "TIPSMUSIC",
         "name": "Tips Industries",
         "sector": "Media",
         "price": 710.0,
