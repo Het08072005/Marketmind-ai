@@ -1,4 +1,15 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+// In production this must be the public HTTPS URL of the FastAPI service.
+// Keeping localhost as a development-only default prevents a deployed Vercel
+// site from silently trying to call the visitor's own computer.
+const configuredApiUrl = (import.meta.env.VITE_API_URL || "").trim().replace(/\/$/, "");
+const API_BASE_URL = configuredApiUrl || (import.meta.env.DEV ? "http://127.0.0.1:8000" : "");
+
+function apiUrl(path) {
+  if (!API_BASE_URL) {
+    throw new Error("Voice service is not configured. Set VITE_API_URL in Vercel to your public backend URL.");
+  }
+  return `${API_BASE_URL}${path}`;
+}
 
 export const apiClient = {
   // Generic HTTP helpers
@@ -42,11 +53,15 @@ export const apiClient = {
     formData.append("file", audioBlob, "recording.webm");
     formData.append("language", language);
 
-    const response = await fetch(`${API_BASE_URL}/api/voice/transcribe`, {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    const response = await fetch(apiUrl("/api/voice/transcribe"), {
       method: "POST",
       body: formData,
+      signal: controller.signal,
     });
-    if (!response.ok) throw new Error("Transcription failed");
+    clearTimeout(timeoutId);
+    if (!response.ok) throw new Error(`Deepgram transcription failed (${response.status})`);
     return await response.json();
   },
 
@@ -54,7 +69,7 @@ export const apiClient = {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/voice/chat`, {
+      const response = await fetch(apiUrl("/api/voice/chat"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message, language, voice_gender, ticker, history }),
@@ -73,7 +88,7 @@ export const apiClient = {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4000);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/voice/synthesize`, {
+      const response = await fetch(apiUrl("/api/voice/synthesize"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, language, voice_gender }),

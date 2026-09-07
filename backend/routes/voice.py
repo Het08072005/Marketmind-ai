@@ -2,6 +2,7 @@ import base64
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
+from config import settings
 from services.voice_service import transcribe_audio_bytes, generate_autonomous_agent_response, synthesize_speech_audio
 
 router = APIRouter(prefix="/api/voice", tags=["Voice Agent"])
@@ -32,10 +33,16 @@ async def transcribe_audio(
     language: str = Form("en")
 ):
     try:
+        if not settings.DEEPGRAM_API_KEY:
+            raise HTTPException(status_code=503, detail="Deepgram STT is not configured on this backend")
         audio_bytes = await file.read()
+        if not audio_bytes:
+            raise HTTPException(status_code=400, detail="No audio was received")
         content_type = file.content_type or "audio/webm"
         transcript = await transcribe_audio_bytes(audio_bytes, content_type=content_type, language=language)
         return {"transcript": transcript, "status": "success"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
 
@@ -116,4 +123,3 @@ async def autonomous_copilot_endpoint(req: AutonomousCopilotRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Autonomous copilot error: {str(e)}")
-

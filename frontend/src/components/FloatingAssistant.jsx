@@ -369,6 +369,9 @@ export default function FloatingAssistant({
               } else {
                 setIsOpen(true);
               }
+              // This user gesture is the browser-safe point to request microphone
+              // permission. Deepgram then detects the spoken "Hey Alex" phrase.
+              if (!isMicMuted) startListening(true);
             }}
             style={{
               width: "52px",

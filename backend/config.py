@@ -16,7 +16,7 @@ class Settings:
         "http://127.0.0.1:3000",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-    ]
+    ] + [origin.strip().rstrip("/") for origin in os.getenv("CORS_ORIGINS", "").split(",") if origin.strip()]
     DEFAULT_STT_MODEL: str = os.getenv("DEFAULT_STT_MODEL", "nova-2")
     DEFAULT_TTS_VOICE_FEMALE: str = os.getenv("DEFAULT_TTS_VOICE_FEMALE", "aura-asteria-en")
     DEFAULT_TTS_VOICE_MALE: str = os.getenv("DEFAULT_TTS_VOICE_MALE", "aura-orion-en")

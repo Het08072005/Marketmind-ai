@@ -978,57 +978,10 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
     }
   };
 
-  // In-drawer Microphone Toggle with Web Speech API
+  // The page does not run a second browser STT engine. Voice questions are
+  // handled exclusively by the Deepgram-backed Alex assistant.
   const handleToggleVoice = () => {
-    if (isListening) {
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch (e) { }
-      }
-      setIsListening(false);
-      return;
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Speech recognition is not supported in this browser. Please use Chrome/Edge or type your question.");
-      return;
-    }
-
-    try {
-      const rec = new SpeechRecognition();
-      rec.continuous = false;
-      rec.interimResults = true;
-      rec.lang = "en-IN";
-
-      rec.onstart = () => {
-        setIsListening(true);
-      };
-
-      rec.onresult = (event) => {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        setCopilotInputText(transcript);
-        if (event.results[0].isFinal && transcript.trim()) {
-          setIsListening(false);
-          handleSendCopilotDrawerQuery(transcript.trim());
-        }
-      };
-
-      rec.onerror = () => {
-        setIsListening(false);
-      };
-
-      rec.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = rec;
-      rec.start();
-    } catch (e) {
-      setIsListening(false);
-    }
+    window.dispatchEvent(new CustomEvent("marketmind:open_voice_assistant"));
   };
 
   // Text-To-Speech for Copilot answer bubbles
