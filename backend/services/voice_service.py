@@ -1374,7 +1374,7 @@ async def generate_autonomous_agent_response(
     ):
         from services.sector_intelligence_service import get_sector_intelligence_data
 
-        sec_data = get_sector_intelligence_data(detected_symbol)
+        sec_data = get_sector_intelligence_data(detected_symbol, fast_mode=True)
         overall_sc = sec_data.get("overall_score", 78)
         tag_val = sec_data.get("tag", "SELECTIVE ACCUMULATION")
         hl_val = sec_data.get("headline", "Quality Improving, Valuation Neutral")

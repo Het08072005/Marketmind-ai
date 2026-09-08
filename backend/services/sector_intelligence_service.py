@@ -18,7 +18,7 @@ from services.gemini_client import generate_content_sync, gemini_pool, get_gemin
 _gemini_client = gemini_pool.get_client()
 
 
-def get_sector_intelligence_data(symbol: str) -> Dict[str, Any]:
+def get_sector_intelligence_data(symbol: str, fast_mode: bool = False) -> Dict[str, Any]:
     """
     Autonomous AI Agent for Sector Decision Intelligence.
     Dynamically generates institutional decision intelligence for ANY Indian equity ticker.
@@ -66,8 +66,8 @@ def get_sector_intelligence_data(symbol: str) -> Dict[str, Any]:
         "pe": round(avg_pe, 1)
     }
 
-    # 3. Try Gemini 2.5 Flash Autonomous AI Agent Generation
-    if gemini_pool.active_keys_count > 0:
+    # 3. Try Gemini 2.5 Flash Autonomous AI Agent Generation (skipped in fast_mode for voice)
+    if not fast_mode and gemini_pool.active_keys_count > 0:
         try:
             ai_data = _generate_with_gemini(comp, peers, sector_averages)
             if ai_data and "overall_score" in ai_data:

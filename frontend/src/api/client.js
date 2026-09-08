@@ -2,13 +2,12 @@
 // Keeping localhost as a development-only default prevents a deployed Vercel
 // site from silently trying to call the visitor's own computer.
 const configuredApiUrl = (import.meta.env.VITE_API_URL || "").trim().replace(/\/$/, "");
-const API_BASE_URL = configuredApiUrl || (import.meta.env.DEV ? "http://127.0.0.1:8000" : "");
+const FALLBACK_PROD_URL = "https://marketmind-ai-piwi.onrender.com";
+const API_BASE_URL = configuredApiUrl || (import.meta.env.DEV ? "http://127.0.0.1:8000" : FALLBACK_PROD_URL);
 
 function apiUrl(path) {
-  if (!API_BASE_URL) {
-    throw new Error("Voice service is not configured. Set VITE_API_URL in Vercel to your public backend URL.");
-  }
-  return `${API_BASE_URL}${path}`;
+  const base = API_BASE_URL || FALLBACK_PROD_URL;
+  return `${base}${path}`;
 }
 
 export const apiClient = {
@@ -47,14 +46,13 @@ export const apiClient = {
     if (!res.ok) throw new Error(`POST ${endpoint} failed`);
     return await res.json();
   },
-  // Voice Endpoints
   async transcribeAudio(audioBlob, language = "en") {
     const formData = new FormData();
     formData.append("file", audioBlob, "recording.webm");
     formData.append("language", language);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
     const response = await fetch(apiUrl("/api/voice/transcribe"), {
       method: "POST",
       body: formData,
@@ -67,7 +65,7 @@ export const apiClient = {
 
   async sendVoiceChat({ message, language = "english", voice_gender = "male", ticker = null, history = [] }) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
     try {
       const response = await fetch(apiUrl("/api/voice/chat"), {
         method: "POST",
@@ -86,7 +84,7 @@ export const apiClient = {
 
   async synthesizeSpeech({ text, language = "english", voice_gender = "male" }) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
       const response = await fetch(apiUrl("/api/voice/synthesize"), {
         method: "POST",

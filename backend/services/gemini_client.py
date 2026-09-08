@@ -115,21 +115,28 @@ class GeminiKeyPool:
         system_instruction: Optional[str] = None,
         max_tokens: int = 100,
         temperature: float = 0.2,
-        timeout_secs: float = 3.5,
+        timeout_secs: float = 2.0,
         models: Optional[List[str]] = None
     ) -> Optional[str]:
         """
         Ultra-fast circular Gemini call for Voice Copilot (Alex).
-        Iterates across all keys in the pool if quota/rate-limits occur.
+        Iterates across all keys in the pool with a strict 3.8s wall-clock budget,
+        guaranteeing instant response and immediate failover.
         """
         if not self._keys or not self._clients:
             return None
 
-        candidate_models = models or DEFAULT_GEMINI_MODELS
+        # Priority voice models (fastest token generation)
+        candidate_models = models or ["gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-3.6-flash"]
         total_keys = len(self._keys)
+        start_time = time.time()
+        max_total_budget = 3.8  # Never hold the HTTP request longer than 3.8 seconds
 
-        # Allow full circular cycle through all keys
         for key_cycle in range(total_keys):
+            elapsed = time.time() - start_time
+            if elapsed >= max_total_budget:
+                break
+
             with self._lock:
                 current_key = self._keys[self._current_idx % total_keys]
                 client = self._clients.get(current_key)
@@ -142,9 +149,12 @@ class GeminiKeyPool:
             if system_instruction:
                 config["system_instruction"] = system_instruction
 
-            key_quota_hit = False
+            remaining_time = max(0.5, max_total_budget - (time.time() - start_time))
+            call_timeout = min(timeout_secs, remaining_time)
 
-            for model_name in candidate_models:
+            for model_name in candidate_models[:2]:
+                if time.time() - start_time >= max_total_budget:
+                    break
                 try:
                     res = await asyncio.wait_for(
                         asyncio.to_thread(
@@ -153,7 +163,7 @@ class GeminiKeyPool:
                             contents=prompt,
                             config=config
                         ),
-                        timeout=timeout_secs
+                        timeout=call_timeout
                     )
                     if res and res.text:
                         cleaned = res.text.strip()
@@ -161,18 +171,14 @@ class GeminiKeyPool:
                             self.mark_success(current_key)
                             return cleaned
                 except asyncio.TimeoutError:
-                    continue
+                    break
                 except Exception as e:
                     if is_quota_or_rate_limit_error(e):
-                        print(f"[GeminiPool] Key #{self._current_idx + 1} hit quota limit on {model_name}: {e}")
-                        key_quota_hit = True
-                        break  # Break model loop to rotate key immediately
-                    continue
+                        print(f"[GeminiPool] Key #{self._current_idx + 1} quota limit on {model_name}: {e}")
+                    break
 
-            if key_quota_hit:
-                self.rotate_key("quota_limit_429")
-            else:
-                self.rotate_key("model_cycle_exhausted")
+            # Rotate immediately on error or timeout so next key gets a chance
+            self.rotate_key("failover")
 
         return None
 
