@@ -11,6 +11,8 @@ try:
 except ImportError:
     genai = None
 
+from services.gemini_client import gemini_pool, generate_content_sync, get_gemini_client
+
 # Pre-calibrated Core Thesis Registry with deep causal and empirical evidence
 # Fully dynamic Thesis Intelligence Engine: zero hardcoded thesis profiles.
 # Every thesis is dynamically synthesized via Gemini AI and real-time company telemetry.
@@ -645,7 +647,7 @@ async def generate_ai_grounded_thesis(symbol: str, custom_claim: Optional[str] =
         "sector": "Core Industry"
     }
 
-    if not settings.GEMINI_API_KEY or not genai:
+    if not gemini_pool.active_keys_count or not genai:
         dynamic = generate_dynamic_thesis(clean, custom_claim)
         normalized = _normalize_thesis_profile(dynamic, clean)
         AI_THESIS_CACHE[clean] = normalized
@@ -750,21 +752,17 @@ Synthesize a living point-in-time causal thesis model in valid JSON matching thi
 Return ONLY the raw JSON without code fences or quotes."""
 
     try:
-        import asyncio
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
         response = None
-        for model_candidate in ["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-2.5-flash"]:
+        for model_candidate in ["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"]:
             try:
-                response = await asyncio.wait_for(
-                    asyncio.to_thread(
-                        client.models.generate_content,
-                        model=model_candidate,
-                        contents=prompt,
-                        config={"temperature": 0.2}
-                    ),
-                    timeout=5.5
+                res_obj = generate_content_sync(
+                    contents=prompt,
+                    model=model_candidate,
+                    config={"temperature": 0.2},
+                    timeout_secs=5.5
                 )
-                if response and response.text:
+                if res_obj and hasattr(res_obj, "text") and res_obj.text:
+                    response = res_obj
                     break
             except Exception as m_err:
                 print(f"Thesis model candidate {model_candidate} failed: {m_err}")
@@ -830,18 +828,22 @@ STRICT INSTRUCTIONS:
 4. If there is a weakest causal link or falsifier, explicitly name it.
 5. Provide ONLY the final paragraph. No preamble, no quotes."""
 
+    if not gemini_pool.active_keys_count or not genai:
+        return thesis_data.get("summary_36_words") or ""
+
     try:
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
+        response = generate_content_sync(
+            contents=prompt,
+            models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
+            timeout_secs=4.0
         )
-        text = response.text.strip().replace('"', '')
-        words = text.split()
-        if 30 <= len(words) <= 45:
-            return text
-        # If Gemini didn't obey word count strictly, use verified audited summary
-        return thesis_data.get("summary_36_words") or text
+        if response and hasattr(response, "text") and response.text:
+            text = response.text.strip().replace('"', '')
+            words = text.split()
+            if 30 <= len(words) <= 45:
+                return text
+            return thesis_data.get("summary_36_words") or text
+        return thesis_data.get("summary_36_words")
     except Exception as e:
         print(f"Gemini grounded thesis summary error: {e}")
         return thesis_data.get("summary_36_words")

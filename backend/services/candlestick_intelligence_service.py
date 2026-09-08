@@ -22,12 +22,9 @@ _GEMINI_MODELS = [
     "gemini-pro-latest"
 ]
 
-_gemini_client = None
-if settings.GEMINI_API_KEY:
-    try:
-        _gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    except Exception as e:
-        print(f"Candlestick Intelligence Service: Gemini init error: {e}")
+from services.gemini_client import generate_content_sync, gemini_pool, get_gemini_client
+
+_gemini_client = gemini_pool.get_client()
 
 
 def get_candlestick_intelligence(symbol: str) -> Dict[str, Any]:
@@ -72,8 +69,8 @@ def get_candlestick_intelligence(symbol: str) -> Dict[str, Any]:
     # 2. Extract technical microstructure & zone geometry
     quant_metrics = _compute_quant_candle_metrics(comp, candles, sector_peers)
 
-    # 3. Primary: Gemini AI Agent Synthesis
-    if _gemini_client:
+    # 3. Primary: Generate via Gemini AI Agent
+    if gemini_pool.active_keys_count > 0:
         try:
             ai_data = _generate_with_gemini(comp, quant_metrics, candles)
             if ai_data and "decision_stance" in ai_data and "evidence_layers" in ai_data:
@@ -399,26 +396,24 @@ Return ONLY valid JSON with this schema:
 }}
 """
 
-    for model in _GEMINI_MODELS:
+    res = generate_content_sync(
+        contents=prompt,
+        models=_GEMINI_MODELS,
+        config={"response_mime_type": "application/json", "temperature": 0.25},
+        timeout_secs=4.0
+    )
+    if res and hasattr(res, "text") and res.text:
         try:
-            res = _gemini_client.models.generate_content(
-                model=model,
-                contents=prompt,
-                config={"response_mime_type": "application/json", "temperature": 0.25}
-            )
-            if res and res.text:
-                text = res.text.strip()
-                text = re.sub(r"^```json\s*", "", text)
-                text = re.sub(r"^```\s*", "", text)
-                text = re.sub(r"\s*```$", "", text)
-                parsed = json.loads(text)
-                if "decision_stance" in parsed and "evidence_layers" in parsed:
-                    # Attach the raw 30-day candles for SVG chart rendering
-                    parsed["candles"] = candles
-                    return parsed
+            text = res.text.strip()
+            text = re.sub(r"^```json\s*", "", text)
+            text = re.sub(r"^```\s*", "", text)
+            text = re.sub(r"\s*```$", "", text)
+            parsed = json.loads(text)
+            if "decision_stance" in parsed and "evidence_layers" in parsed:
+                parsed["candles"] = candles
+                return parsed
         except Exception as e:
-            print(f"Candlestick Intel: Model {model} failed: {e}")
-            continue
+            print(f"Candlestick Intel parse error: {e}")
 
     return None
 
@@ -647,17 +642,17 @@ User Question: "{question}"
 Answer DIRECTLY in 25-35 words with institutional precision. Quote the exact support/resistance numbers and probabilistic confidence. No fluff.
 """
 
-    for model in _GEMINI_MODELS:
-        try:
-            res = _gemini_client.models.generate_content(model=model, contents=prompt)
-            if res and res.text:
-                return {
-                    "answer": res.text.strip(),
-                    "symbol": sym,
-                    "stance": data.get('decision_stance', {}).get('stance')
-                }
-        except Exception:
-            continue
+    res = generate_content_sync(
+        contents=prompt,
+        models=_GEMINI_MODELS,
+        timeout_secs=3.0
+    )
+    if res and hasattr(res, "text") and res.text:
+        return {
+            "answer": res.text.strip(),
+            "symbol": sym,
+            "stance": data.get('decision_stance', {}).get('stance')
+        }
 
     # Fallback response
     return {

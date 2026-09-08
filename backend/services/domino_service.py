@@ -4,6 +4,7 @@ import math
 from typing import Dict, List, Optional, Any
 from google import genai
 from config import settings
+from services.gemini_client import generate_content_sync, get_gemini_client, gemini_pool
 from services.domino_structural_engine import (
     calculate_company_structural_impact,
     load_knowledge_graph
@@ -525,9 +526,8 @@ def simulate_domino_event(
 
     # 7. AI Copilot Synthesis (LLM = Explainer & Institutional CIO)
     ai_narrative = ""
-    if settings.GEMINI_API_KEY:
+    if gemini_pool.active_keys_count > 0:
         try:
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
             top_bear = stocks_impact[0]["symbol"] if stocks_impact else "INDIGO"
             top_bull = stocks_impact[-1]["symbol"] if stocks_impact else "ONGC"
             
@@ -546,11 +546,13 @@ CALCULATED STATISTICAL EVIDENCE FROM THE ENGINE:
 Provide a crisp, 3-sentence institutional voice explanation for the portfolio manager.
 Rule: Cite the mathematical transmission mechanism (fuel expense opex share, pricing pass-through) and explain WHY {top_bear} diverges from peers. Do not invent any numbers."""
             
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
+            response = generate_content_sync(
+                contents=prompt,
+                models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
+                timeout_secs=3.5
             )
-            ai_narrative = response.text.strip()
+            if response and hasattr(response, "text") and response.text:
+                ai_narrative = response.text.strip()
         except Exception as e:
             print(f"Gemini narrative generation error: {e}")
 
@@ -762,10 +764,8 @@ async def process_domino_agent_query(
 
     # 3. Generate Rich Institutional Agent Explanation using Gemini with fallback
     reply = ""
-    if settings.GEMINI_API_KEY:
+    if gemini_pool.active_keys_count > 0:
         try:
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            
             # Format context from simulation
             stocks = simulation_result.get("stocks_impact", [])
             top_stocks_summary = ", ".join([
@@ -812,11 +812,13 @@ INSTRUCTIONS:
 4. If the user asked in Hindi or Hinglish, answer in Hinglish or English cleanly.
 5. Ground your answer in the empirical simulation data provided above."""
 
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
+            response = generate_content_sync(
+                contents=prompt,
+                models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
+                timeout_secs=4.0
             )
-            reply = response.text.strip()
+            if response and hasattr(response, "text") and response.text:
+                reply = response.text.strip()
         except Exception as e:
             print(f"Gemini agent generation error: {e}")
 

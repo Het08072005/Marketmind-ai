@@ -32,15 +32,13 @@ _GEMINI_DISABLED_UNTIL: float = 0.0  # Circuit breaker for rate limits / quota e
 _GEMINI_MODELS = [
     "gemini-2.5-flash-lite",
     "gemini-flash-latest",
+    "gemini-3.6-flash",
+    "gemini-2.5-flash"
 ]
 
-_gemini_client = None
-if settings.GEMINI_API_KEY:
-    try:
-        from google import genai
-        _gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    except Exception as e:
-        print(f"Quant Prediction Engine: Gemini init error: {e}")
+from services.gemini_client import generate_content_sync, gemini_pool, get_gemini_client
+
+_gemini_client = gemini_pool.get_client()
 
 
 
@@ -718,8 +716,8 @@ def synthesize_ai_narrative(
         "cached_date": today_str
     }
 
-    # Only attempt LLM if explicitly requested and circuit breaker is inactive
-    if call_llm and _gemini_client and (time.time() >= _GEMINI_DISABLED_UNTIL):
+    # Attempt LLM synthesis with automatic circular failover across all keys
+    if call_llm and gemini_pool.active_keys_count > 0:
         prompt = f"""
 You are the Chief Quantitative Strategist at MarketMind AI.
 Analyze this institutional telemetry for {name} ({sym}) at CMP ₹{price:,.2f}:
@@ -744,34 +742,26 @@ RULES:
    - "contradiction_analysis": (20-30 words detailing conflicting signals)
    - "counterfactual_flip": (exact conditions when prediction weakens or flips)
 """
-        for model in _GEMINI_MODELS:
+        res = generate_content_sync(
+            contents=prompt,
+            models=_GEMINI_MODELS,
+            config={"response_mime_type": "application/json", "temperature": 0.2},
+            timeout_secs=4.0
+        )
+        if res and hasattr(res, "text") and res.text:
             try:
-                res = _gemini_client.models.generate_content(
-                    model=model,
-                    contents=prompt,
-                    config={"response_mime_type": "application/json", "temperature": 0.2}
-                )
-                if res and res.text:
-                    parsed = json.loads(res.text.strip())
-                    if "summary" in parsed and "institutional_thesis" in parsed:
-                        narrative = {
-                            "summary": parsed["summary"],
-                            "institutional_thesis": parsed["institutional_thesis"],
-                            "contradiction_analysis": parsed.get("contradiction_analysis", fallback_contradiction),
-                            "counterfactual_flip": parsed.get("counterfactual_flip", pred["invalidation_condition"]),
-                            "is_ai_generated": True,
-                            "cached_date": today_str
-                        }
-                        break
-            except Exception as err:
-                err_str = str(err)
-                if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
-                    print("Quant Engine: Gemini quota reached (429). Disabling LLM calls for 10 minutes.")
-                    _GEMINI_DISABLED_UNTIL = time.time() + 600
-                    break
-                else:
-                    print(f"Quant Engine: Gemini model {model} error: {err}")
-                    continue
+                parsed = json.loads(res.text.strip())
+                if "summary" in parsed and "institutional_thesis" in parsed:
+                    narrative = {
+                        "summary": parsed["summary"],
+                        "institutional_thesis": parsed["institutional_thesis"],
+                        "contradiction_analysis": parsed.get("contradiction_analysis", fallback_contradiction),
+                        "counterfactual_flip": parsed.get("counterfactual_flip", pred["invalidation_condition"]),
+                        "is_ai_generated": True,
+                        "cached_date": today_str
+                    }
+            except Exception as e:
+                print(f"Quant Engine: Parse error: {e}")
 
     _GEMINI_SYNTHESIS_CACHE[cache_key] = narrative
     return narrative

@@ -13,12 +13,9 @@ _CACHE_TIMESTAMP: Dict[str, float] = {}
 _CACHE_TTL = 180  # 3 minutes TTL per company
 
 # Initialize Gemini Client if API key is provided
-_gemini_client = None
-if settings.GEMINI_API_KEY:
-    try:
-        _gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    except Exception as e:
-        print(f"Sector Intelligence Service: Gemini init error: {e}")
+from services.gemini_client import generate_content_sync, gemini_pool, get_gemini_client
+
+_gemini_client = gemini_pool.get_client()
 
 
 def get_sector_intelligence_data(symbol: str) -> Dict[str, Any]:
@@ -70,7 +67,7 @@ def get_sector_intelligence_data(symbol: str) -> Dict[str, Any]:
     }
 
     # 3. Try Gemini 2.5 Flash Autonomous AI Agent Generation
-    if _gemini_client:
+    if gemini_pool.active_keys_count > 0:
         try:
             ai_data = _generate_with_gemini(comp, peers, sector_averages)
             if ai_data and "overall_score" in ai_data:
@@ -260,10 +257,11 @@ def _generate_with_gemini(comp: Dict[str, Any], peers: List[Dict[str, Any]], sec
     Return valid JSON only. Do not enclose in markdown code fences if possible.
     """
 
-    res = _gemini_client.models.generate_content(
-        model="gemini-2.5-flash",
+    res = generate_content_sync(
         contents=prompt,
-        config={"response_mime_type": "application/json"}
+        models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
+        config={"response_mime_type": "application/json"},
+        timeout_secs=4.0
     )
 
     if res and res.text:

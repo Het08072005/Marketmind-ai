@@ -21,12 +21,9 @@ _GEMINI_MODELS = [
     "gemini-pro-latest"
 ]
 
-_gemini_client = None
-if settings.GEMINI_API_KEY:
-    try:
-        _gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    except Exception as e:
-        print(f"Smart Alert Service: Gemini init error: {e}")
+from services.gemini_client import generate_content_sync, gemini_pool, get_gemini_client
+
+_gemini_client = gemini_pool.get_client()
 
 
 def get_smart_alert_intelligence(symbol: str, lookback: str = "3M") -> Dict[str, Any]:
@@ -68,8 +65,8 @@ def get_smart_alert_intelligence(symbol: str, lookback: str = "3M") -> Dict[str,
     if not sector_peers:
         sector_peers = [comp]
 
-    # 3. Primary: Generate via Gemini AI Agent
-    if _gemini_client:
+    # Try Gemini dynamic analysis first if key pool is active
+    if gemini_pool.active_keys_count > 0:
         try:
             ai_alert = _generate_with_gemini(comp, sector_peers, candles_info, lookback_clean)
             if ai_alert and "decision_layer" in ai_alert and "news_reaction_timeline" in ai_alert:
@@ -295,24 +292,23 @@ Return ONLY valid JSON matching this schema:
 }}
 """
 
-    for model in _GEMINI_MODELS:
+    res = generate_content_sync(
+        contents=prompt,
+        models=_GEMINI_MODELS,
+        config={"response_mime_type": "application/json", "temperature": 0.25},
+        timeout_secs=4.0
+    )
+    if res and hasattr(res, "text") and res.text:
         try:
-            res = _gemini_client.models.generate_content(
-                model=model,
-                contents=prompt,
-                config={"response_mime_type": "application/json", "temperature": 0.25}
-            )
-            if res and res.text:
-                text = res.text.strip()
-                text = re.sub(r"^```json\s*", "", text)
-                text = re.sub(r"^```\s*", "", text)
-                text = re.sub(r"\s*```$", "", text)
-                parsed = json.loads(text)
-                if "decision_layer" in parsed and "why_alert_generated" in parsed:
-                    return parsed
+            text = res.text.strip()
+            text = re.sub(r"^```json\s*", "", text)
+            text = re.sub(r"^```\s*", "", text)
+            text = re.sub(r"\s*```$", "", text)
+            parsed = json.loads(text)
+            if "decision_layer" in parsed and "why_alert_generated" in parsed:
+                return parsed
         except Exception as e:
-            print(f"Smart Alert: Model {model} failed: {e}")
-            continue
+            print(f"Smart Alert: Parse error: {e}")
 
     return None
 

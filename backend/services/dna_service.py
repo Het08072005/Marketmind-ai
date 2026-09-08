@@ -1,4 +1,5 @@
 import os
+import json
 import math
 import asyncio
 from typing import Dict, List, Any, Optional
@@ -7,12 +8,9 @@ from config import settings
 from services.market_data_service import fetch_live_stock_data, get_all_live_companies, get_stock_historical_candles
 from services.stock_service import get_company_by_symbol, get_all_companies
 
-gemini_client = None
-if settings.GEMINI_API_KEY:
-    try:
-        gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    except Exception as e:
-        print(f"Error initializing Gemini client in dna_service: {e}")
+from services.gemini_client import call_fast_gemini, gemini_pool, get_gemini_client
+
+gemini_client = gemini_pool.get_client()
 
 TRAITS = [
     "Growth & Reinvestment",
@@ -209,7 +207,7 @@ async def generate_ai_dna_intelligence(
         f"Macro Hedging: In risk-off market regimes, {c_name} absorbs higher drawdown amplitude — hedge with index put spreads."
     ]
 
-    if not gemini_client:
+    if not gemini_pool.active_keys_count:
         return {
             "verdict": fallback_verdict,
             "patterns": fallback_patterns,
@@ -230,59 +228,60 @@ Generate a valid JSON object with:
 
 JSON output only:"""
 
-    for model_name in ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-flash-latest"]:
+    res_text = await gemini_pool.call_fast_gemini(
+        prompt=prompt,
+        models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.1-flash-lite"],
+        max_tokens=600,
+        temperature=0.25,
+        timeout_secs=7.0
+    )
+    if res_text:
         try:
-            res = await asyncio.wait_for(
-                asyncio.to_thread(
-                    gemini_client.models.generate_content,
-                    model=model_name,
-                    contents=prompt,
-                    config={"temperature": 0.25, "response_mime_type": "application/json"}
-                ),
-                timeout=7.0
-            )
-            import json
-            if res and res.text:
-                parsed = json.loads(res.text.strip())
-                if isinstance(parsed, dict) and "patterns" in parsed and len(parsed["patterns"]) >= 3:
-                    raw_rules = parsed.get("playbook_rules") or fallback_playbook
-                    norm_rules = []
-                    for r in raw_rules:
-                        if isinstance(r, dict):
-                            r_title = r.get("rule") or r.get("title") or r.get("name") or ""
-                            r_action = r.get("action") or r.get("description") or r.get("desc") or r.get("body") or ""
-                            if r_title and r_action:
-                                norm_rules.append(f"{r_title}: {r_action}")
-                            elif r_title or r_action:
-                                norm_rules.append(r_title or r_action)
-                            else:
-                                norm_rules.append(str(r))
-                        elif isinstance(r, str):
-                            norm_rules.append(r)
+            res_clean = res_text.strip()
+            if res_clean.startswith("```json"):
+                res_clean = res_clean[7:]
+            if res_clean.endswith("```"):
+                res_clean = res_clean[:-3]
+            parsed = json.loads(res_clean.strip())
+            if isinstance(parsed, dict) and "patterns" in parsed and len(parsed["patterns"]) >= 3:
+                raw_rules = parsed.get("playbook_rules") or fallback_playbook
+                norm_rules = []
+                for r in raw_rules:
+                    if isinstance(r, dict):
+                        r_title = r.get("rule") or r.get("title") or r.get("name") or ""
+                        r_action = r.get("action") or r.get("description") or r.get("desc") or r.get("body") or ""
+                        if r_title and r_action:
+                            norm_rules.append(f"{r_title}: {r_action}")
+                        elif r_title or r_action:
+                            norm_rules.append(r_title or r_action)
                         else:
                             norm_rules.append(str(r))
+                    elif isinstance(r, str):
+                        norm_rules.append(r)
+                    else:
+                        norm_rules.append(str(r))
 
-                    norm_patterns = []
-                    for pat in parsed.get("patterns") or fallback_patterns:
-                        if isinstance(pat, dict):
-                            ev_list = []
-                            for ev_item in pat.get("ev") or []:
-                                if isinstance(ev_item, dict):
-                                    ev_list.append(ev_item.get("name") or ev_item.get("signal") or str(ev_item))
-                                else:
-                                    ev_list.append(str(ev_item))
-                            pat["ev"] = ev_list
-                            norm_patterns.append(pat)
-                        else:
-                            norm_patterns.append(pat)
+                norm_patterns = []
+                for pat in parsed.get("patterns") or fallback_patterns:
+                    if isinstance(pat, dict):
+                        ev_list = []
+                        for ev_item in pat.get("ev") or []:
+                            if isinstance(ev_item, dict):
+                                ev_list.append(ev_item.get("name") or ev_item.get("signal") or str(ev_item))
+                            else:
+                                ev_list.append(str(ev_item))
+                        pat["ev"] = ev_list
+                        norm_patterns.append(pat)
+                    else:
+                        norm_patterns.append(pat)
 
-                    return {
-                        "verdict": parsed.get("verdict") or fallback_verdict,
-                        "patterns": norm_patterns or fallback_patterns,
-                        "playbook_rules": norm_rules or fallback_playbook
-                    }
-        except Exception as e:
-            print(f"DNA Gemini ({model_name}) error/timeout: {e}")
+                return {
+                    "verdict": parsed.get("verdict") or fallback_verdict,
+                    "patterns": norm_patterns or fallback_patterns,
+                    "playbook_rules": norm_rules or fallback_playbook
+                }
+        except Exception as parse_err:
+            print(f"DNA JSON parse error: {parse_err}")
 
     return {
         "verdict": fallback_verdict,

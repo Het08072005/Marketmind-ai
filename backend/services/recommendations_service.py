@@ -10,14 +10,9 @@ _RADAR_CACHE_TIME = 0
 _RADAR_CACHE_TTL = 30  # seconds
 
 # Gemini AI Integration for Real-Time Institutional Catalyst Synthesis
-_gemini_client = None
-try:
-    from google import genai
-    from config import settings
-    if settings.GEMINI_API_KEY:
-        _gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-except Exception as e:
-    print(f"Recommendations AI init: {e}")
+from services.gemini_client import generate_content_sync, gemini_pool, get_gemini_client
+
+_gemini_client = gemini_pool.get_client()
 
 _CATALYST_CACHE: Dict[str, Dict[str, Any]] = {}
 _CATALYST_CACHE_TS: Dict[str, float] = {}
@@ -44,7 +39,7 @@ def generate_ai_catalyst_narrative(comp: Dict[str, Any], pred: Dict[str, Any]) -
     regime = pred.get("regime", {}).get("display_name", "Balanced Flow")
 
     catalyst_text = None
-    if _gemini_client:
+    if gemini_pool.active_keys_count > 0:
         try:
             prompt = (
                 f"You are a Senior Quantitative Analyst at a Tier-1 institutional equity desk in Mumbai.\n"
@@ -56,11 +51,12 @@ def generate_ai_catalyst_narrative(comp: Dict[str, Any], pred: Dict[str, Any]) -
                 f"- Valuation: P/E {pe}x, ROE {roe}%\n\n"
                 f"Write an actionable, professional 1-sentence institutional catalyst (25-35 words) explaining the order flow or price driver for the upcoming trading sessions."
             )
-            resp = _gemini_client.models.generate_content(
-                model="gemini-2.5-flash-lite",
-                contents=prompt
+            resp = generate_content_sync(
+                contents=prompt,
+                models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
+                timeout_secs=3.0
             )
-            if resp and resp.text:
+            if resp and hasattr(resp, "text") and resp.text:
                 catalyst_text = resp.text.strip().replace("\n", " ")
         except Exception:
             pass

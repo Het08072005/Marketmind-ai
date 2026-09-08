@@ -29,12 +29,9 @@ IST_TZ = timezone(timedelta(hours=5, minutes=30))
 
 _GEMINI_MODELS = ["gemini-2.5-flash-lite", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-flash-latest", "gemini-pro-latest"]
 
-_gemini_client = None
-if settings.GEMINI_API_KEY:
-    try:
-        _gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    except Exception as e:
-        print(f"News Intelligence Service: Gemini init error: {e}")
+from services.gemini_client import generate_content_sync, gemini_pool, get_gemini_client
+
+_gemini_client = gemini_pool.get_client()
 
 SCRAPE_CACHE_TTL = 35  # 35s freshness for rapid live ingestion
 _GEMINI_QUOTA_BLOCKED_UNTIL = 0
@@ -2424,18 +2421,15 @@ If the user asks in Hindi or Hinglish, answer in natural Hinglish/Hindi. If in E
 Do not use generic statements. Speak with the authority of a senior equity strategist.
 """
 
-    if _gemini_client:
-        for model in _GEMINI_MODELS:
-            try:
-                res = _gemini_client.models.generate_content(
-                    model=model,
-                    contents=prompt,
-                    config={"temperature": 0.3}
-                )
-                if res and res.text:
-                    return res.text.strip()
-            except Exception:
-                continue
+    if gemini_pool.active_keys_count > 0:
+        res = generate_content_sync(
+            contents=prompt,
+            models=_GEMINI_MODELS,
+            config={"temperature": 0.3},
+            timeout_secs=4.0
+        )
+        if res and hasattr(res, "text") and res.text:
+            return res.text.strip()
 
     t_ticks = ", ".join(relevant.get("tickers", ["Relevant stocks"]))
     return f"Regarding '{relevant.get('title')}', this represents a {relevant.get('materiality', 'Medium')} materiality event affecting {t_ticks}. {relevant.get('why_affected', '')} AI Verdict: {relevant.get('ai_verdict', '')}"

@@ -12,17 +12,18 @@ from services.portfolio_service import execute_trade, get_portfolio_summary, sim
 from services.domino_service import get_domino_events
 from services.recommendations_service import get_stock_institutional_profile
 
-gemini_client = None
-if settings.GEMINI_API_KEY:
-    try:
-        gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    except Exception as e:
-        print(f"Error initializing Gemini client: {e}")
+from services.gemini_client import call_fast_gemini as _pool_call_fast_gemini, get_gemini_client, gemini_pool
+
+# Multi-key circular pool reference (backward-compatible)
+gemini_client = gemini_pool.get_client()
 
 FAST_GEMINI_MODELS = [
+    "gemini-2.5-flash-lite",
+    "gemini-flash-latest",
+    "gemini-3.6-flash",
+    "gemini-2.5-flash",
     "gemini-flash-lite-latest",
     "gemini-3.1-flash-lite-preview",
-    "gemini-flash-latest"
 ]
 
 async def call_fast_gemini(
@@ -32,29 +33,15 @@ async def call_fast_gemini(
     temperature: float = 0.2,
     timeout_secs: float = 3.5
 ) -> Optional[str]:
-    if not gemini_client:
-        return None
-    for model_name in FAST_GEMINI_MODELS:
-        try:
-            config = {"temperature": temperature, "max_output_tokens": max_tokens}
-            if system_instruction:
-                config["system_instruction"] = system_instruction
-            res = await asyncio.wait_for(
-                asyncio.to_thread(
-                    gemini_client.models.generate_content,
-                    model=model_name,
-                    contents=prompt,
-                    config=config
-                ),
-                timeout=timeout_secs
-            )
-            if res and res.text:
-                cleaned = res.text.strip()
-                if cleaned:
-                    return cleaned
-        except Exception:
-            continue
-    return None
+    """Execute voice response across circular 4-key pool with automatic failover."""
+    return await _pool_call_fast_gemini(
+        prompt=prompt,
+        system_instruction=system_instruction,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        timeout_secs=timeout_secs,
+        models=FAST_GEMINI_MODELS
+    )
 
 # Global Active Session Memory for zero-hallucination multi-turn tracking
 GLOBAL_SESSION_STATE = {

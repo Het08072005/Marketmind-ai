@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
+from services.gemini_client import gemini_pool
 
 # Import Routers
 from routes.voice import router as voice_router
@@ -51,7 +52,8 @@ def read_root():
     return {
         "terminal": "MarketMind AI Intelligence Terminal",
         "status": "online",
-        "gemini_active": bool(settings.GEMINI_API_KEY),
+        "gemini_active": bool(gemini_pool.active_keys_count > 0),
+        "gemini_keys_count": gemini_pool.active_keys_count,
         "deepgram_active": bool(settings.DEEPGRAM_API_KEY),
         "timestamp": datetime.now().isoformat()
     }
@@ -63,7 +65,8 @@ def health_check():
         "latency_ms": 12,
         "services": {
             "voice_agent": "ready",
-            "gemini_brain": "ready" if settings.GEMINI_API_KEY else "offline",
+            "gemini_brain": "ready" if gemini_pool.active_keys_count > 0 else "offline",
+            "gemini_keys_count": gemini_pool.active_keys_count,
             "deepgram_voice": "ready" if settings.DEEPGRAM_API_KEY else "offline",
             "live_market_data": "active",
             "live_news_feed": "active",

@@ -5,13 +5,9 @@ from google import genai
 from config import settings
 from services.stock_service import get_company_by_symbol
 from services.market_data_service import fetch_live_stock_data, get_stock_historical_candles
+from services.gemini_client import generate_content_sync, get_gemini_client, gemini_pool
 
-gemini_client = None
-if settings.GEMINI_API_KEY:
-    try:
-        gemini_client = genai.Client(api_key=settings.GEMINI_API_KEY)
-    except Exception as e:
-        print(f"Report Service: Error initializing Gemini client: {e}")
+gemini_client = gemini_pool.get_client()
 
 def generate_institutional_equity_report(symbol: str, report_type: str = "Company Snapshot") -> Dict[str, Any]:
     sym = symbol.upper()
@@ -134,16 +130,12 @@ def generate_institutional_equity_report(symbol: str, report_type: str = "Compan
             }}
             Return JSON only. No markdown fences.
             """
-            import concurrent.futures
-            def _call_gemini():
-                return gemini_client.models.generate_content(
-                    model="gemini-2.5-flash",
-                    contents=prompt,
-                    config={"response_mime_type": "application/json"}
-                )
-            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(_call_gemini)
-                res = future.result(timeout=2.0)
+            res = generate_content_sync(
+                contents=prompt,
+                models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
+                config={"response_mime_type": "application/json"},
+                timeout_secs=3.0
+            )
             if res and res.text:
                 parsed = json.loads(res.text.strip())
                 if "executive_summary" in parsed and parsed["executive_summary"]:
