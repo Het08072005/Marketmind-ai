@@ -597,8 +597,11 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
   const [speakingNewsId, setSpeakingNewsId] = useState(null);
   const [expandedRippleId, setExpandedRippleId] = useState(null);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
-  const [selectedNewsArticle, setSelectedNewsArticle] = useState(null);
   const [expandedDetailNewsId, setExpandedDetailNewsId] = useState(null);
+  const [expandedNewsAnalysis, setExpandedNewsAnalysis] = useState({});
+  const toggleNewsAnalysis = (id) => {
+    setExpandedNewsAnalysis((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
   const [expandedStoryIds, setExpandedStoryIds] = useState(() => new Set());
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -1317,24 +1320,57 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
                     </div>
                   </div>
 
-                  {/* Top-Right Direct Source Link Button */}
-                  <a
-                    href={sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="news-top-source-btn"
-                    onClick={(e) => e.stopPropagation()}
-                    title={`View original story on ${n.source || 'Verified Source'}`}
-                  >
-                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                    </svg>
-                    <span>Source: {n.source ? n.source.split('&')[0].trim() : "Verified Article"}</span>
-                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M7 17L17 7M17 7H7M17 7V17" />
-                    </svg>
-                  </a>
+                  {/* Top-Right Direct Analysis & Source Buttons */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                    <button
+                      type="button"
+                      className={`news-top-analysis-btn ${expandedNewsAnalysis[cardKey] ? "active" : ""}`}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "5px 12px",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        background: expandedNewsAnalysis[cardKey] ? "#0E1526" : "var(--navy)",
+                        color: expandedNewsAnalysis[cardKey] ? "#F3D59B" : "#FAF6EC",
+                        border: expandedNewsAnalysis[cardKey] ? "1px solid rgba(184, 147, 90, 0.9)" : "1px solid var(--navy)",
+                        boxShadow: expandedNewsAnalysis[cardKey] ? "0 2px 8px rgba(184, 147, 90, 0.25)" : "none",
+                        transition: "all 0.18s ease"
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleNewsAnalysis(cardKey);
+                      }}
+                      title={`Toggle AI Institutional Impact Analysis for this news`}
+                    >
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                      </svg>
+                      <span>{expandedNewsAnalysis[cardKey] ? "Hide Analysis" : "Analysis"}</span>
+                    </button>
+
+                    <a
+                      href={sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="news-top-source-btn"
+                      onClick={(e) => e.stopPropagation()}
+                      title={`View original story on ${n.source || 'Verified Source'}`}
+                    >
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                      <span>Source</span>
+                      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
 
                 {/* Headline */}
@@ -1478,128 +1514,132 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
                   );
                 })()}
 
-                {/* Dedicated Company-Specific Quantified P&L & Exposure Breakdown */}
-                {(() => {
-                  const companyImpacts = resolveNewsCompanyImpacts(n);
-                  if (!companyImpacts || companyImpacts.length === 0) return null;
-                  return (
-                    <div className="news-quant-impact-section">
-                      <div className="quant-impact-header">
-                        <div className="quant-impact-title-wrap">
-                          <span className="quant-impact-badge">COMPANY IMPACT MODEL</span>
-                          <h4 className="quant-impact-heading">
-                            Quantified P&amp;L &amp; Balance Sheet Transmission
-                          </h4>
-                        </div>
-                        <span className="quant-impact-sub">
-                          Modeled financial effect: ₹ Crores and % Margin / PAT sensitivity
-                        </span>
-                      </div>
-
-                      <div className="quant-unified-box">
-                        <div className="quant-unified-lines">
-                          {companyImpacts.map((c, cIdx) => (
-                            <div key={cIdx} className={`quant-single-line-row border-${(c.direction || 'neutral').toLowerCase()}`}>
-                              {/* 1. Mini Ticker & Company Name */}
-                              <div className="quant-col-entity">
-                                <button
-                                  type="button"
-                                  className="quant-mini-ticker-chip"
-                                  onClick={() => handleTickerClick(c.symbol)}
-                                  title={`Analyze ${c.symbol} Chart & Technicals`}
-                                >
-                                  {c.symbol} ↗
-                                </button>
-                                <strong className="quant-entity-name" title={c.name || c.symbol}>
-                                  {c.name || c.symbol}
-                                </strong>
-                              </div>
-
-                              {/* 2. Rupee Impact */}
-                              <div className="quant-col-impact" title={c.est_turnover_pnl_label || 'Est. Financial Impact'}>
-                                <span className="quant-inline-label">EST. P&amp;L:</span>
-                                <strong className="quant-inline-val">{c.est_turnover_pnl}</strong>
-                              </div>
-
-                              {/* 3. Profit / Loss % Pill */}
-                              <div className="quant-col-pnl" title="Margin / PAT Sensitivity">
-                                <span className={`quant-inline-pnl-pill pnl-${(c.direction || 'neutral').toLowerCase()}`}>
-                                  {c.profit_loss_pct}
-                                </span>
-                              </div>
-
-                              {/* 4. Projected Price Window */}
-                              <div className="quant-col-price" title="Projected Price Volatility Window">
-                                <span className="quant-inline-label">PRICE:</span>
-                                <span className="quant-inline-price-val">{c.price_impact_range}</span>
-                              </div>
-
-                              {/* 5. 1-Line Transmission Explanation */}
-                              <div className="quant-col-trans" title={`P&L Transmission: ${c.rationale}`}>
-                                <span className="quant-inline-bullet">•</span>
-                                <span className="quant-inline-trans-text">{c.rationale}</span>
-                              </div>
+                {/* Dedicated Company-Specific Quantified P&L & Exposure Breakdown + Institutional Impact Matrix - Only shown on Analysis */}
+                {expandedNewsAnalysis[cardKey] && (
+                  <div className="news-on-demand-analysis-wrap" style={{ animation: "fadeIn 0.22s ease" }}>
+                    {(() => {
+                      const companyImpacts = resolveNewsCompanyImpacts(n);
+                      if (!companyImpacts || companyImpacts.length === 0) return null;
+                      return (
+                        <div className="news-quant-impact-section">
+                          <div className="quant-impact-header">
+                            <div className="quant-impact-title-wrap">
+                              <span className="quant-impact-badge">COMPANY IMPACT MODEL</span>
+                              <h4 className="quant-impact-heading">
+                                Quantified P&amp;L &amp; Balance Sheet Transmission
+                              </h4>
                             </div>
-                          ))}
+                            <span className="quant-impact-sub">
+                              Modeled financial effect: ₹ Crores and % Margin / PAT sensitivity
+                            </span>
+                          </div>
+
+                          <div className="quant-unified-box">
+                            <div className="quant-unified-lines">
+                              {companyImpacts.map((c, cIdx) => (
+                                <div key={cIdx} className={`quant-single-line-row border-${(c.direction || 'neutral').toLowerCase()}`}>
+                                  {/* 1. Mini Ticker & Company Name */}
+                                  <div className="quant-col-entity">
+                                    <button
+                                      type="button"
+                                      className="quant-mini-ticker-chip"
+                                      onClick={() => handleTickerClick(c.symbol)}
+                                      title={`Analyze ${c.symbol} Chart & Technicals`}
+                                    >
+                                      {c.symbol} ↗
+                                    </button>
+                                    <strong className="quant-entity-name" title={c.name || c.symbol}>
+                                      {c.name || c.symbol}
+                                    </strong>
+                                  </div>
+
+                                  {/* 2. Rupee Impact */}
+                                  <div className="quant-col-impact" title={c.est_turnover_pnl_label || 'Est. Financial Impact'}>
+                                    <span className="quant-inline-label">EST. P&amp;L:</span>
+                                    <strong className="quant-inline-val">{c.est_turnover_pnl}</strong>
+                                  </div>
+
+                                  {/* 3. Profit / Loss % Pill */}
+                                  <div className="quant-col-pnl" title="Margin / PAT Sensitivity">
+                                    <span className={`quant-inline-pnl-pill pnl-${(c.direction || 'neutral').toLowerCase()}`}>
+                                      {c.profit_loss_pct}
+                                    </span>
+                                  </div>
+
+                                  {/* 4. Projected Price Window */}
+                                  <div className="quant-col-price" title="Projected Price Volatility Window">
+                                    <span className="quant-inline-label">PRICE:</span>
+                                    <span className="quant-inline-price-val">{c.price_impact_range}</span>
+                                  </div>
+
+                                  {/* 5. 1-Line Transmission Explanation */}
+                                  <div className="quant-col-trans" title={`P&L Transmission: ${c.rationale}`}>
+                                    <span className="quant-inline-bullet">•</span>
+                                    <span className="quant-inline-trans-text">{c.rationale}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })()}
+                      );
+                    })()}
 
-                {/* Story-Specific Institutional Impact Matrix - Only rendered when content exists */}
-                {(n.why_affected || n.ai_verdict || n.analysis || n.outcome) && (
-                  <div className="card-news-impact-matrix">
-                    {/* Event Metadata Badges Row */}
-                    <div className="matrix-meta-row">
-                      {n.event_type && (
-                        <span className="matrix-pill event-type">
-                          📌 {n.event_type}
-                        </span>
-                      )}
-                      {n.materiality && (
-                        <span className={`matrix-pill materiality-${(n.materiality || 'medium').toLowerCase().replace(/[^a-z]/g, '')}`}>
-                          ⚡ {n.materiality} Materiality
-                        </span>
-                      )}
-                      {n.exposure_type && (
-                        <span className="matrix-pill exposure">
-                          🎯 {n.exposure_type}
-                        </span>
-                      )}
-                      {n.horizon && (
-                        <span className="matrix-pill horizon">
-                          ⏱️ {n.horizon}
-                        </span>
-                      )}
-                      {n.price_reaction && (
-                        <span className="matrix-pill reaction">
-                          📈 {n.price_reaction}
-                        </span>
-                      )}
-                    </div>
+                    {/* Story-Specific Institutional Impact Matrix */}
+                    {(n.why_affected || n.ai_verdict || n.analysis || n.outcome) && (
+                      <div className="card-news-impact-matrix">
+                        {/* Event Metadata Badges Row */}
+                        <div className="matrix-meta-row">
+                          {n.event_type && (
+                            <span className="matrix-pill event-type">
+                              📌 {n.event_type}
+                            </span>
+                          )}
+                          {n.materiality && (
+                            <span className={`matrix-pill materiality-${(n.materiality || 'medium').toLowerCase().replace(/[^a-z]/g, '')}`}>
+                              ⚡ {n.materiality} Materiality
+                            </span>
+                          )}
+                          {n.exposure_type && (
+                            <span className="matrix-pill exposure">
+                              🎯 {n.exposure_type}
+                            </span>
+                          )}
+                          {n.horizon && (
+                            <span className="matrix-pill horizon">
+                              ⏱️ {n.horizon}
+                            </span>
+                          )}
+                          {n.price_reaction && (
+                            <span className="matrix-pill reaction">
+                              📈 {n.price_reaction}
+                            </span>
+                          )}
+                        </div>
 
-                    {/* Why Affected */}
-                    {(n.why_affected || n.analysis) && (
-                      <div className="matrix-field why-affected">
-                        <span className="matrix-field-tag why">Why Affected :</span>
-                        <span className="matrix-field-text">{n.why_affected || n.analysis}</span>
-                      </div>
-                    )}
+                        {/* Why Affected */}
+                        {(n.why_affected || n.analysis) && (
+                          <div className="matrix-field why-affected">
+                            <span className="matrix-field-tag why">Why Affected :</span>
+                            <span className="matrix-field-text">{n.why_affected || n.analysis}</span>
+                          </div>
+                        )}
 
-                    {/* AI Strategic Verdict */}
-                    {(n.ai_verdict || n.outcome) && (
-                      <div className="matrix-field ai-verdict">
-                        <span className="matrix-field-tag verdict">AI Verdict :</span>
-                        <span className="matrix-field-text">{n.ai_verdict || n.outcome}</span>
-                      </div>
-                    )}
+                        {/* AI Strategic Verdict */}
+                        {(n.ai_verdict || n.outcome) && (
+                          <div className="matrix-field ai-verdict">
+                            <span className="matrix-field-tag verdict">AI Verdict :</span>
+                            <span className="matrix-field-text">{n.ai_verdict || n.outcome}</span>
+                          </div>
+                        )}
 
-                    {/* Risk Invalidation */}
-                    {n.invalidation && (
-                      <div className="matrix-field matrix-invalidation-row">
-                        <span className="matrix-field-tag invalidation">Risk Invalidation :</span>
-                        <span className="matrix-field-text">{n.invalidation}</span>
+                        {/* Risk Invalidation */}
+                        {n.invalidation && (
+                          <div className="matrix-field matrix-invalidation-row">
+                            <span className="matrix-field-tag invalidation">Risk Invalidation :</span>
+                            <span className="matrix-field-text">{n.invalidation}</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

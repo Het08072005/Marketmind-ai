@@ -778,33 +778,43 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     setIsListening(true);
     isListeningRef.current = true;
 
-    // Start Web Speech API stream
+    // Universal Mobile & Safari Audio Unlock
+    try {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.resume();
+      }
+    } catch (e) {}
+
+    // 1. Primary: Use Web Speech API if supported (Chrome, Edge, Safari, iOS Safari, Android)
     if (recognitionRef.current) {
       try {
         recognitionRef.current.start();
+        return;
       } catch (err) {
-        console.warn("Web Speech API already active or busy:", err.message);
+        console.warn("Web Speech API start error:", err.message);
       }
     }
 
-    // Start Raw Audio Recorder for Deepgram Audio Stream
+    // 2. Secondary Fallback: Only for browsers WITHOUT Web Speech API (e.g. Firefox)
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (isMicMutedRef.current || !isListeningRef.current) {
-        stream.getTracks().forEach((track) => track.stop());
-        return;
-      }
-      audioChunksRef.current = [];
-      const recorder = new MediaRecorder(stream);
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (isMicMutedRef.current || !isListeningRef.current) {
+          stream.getTracks().forEach((track) => track.stop());
+          return;
         }
-      };
+        audioChunksRef.current = [];
+        const recorder = new MediaRecorder(stream);
 
-      recorder.start();
-      mediaRecorderRef.current = recorder;
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            audioChunksRef.current.push(e.data);
+          }
+        };
+
+        recorder.start(250);
+        mediaRecorderRef.current = recorder;
+      }
     } catch (err) {
       console.warn("Microphone hardware fallback active:", err.message);
     }
@@ -825,10 +835,10 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
-      } catch (e) { }
+      } catch (e) {}
     }
 
-    // ALWAYS release microphone hardware media stream tracks immediately
+    // Process fallback MediaRecorder if active (for Firefox / unsupported Web Speech)
     if (mediaRecorderRef.current) {
       try {
         if (mediaRecorderRef.current.stream) {
@@ -837,8 +847,24 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         if (mediaRecorderRef.current.state !== "inactive") {
           mediaRecorderRef.current.stop();
         }
-      } catch (e) { }
+      } catch (e) {}
       mediaRecorderRef.current = null;
+
+      if (audioChunksRef.current.length > 0 && !transcriptRef.current.trim()) {
+        try {
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          const langCode = languageRef.current === "hindi" ? "hi" : "en";
+          const res = await apiClient.transcribeAudio(audioBlob, langCode);
+          if (res?.transcript?.trim()) {
+            submitQuery(res.transcript.trim(), true);
+            audioChunksRef.current = [];
+            return;
+          }
+        } catch (e) {
+          console.warn("Server transcription fallback skipped:", e);
+        }
+      }
+      audioChunksRef.current = [];
     }
 
     // Process buffered speech if available

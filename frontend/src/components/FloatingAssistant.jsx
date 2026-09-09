@@ -137,10 +137,11 @@ export default function FloatingAssistant({
   onFabClick,
 }) {
   const [chatInput, setChatInput] = useState("");
-  const [playingMsgId, setPlayingMsgId] = useState(null);
-  const [isSpeakerMuted, setIsSpeakerMuted] = useState(
-    () => localStorage.getItem("alex_speaker_muted") === "true"
-  );
+  const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
+  useEffect(() => {
+    // Ensure clean state: voice sound is enabled by default
+    localStorage.removeItem("alex_speaker_muted");
+  }, []);
 
   // Flexible Resizing: width, height and drag mode ('left' | 'top' | 'corner' | null)
   const [dimensions, setDimensions] = useState(() => {
@@ -335,13 +336,14 @@ export default function FloatingAssistant({
     setIsExpanded((prev) => !prev);
   };
 
-  // Compute active panel dimensions (responsively bounded to screen)
+  // Compute active panel dimensions (responsively bounded to screen, perfect for mobile/tablet/desktop)
+  const isMobileScreen = typeof window !== "undefined" && window.innerWidth < 480;
   const activeWidth = Math.min(
-    isExpanded ? Math.min(740, window.innerWidth - 30) : dimensions.width,
-    window.innerWidth - 20
+    isExpanded ? Math.min(740, window.innerWidth - 20) : (isMobileScreen ? window.innerWidth - 16 : dimensions.width),
+    window.innerWidth - 16
   );
   const activeHeight = Math.min(
-    isExpanded ? Math.min(800, window.innerHeight - 30) : dimensions.height,
+    isExpanded ? Math.min(800, window.innerHeight - 30) : (isMobileScreen ? Math.min(540, window.innerHeight - 30) : dimensions.height),
     window.innerHeight - 16
   );
 
@@ -352,8 +354,8 @@ export default function FloatingAssistant({
         <div
           style={{
             position: "fixed",
-            bottom: "24px",
-            right: "24px",
+            bottom: isMobileScreen ? "16px" : "24px",
+            right: isMobileScreen ? "16px" : "24px",
             zIndex: 999,
             display: "flex",
             alignItems: "center",
@@ -364,13 +366,19 @@ export default function FloatingAssistant({
             className="fab alex-copilot-fab"
             title="Open Alex Copilot"
             onClick={() => {
+              try {
+                if ("speechSynthesis" in window) {
+                  window.speechSynthesis.resume();
+                }
+              } catch (e) {}
+              setIsSpeakerMuted(false);
               if (onFabClick) {
                 onFabClick();
               } else {
                 setIsOpen(true);
               }
               // This user gesture is the browser-safe point to request microphone
-              // permission. Deepgram then detects the spoken "Hey Alex" phrase.
+              // permission. Deepgram/STT then detects the spoken voice phrase.
               if (!isMicMuted) startListening(true);
             }}
             style={{

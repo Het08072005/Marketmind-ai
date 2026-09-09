@@ -72,9 +72,16 @@ export default function App() {
           const match = lower.match(/\b(?:hey|hi|hello)?\s*(?:alex|alexa)\b\s*(.*)/i);
           if (match) {
             const query = match[1]?.trim() || "Hey Alex";
-            window.dispatchEvent(new CustomEvent("marketmind:voice_wake_query", { detail: query }));
+            try {
+              if ("speechSynthesis" in window) {
+                window.speechSynthesis.resume();
+              }
+            } catch (e) {}
             setAssistantInitialTab("chat");
             setAssistantOpen(true);
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent("marketmind:voice_wake_query", { detail: query }));
+            }, 150);
             try { recognition.abort(); } catch (e) { }
           }
         };

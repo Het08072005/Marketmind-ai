@@ -851,8 +851,11 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [selectedSector, setSelectedSector] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("conviction");
   const [expandedIntel, setExpandedIntel] = useState({});
+  const [expandedAnalysis, setExpandedAnalysis] = useState({});
+  const toggleAnalysis = (symbol) => {
+    setExpandedAnalysis((prev) => ({ ...prev, [symbol]: !prev[symbol] }));
+  };
   const [expandedCharts, setExpandedCharts] = useState({ COALINDIA: true });
   const [chartModes, setChartModes] = useState({ COALINDIA: "line" });
   const [dynamicStocks, setDynamicStocks] = useState([]);
@@ -1912,22 +1915,23 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
 
                           <button
                             type="button"
-                            className="radar-action-btn"
-                            style={{ background: "var(--navy)", color: "#FAF6EC", borderColor: "var(--navy)" }}
+                            className={`radar-action-btn ${expandedAnalysis[stock.symbol] ? "active" : ""}`}
+                            style={
+                              expandedAnalysis[stock.symbol]
+                                ? { background: "#0E1526", color: "#F3D59B", borderColor: "rgba(184, 147, 90, 0.9)", boxShadow: "0 2px 8px rgba(184, 147, 90, 0.35)", fontWeight: 700 }
+                                : { background: "var(--navy)", color: "#FAF6EC", borderColor: "var(--navy)" }
+                            }
                             onClick={(e) => {
                               e.stopPropagation();
-                              window.__SELECTED_STOCK_SYMBOL = stock.symbol;
-                              localStorage.setItem("marketmind_sim_stock", stock.symbol);
-                              window.dispatchEvent(new CustomEvent("marketmind:simulate_stock", { detail: { symbol: stock.symbol } }));
-                              goPage("portfolio");
+                              toggleAnalysis(stock.symbol);
                             }}
-                            title={`Simulate trade for ${stock.name} in virtual portfolio`}
+                            title={`Toggle detailed AI institutional analysis for ${stock.name}`}
                           >
                             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-                              <polyline points="16 7 22 7 22 13"/>
+                              <circle cx="12" cy="12" r="3" />
+                              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
                             </svg>
-                            <span>Simulate</span>
+                            <span>{expandedAnalysis[stock.symbol] ? "Hide Analysis" : "Analysis"}</span>
                           </button>
                         </div>
 
@@ -2018,27 +2022,29 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
                       </div>
                     </div>
 
-                    {/* Summary & Institutional Thesis */}
-                    <div className="radar-explanation-callout">
-                      <div className="radar-callout-header">
-                        <span className="radar-summary-label">Summary:</span>
-                        <span className="radar-summary-val">
-                          {(stock.summary || stock.catalyst || `Institutional bias for ${stock.name || stock.symbol} (CMP ₹${(stock.price || 1000).toLocaleString("en-IN")}) is supported by persistent buyer delta and sector strength.`).replace(/⚡\s*/g, "").trim()}
-                        </span>
-                      </div>
-                      <div className="radar-rationale-text">
-                        <strong className="radar-rationale-prefix">Institutional Thesis:</strong>
-                        <span>
-                          {(stock.explanation || `Persistent buyer absorption above key VWAP benchmark with structural risk management for ${stock.name || stock.symbol}.`).replace(/⚡\s*/g, "").trim()}
-                        </span>
-                      </div>
-                      {stock.invalidation_condition && (
-                        <div className="radar-invalidation-callout">
-                          <strong>Structural Invalidation:</strong>
-                          <span>{stock.invalidation_condition}</span>
+                    {/* Summary & Institutional Thesis - Only displayed when Analysis button is clicked */}
+                    {expandedAnalysis[stock.symbol] && (
+                      <div className="radar-explanation-callout" style={{ animation: "fadeIn 0.2s ease" }}>
+                        <div className="radar-callout-header">
+                          <span className="radar-summary-label">Summary:</span>
+                          <span className="radar-summary-val">
+                            {(stock.summary || stock.catalyst || `Institutional bias for ${stock.name || stock.symbol} (CMP ₹${(stock.price || 1000).toLocaleString("en-IN")}) is supported by persistent buyer delta and sector strength.`).replace(/⚡\s*/g, "").trim()}
+                          </span>
                         </div>
-                      )}
-                    </div>
+                        <div className="radar-rationale-text">
+                          <strong className="radar-rationale-prefix">Institutional Thesis:</strong>
+                          <span>
+                            {(stock.explanation || `Persistent buyer absorption above key VWAP benchmark with structural risk management for ${stock.name || stock.symbol}.`).replace(/⚡\s*/g, "").trim()}
+                          </span>
+                        </div>
+                        {stock.invalidation_condition && (
+                          <div className="radar-invalidation-callout">
+                            <strong>Structural Invalidation:</strong>
+                            <span>{stock.invalidation_condition}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Expandable Deep Microstructure & HFT Intelligence Panel */}
                     {expandedIntel[stock.symbol] && (
