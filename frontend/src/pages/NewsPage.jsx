@@ -597,6 +597,7 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
   const [speakingNewsId, setSpeakingNewsId] = useState(null);
   const [expandedRippleId, setExpandedRippleId] = useState(null);
   const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+  const [selectedNewsArticle, setSelectedNewsArticle] = useState(null);
   const [expandedDetailNewsId, setExpandedDetailNewsId] = useState(null);
   const [expandedNewsAnalysis, setExpandedNewsAnalysis] = useState({});
   const toggleNewsAnalysis = (id) => {

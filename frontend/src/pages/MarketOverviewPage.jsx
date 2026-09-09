@@ -851,6 +851,7 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [selectedSector, setSelectedSector] = useState("ALL");
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("conviction");
   const [expandedIntel, setExpandedIntel] = useState({});
   const [expandedAnalysis, setExpandedAnalysis] = useState({});
   const toggleAnalysis = (symbol) => {
