@@ -27,3 +27,31 @@ async def chat_news_copilot(payload: Dict[str, Any] = Body(...)):
     history = payload.get("history", [])
     answer = ask_news_copilot(query=query, news_id=news_id, history=history)
     return {"answer": answer, "query": query, "news_id": news_id}
+
+@router.post("/analyze")
+async def analyze_news_item(payload: Dict[str, Any] = Body(...)):
+    """
+    On-Demand Deep Institutional AI Analysis for a single news story.
+    Strictly on-demand (only invoked when user explicitly clicks Analysis).
+    Caches results for 15 minutes to preserve API quotas.
+    Returns quantified balance sheet transmission, margin impact, and institutional thesis.
+    """
+    news_id = payload.get("news_id", "")
+    title = payload.get("title", "")
+    summary = payload.get("summary", "")
+    tickers = payload.get("tickers", [])
+    category = payload.get("category", "Markets")
+    source = payload.get("source", "Verified News")
+    call_llm = payload.get("call_llm", True)
+
+    from services.live_news_service import get_news_item_ai_analysis
+    return get_news_item_ai_analysis(
+        news_id=news_id,
+        title=title,
+        summary=summary,
+        tickers=tickers,
+        category=category,
+        source=source,
+        call_llm=call_llm
+    )
+

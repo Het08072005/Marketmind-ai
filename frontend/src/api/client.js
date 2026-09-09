@@ -37,6 +37,23 @@ export const apiClient = {
     }
   },
 
+  async getStockAnalysis(symbol, callLlm = true) {
+    const cleanSym = (symbol || "").toUpperCase().replace(".NS", "").replace(".BO", "").trim();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/stocks/${cleanSym}/analysis?call_llm=${callLlm}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error(`GET analysis for ${cleanSym} failed: ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      clearTimeout(timeoutId);
+      throw e;
+    }
+  },
+
   async post(endpoint, data = {}) {
     const res = await fetch(`${API_BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`, {
       method: "POST",
@@ -256,6 +273,33 @@ export const apiClient = {
     });
     if (!res.ok) throw new Error("Failed to query news copilot");
     return await res.json();
+  },
+
+  async getNewsAnalysis(newsItem, callLlm = true) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/news/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          news_id: newsItem?.id || newsItem?.url || newsItem?.title || "news",
+          title: newsItem?.title || "",
+          summary: newsItem?.summary || "",
+          tickers: newsItem?.tickers || [],
+          category: newsItem?.category || "Markets",
+          source: newsItem?.source || "Verified News",
+          call_llm: callLlm
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error("News analysis request failed");
+      return await res.json();
+    } catch (e) {
+      clearTimeout(timeoutId);
+      throw e;
+    }
   },
 
   // Thesis Intelligence Engine Endpoints

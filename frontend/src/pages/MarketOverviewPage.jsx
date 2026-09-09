@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { apiClient } from "../api/client";
 import { ALL_COMPANIES_UNIVERSE, COMPANY_NAME_MAP } from "../data/allCompaniesUniverse";
 import { getIndianMarketStatus } from "../utils/marketHours";
+import { findStockInText } from "../utils/stockMatcher";
 
 function formatCopilotMessage(text) {
   if (!text) return null;
@@ -818,6 +819,14 @@ function buildInitialRadarUniverse() {
   };
 }
 
+const SEARCH_STOP_WORDS = new Set([
+  "show", "shoe", "me", "the", "share", "stock", "stocks", "shares", "price",
+  "search", "about", "ltd", "limited", "corp", "corporation", "co", "company",
+  "industry", "industries", "market", "preview", "overview", "setup", "analysis",
+  "prediction", "verdict", "signals", "radar", "ka", "ki", "ke", "ko", "par",
+  "batao", "dikhao", "dekhna", "kholna", "dekho", "please", "can", "you", "for", "this"
+]);
+
 export default function MarketOverviewPage({ goPage, openAssistant, searchQuery = "", onSearchChange }) {
   const [radarData, setRadarData] = useState(() => {
     try {
@@ -850,12 +859,53 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
   });
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [selectedSector, setSelectedSector] = useState("ALL");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(searchQuery || "");
+  const onSearchChangeRef = useRef(onSearchChange);
+  useEffect(() => {
+    onSearchChangeRef.current = onSearchChange;
+  }, [onSearchChange]);
+
+  // Sync internal searchTerm with parent searchQuery prop
+  useEffect(() => {
+    if (searchQuery !== undefined && searchQuery !== searchTerm) {
+      setSearchTerm(searchQuery);
+    }
+  }, [searchQuery]);
+
   const [sortBy, setSortBy] = useState("conviction");
   const [expandedIntel, setExpandedIntel] = useState({});
   const [expandedAnalysis, setExpandedAnalysis] = useState({});
+  const [analysisLoading, setAnalysisLoading] = useState({});
+  const [stockAnalysisData, setStockAnalysisData] = useState({});
+
+  const fetchStockAnalysis = async (symbol) => {
+    if (!symbol) return;
+    const cleanSym = symbol.toUpperCase().trim();
+    if (stockAnalysisData[cleanSym]) {
+      return stockAnalysisData[cleanSym];
+    }
+    setAnalysisLoading((prev) => ({ ...prev, [cleanSym]: true }));
+    try {
+      const res = await apiClient.getStockAnalysis(cleanSym, true);
+      if (res && (res.summary || res.thesis)) {
+        setStockAnalysisData((prev) => ({ ...prev, [cleanSym]: res }));
+        return res;
+      }
+    } catch (err) {
+      console.warn(`Analysis API notice for ${cleanSym}:`, err);
+    } finally {
+      setAnalysisLoading((prev) => ({ ...prev, [cleanSym]: false }));
+    }
+  };
+
   const toggleAnalysis = (symbol) => {
-    setExpandedAnalysis((prev) => ({ ...prev, [symbol]: !prev[symbol] }));
+    setExpandedAnalysis((prev) => {
+      const next = !prev[symbol];
+      if (next) {
+        fetchStockAnalysis(symbol);
+      }
+      return { ...prev, [symbol]: next };
+    });
   };
   const [expandedCharts, setExpandedCharts] = useState({ COALINDIA: true });
   const [chartModes, setChartModes] = useState({ COALINDIA: "line" });
@@ -866,21 +916,31 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
 
   // Global listener so changing stocks from any other page or copilot immediately updates chart and search view
   useEffect(() => {
+    const triggerStockAnalysis = (sym, name, isLongLoading = false) => {
+      if (!sym) return;
+      const cleanSym = sym.toUpperCase().trim();
+      setSelectedStockSymbol(cleanSym);
+      setExpandedCharts((prev) => ({ ...prev, [cleanSym]: true }));
+      setExpandedAnalysis((prev) => ({ ...prev, [cleanSym]: true }));
+      fetchStockAnalysis(cleanSym);
+      const queryVal = name || cleanSym;
+      setSearchTerm(queryVal);
+      onSearchChangeRef.current?.(queryVal);
+      setActiveFilter("ALL");
+      setSelectedSector("ALL");
+      setTimeout(() => {
+        const el = document.getElementById(`stock-card-${cleanSym}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 160);
+    };
+
     const handleStockEvent = (e) => {
       const sym = e.detail?.symbol;
       const name = e.detail?.name;
       if (sym) {
-        setSelectedStockSymbol(sym);
-        setExpandedCharts((prev) => ({ ...prev, [sym]: true }));
-        setSearchTerm(name || sym);
-        setActiveFilter("all");
-        setSelectedSector("ALL");
-        setTimeout(() => {
-          const el = document.getElementById(`stock-card-${sym}`);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-        }, 150);
+        triggerStockAnalysis(sym, name);
       }
     };
 
@@ -890,30 +950,69 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
       const sym = (action.params?.symbol || action.params?.symbol1 || "").toUpperCase();
       const name = action.params?.name || sym;
       const q = action.params?.query || name || sym;
-      if (sym || q) {
-        if (sym) {
-          setSelectedStockSymbol(sym);
-          setExpandedCharts((prev) => ({ ...prev, [sym]: true }));
+      if (sym) {
+        triggerStockAnalysis(sym, name || q);
+      } else if (q) {
+        const matched = findStockInText(q);
+        if (matched) {
+          triggerStockAnalysis(matched.symbol, matched.name);
+        } else {
+          setSearchTerm(q);
+          onSearchChangeRef.current?.(q);
+          setActiveFilter("ALL");
+          setSelectedSector("ALL");
         }
-        setSearchTerm(q || sym);
-        setActiveFilter("all");
-        setSelectedSector("ALL");
+      }
+    };
+
+    const handleVoiceStockIntent = (e) => {
+      const { symbol, name, loading } = e.detail || {};
+      if (!symbol) return;
+      const sym = symbol.toUpperCase().trim();
+      setSelectedStockSymbol(sym);
+      setExpandedCharts((prev) => ({ ...prev, [sym]: true }));
+      setExpandedAnalysis((prev) => ({ ...prev, [sym]: true }));
+      if (loading) {
+        setAnalysisLoading((prev) => ({ ...prev, [sym]: true }));
+        fetchStockAnalysis(sym);
+        // Safety guard: auto-resolve skeleton after 4000ms max so it never hangs
         setTimeout(() => {
-          if (sym) {
-            const el = document.getElementById(`stock-card-${sym}`);
-            if (el) {
-              el.scrollIntoView({ behavior: "smooth", block: "center" });
-            }
-          }
-        }, 200);
+          setAnalysisLoading((prev) => ({ ...prev, [sym]: false }));
+        }, 4000);
+      } else {
+        setAnalysisLoading((prev) => ({ ...prev, [sym]: false }));
+      }
+      const queryVal = name || sym;
+      setSearchTerm(queryVal);
+      onSearchChangeRef.current?.(queryVal);
+      setActiveFilter("ALL");
+      setSelectedSector("ALL");
+      setTimeout(() => {
+        const el = document.getElementById(`stock-card-${sym}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 160);
+    };
+
+    const handleVoiceWakeQuery = (e) => {
+      const text = (e.detail || "").toLowerCase().trim();
+      if (!text) return;
+      const matched = findStockInText(text);
+      if (matched) {
+        triggerStockAnalysis(matched.symbol, matched.name, true);
       }
     };
 
     window.addEventListener("marketmind:stock_changed", handleStockEvent);
     window.addEventListener("marketmind:voice_action", handleVoiceAction);
+    window.addEventListener("marketmind:voice_wake_query", handleVoiceWakeQuery);
+    window.addEventListener("marketmind:voice_stock_intent", handleVoiceStockIntent);
     return () => {
       window.removeEventListener("marketmind:stock_changed", handleStockEvent);
       window.removeEventListener("marketmind:voice_action", handleVoiceAction);
+      window.removeEventListener("marketmind:voice_wake_query", handleVoiceWakeQuery);
+      window.removeEventListener("marketmind:voice_stock_intent", handleVoiceStockIntent);
     };
   }, []);
 
@@ -1096,27 +1195,66 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
         return false;
       }
 
-      // Search with clean tokens, alias handling, and selected stock preservation
+      // Search with clean tokens, alias handling, and strict company matching
       if (effectiveSearch) {
         const q = effectiveSearch.toLowerCase().trim();
-        const qTokens = q.split(/\s+/).filter((w) => !["show", "shoe", "me", "the", "share", "stock", "stocks", "shares", "price", "search", "about", "ltd", "limited", "ka", "ki", "ke", "ko"].includes(w));
-        const match =
-          s.symbol.toLowerCase().includes(q) ||
-          s.name.toLowerCase().includes(q) ||
-          (q.includes(s.name.toLowerCase()) && s.name.length >= 4) ||
-          (q.includes(s.symbol.toLowerCase()) && s.symbol.length >= 3) ||
-          (qTokens.length > 0 && qTokens.some((tok) => tok.length >= 3 && (s.symbol.toLowerCase().includes(tok) || s.name.toLowerCase().includes(tok)))) ||
-          (selectedStockSymbol && s.symbol.toUpperCase() === selectedStockSymbol.toUpperCase()) ||
-          s.sector.toLowerCase().includes(q);
-        if (!match) return false;
+        const qClean = q.replace(/[^a-z0-9\s]/g, " ").trim();
+        const rawTokens = qClean.split(/\s+/).filter(Boolean);
+        const meaningfulTokens = rawTokens.filter((tok) => !SEARCH_STOP_WORDS.has(tok) && tok.length >= 2);
+
+        // 1. Direct symbol or name match
+        const exactSymMatch = s.symbol.toLowerCase() === q || s.symbol.toLowerCase() === qClean;
+        const nameContains = s.name.toLowerCase().includes(q) || (qClean && s.name.toLowerCase().includes(qClean));
+        const symContains = s.symbol.toLowerCase().includes(q) || (qClean && s.symbol.toLowerCase().includes(qClean));
+        const queryContainsSym = s.symbol.length >= 3 && rawTokens.includes(s.symbol.toLowerCase());
+
+        // 2. Token match against symbol or name words
+        const tokenMatch = meaningfulTokens.length > 0 && meaningfulTokens.some((tok) =>
+          s.symbol.toLowerCase() === tok ||
+          s.symbol.toLowerCase().startsWith(tok) ||
+          s.name.toLowerCase().split(/\s+/).some((word) => word.startsWith(tok) || word === tok)
+        );
+
+        if (!exactSymMatch && !nameContains && !symContains && !queryContainsSym && !tokenMatch) {
+          return false;
+        }
       }
 
       return true;
     });
-  }, [uniqueStocks, activeFilter, selectedSector, effectiveSearch, selectedStockSymbol]);
+  }, [uniqueStocks, activeFilter, selectedSector, effectiveSearch]);
 
   const sortedStocks = useMemo(() => {
     return [...filteredStocks].sort((a, b) => {
+      if (effectiveSearch) {
+        const qClean = effectiveSearch.trim().toLowerCase();
+        const symQuery = qClean.toUpperCase();
+
+        // 1. Exact symbol match always ranked #1
+        const aExactSym = a.symbol.toUpperCase() === symQuery;
+        const bExactSym = b.symbol.toUpperCase() === symQuery;
+        if (aExactSym && !bExactSym) return -1;
+        if (!aExactSym && bExactSym) return 1;
+
+        // 2. Exact full company name match #2
+        const aExactName = a.name.toLowerCase() === qClean;
+        const bExactName = b.name.toLowerCase() === qClean;
+        if (aExactName && !bExactName) return -1;
+        if (!aExactName && bExactName) return 1;
+
+        // 3. Name starts with search query (e.g. "Reliance Industries" starts with "Reliance")
+        const aNameStarts = a.name.toLowerCase().startsWith(qClean);
+        const bNameStarts = b.name.toLowerCase().startsWith(qClean);
+        if (aNameStarts && !bNameStarts) return -1;
+        if (!aNameStarts && bNameStarts) return 1;
+
+        // 4. Symbol starts with search query
+        const aSymStarts = a.symbol.toLowerCase().startsWith(qClean);
+        const bSymStarts = b.symbol.toLowerCase().startsWith(qClean);
+        if (aSymStarts && !bSymStarts) return -1;
+        if (!aSymStarts && bSymStarts) return 1;
+      }
+
       if (sortBy === "conviction") {
         const pA = a.directional_probability_up || a.conviction || 50;
         const pB = b.directional_probability_up || b.conviction || 50;
@@ -1135,7 +1273,23 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
       if (sortBy === "price") return b.price - a.price;
       return 0;
     });
-  }, [filteredStocks, sortBy]);
+  }, [filteredStocks, sortBy, effectiveSearch]);
+
+  // Auto-expand Analysis for Searched Stock with Shimmering Skeleton Transition
+  const lastAutoExpandedRef = useRef("");
+  useEffect(() => {
+    if (effectiveSearch && sortedStocks.length > 0) {
+      const topMatch = sortedStocks[0];
+      const sym = topMatch?.symbol;
+      if (sym && lastAutoExpandedRef.current !== sym) {
+        lastAutoExpandedRef.current = sym;
+        setExpandedAnalysis((prev) => ({ ...prev, [sym]: true }));
+        fetchStockAnalysis(sym);
+      }
+    } else if (!effectiveSearch) {
+      lastAutoExpandedRef.current = "";
+    }
+  }, [effectiveSearch, sortedStocks]);
 
   // Top Pagination for Market Overview: 30 stocks per page
   const OVERVIEW_PAGE_SIZE = 30;
@@ -1548,8 +1702,15 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
             <div className="radar-filter-tabs">
               <button
                 type="button"
-                className={`radar-filter-tab ${activeFilter === "ALL" ? "active" : ""}`}
-                onClick={() => setActiveFilter("ALL")}
+                className={`radar-filter-tab ${activeFilter === "ALL" && !effectiveSearch ? "active" : ""}`}
+                onClick={() => {
+                  setActiveFilter("ALL");
+                  setSelectedSector("ALL");
+                  setSearchTerm("");
+                  onSearchChange?.("");
+                  lastAutoExpandedRef.current = "";
+                }}
+                title="View all tracked Indian stocks"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="filter-tab-icon">
                   <rect x="3" y="3" width="7" height="7" rx="1.8"/>
@@ -1562,8 +1723,16 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
 
               <button
                 type="button"
-                className={`radar-filter-tab ${activeFilter === "BUY" ? "active" : ""}`}
-                onClick={() => setActiveFilter("BUY")}
+                className={`radar-filter-tab ${activeFilter === "BUY" && !effectiveSearch ? "active" : ""}`}
+                onClick={() => {
+                  setActiveFilter("BUY");
+                  if (effectiveSearch) {
+                    setSearchTerm("");
+                    onSearchChange?.("");
+                    lastAutoExpandedRef.current = "";
+                  }
+                }}
+                title="Filter Strong Buy stocks"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="filter-tab-icon icon-buy">
                   <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
@@ -1574,8 +1743,16 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
 
               <button
                 type="button"
-                className={`radar-filter-tab ${activeFilter === "ACCUMULATE" ? "active" : ""}`}
-                onClick={() => setActiveFilter("ACCUMULATE")}
+                className={`radar-filter-tab ${activeFilter === "ACCUMULATE" && !effectiveSearch ? "active" : ""}`}
+                onClick={() => {
+                  setActiveFilter("ACCUMULATE");
+                  if (effectiveSearch) {
+                    setSearchTerm("");
+                    onSearchChange?.("");
+                    lastAutoExpandedRef.current = "";
+                  }
+                }}
+                title="Filter Value Accumulate stocks"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="filter-tab-icon icon-accumulate">
                   <ellipse cx="8.5" cy="7" rx="5.5" ry="2.4"/>
@@ -1589,8 +1766,16 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
 
               <button
                 type="button"
-                className={`radar-filter-tab ${activeFilter === "HOLD" ? "active" : ""}`}
-                onClick={() => setActiveFilter("HOLD")}
+                className={`radar-filter-tab ${activeFilter === "HOLD" && !effectiveSearch ? "active" : ""}`}
+                onClick={() => {
+                  setActiveFilter("HOLD");
+                  if (effectiveSearch) {
+                    setSearchTerm("");
+                    onSearchChange?.("");
+                    lastAutoExpandedRef.current = "";
+                  }
+                }}
+                title="Filter Range Bound / Hold stocks"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" className="filter-tab-icon icon-hold">
                   <line x1="4" y1="9" x2="20" y2="9"/>
@@ -1601,8 +1786,16 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
 
               <button
                 type="button"
-                className={`radar-filter-tab ${activeFilter === "AVOID" ? "active" : ""}`}
-                onClick={() => setActiveFilter("AVOID")}
+                className={`radar-filter-tab ${activeFilter === "AVOID" && !effectiveSearch ? "active" : ""}`}
+                onClick={() => {
+                  setActiveFilter("AVOID");
+                  if (effectiveSearch) {
+                    setSearchTerm("");
+                    onSearchChange?.("");
+                    lastAutoExpandedRef.current = "";
+                  }
+                }}
+                title="Filter High Risk / Avoid stocks"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" className="filter-tab-icon icon-avoid">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -1624,7 +1817,11 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
                   type="text"
                   placeholder="Filter or search Indian stock..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSearchTerm(val);
+                    onSearchChange?.(val);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && searchTerm.trim() && sortedStocks.length === 0) {
                       handleSearchOnline(searchTerm.trim());
@@ -1636,7 +1833,10 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
                   <button
                     type="button"
                     className="radar-search-clear"
-                    onClick={() => setSearchTerm("")}
+                    onClick={() => {
+                      setSearchTerm("");
+                      onSearchChange?.("");
+                    }}
                     title="Clear filter"
                   >
                     ✕
@@ -1928,11 +2128,21 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
                             }}
                             title={`Toggle detailed AI institutional analysis for ${stock.name}`}
                           >
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="13"
+                              height="13"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              style={analysisLoading[stock.symbol] ? { animation: "spin 1s linear infinite" } : {}}
+                            >
                               <circle cx="12" cy="12" r="3" />
                               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
                             </svg>
-                            <span>{expandedAnalysis[stock.symbol] ? "Hide Analysis" : "Analysis"}</span>
+                            <span>{analysisLoading[stock.symbol] ? "Analyzing..." : expandedAnalysis[stock.symbol] ? "Hide Analysis" : "Analysis"}</span>
                           </button>
                         </div>
 
@@ -2026,23 +2236,49 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
                     {/* Summary & Institutional Thesis - Only displayed when Analysis button is clicked */}
                     {expandedAnalysis[stock.symbol] && (
                       <div className="radar-explanation-callout" style={{ animation: "fadeIn 0.2s ease" }}>
-                        <div className="radar-callout-header">
-                          <span className="radar-summary-label">Summary:</span>
-                          <span className="radar-summary-val">
-                            {(stock.summary || stock.catalyst || `Institutional bias for ${stock.name || stock.symbol} (CMP ₹${(stock.price || 1000).toLocaleString("en-IN")}) is supported by persistent buyer delta and sector strength.`).replace(/⚡\s*/g, "").trim()}
-                          </span>
-                        </div>
-                        <div className="radar-rationale-text">
-                          <strong className="radar-rationale-prefix">Institutional Thesis:</strong>
-                          <span>
-                            {(stock.explanation || `Persistent buyer absorption above key VWAP benchmark with structural risk management for ${stock.name || stock.symbol}.`).replace(/⚡\s*/g, "").trim()}
-                          </span>
-                        </div>
-                        {stock.invalidation_condition && (
-                          <div className="radar-invalidation-callout">
-                            <strong>Structural Invalidation:</strong>
-                            <span>{stock.invalidation_condition}</span>
+                        {analysisLoading[stock.symbol] ? (
+                          <div className="radar-analysis-skeleton">
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <div className="radar-skeleton-box" style={{ width: "70px", height: "13px", borderRadius: "4px" }} />
+                              <div className="radar-skeleton-box" style={{ flex: 1, height: "13px", borderRadius: "4px" }} />
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                              <div className="radar-skeleton-box" style={{ width: "95%", height: "12px", borderRadius: "4px" }} />
+                              <div className="radar-skeleton-box" style={{ width: "84%", height: "12px", borderRadius: "4px" }} />
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                              <div className="radar-skeleton-box" style={{ width: "130px", height: "12px", borderRadius: "4px" }} />
+                              <div className="radar-skeleton-box" style={{ width: "60%", height: "12px", borderRadius: "4px" }} />
+                            </div>
                           </div>
+                        ) : (
+                          <>
+                            {stockAnalysisData[stock.symbol]?.source === "gemini_ai" && (
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px" }}>
+                                <span style={{ fontSize: "10px", fontWeight: 750, padding: "1.5px 7px", borderRadius: "4px", background: "rgba(184, 147, 90, 0.18)", color: "#85581A", border: "1px solid rgba(184, 147, 90, 0.45)", letterSpacing: "0.04em" }}>
+                                  ⚡ LIVE AI SYNTHESIS
+                                </span>
+                              </div>
+                            )}
+                            <div className="radar-callout-header">
+                              <span className="radar-summary-label">Summary:</span>
+                              <span className="radar-summary-val">
+                                {(stockAnalysisData[stock.symbol]?.summary || stock.summary || stock.catalyst || `Institutional bias for ${stock.name || stock.symbol} (CMP ₹${(stock.price || 1000).toLocaleString("en-IN")}) is supported by persistent buyer delta and sector strength.`).replace(/⚡\s*/g, "").trim()}
+                              </span>
+                            </div>
+                            <div className="radar-rationale-text">
+                              <strong className="radar-rationale-prefix">Institutional Thesis:</strong>
+                              <span>
+                                {(stockAnalysisData[stock.symbol]?.thesis || stock.explanation || `Persistent buyer absorption above key VWAP benchmark with structural risk management for ${stock.name || stock.symbol}.`).replace(/⚡\s*/g, "").trim()}
+                              </span>
+                            </div>
+                            {(stockAnalysisData[stock.symbol]?.invalidation || stock.invalidation_condition) && (
+                              <div className="radar-invalidation-callout">
+                                <strong>Structural Invalidation:</strong>
+                                <span>{stockAnalysisData[stock.symbol]?.invalidation || stock.invalidation_condition}</span>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     )}

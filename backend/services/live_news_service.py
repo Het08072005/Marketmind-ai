@@ -18,7 +18,7 @@ try:
 except ImportError:
     pypdf = None
 from email.utils import parsedate_to_datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
 logger = logging.getLogger("live_news_service")
 
@@ -2433,3 +2433,116 @@ Do not use generic statements. Speak with the authority of a senior equity strat
 
     t_ticks = ", ".join(relevant.get("tickers", ["Relevant stocks"]))
     return f"Regarding '{relevant.get('title')}', this represents a {relevant.get('materiality', 'Medium')} materiality event affecting {t_ticks}. {relevant.get('why_affected', '')} AI Verdict: {relevant.get('ai_verdict', '')}"
+
+_NEWS_AI_ANALYSIS_CACHE: Dict[str, Tuple[Dict[str, Any], float]] = {}
+_NEWS_AI_ANALYSIS_TTL = 900.0  # 15 minutes cache to prevent duplicate/wasteful API calls
+
+def get_news_item_ai_analysis(
+    news_id: str,
+    title: str = "",
+    summary: str = "",
+    tickers: Optional[List[str]] = None,
+    category: str = "Markets",
+    source: str = "Verified News",
+    call_llm: bool = True
+) -> Dict[str, Any]:
+    """
+    On-Demand Deep Institutional AI Analysis for a single news story.
+    Strictly on-demand (only invoked when user explicitly clicks Analysis).
+    Caches results for 15 minutes to preserve API quotas.
+    Includes robust quantitative local fallback if API is throttled or offline.
+    """
+    clean_id = str(news_id or title[:40]).strip()
+    cache_key = f"{clean_id}_{title[:30]}"
+    now = time.time()
+
+    if cache_key in _NEWS_AI_ANALYSIS_CACHE:
+        cached_data, cached_time = _NEWS_AI_ANALYSIS_CACHE[cache_key]
+        if (now - cached_time) < _NEWS_AI_ANALYSIS_TTL:
+            return cached_data
+
+    # 1. Generate high-quality parametric domain analysis using existing models
+    t_list = [str(t).upper().strip() for t in (tickers or []) if t and str(t).strip()]
+    dynamic_impacts = compute_dynamic_company_impacts(
+        title=title,
+        summary=summary,
+        tickers=t_list,
+        category=category,
+        sentiment="Bullish" if any(w in (title + " " + summary).lower() for w in ["gain", "profit", "surge", "order", "growth", "rally"]) else "Bearish" if any(w in (title + " " + summary).lower() for w in ["loss", "drop", "probe", "fall", "penalty", "slump"]) else "Neutral",
+        authority="SEBI" if "sebi" in (title + " " + summary).lower() else "RBI" if "rbi" in (title + " " + summary).lower() else ""
+    )
+
+    domain_intel = generate_story_specific_intelligence(
+        title=title,
+        summary=summary,
+        tickers=t_list,
+        authority="SEBI" if "sebi" in (title + " " + summary).lower() else "RBI" if "rbi" in (title + " " + summary).lower() else "",
+        source=source
+    )
+
+    ticks_str = ", ".join(t_list[:3]) if t_list else "the affected sector"
+    fallback_result = {
+        "news_id": clean_id,
+        "title": title,
+        "why_affected": domain_intel.get("what_changed") or f"Direct operational and margin transmission impacting {ticks_str} based on updated regulatory / earnings disclosures.",
+        "ai_verdict": domain_intel.get("our_view", {}).get("commentary") or f"Institutional order flow reflects disciplined positioning for {ticks_str} with anchored risk parameters.",
+        "materiality": domain_intel.get("materiality", "Medium-High"),
+        "exposure_type": domain_intel.get("exposure_type", "Operational"),
+        "horizon": domain_intel.get("horizon", "1-3 Days"),
+        "price_reaction": domain_intel.get("price_reaction", "±1.5% Volatility Window"),
+        "invalidation": f"A decisive break below benchmark support invalidates the catalyst.",
+        "company_impacts": dynamic_impacts,
+        "source": "institutional_model"
+    }
+
+    ai_result = None
+    if call_llm and gemini_pool.active_keys_count > 0:
+        try:
+            prompt = (
+                f"You are a Senior Institutional Equity Research Analyst covering the Indian Stock Market (NSE/BSE).\n"
+                f"Analyze the financial impact of this news headline for institutional equity portfolios:\n"
+                f"Headline: {title}\n"
+                f"Context: {summary}\n"
+                f"Key Companies/Tickers: {', '.join(t_list) if t_list else 'Indian Equities'}\n\n"
+                f"Provide a sophisticated, company-specific analysis reflecting its balance sheet transmission, margin impact, and price reaction.\n"
+                f"Respond with ONLY valid JSON containing exactly these keys:\n"
+                f"{{\n"
+                f'  "why_affected": "1-2 sharp sentences on direct balance sheet or P&L transmission (under 35 words).",\n'
+                f'  "ai_verdict": "Institutional strategic stance and outlook (under 25 words).",\n'
+                f'  "materiality": "High or Medium-High",\n'
+                f'  "horizon": "1-3 Days or 1-2 Weeks",\n'
+                f'  "price_reaction": "Expected directional price delta e.g. +1.5% to +2.8%",\n'
+                f'  "invalidation": "1 sentence defining the exact invalidation condition (under 20 words)."\n'
+                f"}}"
+            )
+            resp = generate_content_sync(
+                contents=prompt,
+                models=_GEMINI_MODELS,
+                config={"temperature": 0.2},
+                timeout_secs=3.5
+            )
+            if resp and hasattr(resp, "text") and resp.text:
+                raw = resp.text.strip()
+                m = re.search(r"\{.*\}", raw, re.DOTALL)
+                if m:
+                    parsed = json.loads(m.group(0))
+                    if parsed.get("why_affected") and parsed.get("ai_verdict"):
+                        ai_result = {
+                            "news_id": clean_id,
+                            "title": title,
+                            "why_affected": parsed["why_affected"].strip(),
+                            "ai_verdict": parsed["ai_verdict"].strip(),
+                            "materiality": parsed.get("materiality", fallback_result["materiality"]).strip(),
+                            "exposure_type": fallback_result["exposure_type"],
+                            "horizon": parsed.get("horizon", fallback_result["horizon"]).strip(),
+                            "price_reaction": parsed.get("price_reaction", fallback_result["price_reaction"]).strip(),
+                            "invalidation": parsed.get("invalidation", fallback_result["invalidation"]).strip(),
+                            "company_impacts": dynamic_impacts,
+                            "source": "gemini_ai"
+                        }
+        except Exception as e:
+            print(f"[News AI Analysis] Notice during LLM generation: {e}")
+
+    final_result = ai_result if ai_result else fallback_result
+    _NEWS_AI_ANALYSIS_CACHE[cache_key] = (final_result, now)
+    return final_result

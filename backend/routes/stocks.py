@@ -27,6 +27,14 @@ def get_stock_prediction_route(symbol: str):
         raise HTTPException(status_code=404, detail="Stock prediction profile not found")
     return profile
 
+@router.get("/{symbol}/analysis")
+def get_stock_analysis_route(symbol: str, call_llm: bool = Query(True, description="Whether to invoke Gemini for fresh institutional narrative")):
+    from services.recommendations_service import get_stock_ai_analysis
+    data = get_stock_ai_analysis(symbol, call_llm=call_llm)
+    if not data:
+        raise HTTPException(status_code=404, detail="Stock analysis not found")
+    return data
+
 @router.get("")
 def list_stocks():
     return get_all_live_companies()

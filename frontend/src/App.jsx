@@ -161,8 +161,11 @@ export default function App() {
       const sym = (action.params?.symbol || action.params?.symbol1 || "").toUpperCase();
       const companyName = action.params?.name || sym;
 
-      if (action.command === "SEARCH_COMPANY" || action.type === "SEARCH_COMPANY") {
-        setGlobalSearch(action.params?.query || companyName || sym);
+      if (action.command === "SEARCH_COMPANY" || action.type === "SEARCH_COMPANY" || action.target_page === "overview") {
+        const queryText = action.params?.query || companyName || sym;
+        if (queryText) {
+          setGlobalSearch(queryText);
+        }
         if (currentPage !== "overview") {
           goPage("overview");
         }
@@ -184,9 +187,23 @@ export default function App() {
       }
     };
 
+    const handleVoiceStockIntentGlobal = (e) => {
+      const { symbol, name } = e.detail || {};
+      if (symbol) {
+        const queryText = name || symbol;
+        setGlobalSearch(queryText);
+        window.__SELECTED_STOCK_SYMBOL = symbol;
+        try {
+          localStorage.setItem("mm_selected_candle_symbol", symbol);
+        } catch (e) { }
+      }
+    };
+
     window.addEventListener("marketmind:voice_action", handleAutonomousVoiceAction);
+    window.addEventListener("marketmind:voice_stock_intent", handleVoiceStockIntentGlobal);
     return () => {
       window.removeEventListener("marketmind:voice_action", handleAutonomousVoiceAction);
+      window.removeEventListener("marketmind:voice_stock_intent", handleVoiceStockIntentGlobal);
     };
   }, [goPage, currentPage]);
 

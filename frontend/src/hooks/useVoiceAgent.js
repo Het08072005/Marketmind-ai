@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { apiClient } from "../api/client";
+import { findStockInText } from "../utils/stockMatcher";
 
 export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMuted = false) {
   const [isListening, setIsListening] = useState(false);
@@ -488,6 +489,18 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       text: m.text,
     }));
 
+    // Immediately detect stock from query and dispatch intent so skeleton renders during AI thinking
+    const matchedStock = findStockInText(cleanText);
+    if (matchedStock) {
+      activeTickerRef.current = matchedStock.symbol;
+      window.__SELECTED_STOCK_SYMBOL = matchedStock.symbol;
+      window.dispatchEvent(
+        new CustomEvent("marketmind:voice_stock_intent", {
+          detail: { symbol: matchedStock.symbol, name: matchedStock.name, query: cleanText, loading: true },
+        })
+      );
+    }
+
     try {
       const currentContextTicker = window.__SELECTED_STOCK_SYMBOL || activeTickerRef.current || "RELIANCE";
       const response = await apiClient.sendVoiceChat({
@@ -498,11 +511,21 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         history: historyPayload,
       });
 
-      const newSym = response.action?.params?.symbol || response.detected_symbol;
+      const newSym = response.action?.params?.symbol || response.detected_symbol || matchedStock?.symbol;
       if (newSym) {
         activeTickerRef.current = newSym;
         window.__SELECTED_STOCK_SYMBOL = newSym;
         window.dispatchEvent(new CustomEvent("marketmind:stock_changed", { detail: { symbol: newSym } }));
+        window.dispatchEvent(
+          new CustomEvent("marketmind:voice_stock_intent", {
+            detail: {
+              symbol: newSym,
+              name: response.action?.params?.name || matchedStock?.name || newSym,
+              query: cleanText,
+              loading: false,
+            },
+          })
+        );
       }
 
       setIsProcessing(false);
@@ -577,6 +600,18 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     } catch (err) {
       console.error("Voice chat error:", err);
       const activeSym = window.__SELECTED_STOCK_SYMBOL || activeTickerRef.current || "RELIANCE";
+      if (matchedStock || activeSym) {
+        window.dispatchEvent(
+          new CustomEvent("marketmind:voice_stock_intent", {
+            detail: {
+              symbol: matchedStock?.symbol || activeSym,
+              name: matchedStock?.name || activeSym,
+              query: cleanText,
+              loading: false,
+            },
+          })
+        );
+      }
       let fallbackText = "";
       if (currentLang === "hindi") {
         fallbackText = `${activeSym} का संस्थागत विश्लेषण: 20-दिवसीय VWAP के ऊपर निरंतर खरीदार संचय देखा जा रहा है। कृपया अपना प्रश्न दोबारा दोहराएं।`;
