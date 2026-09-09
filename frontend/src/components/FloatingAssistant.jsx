@@ -137,6 +137,7 @@ export default function FloatingAssistant({
   onFabClick,
 }) {
   const [chatInput, setChatInput] = useState("");
+  const [playingMsgId, setPlayingMsgId] = useState(null);
   const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
   useEffect(() => {
     // Ensure clean state: voice sound is enabled by default
