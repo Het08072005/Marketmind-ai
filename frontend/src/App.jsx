@@ -72,9 +72,11 @@ export default function App() {
           const match = lower.match(/\b(?:hey|hi|hello)?\s*(?:alex|alexa)\b\s*(.*)/i);
           if (match) {
             const query = match[1]?.trim() || "Hey Alex";
-            window.dispatchEvent(new CustomEvent("marketmind:voice_wake_query", { detail: query }));
             setAssistantInitialTab("chat");
             setAssistantOpen(true);
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent("marketmind:voice_wake_query", { detail: query }));
+            }, 100);
             try { recognition.abort(); } catch (e) {}
           }
         };
@@ -309,10 +311,7 @@ export default function App() {
           isMicMuted={isMicMuted}
           setIsMicMuted={setIsMicMuted}
           onFabClick={() => {
-            if (currentPage === "dashboard") {
-              window.dispatchEvent(new CustomEvent("marketmind:open_dashboard_copilot"));
-              return;
-            }
+            setAssistantInitialTab("chat");
             setAssistantOpen(true);
           }}
         />

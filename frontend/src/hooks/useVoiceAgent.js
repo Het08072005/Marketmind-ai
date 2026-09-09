@@ -255,9 +255,31 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       return;
     }
 
-    lastSpokenTextRef.current = (text || "").toLowerCase();
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Clean text: strip markdown symbols, asterisks, hashtags, bullets
+    const cleanText = text
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/[\*_#`~]/g, "")
+      .replace(/^[•\-*⚡]\s*/gm, "")
+      .replace(/[^\w\s\d.,!?'%₹\-\u0900-\u097F]/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!cleanText) {
+      handlePlaybackFinished();
+      return;
+    }
+
+    lastSpokenTextRef.current = cleanText.toLowerCase();
+
+    // Chrome audio policy: resume if paused and cancel pending
+    try {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+      window.speechSynthesis.cancel();
+    } catch (e) {}
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     const currentLang = langMode || languageRef.current;
 
     const selectedVoice = getSelectedSpeechVoice(currentLang);
@@ -269,7 +291,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
     }
 
     utterance.pitch = 1.0;
-    utterance.rate = 1.0;
+    utterance.rate = 1.02;
 
     utterance.onstart = () => {
       setIsPlayingAudio(true);
@@ -277,9 +299,22 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
       window.dispatchEvent(new CustomEvent("marketmind:voice_speaking_state", { detail: { isSpeaking: true } }));
     };
     utterance.onend = () => handlePlaybackFinished();
-    utterance.onerror = () => handlePlaybackFinished();
+    utterance.onerror = (e) => {
+      console.warn("speechSynthesis error:", e);
+      handlePlaybackFinished();
+    };
 
-    window.speechSynthesis.speak(utterance);
+    setTimeout(() => {
+      try {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.warn("speechSynthesis.speak exception:", err);
+        handlePlaybackFinished();
+      }
+    }, 40);
   }, [getSelectedSpeechVoice, handlePlaybackFinished]);
 
   // Audio Playback for Deepgram Aura Base64 MP3 (Male Orion)
@@ -323,6 +358,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
 
   // Replay speech with Male voice on demand
   const playMessageAudio = async (msg) => {
+    isSpeakerMutedRef.current = false;
     const currentLang = languageRef.current;
     const textToSpeak = (msg?.fullText || msg?.text || "").trim();
     if (!textToSpeak) return;
@@ -435,9 +471,9 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         setIsContinuousMode(true);
       }
 
-      if (!isSpeakerMutedRef.current) {
-        speakText(greetReply, languageRef.current);
-      }
+      // Ensure voice speaks greeting aloud
+      isSpeakerMutedRef.current = false;
+      speakText(greetReply, languageRef.current);
       return;
     }
 
@@ -557,8 +593,9 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
         setIsContinuousMode(true);
       }
 
-      // Play audio if enabled or if initiated via voice, AND speaker is NOT muted
-      if (!isSpeakerMutedRef.current && (autoPlayAudio || isVoice)) {
+      // Play audio if initiated via voice or autoplay or regular response
+      if (isVoice || autoPlayAudio || !isSpeakerMutedRef.current) {
+        isSpeakerMutedRef.current = false;
         if (response.audio_base64) {
           playBase64Audio(response.audio_base64, response.reply);
         } else {
@@ -609,6 +646,7 @@ export function useVoiceAgent(onAction = null, isMicMuted = false, isSpeakerMute
   useEffect(() => {
     const handleWakeQuery = (e) => {
       if (isMicMutedRef.current) return; // Strict mute guard
+      isSpeakerMutedRef.current = false;
       const q = e.detail;
       if (q && q.trim()) {
         continuousModeRef.current = true;

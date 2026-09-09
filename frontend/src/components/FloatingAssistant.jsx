@@ -138,9 +138,20 @@ export default function FloatingAssistant({
 }) {
   const [chatInput, setChatInput] = useState("");
   const [playingMsgId, setPlayingMsgId] = useState(null);
-  const [isSpeakerMuted, setIsSpeakerMuted] = useState(
-    () => localStorage.getItem("alex_speaker_muted") === "true"
-  );
+  const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
+
+  // Ensure speaker defaults to ON and wake query enables voice
+  useEffect(() => {
+    try {
+      localStorage.removeItem("alex_speaker_muted");
+    } catch (e) {}
+
+    const handleWake = () => {
+      setIsSpeakerMuted(false);
+    };
+    window.addEventListener("marketmind:voice_wake_query", handleWake);
+    return () => window.removeEventListener("marketmind:voice_wake_query", handleWake);
+  }, []);
 
   // Flexible Resizing: width, height and drag mode ('left' | 'top' | 'corner' | null)
   const [dimensions, setDimensions] = useState(() => {
@@ -364,10 +375,10 @@ export default function FloatingAssistant({
             className="fab alex-copilot-fab"
             title="Open Alex Copilot"
             onClick={() => {
+              setIsOpen(true);
+              setIsSpeakerMuted(false);
               if (onFabClick) {
                 onFabClick();
-              } else {
-                setIsOpen(true);
               }
               // This user gesture is the browser-safe point to request microphone
               // permission. Deepgram then detects the spoken "Hey Alex" phrase.
