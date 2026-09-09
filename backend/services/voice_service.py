@@ -18,10 +18,9 @@ from services.gemini_client import call_fast_gemini as _pool_call_fast_gemini, g
 gemini_client = gemini_pool.get_client()
 
 FAST_GEMINI_MODELS = [
-    "gemini-3.6-flash",
     "gemini-3.5-flash-lite",
+    "gemini-3.6-flash",
     "gemini-3.5-flash",
-    "gemini-flash-latest",
     "gemini-flash-lite-latest",
 ]
 

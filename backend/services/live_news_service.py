@@ -27,7 +27,7 @@ from config import settings
 
 IST_TZ = timezone(timedelta(hours=5, minutes=30))
 
-_GEMINI_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
+_GEMINI_MODELS = ["gemini-3.5-flash-lite", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-flash-lite-latest"]
 
 from services.gemini_client import generate_content_sync, gemini_pool, get_gemini_client
 

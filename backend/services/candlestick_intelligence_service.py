@@ -14,12 +14,10 @@ _CANDLE_CACHE: Dict[str, Dict[str, Any]] = {}
 _CANDLE_CACHE_TS: Dict[str, float] = {}
 _CACHE_TTL = 180
 
-# Preferred Gemini models in priority order
 _GEMINI_MODELS = [
-    "gemini-3.6-flash",
     "gemini-3.5-flash-lite",
+    "gemini-3.6-flash",
     "gemini-3.5-flash",
-    "gemini-flash-latest",
     "gemini-flash-lite-latest"
 ]
 

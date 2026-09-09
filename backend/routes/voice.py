@@ -65,12 +65,12 @@ async def voice_chat(request: ChatRequest):
         # Instant Response: Return text and action payload immediately so voice speaking begins in <1s.
         # Deepgram audio synthesis is available on-demand via the /synthesize endpoint.
         audio_b64 = None
-        if settings.DEEPGRAM_API_KEY and lang not in ["hindi", "hi"]:
+        if getattr(request, "synthesize_audio", False) and lang not in ["hindi", "hi"]:
             try:
                 import asyncio
                 audio_bytes = await asyncio.wait_for(
                     synthesize_speech_audio(reply_text, voice_gender=gender, language=lang),
-                    timeout=1.5
+                    timeout=0.6
                 )
                 if audio_bytes:
                     audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")

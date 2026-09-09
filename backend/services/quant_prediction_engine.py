@@ -28,12 +28,10 @@ _GEMINI_SYNTHESIS_CACHE: Dict[str, Dict[str, Any]] = {}
 _CACHE_TTL = 30  # 30 seconds for live quant telemetry cache
 _GEMINI_DISABLED_UNTIL: float = 0.0  # Circuit breaker for rate limits / quota exhaustion
 
-# Preferred Gemini models
 _GEMINI_MODELS = [
-    "gemini-3.6-flash",
     "gemini-3.5-flash-lite",
+    "gemini-3.6-flash",
     "gemini-3.5-flash",
-    "gemini-flash-latest",
     "gemini-flash-lite-latest"
 ]
 

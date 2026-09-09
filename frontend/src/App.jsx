@@ -72,16 +72,14 @@ export default function App() {
           const match = lower.match(/\b(?:hey|hi|hello)?\s*(?:alex|alexa)\b\s*(.*)/i);
           if (match) {
             const query = match[1]?.trim() || "Hey Alex";
+            window.dispatchEvent(new CustomEvent("marketmind:voice_wake_query", { detail: query }));
             setAssistantInitialTab("chat");
             setAssistantOpen(true);
-            setTimeout(() => {
-              window.dispatchEvent(new CustomEvent("marketmind:voice_wake_query", { detail: query }));
-            }, 100);
-            try { recognition.abort(); } catch (e) {}
+            try { recognition.abort(); } catch (e) { }
           }
         };
 
-        recognition.onerror = () => {};
+        recognition.onerror = () => { };
 
         recognition.onend = () => {
           if (!disposed && !assistantOpen && !isMicMuted) {
@@ -100,7 +98,7 @@ export default function App() {
     return () => {
       disposed = true;
       if (recognition) {
-        try { recognition.abort(); } catch (e) {}
+        try { recognition.abort(); } catch (e) { }
       }
     };
   }, [assistantOpen, isMicMuted]);
@@ -167,7 +165,7 @@ export default function App() {
         window.__SELECTED_STOCK_SYMBOL = sym;
         try {
           localStorage.setItem("mm_selected_candle_symbol", sym);
-        } catch (e) {}
+        } catch (e) { }
       }
 
       if (action.target_page && action.target_page !== currentPage) {
@@ -311,7 +309,10 @@ export default function App() {
           isMicMuted={isMicMuted}
           setIsMicMuted={setIsMicMuted}
           onFabClick={() => {
-            setAssistantInitialTab("chat");
+            if (currentPage === "dashboard") {
+              window.dispatchEvent(new CustomEvent("marketmind:open_dashboard_copilot"));
+              return;
+            }
             setAssistantOpen(true);
           }}
         />

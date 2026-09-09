@@ -9,12 +9,10 @@ from typing import Optional, List, Dict, Any, Tuple
 from google import genai
 from config import settings
 
-# Supported Google Gemini models ordered by speed and availability
 DEFAULT_GEMINI_MODELS = [
-    "gemini-3.6-flash",
     "gemini-3.5-flash-lite",
+    "gemini-3.6-flash",
     "gemini-3.5-flash",
-    "gemini-flash-latest",
     "gemini-flash-lite-latest",
 ]
 
@@ -193,6 +191,34 @@ class GeminiKeyPool:
         
         valid_count = len(self._clients)
         print(f"[GeminiPool] Initialized with {valid_count} active API key(s) in pool.")
+        self._validate_keys_in_background()
+
+    def _validate_keys_in_background(self):
+        """Non-blocking background probe to quarantine dead/403 keys early."""
+        def _check_single(key: str):
+            if not key or key in self._quarantined_keys:
+                return
+            client = self._clients.get(key)
+            if not client:
+                return
+            try:
+                client.models.generate_content(
+                    model="gemini-3.5-flash-lite",
+                    contents="ping"
+                )
+            except Exception as e:
+                if is_permission_or_auth_error(e):
+                    self.mark_quarantine(key, f"startup_probe: {str(e)[:60]}")
+                elif is_quota_or_rate_limit_error(e):
+                    with self._lock:
+                        self._cooldown[key] = time.time() + 60.0
+
+        def _probe_all():
+            with concurrent.futures.ThreadPoolExecutor(max_workers=len(self._keys)) as ex:
+                ex.map(_check_single, self._keys)
+
+        t = threading.Thread(target=_probe_all, daemon=True)
+        t.start()
 
     @property
     def total_keys(self) -> int:

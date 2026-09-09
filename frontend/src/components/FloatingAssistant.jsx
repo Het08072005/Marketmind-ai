@@ -132,26 +132,15 @@ export default function FloatingAssistant({
   isOpen,
   setIsOpen,
   isMicMuted = false,
-  setIsMicMuted = () => {},
+  setIsMicMuted = () => { },
   initialTab,
   onFabClick,
 }) {
   const [chatInput, setChatInput] = useState("");
   const [playingMsgId, setPlayingMsgId] = useState(null);
-  const [isSpeakerMuted, setIsSpeakerMuted] = useState(false);
-
-  // Ensure speaker defaults to ON and wake query enables voice
-  useEffect(() => {
-    try {
-      localStorage.removeItem("alex_speaker_muted");
-    } catch (e) {}
-
-    const handleWake = () => {
-      setIsSpeakerMuted(false);
-    };
-    window.addEventListener("marketmind:voice_wake_query", handleWake);
-    return () => window.removeEventListener("marketmind:voice_wake_query", handleWake);
-  }, []);
+  const [isSpeakerMuted, setIsSpeakerMuted] = useState(
+    () => localStorage.getItem("alex_speaker_muted") === "true"
+  );
 
   // Flexible Resizing: width, height and drag mode ('left' | 'top' | 'corner' | null)
   const [dimensions, setDimensions] = useState(() => {
@@ -166,7 +155,7 @@ export default function FloatingAssistant({
           };
         }
       }
-    } catch (e) {}
+    } catch (e) { }
     return { width: 410, height: 510 };
   });
 
@@ -282,7 +271,7 @@ export default function FloatingAssistant({
       setDragType(null);
       try {
         localStorage.setItem("alex_copilot_dimensions_v4", JSON.stringify(dimensions));
-      } catch (e) {}
+      } catch (e) { }
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -375,10 +364,10 @@ export default function FloatingAssistant({
             className="fab alex-copilot-fab"
             title="Open Alex Copilot"
             onClick={() => {
-              setIsOpen(true);
-              setIsSpeakerMuted(false);
               if (onFabClick) {
                 onFabClick();
+              } else {
+                setIsOpen(true);
               }
               // This user gesture is the browser-safe point to request microphone
               // permission. Deepgram then detects the spoken "Hey Alex" phrase.
@@ -566,10 +555,10 @@ export default function FloatingAssistant({
                     {isListening
                       ? "Listening..."
                       : isProcessing
-                      ? "Analyzing..."
-                      : isPlayingAudio
-                      ? "Speaking..."
-                      : "Listening..."}
+                        ? "Analyzing..."
+                        : isPlayingAudio
+                          ? "Speaking..."
+                          : "Listening..."}
                   </span>
                 </>
               )}
@@ -608,8 +597,8 @@ export default function FloatingAssistant({
                       ? "Muted"
                       : "Mic"
                     : isMicMuted
-                    ? "Mic Muted"
-                    : "Mic Active"}
+                      ? "Mic Muted"
+                      : "Mic Active"}
                 </span>
               </button>
 
@@ -617,19 +606,18 @@ export default function FloatingAssistant({
               <button
                 type="button"
                 onClick={handleToggleSpeaker}
-                className={`alex-pill-btn ${
-                  isPlayingAudio
+                className={`alex-pill-btn ${isPlayingAudio
                     ? "audio-playing"
                     : isSpeakerMuted
-                    ? "audio-muted"
-                    : "audio-active"
-                }`}
+                      ? "audio-muted"
+                      : "audio-active"
+                  }`}
                 title={
                   isPlayingAudio
                     ? "Voice is currently speaking. Click to stop."
                     : isSpeakerMuted
-                    ? "Voice is MUTED. Click to turn voice sound ON."
-                    : "Voice is ACTIVE. Click to mute voice."
+                      ? "Voice is MUTED. Click to turn voice sound ON."
+                      : "Voice is ACTIVE. Click to mute voice."
                 }
               >
                 {isPlayingAudio ? (
@@ -752,22 +740,21 @@ export default function FloatingAssistant({
 
                 {msg.sender === "bot" && (
                   <button
-                    className={`speaker-btn ${
-                      playingMsgId === msg.id ||
-                      (isPlayingAudio && msg === messages[messages.length - 1])
+                    className={`speaker-btn ${playingMsgId === msg.id ||
+                        (isPlayingAudio && msg === messages[messages.length - 1])
                         ? "playing"
                         : ""
-                    }`}
+                      }`}
                     onClick={() => handlePlayMessage(msg)}
                     title={
                       playingMsgId === msg.id ||
-                      (isPlayingAudio && msg === messages[messages.length - 1])
+                        (isPlayingAudio && msg === messages[messages.length - 1])
                         ? "Stop speaking"
                         : "Listen to Alex response"
                     }
                   >
                     {playingMsgId === msg.id ||
-                    (isPlayingAudio && msg === messages[messages.length - 1]) ? (
+                      (isPlayingAudio && msg === messages[messages.length - 1]) ? (
                       <>
                         <SpeakerOffIcon size={12} color="currentColor" />
                         <span>Stop</span>
@@ -893,10 +880,10 @@ export default function FloatingAssistant({
                 isMicMuted
                   ? "🔒 Mic is muted. Type question here..."
                   : isListening
-                  ? "Listening... Speak your question now..."
-                  : isProcessing
-                  ? "Alex is analyzing..."
-                  : `Ask Alex in ${language === "hindi" ? "Hindi" : "English"}...`
+                    ? "Listening... Speak your question now..."
+                    : isProcessing
+                      ? "Alex is analyzing..."
+                      : `Ask Alex in ${language === "hindi" ? "Hindi" : "English"}...`
               }
               value={isListening ? liveTranscript : chatInput}
               onChange={(e) => setChatInput(e.target.value)}
@@ -907,13 +894,13 @@ export default function FloatingAssistant({
                 background: isMicMuted
                   ? "rgba(16,27,51,.04)"
                   : isListening
-                  ? "rgba(161,69,69,.08)"
-                  : "var(--cream, #FAF8F2)",
+                    ? "rgba(161,69,69,.08)"
+                    : "var(--cream, #FAF8F2)",
                 borderColor: isMicMuted
                   ? "var(--line)"
                   : isListening
-                  ? "var(--rose)"
-                  : "var(--line)",
+                    ? "var(--rose)"
+                    : "var(--line)",
               }}
             />
             {isListening && !isMicMuted && (
@@ -932,21 +919,21 @@ export default function FloatingAssistant({
               isMicMuted
                 ? "Microphone is muted. Click to unmute and speak."
                 : isListening
-                ? "Tap to pause voice"
-                : "Tap to speak to Alex"
+                  ? "Tap to pause voice"
+                  : "Tap to speak to Alex"
             }
             onClick={handleToggleMic}
             style={{
               background: isMicMuted
                 ? "linear-gradient(135deg, #718096, #4A5568)"
                 : isListening
-                ? "var(--rose)"
-                : "linear-gradient(135deg, var(--gold), var(--gold-light))",
+                  ? "var(--rose)"
+                  : "linear-gradient(135deg, var(--gold), var(--gold-light))",
               boxShadow: isMicMuted
                 ? "0 2px 8px rgba(0,0,0,.2)"
                 : isListening
-                ? "0 0 16px rgba(161,69,69,.6)"
-                : "0 2px 8px rgba(184,147,90,.3)",
+                  ? "0 0 16px rgba(161,69,69,.6)"
+                  : "0 2px 8px rgba(184,147,90,.3)",
             }}
           >
             {isMicMuted ? (
