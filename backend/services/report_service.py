@@ -100,7 +100,7 @@ def generate_institutional_equity_report(symbol: str, report_type: str = "Compan
     rating_val = "STRONG BUY / OVERWEIGHT"
 
     # Dynamic institutional AI equity generation if Gemini is available
-    if gemini_client:
+    if gemini_pool.active_keys_count > 0:
         try:
             prompt = f"""
             You are a Senior Managing Director & Head of Equity Research at a top global investment bank.
@@ -132,12 +132,18 @@ def generate_institutional_equity_report(symbol: str, report_type: str = "Compan
             """
             res = generate_content_sync(
                 contents=prompt,
-                models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
                 config={"response_mime_type": "application/json"},
-                timeout_secs=3.0
+                timeout_secs=4.0
             )
             if res and res.text:
-                parsed = json.loads(res.text.strip())
+                clean_text = res.text.strip()
+                if clean_text.startswith("```json"):
+                    clean_text = clean_text[7:]
+                if clean_text.startswith("```"):
+                    clean_text = clean_text[3:]
+                if clean_text.endswith("```"):
+                    clean_text = clean_text[:-3]
+                parsed = json.loads(clean_text.strip())
                 if "executive_summary" in parsed and parsed["executive_summary"]:
                     exec_summary = parsed["executive_summary"]
                 if "valuation_analysis" in parsed and parsed["valuation_analysis"]:

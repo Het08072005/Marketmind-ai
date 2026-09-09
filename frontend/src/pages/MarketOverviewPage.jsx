@@ -983,7 +983,7 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
     };
 
     loadDashboardData();
-    const interval = setInterval(loadDashboardData, 15000);
+    const interval = setInterval(loadDashboardData, 90000); // 90s gentle sync to prevent unnecessary requests
     return () => {
       isMounted = false;
       clearInterval(interval);
@@ -2023,13 +2023,13 @@ export default function MarketOverviewPage({ goPage, openAssistant, searchQuery 
                       <div className="radar-callout-header">
                         <span className="radar-summary-label">Summary:</span>
                         <span className="radar-summary-val">
-                          {(stock.summary || stock.catalyst || "").replace(/⚡\s*/g, "").trim()}
+                          {(stock.summary || stock.catalyst || `Institutional bias for ${stock.name || stock.symbol} (CMP ₹${(stock.price || 1000).toLocaleString("en-IN")}) is supported by persistent buyer delta and sector strength.`).replace(/⚡\s*/g, "").trim()}
                         </span>
                       </div>
                       <div className="radar-rationale-text">
                         <strong className="radar-rationale-prefix">Institutional Thesis:</strong>
                         <span>
-                          {(stock.explanation || "Persistent buyer absorption above key VWAP benchmark with structural risk management.").replace(/⚡\s*/g, "").trim()}
+                          {(stock.explanation || `Persistent buyer absorption above key VWAP benchmark with structural risk management for ${stock.name || stock.symbol}.`).replace(/⚡\s*/g, "").trim()}
                         </span>
                       </div>
                       {stock.invalidation_condition && (

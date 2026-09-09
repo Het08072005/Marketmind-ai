@@ -548,7 +548,6 @@ Rule: Cite the mathematical transmission mechanism (fuel expense opex share, pri
             
             response = generate_content_sync(
                 contents=prompt,
-                models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
                 timeout_secs=3.5
             )
             if response and hasattr(response, "text") and response.text:
@@ -814,7 +813,6 @@ INSTRUCTIONS:
 
             response = generate_content_sync(
                 contents=prompt,
-                models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
                 timeout_secs=4.0
             )
             if response and hasattr(response, "text") and response.text:

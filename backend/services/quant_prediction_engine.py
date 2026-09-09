@@ -30,10 +30,11 @@ _GEMINI_DISABLED_UNTIL: float = 0.0  # Circuit breaker for rate limits / quota e
 
 # Preferred Gemini models
 _GEMINI_MODELS = [
-    "gemini-2.5-flash-lite",
-    "gemini-flash-latest",
     "gemini-3.6-flash",
-    "gemini-2.5-flash"
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash",
+    "gemini-flash-latest",
+    "gemini-flash-lite-latest"
 ]
 
 from services.gemini_client import generate_content_sync, gemini_pool, get_gemini_client

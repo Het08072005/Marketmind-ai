@@ -7,7 +7,7 @@ from services.market_data_service import fetch_live_stock_data, get_market_sessi
 # In-memory cache for market radar recommendations
 _RADAR_CACHE: Dict[str, Any] = {}
 _RADAR_CACHE_TIME = 0
-_RADAR_CACHE_TTL = 30  # seconds
+_RADAR_CACHE_TTL = 120  # 120 seconds cache for entire market radar
 
 # Gemini AI Integration for Real-Time Institutional Catalyst Synthesis
 from services.gemini_client import generate_content_sync, gemini_pool, get_gemini_client
@@ -16,12 +16,13 @@ _gemini_client = gemini_pool.get_client()
 
 _CATALYST_CACHE: Dict[str, Dict[str, Any]] = {}
 _CATALYST_CACHE_TS: Dict[str, float] = {}
-CATALYST_CACHE_TTL = 900  # 15 minutes cache per stock
+CATALYST_CACHE_TTL = 1800  # 30 minutes cache per stock
 
-def generate_ai_catalyst_narrative(comp: Dict[str, Any], pred: Dict[str, Any]) -> Dict[str, Any]:
+def generate_ai_catalyst_narrative(comp: Dict[str, Any], pred: Dict[str, Any], call_llm: bool = False) -> Dict[str, Any]:
     """
-    Dynamically generates institutional research catalysts using Google Gemini AI + real-time telemetry.
-    Cached for 15 minutes per stock to ensure instant latency and zero quota exhaustion.
+    Generates institutional research catalysts using quantitative market telemetry.
+    Only calls Google Gemini if call_llm=True (for single stock deep dive) and caches for 30 minutes.
+    Bulk radar calculations use instantaneous deterministic telemetry to preserve API quota.
     """
     sym = comp.get("symbol", "").upper()
     now = time.time()
@@ -39,7 +40,7 @@ def generate_ai_catalyst_narrative(comp: Dict[str, Any], pred: Dict[str, Any]) -
     regime = pred.get("regime", {}).get("display_name", "Balanced Flow")
 
     catalyst_text = None
-    if gemini_pool.active_keys_count > 0:
+    if call_llm and gemini_pool.active_keys_count > 0:
         try:
             prompt = (
                 f"You are a Senior Quantitative Analyst at a Tier-1 institutional equity desk in Mumbai.\n"
@@ -53,7 +54,6 @@ def generate_ai_catalyst_narrative(comp: Dict[str, Any], pred: Dict[str, Any]) -
             )
             resp = generate_content_sync(
                 contents=prompt,
-                models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
                 timeout_secs=3.0
             )
             if resp and hasattr(resp, "text") and resp.text:
@@ -80,7 +80,7 @@ from services.quant_prediction_engine import get_institutional_stock_prediction
 
 _PROFILE_CACHE: Dict[str, Any] = {}
 
-def get_stock_institutional_profile(symbol: str, company_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def get_stock_institutional_profile(symbol: str, company_data: Optional[Dict[str, Any]] = None, call_llm: bool = False) -> Dict[str, Any]:
     """
     Computes or retrieves the institutional quantitative prediction profile for ANY stock ticker.
     Guarantees exact real-time market prices, dynamic targets, and calibrated invalidation floors with zero latency.
@@ -100,7 +100,7 @@ def get_stock_institutional_profile(symbol: str, company_data: Optional[Dict[str
     # Use in-memory company registry first (0.01ms lookup, no blocking network calls)
     comp = company_data if (company_data and company_data.get("price")) else get_company_by_symbol(sym_clean)
 
-    pred = get_institutional_stock_prediction(sym_clean, company_data=comp, call_llm=False, skip_candles_network=True)
+    pred = get_institutional_stock_prediction(sym_clean, company_data=comp, call_llm=call_llm, skip_candles_network=True)
     
     # Real-Time Price Synchronization: Anchor strictly to live market price
     current_price = float(comp.get("price", pred.get("price", 1500.0)))
@@ -158,7 +158,7 @@ def get_stock_institutional_profile(symbol: str, company_data: Optional[Dict[str
     hft_tag = f"LOB Imbalance QI {pred['microstructure']['queue_imbalance']:+.2f} · Microprice {pred['microstructure']['microprice_delta']:+.2f}"
 
     # Generate live-synced narrative text and Gemini AI catalyst
-    ai_narrative = generate_ai_catalyst_narrative(comp, pred)
+    ai_narrative = generate_ai_catalyst_narrative(comp, pred, call_llm=call_llm)
     co_name = comp.get("name", sym_clean)
     ai_catalyst = ai_narrative.get("catalyst")
     summary_text = (

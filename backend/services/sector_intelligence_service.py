@@ -259,7 +259,6 @@ def _generate_with_gemini(comp: Dict[str, Any], peers: List[Dict[str, Any]], sec
 
     res = generate_content_sync(
         contents=prompt,
-        models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
         config={"response_mime_type": "application/json"},
         timeout_secs=4.0
     )

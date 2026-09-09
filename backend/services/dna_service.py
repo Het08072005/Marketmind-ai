@@ -230,7 +230,7 @@ JSON output only:"""
 
     res_text = await gemini_pool.call_fast_gemini(
         prompt=prompt,
-        models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.1-flash-lite"],
+        models=["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-flash-latest", "gemini-flash-lite-latest"],
         max_tokens=600,
         temperature=0.25,
         timeout_secs=7.0

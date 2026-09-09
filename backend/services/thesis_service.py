@@ -752,21 +752,11 @@ Synthesize a living point-in-time causal thesis model in valid JSON matching thi
 Return ONLY the raw JSON without code fences or quotes."""
 
     try:
-        response = None
-        for model_candidate in ["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"]:
-            try:
-                res_obj = generate_content_sync(
-                    contents=prompt,
-                    model=model_candidate,
-                    config={"temperature": 0.2},
-                    timeout_secs=5.5
-                )
-                if res_obj and hasattr(res_obj, "text") and res_obj.text:
-                    response = res_obj
-                    break
-            except Exception as m_err:
-                print(f"Thesis model candidate {model_candidate} failed: {m_err}")
-                continue
+        response = generate_content_sync(
+            contents=prompt,
+            config={"temperature": 0.2},
+            timeout_secs=5.5
+        )
 
         if not response or not response.text:
             raise RuntimeError("All candidate Gemini models failed or timed out")
@@ -834,7 +824,6 @@ STRICT INSTRUCTIONS:
     try:
         response = generate_content_sync(
             contents=prompt,
-            models=["gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-3.6-flash", "gemini-2.5-flash"],
             timeout_secs=4.0
         )
         if response and hasattr(response, "text") and response.text:
