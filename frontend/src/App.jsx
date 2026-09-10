@@ -231,9 +231,9 @@ export default function App() {
       case "reports":
         return <ReportsPage />;
       case "candles":
-        return <CandlestickPage goPage={goPage} searchQuery={globalSearch} />;
+        return <CandlestickPage goPage={goPage} searchQuery={globalSearch} onSearchChange={setGlobalSearch} />;
       case "news":
-        return <NewsPage goPage={goPage} searchQuery={globalSearch} />;
+        return <NewsPage goPage={goPage} searchQuery={globalSearch} onSearchChange={setGlobalSearch} />;
       case "domino":
         return <DominoPage goPage={goPage} />;
       case "breaker":

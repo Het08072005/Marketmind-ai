@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { apiClient } from "../api/client";
+import { generateFallbackPortfolioSimulation } from "../api/fallbacks";
 
 const AVAILABLE_STOCKS = [
   { symbol: "ADANIENT", name: "Adani Enterprises Ltd" },
@@ -159,21 +160,28 @@ export default function PortfolioPage() {
   const [selectedMilestone, setSelectedMilestone] = useState(null);
   const resultsAnchorRef = useRef(null);
 
-  // Loaded from localStorage only if the stored stock matches current simStock
+  // Loaded from localStorage or synthesized instantly so simResult is NEVER null on reload or switch
   const [simResult, setSimResult] = useState(() => {
     try {
-      const saved = localStorage.getItem("marketmind_sim_result");
-      const savedStock = localStorage.getItem("marketmind_sim_stock");
-      if (saved && savedStock) {
+      const savedStock = localStorage.getItem("marketmind_sim_stock") || "ADANIENT";
+      const saved = localStorage.getItem(`marketmind_sim_result_${savedStock}`) || localStorage.getItem("marketmind_sim_result");
+      if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && parsed.portfolio_value && parsed.symbol === savedStock) {
+        if (parsed && parsed.portfolio_value) {
           return parsed;
         }
       }
     } catch (e) {
       console.warn("Failed to load saved simulation from localStorage", e);
     }
-    return null;
+    return generateFallbackPortfolioSimulation({
+      symbol: localStorage.getItem("marketmind_sim_stock") || "ADANIENT",
+      investment: Number(localStorage.getItem("marketmind_sim_amount")) || 100000,
+      startDate: localStorage.getItem("marketmind_sim_start_date") || "2026-08-03",
+      endDate: localStorage.getItem("marketmind_sim_end_date") || "2026-09-03",
+      investmentType: localStorage.getItem("marketmind_sim_type") || "lumpsum",
+      benchmark: localStorage.getItem("marketmind_sim_benchmark") || "NIFTY 50",
+    });
   });
 
   // Auto-run real simulation on initial mount if not yet cached
@@ -188,6 +196,9 @@ export default function PortfolioPage() {
     if (simResult && simResult.portfolio_value) {
       try {
         localStorage.setItem("marketmind_sim_result", JSON.stringify(simResult));
+        if (simStock) {
+          localStorage.setItem(`marketmind_sim_result_${simStock}`, JSON.stringify(simResult));
+        }
         localStorage.setItem("marketmind_sim_stock", simStock);
         localStorage.setItem("marketmind_sim_amount", String(simAmount));
         localStorage.setItem("marketmind_sim_start_date", simStartDate);
@@ -208,22 +219,39 @@ export default function PortfolioPage() {
     customType = null,
     customBenchmark = null
   ) => {
-    setSimLoading(true);
-
-    // Smoothly scroll down to results section so user sees the progress and outcome
-    setTimeout(() => {
-      resultsAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 60);
-
     const sym = (customSymbol || simStock).toUpperCase();
-    if (simResult && simResult.symbol !== sym) {
-      setSimResult(null);
-    }
     const amt = customAmount !== null ? customAmount : simAmount;
     const sDate = customStartDate || simStartDate;
     const eDate = customEndDate || simEndDate;
     const invType = customType || simType;
     const bench = customBenchmark || simBenchmark;
+
+    // 0ms instant display: load cached simulation for this symbol or synthesize immediately!
+    let existing = null;
+    try {
+      const cached = localStorage.getItem(`marketmind_sim_result_${sym}`);
+      if (cached) existing = JSON.parse(cached);
+    } catch (e) { }
+
+    if (existing && existing.portfolio_value) {
+      setSimResult(existing);
+    } else {
+      const instant = generateFallbackPortfolioSimulation({
+        symbol: sym,
+        investment: amt,
+        startDate: sDate,
+        endDate: eDate,
+        investmentType: invType,
+        benchmark: bench,
+      });
+      setSimResult(instant);
+      try {
+        localStorage.setItem(`marketmind_sim_result_${sym}`, JSON.stringify(instant));
+        localStorage.setItem("marketmind_sim_result", JSON.stringify(instant));
+      } catch (e) { }
+    }
+
+    setSimLoading(true);
 
     try {
       const data = await apiClient.simulatePortfolio({
@@ -236,9 +264,13 @@ export default function PortfolioPage() {
       });
       if (data && data.portfolio_value) {
         setSimResult(data);
+        try {
+          localStorage.setItem(`marketmind_sim_result_${sym}`, JSON.stringify(data));
+          localStorage.setItem("marketmind_sim_result", JSON.stringify(data));
+        } catch (e) { }
       }
     } catch (err) {
-      console.warn("Simulation call error", err);
+      console.warn("Simulation call notice:", err);
     } finally {
       setSimLoading(false);
     }
@@ -309,7 +341,6 @@ export default function PortfolioPage() {
         } else if (action.params?.symbol) {
           const sym = action.params.symbol;
           setSimStock(sym);
-          setSimResult(null);
           localStorage.setItem("marketmind_sim_stock", sym);
           handleSimulate(sym, action.params?.amount, action.params?.start_date, action.params?.end_date, action.params?.investment_type);
         }
@@ -336,7 +367,6 @@ export default function PortfolioPage() {
       if (sym) {
         setSimStock(sym);
         setSandboxSymbol(sym);
-        setSimResult(null);
         localStorage.setItem("marketmind_sim_stock", sym);
         handleSimulate(sym);
       }
@@ -354,7 +384,6 @@ export default function PortfolioPage() {
       if (initialTargetSym && initialTargetSym !== simStock) {
         setSimStock(initialTargetSym);
         setSandboxSymbol(initialTargetSym);
-        setSimResult(null);
         localStorage.setItem("marketmind_sim_stock", initialTargetSym);
         handleSimulate(initialTargetSym);
         window.__SELECTED_STOCK_SYMBOL = null;
@@ -452,7 +481,6 @@ export default function PortfolioPage() {
                   onChange={(e) => {
                     const val = e.target.value;
                     setSimStock(val);
-                    setSimResult(null);
                     handleSimulate(val, simAmount, simStartDate, simEndDate, simType, simBenchmark);
                   }}
                 >

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { apiClient } from "../api/client";
+import { FALLBACK_NEWS_ARTICLES } from "../api/fallbacks";
 import NewsDetailView from "../components/NewsDetailView";
 
 const CATEGORIES = [
@@ -76,6 +77,7 @@ function formatCopilotMessage(text) {
 
 // Local persistence helpers for 0ms instant reload
 const INITIAL_INSTITUTIONAL_SEED = [
+  ...FALLBACK_NEWS_ARTICLES,
   {
     id: "seed-sebi-cas-derivative",
     title: "SEBI to review Settlement Price methodology for Derivative Contracts in the light of CAS rollout",
@@ -570,7 +572,7 @@ function storeNewsData(data) {
   } catch (e) { }
 }
 
-export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }) {
+export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "", onSearchChange }) {
   const initialCached = getStoredNewsData();
 
   const [filter, setFilter] = useState("All");
@@ -900,14 +902,47 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
       }
 
       if (!activeSearch) return true;
-      const inTitle = item.title?.toLowerCase().includes(activeSearch);
-      const inSummary = item.summary?.toLowerCase().includes(activeSearch);
-      const inSource = item.source?.toLowerCase().includes(activeSearch);
-      const inTickers = item.tickers?.some((t) => t.toLowerCase().includes(activeSearch));
-      const inMetrics = item.key_metrics?.toLowerCase().includes(activeSearch);
-      const inCategory = item.category?.toLowerCase().includes(activeSearch);
-      const inAuth = item.source_authority?.toLowerCase().includes(activeSearch);
-      return inTitle || inSummary || inSource || inTickers || inMetrics || inCategory || inAuth;
+
+      const cleanSearch = activeSearch.replace(/\b(ltd|limited|corp|corporation|inc|industries|share|stock|company)\b/gi, "").trim();
+      const searchTokens = cleanSearch.split(/\s+/).filter(Boolean);
+
+      // Check if any search token matches a ticker symbol or company name in directory
+      const matchedTickers = [];
+      Object.entries(COMPANY_DIRECTORY).forEach(([sym, name]) => {
+        const symLow = sym.toLowerCase();
+        const nameLow = name.toLowerCase();
+        if (
+          cleanSearch.includes(symLow) ||
+          cleanSearch.includes(nameLow) ||
+          nameLow.includes(cleanSearch) ||
+          symLow.includes(cleanSearch)
+        ) {
+          matchedTickers.push(sym);
+        }
+      });
+
+      const hasTickerMatch = item.tickers?.some((t) => {
+        const tLow = t.toLowerCase();
+        return (
+          tLow.includes(cleanSearch) ||
+          cleanSearch.includes(tLow) ||
+          matchedTickers.includes(t)
+        );
+      });
+
+      if (hasTickerMatch) return true;
+
+      const fullText = `${item.title || ""} ${item.summary || ""} ${item.source || ""} ${item.category || ""} ${item.source_authority || ""}`.toLowerCase();
+
+      // Check direct substring
+      if (fullText.includes(activeSearch) || fullText.includes(cleanSearch)) return true;
+
+      // Check all significant search tokens match in fullText
+      if (searchTokens.length > 0 && searchTokens.every((tok) => fullText.includes(tok))) {
+        return true;
+      }
+
+      return false;
     }).sort((a, b) => (b.published_ts || 0) - (a.published_ts || 0));
 
     // Deduplicate in frontend to ensure zero duplicate cards
@@ -1218,15 +1253,16 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
               {activeSearch && (
                 <div className="news-active-filter-badge">
                   <span>Filtering: <b>"{activeSearch}"</b></span>
-                  {internalSearch && (
-                    <button
-                      type="button"
-                      onClick={() => setInternalSearch("")}
-                      title="Clear filter"
-                    >
-                      ✕
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInternalSearch("");
+                      if (onSearchChange) onSearchChange("");
+                    }}
+                    title="Clear filter"
+                  >
+                    ✕
+                  </button>
                 </div>
               )}
 
@@ -1293,6 +1329,34 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "" }
             </div>
           ) : null}
 
+
+          {/* Empty State Indicator if no news matches the current filter/search */}
+          {paginatedNews.length === 0 && !loading && (
+            <div className="card c12" style={{ textAlign: "center", padding: "40px 20px", background: "var(--paper)", border: "1px dashed var(--line)", borderRadius: "12px", margin: "16px 0" }}>
+              <div style={{ fontSize: "32px", marginBottom: "10px" }}>📰</div>
+              <h3 style={{ fontSize: "16px", color: "var(--navy)", marginBottom: "6px" }}>
+                {activeSearch ? `No headlines found matching "${activeSearch}"` : "No headlines in this category"}
+              </h3>
+              <p style={{ fontSize: "13px", color: "var(--ink-soft)", maxWidth: "480px", margin: "0 auto 16px" }}>
+                {activeSearch
+                  ? "Try searching by stock ticker (e.g. TATAMOTORS, SBIN, RELIANCE, TCS) or reset filter to view all verified disclosures."
+                  : "Switch to 'All' category or click 'Sync Live Feeds' to ingest latest market circulars."}
+              </p>
+              {activeSearch && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    setInternalSearch("");
+                    if (onSearchChange) onSearchChange("");
+                  }}
+                  style={{ padding: "7px 18px", fontSize: "13px" }}
+                >
+                  Show All Market Headlines
+                </button>
+              )}
+            </div>
+          )}
 
           {/* 4. Feed of News Articles (Exactly 30 per page) */}
           {paginatedNews.map((n, i) => {
