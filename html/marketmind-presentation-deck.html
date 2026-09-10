@@ -12,11 +12,11 @@
 
   <style>
     /* -------------------------------------------------------------
-       1. LUXURY EDITORIAL LIGHT THEME (MARKETMIND DESIGN SYSTEM)
+       1. LUXURY EDITORIAL LIGHT THEME — SHARP GEOMETRIC "CHORAS" SYSTEM
        ------------------------------------------------------------- */
     :root {
       --bg-cream: #FAF6EC;
-      --bg-cream-2: #F3ECDD;
+      --bg-cream-2: #F4EEDF;
       --paper: #FFFFFF;
       --paper-soft: #FFFEFB;
       --ink: #101B33;
@@ -37,17 +37,19 @@
       --serif: 'EB Garamond', Georgia, serif;
       --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       --mono: 'JetBrains Mono', monospace;
-      --shadow-sm: 0 4px 12px rgba(16, 27, 51, 0.04);
-      --shadow-md: 0 12px 30px -10px rgba(16, 27, 51, 0.08);
-      --shadow-lg: 0 24px 60px -18px rgba(16, 27, 51, 0.14);
-      --radius: 12px;
-      --radius-lg: 18px;
+      --shadow-sm: 0 2px 8px rgba(16, 27, 51, 0.04);
+      --shadow-md: 0 8px 24px -6px rgba(16, 27, 51, 0.08);
+      --shadow-lg: 0 16px 48px -12px rgba(16, 27, 51, 0.12);
+      /* Strictly 0px border-radius — sharp square boxes ("choras") */
+      --radius: 0px;
+      --radius-lg: 0px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      border-radius: 0 !important; /* All boxes square (choras), no rounded corners */
       -webkit-font-smoothing: antialiased;
     }
 
@@ -84,28 +86,27 @@
       align-items: center;
       justify-content: center;
       z-index: 1;
-      padding: 20px 28px 84px 28px;
+      padding: 16px 28px 76px 28px;
     }
 
     .slide {
       position: absolute;
       width: calc(100vw - 56px);
-      max-width: 1360px;
-      height: calc(100vh - 104px);
-      max-height: 840px;
+      max-width: 1380px;
+      height: calc(100vh - 96px);
+      max-height: 860px;
       background: var(--paper-soft);
       border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
       box-shadow: var(--shadow-lg);
-      padding: 36px 44px;
+      padding: 30px 40px;
       display: flex;
       flex-direction: column;
       opacity: 0;
       visibility: hidden;
-      transform: scale(0.98) translateY(14px);
-      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-                  visibility 0.35s;
+      transform: scale(0.985) translateY(10px);
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                  visibility 0.3s;
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -122,7 +123,6 @@
     }
     .slide::-webkit-scrollbar-thumb {
       background: var(--line);
-      border-radius: 99px;
     }
 
     /* Slide Header */
@@ -130,8 +130,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 18px;
-      padding-bottom: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
       border-bottom: 1px solid var(--line-light);
     }
 
@@ -150,8 +150,7 @@
       color: var(--gold);
       background: var(--gold-bg);
       border: 1px solid var(--line);
-      padding: 3px 9px;
-      border-radius: 5px;
+      padding: 3px 8px;
     }
 
     .meta-doc {
@@ -170,68 +169,105 @@
       color: var(--teal);
       background: var(--teal-light);
       padding: 3px 10px;
-      border-radius: 99px;
-      border: 1px solid rgba(47, 111, 98, 0.2);
+      border: 1px solid rgba(47, 111, 98, 0.25);
     }
 
     .status-dot {
       width: 6px;
       height: 6px;
-      border-radius: 50%;
       background: var(--teal);
       animation: pulseGreen 2s infinite;
     }
 
     @keyframes pulseGreen {
       0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.4); opacity: 0.6; }
+      50% { transform: scale(1.3); opacity: 0.6; }
     }
 
     .slide-headline {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .slide-title {
       font-family: var(--serif);
-      font-size: 32px;
+      font-size: 31px;
       font-weight: 700;
       color: var(--navy);
       line-height: 1.15;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.4px;
     }
 
     .slide-subtitle {
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--ink-soft);
-      margin-top: 4px;
+      margin-top: 3px;
       line-height: 1.45;
     }
 
     /* -------------------------------------------------------------
-       2. ROW-WISE POINT BOX SYSTEM (1 ROW ME 1 BOX)
+       2. TWO-PART (SPLIT 2-COLUMN) LAYOUT SYSTEM ("2 PART ME HO")
        ------------------------------------------------------------- */
-    .row-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .split-2-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
       flex: 1;
+      align-items: start;
     }
 
-    .row-box {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 13px 18px;
+    .split-col {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    /* Section Subheaders */
+    .section-mini-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      margin-bottom: 2px;
+      padding-bottom: 4px;
+      border-bottom: 1.5px solid var(--line);
+    }
+
+    .smh-title {
+      font-family: var(--serif);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .smh-tag {
+      font-family: var(--mono);
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 2px 7px;
+      border: 1px solid var(--line);
+    }
+
+    /* -------------------------------------------------------------
+       3. SQUARE ROW BOXES ("CHORAS BOXES") WITH SVG ICONS
+       ------------------------------------------------------------- */
+    .row-box {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 11px 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       box-shadow: var(--shadow-sm);
-      transition: all 0.2s ease;
+      transition: all 0.18s ease;
     }
 
     .row-box:hover {
-      transform: translateX(4px);
+      transform: translateX(3px);
       border-color: var(--gold);
       box-shadow: var(--shadow-md);
       background: #FFFFFF;
@@ -240,20 +276,20 @@
     .rb-left {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       flex: 1;
+      min-width: 0;
     }
 
     .rb-num {
       font-family: var(--mono);
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 800;
       color: var(--gold);
       background: var(--gold-bg);
       border: 1px solid var(--line);
-      padding: 5px 9px;
-      border-radius: 7px;
-      min-width: 36px;
+      padding: 4px 7px;
+      min-width: 32px;
       text-align: center;
       flex-shrink: 0;
     }
@@ -270,38 +306,82 @@
       border-color: rgba(47, 111, 98, 0.25);
     }
 
-    .rb-icon {
-      font-size: 18px;
+    /* Square SVG Icon Container */
+    .rb-icon-svg {
+      width: 30px;
+      height: 30px;
+      background: var(--bg-cream-2);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--navy);
       flex-shrink: 0;
+    }
+
+    .rb-icon-svg svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: square;
+      stroke-linejoin: miter;
+    }
+
+    .rb-icon-svg.rose {
+      background: var(--rose-light);
+      border-color: rgba(161, 69, 69, 0.25);
+      color: var(--rose);
+    }
+
+    .rb-icon-svg.teal {
+      background: var(--teal-light);
+      border-color: rgba(47, 111, 98, 0.25);
+      color: var(--teal);
+    }
+
+    .rb-icon-svg.gold {
+      background: var(--gold-bg);
+      border-color: rgba(184, 147, 90, 0.3);
+      color: var(--gold);
     }
 
     .rb-content {
       display: flex;
       flex-direction: column;
       gap: 2px;
+      min-width: 0;
+      flex: 1;
     }
 
     .rb-title {
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
       color: var(--navy);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .rb-desc {
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--ink-soft);
-      line-height: 1.4;
+      line-height: 1.38;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .rb-badge {
       font-family: var(--mono);
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 600;
-      padding: 3px 9px;
-      border-radius: 99px;
+      padding: 3px 7px;
       background: var(--bg-cream-2);
       border: 1px solid var(--line);
       color: var(--ink-soft);
@@ -321,37 +401,146 @@
       border-color: rgba(47, 111, 98, 0.3);
     }
 
-    /* Sub-section divider headers */
-    .section-mini-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 10px 0 6px 0;
-      padding: 0 4px;
-    }
-
-    .smh-title {
-      font-family: var(--serif);
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--navy);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .smh-tag {
-      font-family: var(--mono);
-      font-size: 9.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 2px 8px;
-      border-radius: 99px;
+    .rb-badge.rose {
+      background: var(--rose-light);
+      color: var(--rose);
+      border-color: rgba(161, 69, 69, 0.3);
     }
 
     /* -------------------------------------------------------------
-       3. SLIDE 1: GRAND PURE ANIMATED HERO LOGO
+       4. SLIDE 4 ARCHITECTURE LAYOUT (GAMMA REFERENCE MATCH)
+       ------------------------------------------------------------- */
+    .split-arch-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      flex: 1;
+      align-items: stretch;
+    }
+
+    .arch-left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Gamma-style Technology Stack Panel */
+    .tech-stack-panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .tech-stack-header {
+      padding: 12px 18px;
+      background: var(--bg-cream-2);
+      border-bottom: 1.5px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tech-stack-header h3 {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--navy);
+    }
+
+    .tech-stack-header span {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .tech-table-body {
+      padding: 6px 18px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-around;
+    }
+
+    .tech-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line-light);
+      font-size: 13px;
+    }
+
+    .tech-row:last-child {
+      border-bottom: none;
+    }
+
+    .tech-key {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .tech-key-icon {
+      width: 22px;
+      height: 22px;
+      background: var(--bg-cream-2);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+    }
+
+    .tech-key-icon svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .tech-val {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--teal);
+      background: var(--teal-light);
+      border: 1px solid rgba(47, 111, 98, 0.2);
+      padding: 3px 9px;
+    }
+
+    .tech-footer-note {
+      padding: 10px 18px;
+      background: #101B33;
+      color: #FAF6EC;
+      border-top: 1px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .tech-footer-note span:first-child {
+      font-family: var(--mono);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+    }
+
+    .tech-footer-note span:last-child {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* -------------------------------------------------------------
+       5. SLIDE 1: PURE GRAND HERO COVER
        ------------------------------------------------------------- */
     .hero-stage {
       display: flex;
@@ -360,7 +549,7 @@
       justify-content: center;
       text-align: center;
       height: 100%;
-      min-height: 520px;
+      min-height: 500px;
       position: relative;
     }
 
@@ -368,7 +557,6 @@
       position: absolute;
       width: 440px;
       height: 440px;
-      border-radius: 50%;
       background: radial-gradient(circle, rgba(184, 147, 90, 0.18) 0%, rgba(26, 47, 87, 0.05) 50%, transparent 75%);
       filter: blur(40px);
       pointer-events: none;
@@ -382,40 +570,34 @@
 
     .logo-box-wrap {
       position: relative;
-      width: 140px;
-      height: 140px;
-      margin-bottom: 26px;
+      width: 130px;
+      height: 130px;
+      margin-bottom: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .logo-orbit-1 {
+    .logo-frame-outer {
       position: absolute;
-      inset: -14px;
-      border-radius: 50%;
-      border: 1.5px dashed rgba(184, 147, 90, 0.45);
-      animation: rotRight 26s linear infinite;
+      inset: -10px;
+      border: 1px dashed rgba(184, 147, 90, 0.45);
+      animation: rotateSquare 30s linear infinite;
     }
 
-    .logo-orbit-2 {
-      position: absolute;
-      inset: -28px;
-      border-radius: 50%;
-      border: 1px solid rgba(16, 27, 51, 0.12);
-      animation: rotLeft 36s linear infinite;
+    @keyframes rotateSquare {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
-
-    @keyframes rotRight { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes rotLeft { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
 
     .brand-shield {
-      width: 120px;
-      height: 120px;
-      border-radius: 26px;
-      background: linear-gradient(135deg, #101B33 0%, #1A2F57 55%, #0A1224 100%);
+      width: 110px;
+      height: 110px;
+      background: linear-gradient(135deg, #101B33 0%, #1A2F57 60%, #0A1224 100%);
       border: 2px solid var(--gold);
-      box-shadow: 0 20px 48px -12px rgba(16, 27, 51, 0.35), 0 0 0 6px rgba(184, 147, 90, 0.15);
+      outline: 1px solid rgba(184, 147, 90, 0.4);
+      outline-offset: 4px;
+      box-shadow: 0 16px 40px -10px rgba(16, 27, 51, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -424,21 +606,31 @@
 
     @keyframes floatShield {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-7px); }
+      50% { transform: translateY(-5px); }
     }
 
     .brand-shield svg {
-      width: 66px;
-      height: 66px;
-      filter: drop-shadow(0 4px 10px rgba(184, 147, 90, 0.45));
+      width: 60px;
+      height: 60px;
+      filter: drop-shadow(0 3px 8px rgba(184, 147, 90, 0.4));
+    }
+
+    .hero-kicker {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
     }
 
     .hero-title {
       font-family: var(--serif);
-      font-size: 60px;
+      font-size: 58px;
       font-weight: 700;
       color: var(--navy);
-      letter-spacing: -1.2px;
+      letter-spacing: -1px;
       line-height: 1.05;
       margin-bottom: 10px;
     }
@@ -449,22 +641,12 @@
       -webkit-text-fill-color: transparent;
     }
 
-    .hero-kicker {
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 14px;
-    }
-
     .hero-sub {
-      font-size: 15px;
+      font-size: 14.5px;
       color: var(--ink-soft);
-      max-width: 600px;
+      max-width: 620px;
       line-height: 1.55;
-      margin-bottom: 26px;
+      margin-bottom: 24px;
     }
 
     .hero-pill-row {
@@ -472,7 +654,7 @@
       gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
     .hp-pill {
@@ -481,9 +663,19 @@
       color: var(--navy);
       background: var(--paper);
       border: 1px solid var(--line);
-      padding: 6px 14px;
-      border-radius: 99px;
+      padding: 6px 12px;
       box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .hp-pill svg {
+      width: 13px;
+      height: 13px;
+      stroke: var(--gold);
+      stroke-width: 2;
+      fill: none;
     }
 
     .hero-prompt {
@@ -499,53 +691,12 @@
     }
 
     /* -------------------------------------------------------------
-       4. SLIDE 4 ARCHITECTURE BANNER STRIP
-       ------------------------------------------------------------- */
-    .tech-banner-strip {
-      background: linear-gradient(135deg, #101B33 0%, #1A2F57 100%);
-      border-radius: 10px;
-      padding: 12px 18px;
-      color: #FAF6EC;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 10px;
-      border: 1px solid rgba(184, 147, 90, 0.35);
-    }
-
-    .tbs-title {
-      font-family: var(--mono);
-      font-size: 10.5px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--gold-light);
-    }
-
-    .tbs-tags {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .tbs-tag {
-      font-size: 11px;
-      font-weight: 600;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 3px 9px;
-      border-radius: 99px;
-      color: #FFF;
-    }
-
-    /* -------------------------------------------------------------
-       5. SLIDE 5: CONCLUSION ROW BOXES & THANK YOU
+       6. SLIDE 5: CONCLUSION & THANK YOU
        ------------------------------------------------------------- */
     .thank-you-bar {
       background: linear-gradient(135deg, #101B33 0%, #16274A 100%);
-      border: 1px solid rgba(184, 147, 90, 0.35);
-      border-radius: var(--radius);
-      padding: 16px 22px;
+      border: 1px solid rgba(184, 147, 90, 0.4);
+      padding: 14px 18px;
       color: #FAF6EC;
       display: flex;
       align-items: center;
@@ -556,13 +707,13 @@
 
     .ty-text h3 {
       font-family: var(--serif);
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       color: #FFF;
     }
 
     .ty-text p {
-      font-size: 11.5px;
+      font-size: 11px;
       color: var(--gold-light);
       margin-top: 2px;
     }
@@ -570,10 +721,9 @@
     .restart-btn {
       background: var(--gold);
       color: var(--navy);
-      border: none;
-      padding: 8px 18px;
-      border-radius: 8px;
-      font-size: 11.5px;
+      border: 1px solid var(--gold-light);
+      padding: 8px 16px;
+      font-size: 11px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -588,22 +738,21 @@
     }
 
     /* -------------------------------------------------------------
-       6. GLOBAL CONTROLLER BAR
+       7. GLOBAL CONTROLLER BAR (SHARP SQUARE SYSTEM)
        ------------------------------------------------------------- */
     .deck-controls {
       position: fixed;
-      bottom: 22px;
+      bottom: 18px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(16, 27, 51, 0.95);
+      background: rgba(16, 27, 51, 0.96);
       backdrop-filter: blur(16px);
-      border: 1px solid rgba(184, 147, 90, 0.4);
-      box-shadow: 0 16px 40px rgba(16, 27, 51, 0.35);
-      border-radius: 99px;
-      padding: 7px 16px;
+      border: 1px solid rgba(184, 147, 90, 0.5);
+      box-shadow: 0 12px 36px rgba(16, 27, 51, 0.35);
+      padding: 6px 14px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       z-index: 100;
     }
 
@@ -611,9 +760,8 @@
       background: transparent;
       border: 1px solid rgba(255, 255, 255, 0.18);
       color: #FAF6EC;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
+      width: 30px;
+      height: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -625,7 +773,7 @@
       background: var(--gold);
       color: var(--navy);
       border-color: var(--gold);
-      transform: scale(1.08);
+      transform: scale(1.06);
     }
 
     .ctrl-btn:disabled {
@@ -634,34 +782,33 @@
     }
 
     .ctrl-btn svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
     }
 
     .slide-dots {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
     }
 
     .dot {
       width: 9px;
       height: 9px;
-      border-radius: 50%;
       background: rgba(255, 255, 255, 0.25);
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.2s ease;
     }
 
     .dot.active {
-      width: 24px;
-      border-radius: 99px;
+      width: 22px;
+      height: 9px;
       background: var(--gold);
     }
 
     .counter-badge {
       font-family: var(--mono);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: var(--gold-light);
       letter-spacing: 1px;
@@ -725,21 +872,20 @@
       <div class="hero-stage">
         <div class="hero-glow"></div>
 
-        <!-- Animated Center Logo Shield -->
+        <!-- Square Center Brand Shield -->
         <div class="logo-box-wrap">
-          <div class="logo-orbit-1"></div>
-          <div class="logo-orbit-2"></div>
+          <div class="logo-frame-outer"></div>
           <div class="brand-shield">
             <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <line x1="32" y1="22" x2="32" y2="78" stroke="#B8935A" stroke-width="3" stroke-linecap="round"/>
-              <rect x="25" y="34" width="14" height="32" rx="3" fill="#D9BC8B" stroke="#B8935A" stroke-width="2"/>
-              <line x1="50" y1="16" x2="50" y2="84" stroke="#FAF6EC" stroke-width="3.5" stroke-linecap="round"/>
-              <rect x="42" y="26" width="16" height="46" rx="3" fill="#FAF6EC" stroke="#B8935A" stroke-width="2.5"/>
-              <line x1="68" y1="26" x2="68" y2="74" stroke="#B8935A" stroke-width="3" stroke-linecap="round"/>
-              <rect x="61" y="38" width="14" height="26" rx="3" fill="#D9BC8B" stroke="#B8935A" stroke-width="2"/>
-              <circle cx="32" cy="50" r="3.5" fill="#101B33"/>
-              <circle cx="50" cy="49" r="4" fill="#B8935A"/>
-              <circle cx="68" cy="51" r="3.5" fill="#101B33"/>
+              <line x1="32" y1="22" x2="32" y2="78" stroke="#B8935A" stroke-width="3" stroke-linecap="square"/>
+              <rect x="25" y="34" width="14" height="32" fill="#D9BC8B" stroke="#B8935A" stroke-width="2"/>
+              <line x1="50" y1="16" x2="50" y2="84" stroke="#FAF6EC" stroke-width="3.5" stroke-linecap="square"/>
+              <rect x="42" y="26" width="16" height="46" fill="#FAF6EC" stroke="#B8935A" stroke-width="2.5"/>
+              <line x1="68" y1="26" x2="68" y2="74" stroke="#B8935A" stroke-width="3" stroke-linecap="square"/>
+              <rect x="61" y="38" width="14" height="26" fill="#D9BC8B" stroke="#B8935A" stroke-width="2"/>
+              <rect x="30" y="48" width="4" height="4" fill="#101B33"/>
+              <rect x="48" y="47" width="4" height="4" fill="#B8935A"/>
+              <rect x="66" y="49" width="4" height="4" fill="#101B33"/>
               <path d="M 32 50 Q 50 38 68 51" stroke="#FAF6EC" stroke-width="2" stroke-dasharray="3 3"/>
             </svg>
           </div>
@@ -749,14 +895,26 @@
         <h1 class="hero-title">MarketMind <span>AI</span></h1>
         
         <p class="hero-sub">
-          AI-powered quantitative decision system converting market noise, corporate filings, candlestick patterns, and economic shocks into explainable conviction.
+          Quantitative decision terminal converting stock tick noise, corporate regulatory filings, candlestick geometry, and macro shocks into explainable conviction.
         </p>
 
         <div class="hero-pill-row">
-          <span class="hp-pill">⚡ 0ms Instant Client Display</span>
-          <span class="hp-pill">📊 30-Day SVG Candlesticks</span>
-          <span class="hp-pill">🎙️ Hands-Free Alex Voice Copilot</span>
-          <span class="hp-pill">🧠 Google Gemini 2.5 Reasoner</span>
+          <span class="hp-pill">
+            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            0ms Instant Client Display
+          </span>
+          <span class="hp-pill">
+            <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7"/><rect x="14" y="6" width="3" height="11"/></svg>
+            30-Day SVG Candlesticks
+          </span>
+          <span class="hp-pill">
+            <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            Hands-Free Alex Voice Copilot
+          </span>
+          <span class="hp-pill">
+            <svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+            Google Gemini 2.5 Reasoner
+          </span>
         </div>
 
         <div class="hero-prompt">
@@ -767,7 +925,7 @@
 
 
     <!-- ====================================================================
-         SLIDE 2: PROBLEM (1.2.3.) & SOLUTION (1.2.3.) — ROW-WISE
+         SLIDE 2: PROBLEM (1.2.3.) & SOLUTION (1.2.3.) — 2 PARTS (SPLIT 2-COL)
          ==================================================================== -->
     <section class="slide" id="slide-2" data-index="2">
       <div class="slide-meta">
@@ -787,96 +945,121 @@
         </p>
       </div>
 
-      <div class="row-stack">
-        <!-- Section: Problem Statement (1 Row me 1) -->
-        <div class="section-mini-header">
-          <div class="smh-title">Market Problem Statement</div>
-          <span class="smh-tag" style="background: var(--rose-light); color: var(--rose);">Challenges</span>
-        </div>
-
-        <!-- Problem 1 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num rose">01</div>
-            <div class="rb-content">
-              <div class="rb-title">Information Overload &amp; Scattered Data</div>
-              <div class="rb-desc">Financial reports, news feeds, and tick data are fragmented across multiple disconnected sources.</div>
-            </div>
+      <!-- 2 Parts Layout -->
+      <div class="split-2-col">
+        
+        <!-- Left Part: Problem Statement (3 square boxes) -->
+        <div class="split-col">
+          <div class="section-mini-header">
+            <div class="smh-title">Market Problem Statement</div>
+            <span class="smh-tag" style="background: var(--rose-light); color: var(--rose);">Challenges</span>
           </div>
-          <span class="rb-badge">Fragmented</span>
-        </div>
 
-        <!-- Problem 2 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num rose">02</div>
-            <div class="rb-content">
-              <div class="rb-title">Misleading Rumors &amp; Black-Box Moves</div>
-              <div class="rb-desc">Unverified news and sudden price shocks leave investors trapped without causal explanation.</div>
+          <!-- Problem 01 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num rose">01</div>
+              <div class="rb-icon-svg rose">
+                <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Information Overload &amp; Scattered Data</div>
+                <div class="rb-desc">Financial reports, news feeds, and tick data are fragmented across multiple disconnected sources.</div>
+              </div>
             </div>
+            <span class="rb-badge rose">Fragmented</span>
           </div>
-          <span class="rb-badge">Unexplained</span>
-        </div>
 
-        <!-- Problem 3 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num rose">03</div>
-            <div class="rb-content">
-              <div class="rb-title">Lack of Probabilistic Reasoning</div>
-              <div class="rb-desc">Conventional charts offer lagging indicators without clear thesis invalidation levels or risk confidence.</div>
+          <!-- Problem 02 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num rose">02</div>
+              <div class="rb-icon-svg rose">
+                <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Misleading Rumors &amp; Black-Box Moves</div>
+                <div class="rb-desc">Unverified news and sudden price shocks leave investors trapped without causal explanation.</div>
+              </div>
             </div>
+            <span class="rb-badge rose">Unexplained</span>
           </div>
-          <span class="rb-badge">No Validation</span>
-        </div>
 
-        <!-- Section: Solution (1 Row me 1) -->
-        <div class="section-mini-header" style="margin-top: 14px;">
-          <div class="smh-title">Proposed Solution — MarketMind AI</div>
-          <span class="smh-tag" style="background: var(--teal-light); color: var(--teal);">Solution</span>
-        </div>
-
-        <!-- Solution 1 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num teal">01</div>
-            <div class="rb-content">
-              <div class="rb-title">Unified Multi-Modal Market Analysis</div>
-              <div class="rb-desc">Harmonizes live tick feeds, 30-day candlestick patterns, and corporate filings into a single terminal.</div>
+          <!-- Problem 03 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num rose">03</div>
+              <div class="rb-icon-svg rose">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Lack of Probabilistic Reasoning</div>
+                <div class="rb-desc">Conventional charts offer lagging indicators without clear thesis invalidation levels or risk confidence.</div>
+              </div>
             </div>
+            <span class="rb-badge rose">No Validation</span>
           </div>
-          <span class="rb-badge teal">Unified</span>
         </div>
 
-        <!-- Solution 2 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num teal">02</div>
-            <div class="rb-content">
-              <div class="rb-title">News &amp; Causal Event Intelligence</div>
-              <div class="rb-desc">Analyzes regulatory circulars and traces economic shocks through supply chains to project company P&amp;L impact.</div>
-            </div>
+        <!-- Right Part: Proposed Solution (3 square boxes) -->
+        <div class="split-col">
+          <div class="section-mini-header">
+            <div class="smh-title">Proposed Solution — MarketMind AI</div>
+            <span class="smh-tag" style="background: var(--teal-light); color: var(--teal);">Solution</span>
           </div>
-          <span class="rb-badge teal">Causal Engine</span>
+
+          <!-- Solution 01 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num teal">01</div>
+              <div class="rb-icon-svg teal">
+                <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Unified Multi-Modal Market Analysis</div>
+                <div class="rb-desc">Harmonizes live tick feeds, 30-day candlestick patterns, and corporate filings into a single terminal.</div>
+              </div>
+            </div>
+            <span class="rb-badge teal">Unified</span>
+          </div>
+
+          <!-- Solution 02 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num teal">02</div>
+              <div class="rb-icon-svg teal">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">News &amp; Causal Event Intelligence</div>
+                <div class="rb-desc">Analyzes regulatory circulars and traces economic shocks through supply chains to project company P&amp;L impact.</div>
+              </div>
+            </div>
+            <span class="rb-badge teal">Causal Engine</span>
+          </div>
+
+          <!-- Solution 03 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num teal">03</div>
+              <div class="rb-icon-svg teal">
+                <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Explainable Decision Support &amp; Voice</div>
+                <div class="rb-desc">Delivers calibrated risk alerts, clear thesis invalidation rules, and hands-free conversational voice execution.</div>
+              </div>
+            </div>
+            <span class="rb-badge teal">Voice Copilot</span>
+          </div>
         </div>
 
-        <!-- Solution 3 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num teal">03</div>
-            <div class="rb-content">
-              <div class="rb-title">Explainable Decision Support &amp; Alex Voice Copilot</div>
-              <div class="rb-desc">Delivers calibrated risk alerts, clear thesis invalidation rules, and hands-free conversational voice execution.</div>
-            </div>
-          </div>
-          <span class="rb-badge teal">Voice Copilot</span>
-        </div>
       </div>
     </section>
 
 
     <!-- ====================================================================
-         SLIDE 3: CAPABILITIES & CORE FEATURES — ROW-WISE (1 ROW ME 1)
+         SLIDE 3: CAPABILITIES & CORE FEATURES — 2 PARTS (SPLIT 2-COL)
          ==================================================================== -->
     <section class="slide" id="slide-3" data-index="3">
       <div class="slide-meta">
@@ -892,94 +1075,126 @@
       <div class="slide-headline">
         <h2 class="slide-title">Capabilities &amp; Main Features</h2>
         <p class="slide-subtitle">
-          Row-by-row overview of MarketMind AI's quantitative analytics, institutional intelligence, and voice automation.
+          Two-part overview of MarketMind AI's quantitative analytics, institutional intelligence, and voice automation.
         </p>
       </div>
 
-      <div class="row-stack">
-        <!-- Feature 1 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">01</div>
-            <span class="rb-icon">📈</span>
-            <div class="rb-content">
-              <div class="rb-title">Intelligent Stock Analysis &amp; Candlestick Copilot</div>
-              <div class="rb-desc">Real-time NSE/BSE tick tracking, 30-day SVG OHLC charts, pattern detection (flags, pinbars), and support/resistance zones.</div>
-            </div>
+      <!-- 2 Parts Layout -->
+      <div class="split-2-col">
+
+        <!-- Left Part: Real-Time Intelligence (3 square boxes) -->
+        <div class="split-col">
+          <div class="section-mini-header">
+            <div class="smh-title">Real-Time Market Intelligence</div>
+            <span class="smh-tag" style="background: var(--gold-bg); color: var(--gold);">Part 1</span>
           </div>
-          <span class="rb-badge gold">0ms Display</span>
+
+          <!-- Feature 01 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">01</div>
+              <div class="rb-icon-svg gold">
+                <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Intelligent Stock Analysis</div>
+                <div class="rb-desc">Real-time NSE/BSE tick feeds, 30-day SVG OHLC charts, pattern detection, and support/resistance zones.</div>
+              </div>
+            </div>
+            <span class="rb-badge gold">0ms Display</span>
+          </div>
+
+          <!-- Feature 02 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">02</div>
+              <div class="rb-icon-svg">
+                <svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Institutional News &amp; Circulars</div>
+                <div class="rb-desc">Real-time SEBI/NSE regulatory circular parsing, sentiment impact scoring, and EBITDA projection calculations.</div>
+              </div>
+            </div>
+            <span class="rb-badge">Live Feeds</span>
+          </div>
+
+          <!-- Feature 03 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">03</div>
+              <div class="rb-icon-svg teal">
+                <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Autonomous Alex Voice Assistant</div>
+                <div class="rb-desc">Hands-free voice stock inquiries and simulations in English &amp; Hinglish powered by Deepgram STT + Gemini 2.5.</div>
+              </div>
+            </div>
+            <span class="rb-badge teal">Voice AI</span>
+          </div>
         </div>
 
-        <!-- Feature 2 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">02</div>
-            <span class="rb-icon">📰</span>
-            <div class="rb-content">
-              <div class="rb-title">Institutional News &amp; Circular Intelligence</div>
-              <div class="rb-desc">Real-time SEBI/NSE regulatory parsing, sentiment impact scoring, and company-specific turnover/EBITDA calculations.</div>
-            </div>
+        <!-- Right Part: Deep Quant & Risk Systems (3 square boxes) -->
+        <div class="split-col">
+          <div class="section-mini-header">
+            <div class="smh-title">Deep Quant &amp; Risk Governance</div>
+            <span class="smh-tag" style="background: var(--teal-light); color: var(--teal);">Part 2</span>
           </div>
-          <span class="rb-badge">Live Disclosures</span>
+
+          <!-- Feature 04 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">04</div>
+              <div class="rb-icon-svg">
+                <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Market Domino Causal Predictor</div>
+                <div class="rb-desc">Multi-order causal discovery modeling 1st to 4th-order macro shocks (crude, repo rate, FX) with regime analogs.</div>
+              </div>
+            </div>
+            <span class="rb-badge">4-Order Chains</span>
+          </div>
+
+          <!-- Feature 05 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">05</div>
+              <div class="rb-icon-svg">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Forensic Thesis Breaker</div>
+                <div class="rb-desc">Corporate governance audit tracking debt covenants, auditor notes, promoter pledges, and invalidation triggers.</div>
+              </div>
+            </div>
+            <span class="rb-badge">Anti-Thesis</span>
+          </div>
+
+          <!-- Feature 06 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">06</div>
+              <div class="rb-icon-svg gold">
+                <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Smart Investor Tools</div>
+                <div class="rb-desc">Lumpsum/SIP simulator, cross-asset DNA correlation twins, walk-forward calibrated trust scores, and risk limits.</div>
+              </div>
+            </div>
+            <span class="rb-badge gold">Complete Suite</span>
+          </div>
         </div>
 
-        <!-- Feature 3 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">03</div>
-            <span class="rb-icon">🎙️</span>
-            <div class="rb-content">
-              <div class="rb-title">Autonomous Alex Voice Assistant</div>
-              <div class="rb-desc">Hands-free voice trading and stock inquiries in English &amp; Hinglish powered by Deepgram STT and Gemini 2.5 Flash.</div>
-            </div>
-          </div>
-          <span class="rb-badge teal">Voice AI</span>
-        </div>
-
-        <!-- Feature 4 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">04</div>
-            <span class="rb-icon">⚡</span>
-            <div class="rb-content">
-              <div class="rb-title">Market Domino Causal Predictor</div>
-              <div class="rb-desc">Multi-order causal discovery modeling 1st to 4th-order macro shocks (crude, repo rate, FX) with historical regime analogs.</div>
-            </div>
-          </div>
-          <span class="rb-badge">4-Order Chains</span>
-        </div>
-
-        <!-- Feature 5 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">05</div>
-            <span class="rb-icon">🔬</span>
-            <div class="rb-content">
-              <div class="rb-title">Forensic Thesis Breaker &amp; Stock Autopsy</div>
-              <div class="rb-desc">Corporate governance audit checking debt covenants, auditor red flags, promoter pledges, and thesis invalidation triggers.</div>
-            </div>
-          </div>
-          <span class="rb-badge">Anti-Thesis</span>
-        </div>
-
-        <!-- Feature 6 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">06</div>
-            <span class="rb-icon">💼</span>
-            <div class="rb-content">
-              <div class="rb-title">Smart Investor Tools (Portfolio, DNA Twin, Trust Meter)</div>
-              <div class="rb-desc">Lumpsum/SIP portfolio simulator, cross-asset genetic correlation twins, walk-forward calibrated trust scores, and alerts.</div>
-            </div>
-          </div>
-          <span class="rb-badge gold">Complete Suite</span>
-        </div>
       </div>
     </section>
 
 
     <!-- ====================================================================
-         SLIDE 4: SYSTEM IMPLEMENTATION & TECH ARCHITECTURE — ROW-WISE
+         SLIDE 4: SYSTEM IMPLEMENTATION & TECHNOLOGY ARCHITECTURE — 2 PARTS
+         (Matches Gamma Reference Screenshot Exactly!)
          ==================================================================== -->
     <section class="slide" id="slide-4" data-index="4">
       <div class="slide-meta">
@@ -995,103 +1210,194 @@
       <div class="slide-headline">
         <h2 class="slide-title">System Implementation &amp; Technology Architecture</h2>
         <p class="slide-subtitle">
-          Clean points-wise breakdown of the end-to-end data pipeline, asynchronous services, and cloud deployment.
+          Clean points-wise breakdown of the end-to-end data pipeline, asynchronous microservices, and technology stack.
         </p>
       </div>
 
-      <div class="row-stack">
-        <!-- Row 1 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">01</div>
-            <div class="rb-content">
-              <div class="rb-title">Market Data &amp; Regulatory Ingestion</div>
-              <div class="rb-desc">Ingests real-time NSE/BSE tick feeds, 30-day historical OHLC geometry, PPAC commodity benchmarks, and exchange filings.</div>
-            </div>
+      <!-- 2 Parts Layout (Left: Pipeline Boxes, Right: Tech Stack Table) -->
+      <div class="split-arch-layout">
+
+        <!-- Left Part: System Pipeline (Square Row Boxes) -->
+        <div class="arch-left-col">
+          <div class="section-mini-header">
+            <div class="smh-title">Data Pipeline &amp; Processing Flow</div>
+            <span class="smh-tag" style="background: var(--bg-cream-2); color: var(--navy);">Pipeline</span>
           </div>
-          <span class="rb-badge">REST &amp; WebSockets</span>
+
+          <!-- Step 01 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">01</div>
+              <div class="rb-icon-svg">
+                <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Market Data &amp; Regulatory Ingestion</div>
+                <div class="rb-desc">Ingests real-time NSE/BSE tick feeds, 30-day historical OHLC geometry, PPAC benchmarks, and exchange filings.</div>
+              </div>
+            </div>
+            <span class="rb-badge">REST &amp; WebSockets</span>
+          </div>
+
+          <!-- Step 02 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">02</div>
+              <div class="rb-icon-svg teal">
+                <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8"/><rect x="2" y="14" width="20" height="8"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">High-Performance FastAPI Backend</div>
+                <div class="rb-desc">Asynchronous Python microservices with universal CORS handling, 20s cold-start timeout resilience, and quant models.</div>
+              </div>
+            </div>
+            <span class="rb-badge teal">FastAPI / Python 3.11</span>
+          </div>
+
+          <!-- Step 03 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">03</div>
+              <div class="rb-icon-svg gold">
+                <svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">AI Reasoning Engine (Google Gemini 2.5)</div>
+                <div class="rb-desc">Financial reasoning, news sentiment interpretation, causal ripple graph traversal, and prediction explanation.</div>
+              </div>
+            </div>
+            <span class="rb-badge gold">Gemini 2.5 API</span>
+          </div>
+
+          <!-- Step 04 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">04</div>
+              <div class="rb-icon-svg">
+                <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Real-Time Voice Assistant Flow</div>
+                <div class="rb-desc">Deepgram Nova-2 API for low-latency Speech-to-Text → Gemini reasoning → browser SpeechSynthesis audio playback.</div>
+              </div>
+            </div>
+            <span class="rb-badge">Deepgram API</span>
+          </div>
+
+          <!-- Step 05 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">05</div>
+              <div class="rb-icon-svg teal">
+                <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">React Analytical Frontend Dashboard</div>
+                <div class="rb-desc">Ultra-fast React 18 + Vite interface with instant client fallback synthesis, persistent localStorage, and SVG charts.</div>
+              </div>
+            </div>
+            <span class="rb-badge teal">React 18 / Vite</span>
+          </div>
         </div>
 
-        <!-- Row 2 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">02</div>
-            <div class="rb-content">
-              <div class="rb-title">High-Performance FastAPI Backend</div>
-              <div class="rb-desc">Asynchronous Python microservices with universal CORS handling, 20s cold-start timeout resilience, and quant models.</div>
+        <!-- Right Part: Technology Stack (Gamma Reference Match) -->
+        <div class="tech-stack-panel">
+          <div class="tech-stack-header">
+            <h3>Technology Stack</h3>
+            <span>Specification</span>
+          </div>
+
+          <div class="tech-table-body">
+            <!-- Row 1 -->
+            <div class="tech-row">
+              <div class="tech-key">
+                <div class="tech-key-icon">
+                  <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg>
+                </div>
+                <span>Frontend:</span>
+              </div>
+              <span class="tech-val">React</span>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="tech-row">
+              <div class="tech-key">
+                <div class="tech-key-icon">
+                  <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8"/><rect x="2" y="14" width="20" height="8"/></svg>
+                </div>
+                <span>Backend:</span>
+              </div>
+              <span class="tech-val">FastAPI</span>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="tech-row">
+              <div class="tech-key">
+                <div class="tech-key-icon">
+                  <svg viewBox="0 0 24 24"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4"/></svg>
+                </div>
+                <span>AI / LLM:</span>
+              </div>
+              <span class="tech-val">Gemini API</span>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="tech-row">
+              <div class="tech-key">
+                <div class="tech-key-icon">
+                  <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                </div>
+                <span>Speech-to-Text:</span>
+              </div>
+              <span class="tech-val">Deepgram API</span>
+            </div>
+
+            <!-- Row 5 -->
+            <div class="tech-row">
+              <div class="tech-key">
+                <div class="tech-key-icon">
+                  <svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                </div>
+                <span>Frontend Deployment:</span>
+              </div>
+              <span class="tech-val">Vercel</span>
+            </div>
+
+            <!-- Row 6 -->
+            <div class="tech-row">
+              <div class="tech-key">
+                <div class="tech-key-icon">
+                  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <span>Backend Deployment:</span>
+              </div>
+              <span class="tech-val">Render</span>
+            </div>
+
+            <!-- Row 7 -->
+            <div class="tech-row">
+              <div class="tech-key">
+                <div class="tech-key-icon">
+                  <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </div>
+                <span>API Communication:</span>
+              </div>
+              <span class="tech-val">REST APIs</span>
             </div>
           </div>
-          <span class="rb-badge teal">FastAPI / Python 3.11</span>
-        </div>
 
-        <!-- Row 3 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">03</div>
-            <div class="rb-content">
-              <div class="rb-title">AI Reasoning Engine (Google Gemini 2.5 Flash)</div>
-              <div class="rb-desc">Financial reasoning, news sentiment interpretation, causal ripple graph traversal, and prediction explanation.</div>
-            </div>
-          </div>
-          <span class="rb-badge gold">Gemini 2.5 API</span>
-        </div>
-
-        <!-- Row 4 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">04</div>
-            <div class="rb-content">
-              <div class="rb-title">Real-Time Voice Assistant Flow</div>
-              <div class="rb-desc">Deepgram Nova-2 API for low-latency Speech-to-Text → Gemini reasoning → browser SpeechSynthesis audio playback.</div>
-            </div>
-          </div>
-          <span class="rb-badge">Deepgram API</span>
-        </div>
-
-        <!-- Row 5 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">05</div>
-            <div class="rb-content">
-              <div class="rb-title">React Analytical Frontend Dashboard</div>
-              <div class="rb-desc">Ultra-fast React 18 + Vite interface with instant client fallback synthesis, persistent localStorage, and SVG charts.</div>
-            </div>
-          </div>
-          <span class="rb-badge teal">React 18 / Vite</span>
-        </div>
-
-        <!-- Row 6 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">06</div>
-            <div class="rb-content">
-              <div class="rb-title">Cloud Infrastructure &amp; Edge Delivery</div>
-              <div class="rb-desc">Frontend deployed on Vercel Global Edge CDN; backend compute hosted on Render Cloud with automated health-checks.</div>
-            </div>
-          </div>
-          <span class="rb-badge">Vercel + Render</span>
-        </div>
-
-        <!-- Bottom Stack Banner -->
-        <div class="tech-banner-strip">
-          <span class="tbs-title">Production Tech Stack</span>
-          <div class="tbs-tags">
-            <span class="tbs-tag">React 18</span>
-            <span class="tbs-tag">Vite</span>
-            <span class="tbs-tag">FastAPI</span>
-            <span class="tbs-tag">Python 3.11</span>
-            <span class="tbs-tag">Gemini 2.5</span>
-            <span class="tbs-tag">Deepgram</span>
-            <span class="tbs-tag">Vercel</span>
-            <span class="tbs-tag">Render</span>
+          <div class="tech-footer-note">
+            <span>Zero Cold-Start Latency</span>
+            <span>Edge + Cloud Microservices</span>
           </div>
         </div>
+
       </div>
     </section>
 
 
     <!-- ====================================================================
-         SLIDE 5: CONCLUSION & STRATEGIC VISION — ROW-WISE
+         SLIDE 5: CONCLUSION & STRATEGIC VISION — 2 PARTS (SPLIT 2-COL)
          ==================================================================== -->
     <section class="slide" id="slide-5" data-index="5">
       <div class="slide-meta">
@@ -1107,81 +1413,108 @@
       <div class="slide-headline">
         <h2 class="slide-title">Conclusion &amp; Strategic Vision</h2>
         <p class="slide-subtitle">
-          Unifying quantitative analysis, regulatory news, causal reasoning, and hands-free voice autonomy into one platform.
+          Unifying quantitative analysis, regulatory circulars, causal reasoning, and hands-free voice autonomy into one platform.
         </p>
       </div>
 
-      <div class="row-stack">
-        <!-- Conclusion Point 1 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">01</div>
-            <span class="rb-icon">🌐</span>
-            <div class="rb-content">
-              <div class="rb-title">Unified Multi-Modal Platform</div>
-              <div class="rb-desc">Combines stock market data, historical OHLC patterns, regulatory circulars, and risk signals into one single source of truth.</div>
-            </div>
+      <!-- 2 Parts Layout -->
+      <div class="split-2-col">
+
+        <!-- Left Part: Quantitative Value (Square Boxes) -->
+        <div class="split-col">
+          <div class="section-mini-header">
+            <div class="smh-title">Core Quantitative Pillars</div>
+            <span class="smh-tag" style="background: var(--gold-bg); color: var(--gold);">Pillars</span>
           </div>
-          <span class="rb-badge gold">All-in-One</span>
+
+          <!-- Conclusion Point 01 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">01</div>
+              <div class="rb-icon-svg gold">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Unified Multi-Modal Platform</div>
+                <div class="rb-desc">Combines stock market feeds, historical OHLC patterns, regulatory circulars, and risk signals into one single terminal.</div>
+              </div>
+            </div>
+            <span class="rb-badge gold">All-in-One</span>
+          </div>
+
+          <!-- Conclusion Point 02 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">02</div>
+              <div class="rb-icon-svg teal">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Explainable Decision Support</div>
+                <div class="rb-desc">Replaces black-box speculation with walk-forward calibrated probabilities (80%+ bucket accuracy) and explicit thesis rules.</div>
+              </div>
+            </div>
+            <span class="rb-badge teal">Calibrated</span>
+          </div>
         </div>
 
-        <!-- Conclusion Point 2 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">02</div>
-            <span class="rb-icon">🎯</span>
-            <div class="rb-content">
-              <div class="rb-title">Explainable Decision Support</div>
-              <div class="rb-desc">Replaces black-box speculation with walk-forward calibrated probabilities (80%+ bucket accuracy) and explicit thesis invalidation rules.</div>
-            </div>
+        <!-- Right Part: Production Execution & Thank You -->
+        <div class="split-col">
+          <div class="section-mini-header">
+            <div class="smh-title">Production Execution</div>
+            <span class="smh-tag" style="background: var(--teal-light); color: var(--teal);">Delivery</span>
           </div>
-          <span class="rb-badge teal">Calibrated</span>
+
+          <!-- Conclusion Point 03 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">03</div>
+              <div class="rb-icon-svg">
+                <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Autonomous Voice Workflow</div>
+                <div class="rb-desc">Complete hands-free terminal interaction: execute simulations, check corporate health, and trade without modal clutter.</div>
+              </div>
+            </div>
+            <span class="rb-badge">Alex Voice</span>
+          </div>
+
+          <!-- Conclusion Point 04 -->
+          <div class="row-box">
+            <div class="rb-left">
+              <div class="rb-num">04</div>
+              <div class="rb-icon-svg gold">
+                <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <div class="rb-content">
+                <div class="rb-title">Production Resilience</div>
+                <div class="rb-desc">0ms client fallback synthesis ensures zero blank screens, zero infinite skeletons, and seamless offline reliability.</div>
+              </div>
+            </div>
+            <span class="rb-badge gold">Zero Latency</span>
+          </div>
+
+          <!-- Thank You Banner -->
+          <div class="thank-you-bar">
+            <div class="ty-text">
+              <h3>Thank You — MarketMind AI</h3>
+              <p>Empowering investors to move from "what moved?" to "what moves next — and why?"</p>
+            </div>
+            <button class="restart-btn" id="restartBtn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Replay Deck
+            </button>
+          </div>
         </div>
 
-        <!-- Conclusion Point 3 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">03</div>
-            <span class="rb-icon">🎙️</span>
-            <div class="rb-content">
-              <div class="rb-title">Autonomous Voice Workflow</div>
-              <div class="rb-desc">Complete hands-free terminal interaction: execute simulations, check corporate health, and trade without popup clutter.</div>
-            </div>
-          </div>
-          <span class="rb-badge">Alex Voice</span>
-        </div>
-
-        <!-- Conclusion Point 4 -->
-        <div class="row-box">
-          <div class="rb-left">
-            <div class="rb-num">04</div>
-            <span class="rb-icon">🚀</span>
-            <div class="rb-content">
-              <div class="rb-title">Production-Calibrated Resilience</div>
-              <div class="rb-desc">0ms client fallback synthesis ensures zero blank screens, zero infinite skeletons, and seamless offline/cold-start reliability.</div>
-            </div>
-          </div>
-          <span class="rb-badge gold">Zero Latency</span>
-        </div>
-
-        <!-- Thank You Banner -->
-        <div class="thank-you-bar">
-          <div class="ty-text">
-            <h3>Thank You — MarketMind AI</h3>
-            <p>Empowering investors to move from "what moved?" to "what moves next — and why?"</p>
-          </div>
-          <button class="restart-btn" id="restartBtn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-            Replay Deck
-          </button>
-        </div>
       </div>
     </section>
 
   </div>
 
 
-  <!-- Floating Controls -->
+  <!-- Floating Controls (Sharp Square Aesthetic) -->
   <nav class="deck-controls" aria-label="Slide Controls">
     <button class="ctrl-btn" id="prevBtn" title="Previous Slide (← Left Arrow)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
