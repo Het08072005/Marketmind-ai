@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { apiClient } from "../api/client";
+import { generateFallbackDominoSimulation } from "../api/fallbacks";
 
 const DEFAULT_SCENARIOS_CATALOG = [
   { key: "brent_crude", title: "Brent crude oil shock (+12% to +35%)", category: "Commodity Shock", default_magnitude: 12 },
@@ -152,10 +154,18 @@ export default function DominoPage({ goPage }) {
   const [simulationData, setSimulationData] = useState(() => {
     try {
       const cached = localStorage.getItem("marketmind:domino_last_sim");
-      return cached ? JSON.parse(cached) : null;
-    } catch {
-      return null;
-    }
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.stocks_impact) return parsed;
+      }
+    } catch { }
+    return generateFallbackDominoSimulation({
+      scenarioKey: "brent_crude",
+      magnitude: 12,
+      depth: 4,
+      horizon: "1_5_days",
+      minConfidence: 0.70
+    });
   });
 
   const [loading, setLoading] = useState(false);
@@ -325,12 +335,9 @@ export default function DominoPage({ goPage }) {
 
   const fetchScenarios = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/domino/scenarios");
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setScenarios(data);
-        }
+      const data = await apiClient.getDominoScenarios();
+      if (Array.isArray(data) && data.length > 0) {
+        setScenarios(data);
       }
     } catch (e) {
       console.warn("Could not load scenarios from backend, using fallback catalog", e);
@@ -345,26 +352,33 @@ export default function DominoPage({ goPage }) {
     minConf = minConfidence,
     customQueryText = customTitle
   ) => {
-    setLoading(true);
-    try {
-      const effectiveTitle = (scenKey === "custom" || customQueryText) ? (customQueryText || customTitle).trim() : undefined;
-      const payload = {
-        scenario_key: scenKey,
+    const effectiveTitle = (scenKey === "custom" || customQueryText) ? (customQueryText || customTitle).trim() : undefined;
+    const payload = {
+      scenario_key: scenKey,
+      magnitude: parseFloat(mag),
+      depth: parseInt(d, 10),
+      horizon: h,
+      min_confidence: parseFloat(minConf),
+      custom_event_title: effectiveTitle || undefined
+    };
+
+    // 0ms instant display: synthesize fallback or use cache if current simulation is missing or different
+    if (!simulationData || simulationData.event?.key !== scenKey) {
+      const instant = generateFallbackDominoSimulation({
+        scenarioKey: scenKey,
         magnitude: parseFloat(mag),
         depth: parseInt(d, 10),
         horizon: h,
-        min_confidence: parseFloat(minConf),
-        custom_event_title: effectiveTitle || undefined
-      };
-
-      const res = await fetch("http://127.0.0.1:8000/api/domino/simulate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        minConfidence: parseFloat(minConf),
+        customEventTitle: effectiveTitle || undefined
       });
+      setSimulationData(instant);
+    }
 
-      if (res.ok) {
-        const data = await res.json();
+    setLoading(true);
+    try {
+      const data = await apiClient.simulateDomino(payload);
+      if (data && data.stocks_impact) {
         setSimulationData(data);
         try {
           localStorage.setItem("marketmind:domino_last_sim", JSON.stringify(data));
@@ -373,7 +387,7 @@ export default function DominoPage({ goPage }) {
         }
       }
     } catch (err) {
-      console.error("Error executing simulation:", err);
+      console.warn("Notice during simulation execution:", err);
     } finally {
       setLoading(false);
     }
@@ -381,13 +395,12 @@ export default function DominoPage({ goPage }) {
 
   const fetchStockDetail = async (symbol, mag = magnitude) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/domino/stock-detail/${symbol}?magnitude=${mag}`);
-      if (res.ok) {
-        const data = await res.json();
+      const data = await apiClient.getDominoStockDetail(symbol, mag);
+      if (data) {
         setSelectedStock(data);
       }
     } catch (err) {
-      console.error("Error fetching stock detail", err);
+      console.warn("Notice fetching stock detail:", err);
     }
   };
 
@@ -420,22 +433,17 @@ export default function DominoPage({ goPage }) {
         text: m.text
       }));
 
-      const res = await fetch("http://127.0.0.1:8000/api/domino/agent-query", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: query,
-          context_ticker: selectedStock?.symbol || "INDIGO",
-          history: historyPayload,
-          active_scenario_key: selectedScenario,
-          active_magnitude: magnitude,
-          active_depth: depth,
-          active_horizon: horizon
-        })
+      const data = await apiClient.queryDominoAgent({
+        query: query,
+        context_ticker: selectedStock?.symbol || "INDIGO",
+        history: historyPayload,
+        active_scenario_key: selectedScenario,
+        active_magnitude: magnitude,
+        active_depth: depth,
+        active_horizon: horizon
       });
 
-      if (res.ok) {
-        const data = await res.json();
+      if (data) {
         setVoiceResponse(data);
 
         // Instantly synchronize the whole page's simulation data!

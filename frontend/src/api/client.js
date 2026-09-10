@@ -2,6 +2,9 @@ import {
   generateFallbackCandles,
   generateFallbackCandleIntelligence,
   generateFallbackPortfolioSimulation,
+  generateFallbackDominoSimulation,
+  getFallbackDominoStockDetail,
+  generateFallbackDominoAgentResponse,
   FALLBACK_NEWS_ARTICLES,
   getCompanyMeta
 } from "./fallbacks";
@@ -11,7 +14,7 @@ import {
 // site from silently trying to call the visitor's own computer.
 const configuredApiUrl = (import.meta.env.VITE_API_URL || "").trim().replace(/\/$/, "");
 const FALLBACK_PROD_URL = "https://marketmind-ai-piwi.onrender.com";
-const API_BASE_URL = configuredApiUrl || (import.meta.env.DEV ? "http://127.0.0.1:8000" : FALLBACK_PROD_URL);
+export const API_BASE_URL = configuredApiUrl || (import.meta.env.DEV ? "http://127.0.0.1:8000" : FALLBACK_PROD_URL);
 
 function apiUrl(path) {
   const base = API_BASE_URL || FALLBACK_PROD_URL;
@@ -387,6 +390,101 @@ export const apiClient = {
   },
 
   // Intelligence & Domino Endpoints
+  async getDominoScenarios() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/domino/scenarios`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) return data;
+      }
+    } catch (e) {
+      clearTimeout(timeoutId);
+      console.warn("Could not load scenarios from backend, using fallback catalog", e);
+    }
+    return null;
+  },
+
+  async simulateDomino(payload = {}) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/domino/simulate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.stocks_impact) {
+          try {
+            localStorage.setItem("marketmind:domino_last_sim", JSON.stringify(data));
+          } catch (e) { }
+          return data;
+        }
+      }
+    } catch (e) {
+      clearTimeout(timeoutId);
+      console.warn("Domino simulation network notice, falling back to local model:", e);
+    }
+
+    try {
+      const cached = localStorage.getItem("marketmind:domino_last_sim");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.stocks_impact) return parsed;
+      }
+    } catch (e) { }
+
+    const fallback = generateFallbackDominoSimulation({
+      scenarioKey: payload.scenario_key || "brent_crude",
+      magnitude: payload.magnitude || 12,
+      depth: payload.depth || 4,
+      horizon: payload.horizon || "1_5_days",
+      minConfidence: payload.min_confidence || 0.70,
+      customEventTitle: payload.custom_event_title || null
+    });
+    return fallback;
+  },
+
+  async getDominoStockDetail(symbol, magnitude = 12) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/domino/stock-detail/${symbol}?magnitude=${magnitude}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) return await res.json();
+    } catch (e) {
+      clearTimeout(timeoutId);
+    }
+    return getFallbackDominoStockDetail(symbol, magnitude);
+  },
+
+  async queryDominoAgent(payload = {}) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/domino/agent-query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) return await res.json();
+    } catch (e) {
+      clearTimeout(timeoutId);
+      console.warn("Domino agent query notice, using local copilot fallback:", e);
+    }
+    return generateFallbackDominoAgentResponse(payload.query, payload.context_ticker);
+  },
+
   async getDominoTrace(event) {
     const res = await fetch(`${API_BASE_URL}/api/domino/trace`, {
       method: "POST",

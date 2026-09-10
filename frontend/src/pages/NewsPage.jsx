@@ -759,7 +759,7 @@ export default function NewsPage({ goPage, searchQuery: parentSearchQuery = "", 
       }
       try {
         setIsSyncing(true);
-        const res = await apiClient.get("/api/news");
+        const res = await apiClient.getNews("All");
         if (mounted && res?.articles && res.articles.length > 0) {
           // Strictly sort newest-first (highest timestamp at top)
           const sorted = [...res.articles].sort((a, b) => (b.published_ts || 0) - (a.published_ts || 0));
