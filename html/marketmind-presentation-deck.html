@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MarketMind AI — Executive Presentation & System Architecture</title>
+  
+  <!-- Typography matching MarketMind AI Homepage & Dashboard -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* -------------------------------------------------------------
+       1. LUXURY EDITORIAL LIGHT THEME SYSTEM (MARKETMIND BRAND DNA)
+       ------------------------------------------------------------- */
+    :root {
+      --bg-cream: #FAF6EC;
+      --bg-cream-2: #F3ECDD;
+      --paper: #FFFFFF;
+      --paper-soft: #FFFEFB;
+      --ink: #101B33;
+      --ink-soft: #4A5568;
+      --ink-muted: #718096;
+      --navy: #101B33;
+      --navy-light: #18294D;
+      --navy-card: #0D162A;
+      --gold: #B8935A;
+      --gold-light: #D9BC8B;
+      --gold-dim: #EADFC7;
+      --gold-bg: rgba(184, 147, 90, 0.08);
+      --teal: #2F6F62;
+      --teal-light: #EBF4F1;
+      --rose: #A14545;
+      --rose-light: #F9EBEA;
+      --line: #E6DCC4;
+      --line-light: #EFE8D8;
+      --serif: 'EB Garamond', Georgia, serif;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --shadow-sm: 0 4px 12px rgba(16, 27, 51, 0.04);
+      --shadow-md: 0 14px 34px -10px rgba(16, 27, 51, 0.08);
+      --shadow-lg: 0 24px 60px -18px rgba(16, 27, 51, 0.14);
+      --radius: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-cream);
+      color: var(--ink);
+      font-family: var(--sans);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Subtle background watermark / grid lines */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: 
+        radial-gradient(var(--gold-dim) 0.75px, transparent 0.75px),
+        linear-gradient(to right, rgba(230, 220, 196, 0.25) 1px, transparent 1px);
+      background-size: 32px 32px, 120px 120px;
+      opacity: 0.55;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* -------------------------------------------------------------
+       2. PRESENTATION DECK CONTAINER & SLIDE STACK
+       ------------------------------------------------------------- */
+    .deck-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+      padding: 24px 32px 84px 32px;
+    }
+
+    .slide {
+      position: absolute;
+      width: calc(100vw - 64px);
+      max-width: 1440px;
+      height: calc(100vh - 108px);
+      max-height: 860px;
+      background: var(--paper-soft);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 44px 52px;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.97) translateY(18px);
+      transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                  visibility 0.45s;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+      z-index: 10;
+    }
+
+    .slide::-webkit-scrollbar {
+      width: 6px;
+    }
+    .slide::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .slide::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 99px;
+    }
+
+    /* -------------------------------------------------------------
+       3. SLIDE HEADER & METADATA
+       ------------------------------------------------------------- */
+    .slide-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line-light);
+    }
+
+    .meta-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .meta-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: var(--gold-bg);
+      border: 1px solid var(--line);
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .meta-doc {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .meta-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--teal);
+      background: var(--teal-light);
+      padding: 4px 10px;
+      border-radius: 99px;
+      border: 1px solid rgba(47, 111, 98, 0.2);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      animation: pulseGreen 2s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+    }
+
+    .slide-headline {
+      margin-bottom: 22px;
+    }
+
+    .slide-title {
+      font-family: var(--serif);
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+    }
+
+    .slide-subtitle {
+      font-size: 13.5px;
+      color: var(--ink-soft);
+      margin-top: 6px;
+      font-weight: 400;
+      max-width: 960px;
+      line-height: 1.5;
+    }
+
+    /* -------------------------------------------------------------
+       4. SLIDE 1: PURE ANIMATED HERO LOGO COVER
+       ------------------------------------------------------------- */
+    .slide-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      min-height: 560px;
+      padding: 40px 20px;
+      position: relative;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 460px;
+      height: 460px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(184, 147, 90, 0.15) 0%, rgba(26, 47, 87, 0.05) 50%, transparent 75%);
+      filter: blur(40px);
+      pointer-events: none;
+      animation: pulseGlow 6s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      100% { transform: scale(1.15); opacity: 1; }
+    }
+
+    .logo-stage {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-ring {
+      position: absolute;
+      inset: -14px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(184, 147, 90, 0.45);
+      animation: rotateClockwise 28s linear infinite;
+    }
+
+    .logo-ring-2 {
+      position: absolute;
+      inset: -28px;
+      border-radius: 50%;
+      border: 1px solid rgba(16, 27, 51, 0.12);
+      animation: rotateCounter 38s linear infinite;
+    }
+
+    @keyframes rotateClockwise {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes rotateCounter {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    .brand-shield {
+      width: 120px;
+      height: 120px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, #101B33 0%, #1A2F57 55%, #0A1224 100%);
+      border: 2px solid var(--gold);
+      box-shadow: 0 20px 48px -12px rgba(16, 27, 51, 0.35), 0 0 0 6px rgba(184, 147, 90, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      animation: floatShield 4s ease-in-out infinite;
+    }
+
+    @keyframes floatShield {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .brand-shield svg {
+      width: 68px;
+      height: 68px;
+      filter: drop-shadow(0 4px 12px rgba(184, 147, 90, 0.4));
+    }
+
+    .hero-title {
+      font-family: var(--serif);
+      font-size: 64px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -1.5px;
+      line-height: 1.05;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 14px rgba(16, 27, 51, 0.06);
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, #B8935A 0%, #9F7033 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-kicker {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 18px;
+    }
+
+    .hero-desc {
+      font-size: 16px;
+      color: var(--ink-soft);
+      max-width: 680px;
+      line-height: 1.6;
+      margin-bottom: 34px;
+    }
+
+    .hero-tags {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 38px;
+    }
+
+    .hero-pill {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 7px 16px;
+      border-radius: 99px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-pill svg {
+      width: 14px;
+      height: 14px;
+      color: var(--gold);
+    }
+
+    .hero-hint {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: bounceHint 2s infinite;
+    }
+
+    @keyframes bounceHint {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-4px); }
+      60% { transform: translateY(-2px); }
+    }
+
+    /* -------------------------------------------------------------
+       5. SLIDE 2: PROBLEM (1.2.3.) & PROPOSED SOLUTION (1.2.3.)
+       ------------------------------------------------------------- */
+    .ps-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      flex: 1;
+    }
+
+    .ps-block {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px 26px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ps-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed var(--line);
+    }
+
+    .ps-block-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--serif);
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .ps-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 99px;
+    }
+
+    .ps-badge.problem {
+      background: var(--rose-light);
+      color: var(--rose);
+      border: 1px solid rgba(161, 69, 69, 0.25);
+    }
+
+    .ps-badge.solution {
+      background: var(--teal-light);
+      color: var(--teal);
+      border: 1px solid rgba(47, 111, 98, 0.25);
+    }
+
+    /* 3 Rows / Lines */
+    .ps-rows {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .ps-card {
+      background: var(--paper-soft);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .ps-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--gold);
+    }
+
+    .ps-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .ps-card.problem-card .ps-num {
+      background: var(--rose-light);
+      color: var(--rose);
+    }
+
+    .ps-card.solution-card .ps-num {
+      background: var(--teal-light);
+      color: var(--teal);
+    }
+
+    .ps-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .ps-desc {
+      font-size: 12px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+
+    /* -------------------------------------------------------------
+       6. SLIDE 3: CAPABILITIES & ALL CORE FEATURES (ROW-WISE BOXES)
+       ------------------------------------------------------------- */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      flex: 1;
+    }
+
+    .feature-box {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.22s ease;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .feature-box:hover {
+      transform: translateY(-3px);
+      border-color: var(--gold);
+      box-shadow: var(--shadow-md);
+    }
+
+    .fb-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .fb-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold);
+      background: var(--gold-bg);
+      border: 1px solid var(--line);
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+
+    .fb-icon {
+      font-size: 18px;
+    }
+
+    .fb-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .fb-desc {
+      font-size: 11.5px;
+      color: var(--ink-soft);
+      line-height: 1.48;
+      flex: 1;
+      margin-bottom: 10px;
+    }
+
+    .fb-footer {
+      padding-top: 8px;
+      border-top: 1px dashed var(--line-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--ink-muted);
+    }
+
+    .fb-tag {
+      font-weight: 600;
+      color: var(--teal);
+    }
+
+    /* -------------------------------------------------------------
+       7. SLIDE 4: SYSTEM IMPLEMENTATION & TECH ARCHITECTURE (POINTS-WISE)
+       ------------------------------------------------------------- */
+    .arch-points-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .arch-point-row {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      display: grid;
+      grid-template-columns: 80px 240px 1fr 180px;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .arch-point-row:hover {
+      transform: translateX(4px);
+      border-color: var(--gold);
+      box-shadow: var(--shadow-md);
+    }
+
+    .apr-num {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--navy);
+      background: var(--bg-cream-2);
+      border: 1px solid var(--line);
+      padding: 6px 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .apr-layer {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .apr-layer small {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .apr-desc {
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      line-height: 1.45;
+    }
+
+    .apr-tech {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: flex-end;
+    }
+
+    .tech-pill {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--navy);
+      color: #FAF6EC;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(184, 147, 90, 0.3);
+    }
+
+    .tech-strip-banner {
+      background: linear-gradient(135deg, #101B33 0%, #1A2F57 100%);
+      border-radius: var(--radius);
+      padding: 14px 22px;
+      color: #FAF6EC;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      border: 1px solid rgba(184, 147, 90, 0.35);
+    }
+
+    .ts-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+    }
+
+    .ts-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ts-badge {
+      font-size: 11.5px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 4px 10px;
+      border-radius: 99px;
+      color: #FFF;
+    }
+
+    /* -------------------------------------------------------------
+       8. SLIDE 5: CONCLUSION & VALUE PROPOSITION
+       ------------------------------------------------------------- */
+    .conclusion-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 22px;
+      flex: 1;
+    }
+
+    .conc-main {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .conc-quote {
+      font-family: var(--serif);
+      font-size: 26px;
+      color: var(--navy);
+      line-height: 1.35;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    .conc-quote span {
+      color: var(--gold);
+    }
+
+    .conc-pillars {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .conc-pillar-card {
+      background: var(--bg-cream);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .cpc-metric {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .cpc-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .cpc-desc {
+      font-size: 11px;
+      color: var(--ink-soft);
+      line-height: 1.4;
+    }
+
+    .conc-side {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .conc-card-dark {
+      background: linear-gradient(135deg, #101B33 0%, #16274A 100%);
+      border: 1px solid rgba(184, 147, 90, 0.3);
+      border-radius: var(--radius);
+      padding: 24px 26px;
+      color: #FAF6EC;
+      box-shadow: var(--shadow-md);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .ccd-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 8px;
+    }
+
+    .ccd-heading {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .ccd-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      font-size: 12.5px;
+      color: #E2E8F0;
+      margin-bottom: 18px;
+    }
+
+    .ccd-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .ccd-list li span {
+      color: var(--gold-light);
+      font-weight: 800;
+    }
+
+    .thank-you-box {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ty-left h4 {
+      font-family: var(--serif);
+      font-size: 20px;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
+    .ty-left p {
+      font-size: 11.5px;
+      color: var(--ink-soft);
+      margin-top: 2px;
+    }
+
+    .replay-btn {
+      background: var(--navy);
+      color: #FAF6EC;
+      border: 1px solid var(--gold);
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.18s ease;
+    }
+
+    .replay-btn:hover {
+      background: #1A2F57;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 27, 51, 0.2);
+    }
+
+    /* -------------------------------------------------------------
+       9. GLOBAL FLOATING CONTROLLER / NAVIGATION BAR
+       ------------------------------------------------------------- */
+    .deck-controls {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(16, 27, 51, 0.95);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(184, 147, 90, 0.4);
+      box-shadow: 0 16px 40px rgba(16, 27, 51, 0.35);
+      border-radius: 99px;
+      padding: 8px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 100;
+    }
+
+    .ctrl-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #FAF6EC;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .ctrl-btn:hover:not(:disabled) {
+      background: var(--gold);
+      color: var(--navy);
+      border-color: var(--gold);
+      transform: scale(1.08);
+    }
+
+    .ctrl-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .ctrl-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .slide-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dot.active {
+      width: 28px;
+      border-radius: 99px;
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .counter-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 1px;
+      padding: 0 4px;
+    }
+
+    .fs-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .fs-btn:hover {
+      color: #FFF;
+    }
+
+    /* Keyboard navigation badge */
+    .key-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #D9BC8B;
+    }
+
+    /* Print / PDF Styling */
+    @media print {
+      body {
+        overflow: visible;
+        background: #FFF;
+      }
+      .deck-container {
+        padding: 0;
+        height: auto;
+        display: block;
+      }
+      .slide {
+        position: relative;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        width: 100% !important;
+        height: 100vh !important;
+        page-break-after: always;
+        break-after: page;
+        border: none;
+        box-shadow: none;
+        max-width: none;
+        max-height: none;
+      }
+      .deck-controls, .hero-hint {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- DECK CONTAINER -->
+  <div class="deck-container">
+
+    <!-- ====================================================================
+         SLIDE 1: PURE ANIMATED HERO LOGO & TITLE
+         ==================================================================== -->
+    <section class="slide active" id="slide-1" data-index="1">
+      <div class="slide-meta">
+        <div class="meta-left">
+          <span class="meta-tag">PROJECT FILE · SELECTED WORK 01</span>
+          <span class="meta-doc">Dalal Street &amp; Global Quant Strategy</span>
+        </div>
+        <div class="meta-right">
+          <span class="status-badge"><span class="status-dot"></span> Live Terminal Engine</span>
+        </div>
+      </div>
+
+      <div class="slide-hero">
+        <div class="hero-glow"></div>
+
+        <!-- Animated Logo Stage -->
+        <div class="logo-stage">
+          <div class="logo-ring"></div>
+          <div class="logo-ring-2"></div>
+          <div class="brand-shield">
+            <!-- Premium Candlestick + Neural Brain Logo SVG -->
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Candlestick Bar 1 (Bullish) -->
+              <line x1="32" y1="20" x2="32" y2="80" stroke="#B8935A" stroke-width="3" stroke-linecap="round"/>
+              <rect x="25" y="34" width="14" height="32" rx="3" fill="#D9BC8B" stroke="#B8935A" stroke-width="2"/>
+              
+              <!-- Candlestick Bar 2 (Central Breakout) -->
+              <line x1="50" y1="14" x2="50" y2="86" stroke="#FAF6EC" stroke-width="3.5" stroke-linecap="round"/>
+              <rect x="42" y="26" width="16" height="46" rx="3" fill="#FAF6EC" stroke="#B8935A" stroke-width="2.5"/>
+              
+              <!-- Candlestick Bar 3 (Momentum) -->
+              <line x1="68" y1="24" x2="68" y2="76" stroke="#B8935A" stroke-width="3" stroke-linecap="round"/>
+              <rect x="61" y="38" width="14" height="26" rx="3" fill="#D9BC8B" stroke="#B8935A" stroke-width="2"/>
+              
+              <!-- Neural Impulse Nodes -->
+              <circle cx="32" cy="50" r="3.5" fill="#101B33"/>
+              <circle cx="50" cy="49" r="4" fill="#B8935A"/>
+              <circle cx="68" cy="51" r="3.5" fill="#101B33"/>
+              
+              <!-- Causal Connectivity Arc -->
+              <path d="M 32 50 Q 50 38 68 51" stroke="#FAF6EC" stroke-width="2" stroke-dasharray="3 3"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="hero-kicker">AUTONOMOUS FINANCIAL REASONER &amp; QUANTITATIVE DECISION SYSTEM</div>
+        <h1 class="hero-title">MarketMind <span>AI</span></h1>
+        
+        <p class="hero-desc">
+          Next-generation financial intelligence combining real-time tick geometries, multi-order causal shock transmission, forensic filing scrutiny, and hands-free conversational voice autonomy for modern investors.
+        </p>
+
+        <div class="hero-tags">
+          <span class="hero-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            NSE / BSE Real-Time Ticks
+          </span>
+          <span class="hero-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            30-Day SVG OHLC Geometry
+          </span>
+          <span class="hero-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+            Autonomous Alex Voice Copilot
+          </span>
+          <span class="hero-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Google Gemini 2.5 Reasoner
+          </span>
+        </div>
+
+        <div class="hero-hint">
+          <span>Use keyboard arrows</span> <span class="key-badge">←</span> <span class="key-badge">→</span> <span>or click Next below to begin</span>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ====================================================================
+         SLIDE 2: PROBLEM (1.2.3.) & PROPOSED SOLUTION (1.2.3.)
+         ==================================================================== -->
+    <section class="slide" id="slide-2" data-index="2">
+      <div class="slide-meta">
+        <div class="meta-left">
+          <span class="meta-tag">PROJECT FILE · SELECTED WORK 02</span>
+          <span class="meta-doc">Market Disconnect &amp; AI Formulation</span>
+        </div>
+        <div class="meta-right">
+          <span class="status-badge"><span class="status-dot"></span> Structural Market Gap</span>
+        </div>
+      </div>
+
+      <div class="slide-headline">
+        <h2 class="slide-title">Problem Statement &amp; Proposed Solution</h2>
+        <p class="slide-subtitle">
+          Addressing the fundamental information asymmetry, fragmented disclosures, and black-box recommendations that penalize modern retail and institutional investors.
+        </p>
+      </div>
+
+      <div class="ps-wrapper">
+        <!-- TOP: PROBLEM STATEMENT (1. 2. 3.) -->
+        <div class="ps-block">
+          <div class="ps-block-header">
+            <div class="ps-block-title">
+              <span>Market Problem Statement</span>
+            </div>
+            <span class="ps-badge problem">Current Market Bottlenecks</span>
+          </div>
+
+          <div class="ps-rows">
+            <!-- Problem 1 -->
+            <div class="ps-card problem-card">
+              <div class="ps-num">01</div>
+              <h4 class="ps-title">Information Overload &amp; Data Fragmentation</h4>
+              <p class="ps-desc">
+                Investors navigate scattered sources across quarterly exchange filings, unverified social media tips, delayed TV broadcasts, and disconnected terminal feeds. Critical balance-sheet disclosures remain buried in 100-page PDF reports.
+              </p>
+            </div>
+
+            <!-- Problem 2 -->
+            <div class="ps-card problem-card">
+              <div class="ps-num">02</div>
+              <h4 class="ps-title">Misleading Market Rumors &amp; Black-Box Moves</h4>
+              <p class="ps-desc">
+                Retail traders frequently suffer sudden stop-outs and gap-downs driven by unquantified corporate rumors, operator pumps, and algorithmic spoofing without understanding the true underlying economic causality.
+              </p>
+            </div>
+
+            <!-- Problem 3 -->
+            <div class="ps-card problem-card">
+              <div class="ps-num">03</div>
+              <h4 class="ps-title">Lack of Explainable &amp; Probabilistic Decisions</h4>
+              <p class="ps-desc">
+                Standard technical charting platforms offer backward-looking lagging indicators (RSI, MACD) with zero explainability, no probability calibration, and no clear thesis invalidation criteria to protect capital.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM: PROPOSED SOLUTION (1. 2. 3.) -->
+        <div class="ps-block">
+          <div class="ps-block-header">
+            <div class="ps-block-title">
+              <span>Proposed Solution — MarketMind AI</span>
+            </div>
+            <span class="ps-badge solution">Autonomous Financial Architecture</span>
+          </div>
+
+          <div class="ps-rows">
+            <!-- Solution 1 -->
+            <div class="ps-card solution-card">
+              <div class="ps-num">01</div>
+              <h4 class="ps-title">Unified Multi-Modal Market Intelligence</h4>
+              <p class="ps-desc">
+                Harmonizes live NSE/BSE tick feeds, 30-day SVG candlestick geometry, corporate governance disclosures, and audited annual reports into a single cohesive analytical knowledge graph with 0ms latency display.
+              </p>
+            </div>
+
+            <!-- Solution 2 -->
+            <div class="ps-card solution-card">
+              <div class="ps-num">02</div>
+              <h4 class="ps-title">Causal Shock Transmission Engine (Domino Predictor)</h4>
+              <p class="ps-desc">
+                Transforms macroeconomic and geopolitical shocks (crude spikes, repo rate revisions, tariff wars) into traceable 1st to 4th-order ripple effects, calculating precise company-level P&amp;L margin impacts before Dalal Street reacts.
+              </p>
+            </div>
+
+            <!-- Solution 3 -->
+            <div class="ps-card solution-card">
+              <div class="ps-num">03</div>
+              <h4 class="ps-title">Explainable Decision Support &amp; Alex Voice Copilot</h4>
+              <p class="ps-desc">
+                Delivers walk-forward calibrated probabilities (80%+ bucket accuracy), explicit thesis break conditions, and an autonomous conversational Voice Copilot (Alex) capable of hands-free terminal control and trade execution.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ====================================================================
+         SLIDE 3: CAPABILITIES & ALL CORE FEATURES (ROW-WISE BOXES)
+         ==================================================================== -->
+    <section class="slide" id="slide-3" data-index="3">
+      <div class="slide-meta">
+        <div class="meta-left">
+          <span class="meta-tag">PROJECT FILE · SELECTED WORK 03</span>
+          <span class="meta-doc">Platform Modules &amp; Analytical Spectrum</span>
+        </div>
+        <div class="meta-right">
+          <span class="status-badge"><span class="status-dot"></span> 8 Production Modules</span>
+        </div>
+      </div>
+
+      <div class="slide-headline">
+        <h2 class="slide-title">Capabilities &amp; Comprehensive Core Features</h2>
+        <p class="slide-subtitle">
+          An end-to-end quantitative workspace integrating predictive candlestick charts, institutional news verification, causal simulation, and autonomous voice interaction into one unified platform.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-box">
+          <div class="fb-top">
+            <span class="fb-num">01</span>
+            <span class="fb-icon">📈</span>
+          </div>
+          <h4 class="fb-title">Intelligent Candlestick Copilot</h4>
+          <p class="fb-desc">
+            High-density 30-day SVG OHLC charts with real-time ticker polling (15s), automated geometric pattern detection (Flags, Double Bottoms, Pinbars), and dynamic AI support/resistance corridor mapping.
+          </p>
+          <div class="fb-footer">
+            <span class="fb-tag">0ms Instant Render</span>
+            <span>Pattern AI</span>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-box">
+          <div class="fb-top">
+            <span class="fb-num">02</span>
+            <span class="fb-icon">📰</span>
+          </div>
+          <h4 class="fb-title">Institutional News Intelligence</h4>
+          <p class="fb-desc">
+            Continuous SEBI/NSE regulatory ingestion, corporate circular parsing, verified sentiment polarity scoring, and automatic company turnover/EBITDA impact calculations with tokenized ticker matching.
+          </p>
+          <div class="fb-footer">
+            <span class="fb-tag">Audited Disclosures</span>
+            <span>Sub-Minute</span>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-box">
+          <div class="fb-top">
+            <span class="fb-num">03</span>
+            <span class="fb-icon">🎙️</span>
+          </div>
+          <h4 class="fb-title">Autonomous Alex Voice Copilot</h4>
+          <p class="fb-desc">
+            Zero-popup hands-free terminal control powered by Deepgram STT and Gemini 2.5. Responds conversationally in English and Hinglish, executes live trades, navigates charts, and explains complex theses.
+          </p>
+          <div class="fb-footer">
+            <span class="fb-tag">Conversational AI</span>
+            <span>Deepgram STT</span>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-box">
+          <div class="fb-top">
+            <span class="fb-num">04</span>
+            <span class="fb-icon">⚡</span>
+          </div>
+          <h4 class="fb-title">Market Domino Predictor</h4>
+          <p class="fb-desc">
+            Multi-order causal discovery tracing 1st to 4th order economic shocks. Calculates structural P&amp;L margin sensitivity, historical regime analog matching, and audited walk-forward prediction ledgers.
+          </p>
+          <div class="fb-footer">
+            <span class="fb-tag">Causal Simulation</span>
+            <span>4-Order Chains</span>
+          </div>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-box">
+          <div class="fb-top">
+            <span class="fb-num">05</span>
+            <span class="fb-icon">🔬</span>
+          </div>
+          <h4 class="fb-title">Forensic Thesis Breaker</h4>
+          <p class="fb-desc">
+            Institutional corporate autopsy scrutinizing debt covenants, auditor red flags, promoter pledge risks, and explicit falsification triggers that objectively invalidate bullish retail hypotheses.
+          </p>
+          <div class="fb-footer">
+            <span class="fb-tag">Risk Governance</span>
+            <span>Anti-Thesis</span>
+          </div>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-box">
+          <div class="fb-top">
+            <span class="fb-num">06</span>
+            <span class="fb-icon">💼</span>
+          </div>
+          <h4 class="fb-title">Portfolio Simulator &amp; Sandbox</h4>
+          <p class="fb-desc">
+            Zero-risk backtesting and forward projection engine for Lumpsum and SIP strategies. Visualizes drawdown curves, calculates Sharpe/Sortino ratios, and measures excess alpha against the NIFTY 50 benchmark.
+          </p>
+          <div class="fb-footer">
+            <span class="fb-tag">Persistent Cache</span>
+            <span>Monte Carlo</span>
+          </div>
+        </div>
+
+        <!-- Feature 7 -->
+        <div class="feature-box">
+          <div class="fb-top">
+            <span class="fb-num">07</span>
+            <span class="fb-icon">🧬</span>
+          </div>
+          <h4 class="fb-title">Genetic DNA Twin &amp; Dependency Map</h4>
+          <p class="fb-desc">
+            Multivariate statistical fingerprinting clustering equities by beta, recovery velocity, and liquidity. Graph-based dependency mapper highlights hidden supply-chain bottlenecks and supplier risks.
+          </p>
+          <div class="fb-footer">
+            <span class="fb-tag">Graph Discovery</span>
+            <span>Peer Clustering</span>
+          </div>
+        </div>
+
+        <!-- Feature 8 -->
+        <div class="feature-box">
+          <div class="fb-top">
+            <span class="fb-num">08</span>
+            <span class="fb-icon">🎯</span>
+          </div>
+          <h4 class="fb-title">Trust Meter &amp; Smart Alerts</h4>
+          <p class="fb-desc">
+            Walk-forward calibrated confidence gauges ensuring 80% accuracy in high-conviction signals. Real-time smart price alerts, stop-loss trigger warnings, and explainable Buy/Sell/Hold probabilistic rationales.
+          </p>
+          <div class="fb-footer">
+            <span class="fb-tag">Calibrated Edge</span>
+            <span>Live Telemetry</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ====================================================================
+         SLIDE 4: SYSTEM IMPLEMENTATION & TECH ARCHITECTURE (POINTS-WISE)
+         ==================================================================== -->
+    <section class="slide" id="slide-4" data-index="4">
+      <div class="slide-meta">
+        <div class="meta-left">
+          <span class="meta-tag">PROJECT FILE · SELECTED WORK 04</span>
+          <span class="meta-doc">Distributed Pipeline &amp; Production Stack</span>
+        </div>
+        <div class="meta-right">
+          <span class="status-badge"><span class="status-dot"></span> End-to-End Point Architecture</span>
+        </div>
+      </div>
+
+      <div class="slide-headline">
+        <h2 class="slide-title">System Implementation &amp; Technology Architecture</h2>
+        <p class="slide-subtitle">
+          A fault-tolerant, low-latency microservices pipeline engineered with asynchronous Python services, Google Gemini AI reasoning, Deepgram voice streaming, and a high-performance React client.
+        </p>
+      </div>
+
+      <div class="arch-points-container">
+        <!-- Point 1: Data Ingestion -->
+        <div class="arch-point-row">
+          <div class="apr-num">01</div>
+          <div class="apr-layer">
+            Data Ingestion Layer
+            <small>Market Feeds &amp; Filings</small>
+          </div>
+          <div class="apr-desc">
+            Ingests real-time NSE/BSE tick feeds, 30-day OHLC candlestick series, PPAC commodity benchmarks (Brent, Gas), RBI macro rate cycles, and live exchange regulatory circulars with sub-minute validation.
+          </div>
+          <div class="apr-tech">
+            <span class="tech-pill">REST APIs</span>
+            <span class="tech-pill">WebSockets</span>
+            <span class="tech-pill">Tick Engine</span>
+          </div>
+        </div>
+
+        <!-- Point 2: FastAPI Backend Engine -->
+        <div class="arch-point-row">
+          <div class="apr-num">02</div>
+          <div class="apr-layer">
+            High-Performance Backend
+            <small>FastAPI Microservices</small>
+          </div>
+          <div class="apr-desc">
+            Asynchronous Python service with universal CORS handling, 20-second cold-start timeout resilience, quantitative mathematical fallback synthesizers, and deterministic econometric modeling for 100% uptime.
+          </div>
+          <div class="apr-tech">
+            <span class="tech-pill">FastAPI</span>
+            <span class="tech-pill">Python 3.11</span>
+            <span class="tech-pill">Uvicorn / Async</span>
+          </div>
+        </div>
+
+        <!-- Point 3: Dual-Engine AI Reasoning Core -->
+        <div class="arch-point-row">
+          <div class="apr-num">03</div>
+          <div class="apr-layer">
+            AI Reasoning Engine
+            <small>Google Gemini 2.5 Flash</small>
+          </div>
+          <div class="apr-desc">
+            Multi-modal Large Language Model acts as the institutional CIO: parses complex balance-sheet footnotes, performs multi-turn causal reasoning, generates CIO-grade executive summaries, and explains risk attributions.
+          </div>
+          <div class="apr-tech">
+            <span class="tech-pill">Gemini 2.5</span>
+            <span class="tech-pill">Prompt Engine</span>
+            <span class="tech-pill">Causal Graph</span>
+          </div>
+        </div>
+
+        <!-- Point 4: Deepgram Real-Time Voice -->
+        <div class="arch-point-row">
+          <div class="apr-num">04</div>
+          <div class="apr-layer">
+            Real-Time Voice Pipeline
+            <small>Speech-to-Text &amp; Synthesis</small>
+          </div>
+          <div class="apr-desc">
+            Streams user microphone input into Deepgram's Nova-2 transcription model with under 300ms latency. Handles Hinglish accent nuances and dispatches action payloads to execute live chart and order changes hands-free.
+          </div>
+          <div class="apr-tech">
+            <span class="tech-pill">Deepgram API</span>
+            <span class="tech-pill">Web Audio</span>
+            <span class="tech-pill">SpeechSynthesis</span>
+          </div>
+        </div>
+
+        <!-- Point 5: React Analytical Frontend -->
+        <div class="arch-point-row">
+          <div class="apr-num">05</div>
+          <div class="apr-layer">
+            Analytical Client Terminal
+            <small>React 18 + Vite</small>
+          </div>
+          <div class="apr-desc">
+            Zero-skeleton, 0ms instant display client equipped with client-side mathematical fallback generators, per-symbol localStorage state caching, interactive SVG financial charts, and synchronized topbar search filters.
+          </div>
+          <div class="apr-tech">
+            <span class="tech-pill">React 18</span>
+            <span class="tech-pill">Vite</span>
+            <span class="tech-pill">Pure CSS3</span>
+          </div>
+        </div>
+
+        <!-- Point 6: Production Deployment & Edge Delivery -->
+        <div class="arch-point-row">
+          <div class="apr-num">06</div>
+          <div class="apr-layer">
+            Cloud Edge Infrastructure
+            <small>Vercel &amp; Render Cloud</small>
+          </div>
+          <div class="apr-desc">
+            Global edge CDN hosting on Vercel ensuring sub-50ms static asset delivery, coupled with an isolated compute cluster on Render with auto-reconnect and health-check monitoring for flawless global access.
+          </div>
+          <div class="apr-tech">
+            <span class="tech-pill">Vercel Edge</span>
+            <span class="tech-pill">Render Cloud</span>
+            <span class="tech-pill">SSL / HTTPS</span>
+          </div>
+        </div>
+
+        <!-- Bottom Complete Tech Stack Banner -->
+        <div class="tech-strip-banner">
+          <span class="ts-title">Verified Production Stack</span>
+          <div class="ts-tags">
+            <span class="ts-badge">React 18</span>
+            <span class="ts-badge">Vite 8.2</span>
+            <span class="ts-badge">FastAPI</span>
+            <span class="ts-badge">Python 3.11</span>
+            <span class="ts-badge">Google Gemini API</span>
+            <span class="ts-badge">Deepgram Nova-2</span>
+            <span class="ts-badge">Vercel</span>
+            <span class="ts-badge">Render</span>
+            <span class="ts-badge">RESTful APIs</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ====================================================================
+         SLIDE 5: CONCLUSION & VALUE PROPOSITION
+         ==================================================================== -->
+    <section class="slide" id="slide-5" data-index="5">
+      <div class="slide-meta">
+        <div class="meta-left">
+          <span class="meta-tag">PROJECT FILE · SELECTED WORK 05</span>
+          <span class="meta-doc">Strategic Impact &amp; Roadmap</span>
+        </div>
+        <div class="meta-right">
+          <span class="status-badge"><span class="status-dot"></span> Ready For Institutional Scale</span>
+        </div>
+      </div>
+
+      <div class="slide-headline">
+        <h2 class="slide-title">Conclusion &amp; Strategic Vision</h2>
+        <p class="slide-subtitle">
+          MarketMind AI democratizes hedge-fund-grade quantitative market reasoning, replacing speculative noise with empirical causality, walk-forward calibration, and voice-guided execution.
+        </p>
+      </div>
+
+      <div class="conclusion-grid">
+        <!-- Main Left Block -->
+        <div class="conc-main">
+          <div>
+            <div class="conc-quote">
+              "From <span>'what moved?'</span> to <span>'what moves next — and why?'</span> MarketMind AI bridges the gap between raw terminal data and actionable probabilistic conviction."
+            </div>
+
+            <div class="conc-pillars">
+              <div class="conc-pillar-card">
+                <div class="cpc-metric">0ms</div>
+                <div class="cpc-label">Zero-Latency Display</div>
+                <p class="cpc-desc">Instant client fallback synthesis eliminates blank screens and loading spinners.</p>
+              </div>
+              <div class="conc-pillar-card">
+                <div class="cpc-metric">80%+</div>
+                <div class="cpc-label">Calibrated Accuracy</div>
+                <p class="cpc-desc">Walk-forward audited ledger verifies empirical predictive edge over market cycles.</p>
+              </div>
+              <div class="conc-pillar-card">
+                <div class="cpc-metric">4-Order</div>
+                <div class="cpc-label">Causal Transmission</div>
+                <p class="cpc-desc">Discovers multi-order macro ripple effects through audited supply chain graphs.</p>
+              </div>
+              <div class="conc-pillar-card">
+                <div class="cpc-metric">100%</div>
+                <div class="cpc-label">Hands-Free Autonomy</div>
+                <p class="cpc-desc">Alex Copilot executes analyses and live order setup through natural conversational voice.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="thank-you-box">
+            <div class="ty-left">
+              <h4>Thank You</h4>
+              <p>MarketMind AI — Autonomous Financial Intelligence Terminal</p>
+            </div>
+            <button class="replay-btn" id="restartBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Replay Deck
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Side Dark Card -->
+        <div class="conc-side">
+          <div class="conc-card-dark">
+            <div>
+              <div class="ccd-title">THE ROAD AHEAD · ROADMAP</div>
+              <h3 class="ccd-heading">Future Expansion Vectors</h3>
+
+              <ul class="ccd-list">
+                <li>
+                  <span>01</span>
+                  Direct Broker Integrations: Plug-and-play webhook order routing with Zerodha Kite, AngelOne, and Upstox.
+                </li>
+                <li>
+                  <span>02</span>
+                  Derivatives &amp; Greeks Telemetry: Live implied volatility surface modeling, gamma squeeze detection, and option chain flow analysis.
+                </li>
+                <li>
+                  <span>03</span>
+                  Multi-Lingual Autonomous Voice: Expanding Alex Copilot to 6 Indian vernacular languages (Hindi, Gujarati, Tamil, Marathi).
+                </li>
+                <li>
+                  <span>04</span>
+                  Global Macro Exposure: Extending the Domino Predictor cross-border to S&amp;P 500, NASDAQ, and commodities.
+                </li>
+              </ul>
+            </div>
+
+            <div style="font-family: var(--mono); font-size: 11px; color: var(--gold-light); border-top: 1px dashed rgba(184,147,90,0.3); padding-top: 12px;">
+              Production Live: marketmind-ai-ecru.vercel.app
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+
+  <!-- ====================================================================
+       10. FLOATING INTERACTIVE CONTROLLER
+       ==================================================================== -->
+  <nav class="deck-controls" aria-label="Slide Controls">
+    <button class="ctrl-btn" id="prevBtn" title="Previous Slide (← Left Arrow)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <div class="slide-dots" id="dotsContainer">
+      <div class="dot active" data-slide="1"></div>
+      <div class="dot" data-slide="2"></div>
+      <div class="dot" data-slide="3"></div>
+      <div class="dot" data-slide="4"></div>
+      <div class="dot" data-slide="5"></div>
+    </div>
+
+    <div class="counter-badge" id="counterBadge">SLIDE 01 / 05</div>
+
+    <button class="ctrl-btn" id="nextBtn" title="Next Slide (→ Right Arrow or Space)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+
+    <button class="fs-btn" id="fsBtn" title="Toggle Fullscreen">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+  </nav>
+
+  <!-- ====================================================================
+       11. INTERACTIVE NAVIGATION JAVASCRIPT
+       ==================================================================== -->
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const dots = Array.from(document.querySelectorAll('.dot'));
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const counterBadge = document.getElementById('counterBadge');
+      const restartBtn = document.getElementById('restartBtn');
+      const fsBtn = document.getElementById('fsBtn');
+      const totalSlides = slides.length;
+      let currentIndex = 0;
+
+      function updateSlide(newIndex) {
+        if (newIndex < 0 || newIndex >= totalSlides) return;
+        currentIndex = newIndex;
+
+        // Transition slides
+        slides.forEach((slide, idx) => {
+          if (idx === currentIndex) {
+            slide.classList.add('active');
+            slide.scrollTop = 0;
+          } else {
+            slide.classList.remove('active');
+          }
+        });
+
+        // Update dots
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('active', idx === currentIndex);
+        });
+
+        // Update counter
+        const padCurrent = String(currentIndex + 1).padStart(2, '0');
+        const padTotal = String(totalSlides).padStart(2, '0');
+        counterBadge.textContent = `SLIDE ${padCurrent} / ${padTotal}`;
+
+        // Update button states
+        prevBtn.disabled = (currentIndex === 0);
+        nextBtn.disabled = (currentIndex === totalSlides - 1);
+      }
+
+      // Button clicks
+      prevBtn.addEventListener('click', () => updateSlide(currentIndex - 1));
+      nextBtn.addEventListener('click', () => updateSlide(currentIndex + 1));
+      if (restartBtn) {
+        restartBtn.addEventListener('click', () => updateSlide(0));
+      }
+
+      // Dot clicks
+      dots.forEach((dot, idx) => {
+        dot.addEventListener('click', () => updateSlide(idx));
+      });
+
+      // Keyboard navigation
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+          if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            updateSlide(currentIndex + 1);
+          }
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            updateSlide(currentIndex - 1);
+          }
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          updateSlide(0);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          updateSlide(totalSlides - 1);
+        }
+      });
+
+      // Fullscreen toggle
+      fsBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      // Touch / Swipe support for mobile & tablet
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      window.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      window.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 45) {
+          if (diff > 0) updateSlide(currentIndex + 1);
+          else updateSlide(currentIndex - 1);
+        }
+      }, { passive: true });
+
+      // Initialize
+      updateSlide(0);
+    })();
+  </script>
+
+</body>
+</html>
