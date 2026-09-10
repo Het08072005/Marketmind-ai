@@ -970,6 +970,7 @@ export function generateFallbackDominoSimulation({
       {
         name: "2022 Ukraine Oil Surge (+34%)",
         date: "Mar 2022",
+        similarity: 0.91,
         similarity_pct: 91,
         return_impact: "-4.2%",
         regime: "Inflationary Shock"
@@ -977,6 +978,7 @@ export function generateFallbackDominoSimulation({
       {
         name: "2018 Iran Sanctions Spike (+22%)",
         date: "May 2018",
+        similarity: 0.84,
         similarity_pct: 84,
         return_impact: "-2.8%",
         regime: "Supply Disruption"

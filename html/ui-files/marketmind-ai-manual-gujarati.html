@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8" />
+  <title>MarketMind AI — ઇન્સ્ટિટ્યુશનલ ક્વોન્ટિટેટિવ શેરબજાર પ્લેટફોર્મ અને વોઇસ કો-પાઇલટ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Noto+Sans+Gujarati:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    @page {
+      size: A4 portrait;
+      margin: 12mm 14mm 12mm 14mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #FFFFFF;
+      color: #0F172A;
+      font-family: 'Noto Sans Gujarati', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 10px;
+      line-height: 1.48;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      width: 100%;
+      height: 271mm;
+      max-height: 271mm;
+      page-break-after: always;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      padding-bottom: 2mm;
+    }
+
+    .page:last-child {
+      page-break-after: auto;
+    }
+
+    /* Running Header & Footer */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid #0F172A;
+      padding-bottom: 5px;
+      margin-bottom: 9px;
+    }
+
+    .header-logo {
+      font-family: 'EB Garamond', 'Noto Sans Gujarati', Georgia, serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-logo span {
+      color: #B8935A;
+    }
+
+    .header-tagline {
+      font-size: 8.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #64748B;
+    }
+
+    .page-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #E2E8F0;
+      padding-top: 5px;
+      font-size: 8px;
+      color: #64748B;
+      letter-spacing: 0.3px;
+    }
+
+    .page-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Headings */
+    h1.doc-title {
+      font-family: 'EB Garamond', 'Noto Sans Gujarati', Georgia, serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #0F172A;
+      letter-spacing: -0.2px;
+    }
+
+    .doc-subtitle {
+      font-size: 10px;
+      color: #475569;
+      font-weight: 400;
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    .section-title {
+      font-family: 'EB Garamond', 'Noto Sans Gujarati', Georgia, serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #0F172A;
+      border-bottom: 1px solid #CBD5E1;
+      padding-bottom: 2px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-badge {
+      font-family: 'Inter', 'Noto Sans Gujarati', sans-serif;
+      font-size: 7.5px;
+      font-weight: 700;
+      background: #F1F5F9;
+      color: #0F172A;
+      border: 1px solid #CBD5E1;
+      padding: 1.5px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Cards & Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+
+    .card {
+      background: #FAFAFA;
+      border: 1px solid #E2E8F0;
+      border-radius: 5px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5px;
+    }
+
+    .card-title {
+      font-family: 'EB Garamond', 'Noto Sans Gujarati', Georgia, serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pill {
+      font-family: 'Noto Sans Gujarati', 'Inter', sans-serif;
+      font-size: 7.5px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      letter-spacing: 0.3px;
+    }
+
+    .pill-blue { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-gold { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+    .pill-green { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-slate { background: #F1F5F9; color: #334155; border: 1px solid #CBD5E1; }
+
+    .concept-box {
+      background: #FFFFFF;
+      border-left: 3px solid #B8935A;
+      border-top: 1px solid #E2E8F0;
+      border-right: 1px solid #E2E8F0;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 4px 7px;
+      font-size: 9px;
+      color: #1E293B;
+      line-height: 1.4;
+      margin: 1.5px 0;
+    }
+
+    .example-tag {
+      font-size: 9px;
+      color: #334155;
+      background: #F8FAFC;
+      border: 1px dashed #CBD5E1;
+      padding: 3.5px 6px;
+      border-radius: 4px;
+      line-height: 1.35;
+    }
+
+    .example-tag strong {
+      color: #0F172A;
+      font-weight: 600;
+    }
+
+    /* Tables */
+    table.compact-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9px;
+      margin-top: 2px;
+    }
+
+    table.compact-table th {
+      background: #0F172A;
+      color: #FFFFFF;
+      font-family: 'Noto Sans Gujarati', 'Inter', sans-serif;
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      padding: 3.5px 5px;
+      text-align: left;
+    }
+
+    table.compact-table td {
+      padding: 3.5px 5px;
+      border-bottom: 1px solid #E2E8F0;
+      color: #1E293B;
+      line-height: 1.32;
+    }
+
+    table.compact-table tr:nth-child(even) td {
+      background: #F8FAFC;
+    }
+
+    /* Key Points / Callouts */
+    .callout {
+      background: #FFFDF9;
+      border: 1px solid #E8DFCC;
+      border-left: 3px solid #B8935A;
+      padding: 5px 8px;
+      border-radius: 3px;
+      font-size: 9.5px;
+      color: #262626;
+      line-height: 1.4;
+    }
+
+    .qa-box {
+      border: 1px solid #E2E8F0;
+      background: #FFFFFF;
+      border-radius: 4px;
+      padding: 5px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5px;
+    }
+
+    .qa-q {
+      font-family: 'Noto Sans Gujarati', 'Inter', sans-serif;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    .qa-a {
+      font-size: 9px;
+      color: #334155;
+      line-height: 1.35;
+    }
+
+    b { font-weight: 600; color: #0F172A; }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================= -->
+  <!-- PAGE 1: SYSTEM ARCHITECTURE & 5 CORE ENGINES (GUJARATI) -->
+  <!-- ========================================================================= -->
+  <div class="page">
+    <div class="page-header">
+      <div class="header-logo">MARKETMIND <span>AI</span> · ઇન્સ્ટિટ્યુશનલ માર્ગદર્શિકા</div>
+      <div class="header-tagline">સિસ્ટમ કન્સેપ્ટ અને આર્કિટેક્ચર · પેજ 1 of 5</div>
+    </div>
+
+    <div class="page-content">
+      <div>
+        <h1 class="doc-title">MarketMind AI: ક્વોન્ટિટેટિવ શેરબજાર પ્લેટફોર્મ અને વોઇસ કો-પાઇલટ</h1>
+        <p class="doc-subtitle">
+          નેશનલ સ્ટોક એક્સચેન્જ (NSE) ના 270+ શેરો માટેનું ઇન્સ્ટિટ્યુશનલ એનાલિટિક્સ પ્લેટફોર્મ. AI ની મદદથી સંશોધિત અને ડિઝાઇન કરાયેલ આ સિસ્ટમ રિટેલ ટ્રેડર્સની ખોટી આશાઓ અને અફવાઓને બદલે લાઈવ બાયર્સ-સેલર્સનું બેલેન્સ, સપ્લાય ચેઇનની સાંકળરૂપી અસર અને હાથ લગાવ્યા વગર વોઇસ કમાન્ડ દ્વારા સ્માર્ટ ટ્રેડિંગ પૂરું પાડે છે.
+        </p>
+      </div>
+
+      <!-- Problem vs Institutional Solution -->
+      <div class="grid-2">
+        <div class="card" style="background: #FEF2F2; border-color: #FECACA;">
+          <div class="card-title" style="color: #991B1B;">રિટેલ રોકાણકારોની મુશ્કેલી (90%+ લોકો કેમ ખોટ કરે છે?)</div>
+          <p style="font-size: 9px; color: #7F1D1D;">
+            SEBI ના સત્તાવાર આંકડા મુજબ 90% થી વધુ સામાન્ય ટ્રેડર્સ પૈસા ગુમાવે છે. તેનું કારણ મોડા સમાચાર, WhatsApp ટિપ્સ અને જૂના ઇન્ડિકેટર્સ (RSI/MACD) છે. ટ્રેડ ખોટો પડે ત્યારે "ભાવ પાછો આવશે" તેવી ખોટી આશા રાખીને બેસી રહે છે અને મોટી ખોટ કરે છે.
+          </p>
+        </div>
+        <div class="card" style="background: #F0FDF4; border-color: #BBF7D0;">
+          <div class="card-title" style="color: #166534;">AI અને ઇન્સ્ટિટ્યુશનલ ક્વોન્ટ સમાધાન</div>
+          <p style="font-size: 9px; color: #14532D;">
+            મોટા હેજ ફંડ્સ (જેમ કે Citadel, Renaissance) અંદાજ લગાવવાને બદલે ચોક્કસ ડેટા વાપરે છે: બજારમાં ખરીદદારો વધારે છે કે વેચનારા? મોટા ફંડ્સનો ખરીદભાવ (VWAP) કયો છે? વૈશ્વિક ઘટનાઓની સ્થાનિક કંપનીઓ પર શું અસર થશે? અને નુકસાન રોકવા અગાઉથી સ્ટોપલોસ.
+          </p>
+        </div>
+      </div>
+
+      <!-- Core Models Section (Zero Formulas, Pure Intuition) -->
+      <div class="section-title">
+        <span>5 મુખ્ય સ્માર્ટ એન્જિન (કોઈ અટપટા ફોર્મ્યુલા વગર, એકદમ સરળ સમજ)</span>
+        <span class="section-badge">FastAPI બેકએન્ડ</span>
+      </div>
+
+      <!-- Model 1 -->
+      <div class="card">
+        <div class="card-title">
+          <span>1. ડાયરેક્શનલ પ્રોબેબિલિટી મોડેલ <span style="font-size: 8.5px; font-weight: 400; color: #64748B;">(recommendations_service.py)</span></span>
+          <span class="pill pill-green">ખરીદદાર વિરુદ્ધ વેચનાર શક્તિ</span>
+        </div>
+        <div class="concept-box">
+          <b>શા માટે બનાવ્યું:</b> સામાન્ય રીતે લોકો શેર વધ્યા પછી ટોચ પર ખરીદે છે જ્યાં સંસ્થાઓ માલ વેચી દેતી હોય છે.<br/>
+          <b>કેવી રીતે કામ કરે છે:</b> કોઈ અંદાજ વગર 3 બાબતો ચકાસે છે: (1) એક્સચેન્જ ઓર્ડર બુકમાં વેચનારા કરતા ખરીદદારોની લાઇન મોટી છે? (2) ભાવ આજના સંસ્થાકીય સરેરાશ ભાવ (VWAP) કરતા ઉપર છે? (3) વોલ્યુમ સામાન્ય કરતા બમણું છે? આના આધારે તે શેર ઉપર જવાની 0% થી 100% ચોક્કસ સંભાવના ગણે છે.
+        </div>
+        <div class="example-tag">
+          <strong>શેરબજારનું વાસ્તવિક ઉદાહરણ:</strong> Syrma SGS માં ₹1,635 ના ભાવે ખરીદદારોનું ખૂબ મોટું દબાણ અને 2 ગણું વોલ્યુમ હતું. સિસ્ટમે 66.5% ઉપર જવાની સંભાવના ગણીને ₹1,729 ના ટાર્ગેટ સાથે <em>STRONG BUY</em> ની સ્પષ્ટ સલાહ આપી.
+        </div>
+      </div>
+
+      <!-- Model 2 -->
+      <div class="card">
+        <div class="card-title">
+          <span>2. મેક્રો ડોમિનો શોક એન્જિન <span style="font-size: 8.5px; font-weight: 400; color: #64748B;">(domino_service.py)</span></span>
+          <span class="pill pill-gold">સપ્લાય ચેઇનની સાંકળરૂપી અસર</span>
+        </div>
+        <div class="concept-box">
+          <b>શા માટે બનાવ્યું:</b> કોઈ એક વૈશ્વિક ઘટના બને ત્યારે તેની અસર બીજી કઈ કંપનીઓ પર પડશે તે સામાન્ય લોકોને ખબર નથી પડતી.<br/>
+          <b>કેવી રીતે કામ કરે છે:</b> જેમ એક પત્તું પડવાથી આખી લાઇન પડે, તેમ કાચો માલ મોંઘો થાય ત્યારે કોનો ખર્ચ વધશે અને કોનો નફો વધશે તે આપમેળે સાંકળ જોડીને ગણી કાઢે છે.
+        </div>
+        <div class="example-tag">
+          <strong>શેરબજારનું વાસ્તવિક ઉદાહરણ:</strong> જો ક્રૂડ ઓઇલ +20% વધે, તો ઇન્ડિગો એરલાઇન્સનો નફો ઘટશે કારણ કે વિમાનનું ઇંધણ મોંઘું થશે; જ્યારે ONGC નો નફો +₹1,120 કરોડ વધશે કારણ કે તે કાચું તેલ ઊંચા ભાવે વેચીને સીધો ફાયદો કમાશે.
+        </div>
+      </div>
+
+      <!-- Model 3 -->
+      <div class="card">
+        <div class="card-title">
+          <span>3. સ્ટોક DNA બિહેવિયરલ ટ્વિન ફાઇન્ડર <span style="font-size: 8.5px; font-weight: 400; color: #64748B;">(dna_service.py)</span></span>
+          <span class="pill pill-blue">સ્માર્ટ શેર મેચમેકર</span>
+        </div>
+        <div class="concept-box">
+          <b>શા માટે બનાવ્યું:</b> જ્યારે કોઈ સારો શેર બહુ દોડી ગયો હોય અને મોંઘો થઈ ગયો હોય, ત્યારે તેના જેવા જ ગુણો ધરાવતો બીજો શેર શોધવા માટે.<br/>
+          <b>કેવી રીતે કામ કરે છે:</b> 270 શેરોના 8 મૂળભૂત ગુણધર્મો (વેલ્યુએશન, મોમેન્ટમ, દેવું, કંપની કદ વગેરે) સરખાવીને તેના જોડિયા (Twin) શેરો શોધી આપે છે.
+        </div>
+        <div class="example-tag">
+          <strong>શેરબજારનું વાસ્તવિક ઉદાહરણ:</strong> ટાટા મોટર્સ +35% વધીને ઓવરબોટ થઈ ગયો હોય, ત્યારે સ્ટોક DNA 270 શેરોમાંથી ભારત ફોર્જ (Bharat Forge - 89% સમાનતા) શોધી આપે છે, જેથી તમે ઓટો સેક્ટરની તેજીનો સુરક્ષિત ભાવે લાભ લઈ શકો.
+        </div>
+      </div>
+
+      <!-- Models 4 & 5 Compact Grid -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <span>4. 1-દિવસ મોન્ટે કાર્લો રિસ્ક મીટર</span>
+            <span class="pill pill-slate">portfolio_service.py</span>
+          </div>
+          <div class="concept-box" style="font-size: 8.5px;">
+            <b>શા માટે બનાવ્યું:</b> ખરાબ બજારમાં તમારા પોર્ટફોલિયોમાં વધુમાં વધુ કેટલું નુકસાન થઈ શકે તે રૂપિયામાં જાણવા.<br/>
+            <b>કેવી રીતે કામ કરે છે:</b> છેલ્લા 1 વર્ષના ડેટા પરથી આવતીકાલના બજારના 1,000 કાલ્પનિક દિવસો રન કરીને જોખમ ગણે છે.
+          </div>
+          <div class="example-tag" style="font-size: 8.5px;">
+            <strong>ઉદાહરણ:</strong> રિલાયન્સ અને અદાણીના ₹10 લાખના પોર્ટફોલિયો પર પ્રમાણિત કરે છે: <em>"100 માંથી 95 સામાન્ય દિવસોમાં તમારું 1 દિવસનું નુકસાન ₹18,450 થી વધારે નહીં થાય."</em>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>5. સ્માર્ટ વોઇસ ફોનેટિક મેચર</span>
+            <span class="pill pill-slate">voice_service.py</span>
+          </div>
+          <div class="concept-box" style="font-size: 8.5px;">
+            <b>શા માટે બનાવ્યું:</b> ભારતીય ઉચ્ચાર, અવાજના તફાવત કે સ્પીચની ભૂલ છતાં શેરનું નામ સાચું ઓળખવા માટે.<br/>
+            <b>કેવી રીતે કામ કરે છે:</b> બોલાયેલા શબ્દોના અવાજની સરખામણી 270 અધિકૃત કંપનીઓના નામો સાથે તાત્કાલિક કરે છે.
+          </div>
+          <div class="example-tag" style="font-size: 8.5px;">
+            <strong>ઉદાહરણ:</strong> જો તમે બોલો <em>"adacni entirerpice"</em>, તો સિસ્ટમ તરત જ <code>ADANIENT</code> સાથે મેળવીને સ્ક્રીન પર ચાર્ટ ખોલી આપે છે.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>MarketMind AI આર્કિટેક્ચર અને વિદ્યાર્થી વાઇવા ડિફેન્સ મેન્યુઅલ</span>
+      <span>ગુપ્ત અને માલિકી હક ધરાવતું · પેજ 1</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PAGE 2: CORE PLATFORM ENGINES (PART 1) (GUJARATI) -->
+  <!-- ========================================================================= -->
+  <div class="page">
+    <div class="page-header">
+      <div class="header-logo">MARKETMIND <span>AI</span> · ઇન્સ્ટિટ્યુશનલ માર્ગદર્શિકા</div>
+      <div class="header-tagline">પ્લેટફોર્મના મુખ્ય મોડ્યુલ્સ (ભાગ 1) · પેજ 2 of 5</div>
+    </div>
+
+    <div class="page-content">
+      <div class="section-title">
+        <span>ઇન્સ્ટિટ્યુશનલ ઇક્વિટી મોડ્યુલ્સ (ઓવરવ્યૂ, ડેશબોર્ડ, ડોમિનો અને DNA)</span>
+        <span class="section-badge">વર્કસ્પેસ 01 – 04</span>
+      </div>
+
+      <!-- Feature 1: Market Overview -->
+      <div class="card">
+        <div class="card-title">
+          <span>ફીચર 1: માર્કેટ ઓવરવ્યૂ રડાર અને લાઇવ ઓર્ડર ફ્લો</span>
+          <span class="pill pill-green">MarketOverviewPage.jsx</span>
+        </div>
+        <p style="font-size: 9.5px;">
+          મેમરીમાં કેશ્ડ 270+ લિક્વિડ NSE શેરોનું લાઇવ ટ્રેકિંગ કરે છે. રીઅલ-ટાઇમ બાયર વિરુદ્ધ સેલર ઓર્ડર બુક અને સંસ્થાકીય એવરેજ પ્રાઇસ (VWAP) ના આધારે આપમેળે સલાહ આપે છે (<em>STRONG BUY, ACCUMULATE, HOLD, CAUTION</em>).
+        </p>
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>મહત્વનો મેટ્રિક</th>
+              <th>કેવી રીતે કામ કરે છે (સરળ ભાષામાં)</th>
+              <th>ટ્રેડરને શું મોટો ફાયદો થાય છે</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Order Book Imbalance (OBI)</b></td>
+              <td>એક્સચેન્જમાં ખરીદવા ઊભેલા ઓર્ડર વિરુદ્ધ વેચવા ઊભેલા ઓર્ડરની ગણતરી કરે છે.</td>
+              <td>ભાવ વધતા પહેલા જ ખબર પડી જાય છે કે બાયર્સ કેટલા મજબૂત છે (+0.15 એટલે 15% વધુ બાયર્સ).</td>
+            </tr>
+            <tr>
+              <td><b>Anchored VWAP (AVWAP)</b></td>
+              <td>બજાર ખૂલ્યા પછી મોટા વોલ્યુમ સાથે થયેલા સોદાનો સાચો સરેરાશ ભાવ ગણે છે.</td>
+              <td>સંસ્થાઓનું તળિયું બતાવે છે. જો ભાવ VWAP થી ઉપર હોય તો મોટા ફંડ્સ પ્રોફિટમાં છે.</td>
+            </tr>
+            <tr>
+              <td><b>Historical Win Rate</b></td>
+              <td>ભૂતકાળમાં આવા સેટઅપમાં કેટલી વાર પ્રોફિટ થયો હતો તેનું ઐતિહાસિક ટેસ્ટિંગ.</td>
+              <td>ખોટી ધારણાઓને બદલે નક્કર ઐતિહાસિક ડેટા આપે છે (દા.ત. 2,589 ટ્રેડ્સમાં 68% સફળતા).</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="example-tag">
+          <strong>દલાલ સ્ટ્રીટ સિનારિયો:</strong> રિલાયન્સ ઇન્ડસ્ટ્રીઝ ₹1,285.20 પર છે. MarketMind દર્શાવે છે કે બાયર્સ +10% વધુ શક્તિશાળી છે, ભાવ ₹1,293.79 ના સંસ્થાકીય બેન્ચમાર્કથી ઉપર છે અને ₹1,338.31 (+2.2%) નો ટાર્ગેટ સુરક્ષિત સ્ટોપલોસ સાથે આપે છે.
+        </div>
+      </div>
+
+      <!-- Feature 2: Executive Multi-Workspace Dashboard -->
+      <div class="card">
+        <div class="card-title">
+          <span>ફીચર 2: એક્ઝિક્યુટિવ મલ્ટી-વર્કસ્પેસ ડેશબોર્ડ</span>
+          <span class="pill pill-blue">DashboardPage.jsx</span>
+        </div>
+        <p style="font-size: 9.5px;">
+          બ્લૂમબર્ગ ટર્મિનલથી પ્રેરિત વ્યાવસાયિક કમાન્ડ સેન્ટર, જે એક જ સ્ક્રીન પર ચાર અલગ-અલગ ઇન્ટેલિજન્સ પોડ્સ પૂરા પાડે છે:
+        </p>
+        <div class="grid-2">
+          <div class="example-tag">
+            <b>વર્કસ્પેસ 01: ક્વોન્ટ મેટ્રિક્સ:</b> સમગ્ર 270 શેરોને સંસ્થાકીય કન્વિક્શન, 1-દિવસની ગતિ અને સેક્ટર મોમેન્ટમ મુજબ સોર્ટ કરે છે.
+          </div>
+          <div class="example-tag">
+            <b>વર્કસ્પેસ 02: માર્કેટ પલ્સ હીટમેપ:</b> 9 મુખ્ય ભારતીય સેક્ટરો (બેંક્સ, મેટલ્સ, એનર્જી, ઓટો, IT) માં નાણાંની હિલચાલ દર્શાવતો લાઇવ ટ્રીમેપ.
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="example-tag">
+            <b>વર્કસ્પેસ 03: લાઇવ સ્ટ્રીમિંગ ન્યૂઝ:</b> SEBI ના નિયામક પરિપત્રો અને RBI ની જાહેરાતોનું સેન્ટિમેન્ટ ટૅગિંગ સાથે લાઇવ ફીડ.
+          </div>
+          <div class="example-tag">
+            <b>વર્કસ્પેસ 04: ડીપ ચાર્ટ્સ:</b> કેન્ડલસ્ટિક પેટર્ન અને સ્મૂધ ટ્રેન્ડ લાઇન્સ દર્શાવતો ઇન્ટરેક્ટિવ ટ્રેડિંગવ્યૂ કેનવાસ.
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 3: Market Domino Predictor -->
+      <div class="card">
+        <div class="card-title">
+          <span>ફીચર 3: માર્કેટ ડોમિનો પ્રિડિક્ટર (સપ્લાય ચેઇન સાંકળ અસર)</span>
+          <span class="pill pill-gold">DominoPredictorPage.jsx</span>
+        </div>
+        <p style="font-size: 9.5px;">
+          શેરો ક્યારેય એકલા નથી ચાલતા. વૈશ્વિક કાચા માલ કે વ્યાજદરમાં ફેરફાર થાય ત્યારે આ એન્જિન સાંકળરૂપી અસર ગણી કાઢે છે:
+        </p>
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>ઘટના / ટ્રિગર</th>
+              <th>પ્રથમ સીધી અસર</th>
+              <th>કંપનીના નફા પર અસર</th>
+              <th>સ્માર્ટ સેક્ટર હેજ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>ક્રૂડ ઓઇલ +20% વધે</b></td>
+              <td>વિમાનનું ઇંધણ (ATF) મોંઘું થાય છે.</td>
+              <td>ઇન્ડિગો એરલાઇન્સ (IndiGo) નો નફો -210 bps ઘટે છે.</td>
+              <td>ONGC ઊંચા ભાવે તેલ વેચીને +₹1,120 કરોડ વધુ કમાય છે.</td>
+            </tr>
+            <tr>
+              <td><b>RBI રેપો રેટ +50 bps વધારે</b></td>
+              <td>બેંક લોન અને ધિરાણ ખર્ચમાં વધારો થાય છે.</td>
+              <td>કાર અને મકાનોના વેચાણમાં -4.2% નો ઘટાડો થાય છે.</td>
+              <td>HDFC બેંક જેવી મોટી બેંકોનું નેટ ઇન્ટરેસ્ટ માર્જિન વધે છે.</td>
+            </tr>
+            <tr>
+              <td><b>રૂપિયો ડોલર સામે 2% નબળો પડે</b></td>
+              <td>આયાતી ઇલેક્ટ્રોનિક્સ અને ચિપ્સ મોંઘી બને છે.</td>
+              <td>સ્થાનિક ટેક કંપનીઓનો કાચા માલનો ખર્ચ વધે છે.</td>
+              <td>TCS, Infosys જેવી IT નિકાસકાર કંપનીઓનો નફો વધે છે.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Feature 4: Stock DNA Fingerprint -->
+      <div class="card">
+        <div class="card-title">
+          <span>ફીચર 4: સ્ટોક DNA ફિંગરપ્રિન્ટ અને પેર ટ્રેડિંગ</span>
+          <span class="pill pill-slate">StockDnaPage.jsx</span>
+        </div>
+        <p style="font-size: 9.5px;">
+          જ્યારે મોટી કંપનીઓ ઘણા વ્યવસાયો ચલાવતી હોય ત્યારે પરંપરાગત સેક્ટર વર્ગીકરણ પૂરતું નથી હોતું. સ્ટોક DNA દરેક કંપનીને 8 નાણાકીય ગુણો (વેલ્યુએશન, મોમેન્ટમ, દેવું, કંપની કદ, અસ્થિરતા વગેરે) ના આધારે માપે છે:
+        </p>
+        <div class="callout">
+          <b>સ્માર્ટ શેર રિપ્લેસમેન્ટ:</b> જો કોઈ રોકાણકારને ભારતીય ઓટો સેક્ટરમાં રોકાણ કરવું હોય પણ ટાટા મોટર્સ પહેલેથી +35% વધીને જોખમી થઈ ગયો હોય, તો સ્ટોક DNA તરત જ <b>ભારત ફોર્જ (89% મેચ)</b> અથવા <b>અશોક લેલેન્ડ (84% મેચ)</b> જેવા સમાન વિકલ્પો વાજબી ભાવે શોધી આપે છે.
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>MarketMind AI આર્કિટેક્ચર અને વિદ્યાર્થી વાઇવા ડિફેન્સ મેન્યુઅલ</span>
+      <span>ગુપ્ત અને માલિકી હક ધરાવતું · પેજ 2</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PAGE 3: CORE PLATFORM ENGINES (PART 2) & ALEX VOICE COPILOT (GUJARATI) -->
+  <!-- ========================================================================= -->
+  <div class="page">
+    <div class="page-header">
+      <div class="header-logo">MARKETMIND <span>AI</span> · ઇન્સ્ટિટ્યુશનલ માર્ગદર્શિકા</div>
+      <div class="header-tagline">પ્લેટફોર્મના મુખ્ય મોડ્યુલ્સ (ભાગ 2) · પેજ 3 of 5</div>
+    </div>
+
+    <div class="page-content">
+      <div class="section-title">
+        <span>રિસ્ક મોડેલિંગ, કેન્ડલસ્ટિક પેટર્ન અને એલેક્સ વોઇસ કો-પાઇલટ</span>
+        <span class="section-badge">વર્કસ્પેસ 05 – 08</span>
+      </div>
+
+      <!-- Feature 5: Thesis Breaker -->
+      <div class="card">
+        <div class="card-title">
+          <span>ફીચર 5: થીસિસ બ્રેકર (ખોટી આશાઓ વગર રિસ્ક મેનેજમેન્ટ)</span>
+          <span class="pill pill-gold">ThesisBreakerPage.jsx</span>
+        </div>
+        <p style="font-size: 9.5px;">
+          સામાન્ય ટ્રેડર્સ ખોટ જતા શેરોને "હમણાં ભાવ પાછો આવશે" તેવી આશામાં પકડી રાખીને મોટું નુકસાન કરે છે. થીસિસ બ્રેકર અગાઉથી સંસ્થાકીય સપોર્ટ અને VWAP આધારિત <b>સ્ટ્રક્ચરલ એક્ઝિટ લેવલ</b> નક્કી કરે છે:
+        </p>
+        <div class="example-tag">
+          <strong>કડક શિસ્તબદ્ધ એક્ઝિટ:</strong> અદાણી એન્ટરપ્રાઇઝ ₹2,950 માં ખરીદતી વખતે સિસ્ટમ ₹2,914.60 નો સ્ટોપલોસ નક્કી કરે છે. જો શેર આ સપાટી નીચે બંધ થાય, તો ખરીદવાનો આઈડિયા ખોટો સાબિત થાય છે. સિસ્ટમ ભાવનાત્મક સંકોચ વગર તરત જ બહાર નીકળવાની સલાહ આપે છે.
+        </div>
+      </div>
+
+      <!-- Feature 6: Candlestick Intel -->
+      <div class="card">
+        <div class="card-title">
+          <span>ફીચર 6: કેન્ડલસ્ટિક ઇન્ટેલ અને ઓટોમેટિક પેટર્ન ડિટેક્શન</span>
+          <span class="pill pill-green">CandlestickIntelPage.jsx</span>
+        </div>
+        <p style="font-size: 9.5px;">
+          શેરોના ઐતિહાસિક ભાવ સ્કેન કરીને મોટા રોકાણકારોની ખરીદી દર્શાવતી પેટર્ન (બુલિશ એન્ગલ્ફિંગ, હેમર, સપોર્ટ રિક્લેમ) આપમેળે ઓળખે છે. ખોટા બ્રેકઆઉટથી બચવા માટે તે <b>1.5x લઘુત્તમ વોલ્યુમ કન્ફર્મેશન</b> ફરજિયાત રાખે છે.
+        </p>
+        <div class="example-tag">
+          <strong>પેટર્ન ઉદાહરણ:</strong> TCS માં સરેરાશ કરતા 2.4 ગણા વોલ્યુમ સાથે 20-દિવસના કોન્સોલિડેશનમાંથી બ્રેકઆઉટ થયો. સિસ્ટમે 81% પેટર્ન કન્ફિડન્સ અને 68% સફળતા દર સાથે સંસ્થાકીય ખરીદી ફ્લેગ કરી.
+        </div>
+      </div>
+
+      <!-- Feature 7: Portfolio Simulator & Monte Carlo VaR -->
+      <div class="card">
+        <div class="card-title">
+          <span>ફીચર 7: પોર્ટફોલિયો સિમ્યુલેટર અને 1,000-સિનારિયો રિસ્ક ટેસ્ટ</span>
+          <span class="pill pill-blue">PortfolioSimulatorPage.jsx</span>
+        </div>
+        <p style="font-size: 9.5px;">
+          રોકાણકારોને પ્રેક્ટિસ કરવા માટે ₹10 લાખની વર્ચ્યુઅલ મૂડી ધરાવતું વોલેટ પૂરું પાડે છે. પોર્ટફોલિયોનું દૈનિક જોખમ માપવા માટે તે <b>1,000 કાલ્પનિક બજાર દિવસોનું સિમ્યુલેશન</b> ચલાવે છે:
+        </p>
+        <div class="callout">
+          <b>ચોક્કસ રિસ્ક સર્ટિફિકેશન:</b> અટપટા ગણિત વગર સીધું જ સમજાવે છે: <em>"100 માંથી 95 સામાન્ય ટ્રેડિંગ દિવસોમાં તમારા પોર્ટફોલિયોનું 1 દિવસનું વધુમાં વધુ નુકસાન ₹18,450 (1.85%) થી વધારે નહીં થાય."</em>
+        </div>
+      </div>
+
+      <!-- Feature 8: Alex Autonomous Voice Copilot -->
+      <div class="card">
+        <div class="card-title">
+          <span>ફીચર 8: એલેક્સ કો-પાઇલટ — સ્વાયત્ત ફાઇનાન્સિયલ વોઇસ આર્કિટેક્ચર</span>
+          <span class="pill pill-slate">useVoiceAgent.js & voice_service.py</span>
+        </div>
+        <p style="font-size: 9.5px;">
+          એલેક્સ ખાસ ભારતીય શેરબજાર માટે તૈયાર કરાયેલો વોઇસ આસિસ્ટન્ટ છે. તે સતત સાંભળે છે અને બોલાયેલા શબ્દો મુજબ આખી સ્ક્રીન જાતે કંટ્રોલ કરે છે:
+        </p>
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>વોઇસ ક્ષમતા</th>
+              <th>કેવી રીતે કામ કરે છે (સરળ ભાષામાં)</th>
+              <th>શા માટે જરૂરી છે</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>વર્ડ-બાય-વર્ડ લાઇવ સ્ટ્રીમિંગ</b></td>
+              <td>યુઝર બોલે તેમ એક-એક શબ્દ રીઅલ-ટાઇમ સ્ક્રીન પર દેખાય છે.</td>
+              <td>યુઝરને ખાતરી થાય છે કે AI તેનો અવાજ સચોટ રીતે સાંભળી રહ્યો છે.</td>
+            </tr>
+            <tr>
+              <td><b>2.2 સેકન્ડનો નેચરલ પોઝ</b></td>
+              <td>બોલ્યા પછી 2.2 સેકન્ડ શાંતિ રહે પછી જ આદેશ પર પ્રોસેસ કરે છે.</td>
+              <td>યુઝર વાક્ય પૂરું કરતા વિચારવા રોકાય તો વચ્ચેથી વાત કપાતી નથી.</td>
+            </tr>
+            <tr>
+              <td><b>સળંગ વાતચીતની યાદશક્તિ</b></td>
+              <td>તાજેતરમાં ચર્ચા થયેલા શેરનું નામ યાદ રાખે છે.</td>
+              <td>"તેનો સ્ટોપલોસ શું છે?" પૂછો તો અગાઉ પૂછેલા શેરનો જ જવાબ આપે છે.</td>
+            </tr>
+            <tr>
+              <td><b>ઇકો કેન્સલેશન ફિલ્ટર</b></td>
+              <td>એલેક્સ પોતે બોલતો હોય ત્યારે માઇક્રોફોન બંધ રાખે છે.</td>
+              <td>લેપટોપ સ્પીકરનો પોતાનો અવાજ માઇકમાં જઈને ગરબડ ન સર્જે.</td>
+            </tr>
+            <tr>
+              <td><b>બેવડી અવાજ ક્ષમતા (Dual Voice)</b></td>
+              <td>ડીપગ્રામનો નેચરલ માનવીય અવાજ + બ્રાઉઝરનું ઓફલાઇન સ્પીચ.</td>
+              <td>ઇન્ટરનેટ ધીમું હોય તો પણ કોઈ પણ ક્ષણે અવાજ અટકતો નથી.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="example-tag" style="margin-top: 2px;">
+          <strong>હાથ વગર સ્ક્રીન કંટ્રોલ:</strong> યુઝર બોલે: <em>"Show me adacni entirerpice"</em>. એલેક્સ ભૂલ સુધારીને <code>ADANIENT</code> પર જાય છે, શેરનું કાર્ડ સેન્ટરમાં લાવી ચાર્ટ ખોલે છે અને બોલે છે: <em>"અદાણી એન્ટરપ્રાઇઝ ₹2,950.00 પર ટ્રેડ થાય છે, ટાર્ગેટ ₹3,003.10 અને સ્ટોપલોસ ₹2,914.60 છે."</em>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>MarketMind AI આર્કિટેક્ચર અને વિદ્યાર્થી વાઇવા ડિફેન્સ મેન્યુઅલ</span>
+      <span>ગુપ્ત અને માલિકી હક ધરાવતું · પેજ 3</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PAGE 4: TECH STACK, VOICE ACTION MATRIX & RESILIENCE (GUJARATI) -->
+  <!-- ========================================================================= -->
+  <div class="page">
+    <div class="page-header">
+      <div class="header-logo">MARKETMIND <span>AI</span> · ઇન્સ્ટિટ્યુશનલ માર્ગદર્શિકા</div>
+      <div class="header-tagline">ટેકનોલોજી સ્ટેક અને વોઇસ એક્શન મેટ્રિક્સ · પેજ 4 of 5</div>
+    </div>
+
+    <div class="page-content">
+      <div class="section-title">
+        <span>એન્ડ-ટુ-એન્ડ ટેકનોલોજી સ્ટેક અને ક્રોસ-સ્ક્રીન એક્શન મેટ્રિક્સ</span>
+        <span class="section-badge">સંપૂર્ણ સિસ્ટમ આર્કિટેક્ચર</span>
+      </div>
+
+      <!-- Tech Stack Table -->
+      <div class="card">
+        <div class="card-title">પ્રોડક્શન ટેકનોલોજી સ્ટેકની પસંદગીના કારણો</div>
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>લેયર</th>
+              <th>પસંદ કરેલી ટેકનોલોજી</th>
+              <th>શા માટે પસંદ કરી (એન્જિનિયરિંગ કારણ)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>બેકએન્ડ ફ્રેમવર્ક</b></td>
+              <td><b>FastAPI (Python 3.11+)</b></td>
+              <td>સુપર-ફાસ્ટ અસિન્ક્રોનસ API જે Python ની ગણતરી લાઇબ્રેરીઓ (NumPy, SciPy) સાથે સીધું જોડાય છે.</td>
+            </tr>
+            <tr>
+              <td><b>ફ્રન્ટએન્ડ ફ્રેમવર્ક</b></td>
+              <td><b>React 18 + Vite</b></td>
+              <td>માત્ર 460ms માં બિલ્ડ અને ઝીરો-લેટન્સી સાથે સ્મૂધ રોકાણકાર ઇન્ટરફેસ.</td>
+            </tr>
+            <tr>
+              <td><b>ડિઝાઇન આર્કિટેક્ચર</b></td>
+              <td><b>Vanilla CSS (ડિઝાઇન ટોકન્સ)</b></td>
+              <td>કોઈ વધારાના રનટાઇમ લોડ વગર બ્લૂમબર્ગ ટર્મિનલ જેવો ભરોસાપાત્ર અને પ્રીમિયમ લુક.</td>
+            </tr>
+            <tr>
+              <td><b>વોઇસ ઓળખ</b></td>
+              <td><b>Web Speech + Deepgram Nova-2</b></td>
+              <td>ભારતીય અંગ્રેજી અને પ્રાદેશિક લહેકા માટે 1 સેકન્ડથી ઓછા સમયમાં ચોક્કસ સ્પીચ-ટુ-ટેક્સ્ટ.</td>
+            </tr>
+            <tr>
+              <td><b>AI સ્પીચ સિન્થેસાઇઝર</b></td>
+              <td><b>Google Gemini 2.5 Flash-Lite</b></td>
+              <td>ગણતરી કરેલા આંકડાઓને 35 શબ્દોના સચોટ વોઇસ સંવાદમાં ફેરવીને 1.8 સેકન્ડમાં બોલી સંભળાવે છે.</td>
+            </tr>
+            <tr>
+              <td><b>માર્કેટ ડેટા ફીડ</b></td>
+              <td><b>Yahoo Finance + ઇન-મેમરી કેશ</b></td>
+              <td>270+ શેરોનો ડેટા મેમરીમાંથી 0.0001ms માં સીધો ઉપલબ્ધ થાય છે.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Cross-Screen Voice Action Matrix -->
+      <div class="card">
+        <div class="card-title">ક્રોસ-સ્ક્રીન વોઇસ સિંક્રોનાઇઝેશન મેટ્રિક્સ (9 મુખ્ય આદેશો)</div>
+        <p style="font-size: 9.5px;">
+          એલેક્સ કો-પાઇલટ માત્ર જવાબ નથી આપતો, પણ એપ્લિકેશનની તમામ મુખ્ય સ્ક્રીનો પર જાતે નેવિગેટ કરે છે:
+        </p>
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>બોલાયેલો વોઇસ આદેશ</th>
+              <th>ટાર્ગેટ સ્ક્રીન</th>
+              <th>સ્ક્રીન પર જાતે થતી કામગીરી</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>"Show Reliance Industries"</code></td>
+              <td><b>Market Overview</b></td>
+              <td>રિલાયન્સ શોધીને કાર્ડ સેન્ટરમાં લાવે છે અને લાઇવ પ્રાઇસ ચાર્ટ મોટો કરે છે.</td>
+            </tr>
+            <tr>
+              <td><code>"What if crude rises 20%?"</code></td>
+              <td><b>Domino Predictor</b></td>
+              <td>ડોમિનો પેજ પર જાય છે, ક્રૂડ સ્લાઇડર +20% કરે છે અને સપ્લાય ચેઇનની અસર બતાવે છે.</td>
+            </tr>
+            <tr>
+              <td><code>"Find twin for Tata Motors"</code></td>
+              <td><b>Stock DNA</b></td>
+              <td>સ્ટોક DNA ખોલે છે અને ભારત ફોર્જ (89% સમાનતા) ને રડાર પર મેચ કરીને બતાવે છે.</td>
+            </tr>
+            <tr>
+              <td><code>"Stress test HDFC Bank thesis"</code></td>
+              <td><b>Thesis Breaker</b></td>
+              <td>થીસિસ બ્રેકર ખોલીને ગણતરી કરેલી લાલ સ્ટોપલોસ એક્ઝિટ લાઇન દર્શાવે છે.</td>
+            </tr>
+            <tr>
+              <td><code>"Show Syrma SGS candles"</code></td>
+              <td><b>Candlestick Intel</b></td>
+              <td>કેન્ડલસ્ટિક પેજ પર જઈ OHLCV ચાર્ટ લોડ કરે છે અને સંસ્થાકીય પેટર્ન દર્શાવે છે.</td>
+            </tr>
+            <tr>
+              <td><code>"Calculate portfolio risk"</code></td>
+              <td><b>Portfolio Simulator</b></td>
+              <td>પોર્ટફોલિયો પેજ પર 1,000 સિમ્યુલેશન રન કરી VaR રિસ્ક મીટર અપડેટ કરે છે.</td>
+            </tr>
+            <tr>
+              <td><code>"Show latest news from SEBI"</code></td>
+              <td><b>Latest News</b></td>
+              <td>સમાચાર પેજ ખોલીને SEBI ના સત્તાવાર નિયામક પરિપત્રો ફિલ્ટર કરે છે.</td>
+            </tr>
+            <tr>
+              <td><code>"Open Sector Intelligence"</code></td>
+              <td><b>Sector Intelligence</b></td>
+              <td>9 સેક્ટરોનો હીટમેપ લોડ કરી ફંડ્સ ક્યાં જઈ રહ્યા છે તે દર્શાવે છે.</td>
+            </tr>
+            <tr>
+              <td><code>"Open Market Pulse"</code></td>
+              <td><b>Executive Dashboard</b></td>
+              <td>ડેશબોર્ડ ખોલીને માર્કેટ પલ્સ ટ્રીમેપ વ્યૂ પર સ્વિચ કરે છે.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3-Layer Resilience Engine -->
+      <div class="card">
+        <div class="card-title">3-લેયર રેઝિલિયન્ટ ફોલબેક આર્કિટેક્ચર (સિસ્ટમ ક્યારેય અટકે નહીં)</div>
+        <p style="font-size: 9.5px;">
+          શેરબજારમાં લાઇવ ટ્રેડિંગ વખતે સ્ક્રીન ક્યારેય ફ્રીઝ થવી ન જોઈએ. MarketMind આ માટે 3-સ્તરીય સુરક્ષા વાપરે છે:
+        </p>
+        <div class="grid-3">
+          <div class="example-tag">
+            <b>લેયર 1: લાઇવ માર્કેટ ડેટા:</b> એક્સચેન્જ પાસેથી રીઅલ-ટાઇમ 5-મિનિટની ઇન્ટ્રાડે કેન્ડલ્સ મેળવે છે.
+          </div>
+          <div class="example-tag">
+            <b>લેયર 2: 2.5 સેકન્ડ ટાઇમઆઉટ:</b> જો ઇન્ટરનેટ કનેક્શન 2.5 સેકન્ડથી વધુ વિલંબ કરે, તો રિક્વેસ્ટ આપમેળે સુરક્ષિત રીતે કેન્સલ થાય છે.
+          </div>
+          <div class="example-tag">
+            <b>લેયર 3: મેમરી બેકઅપ ડેટા:</b> ઐતિહાસિક ક્લોઝિંગ પ્રાઇસ આધારિત કેશ્ડ કર્વ બતાવે છે જેથી સ્ક્રીન ક્યારેય લોડિંગ સ્પિનર પર અટવાતી નથી.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>MarketMind AI આર્કિટેક્ચર અને વિદ્યાર્થી વાઇવા ડિફેન્સ મેન્યુઅલ</span>
+      <span>ગુપ્ત અને માલિકી હક ધરાવતું · પેજ 4</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PAGE 5: VIVA & TECHNICAL DEFENSE (TOP 7 TRAP QUESTIONS) (GUJARATI) -->
+  <!-- ========================================================================= -->
+  <div class="page">
+    <div class="page-header">
+      <div class="header-logo">MARKETMIND <span>AI</span> · ઇન્સ્ટિટ્યુશનલ માર્ગદર્શિકા</div>
+      <div class="header-tagline">વાઇવા અને ટેકનિકલ પ્રશ્નોત્તરી · પેજ 5 of 5</div>
+    </div>
+
+    <div class="page-content">
+      <div class="section-title">
+        <span>પરીક્ષક વાઇવા ડિફેન્સ: 7 મહત્વના ટેકનિકલ અને કન્સેપ્ટ પ્રશ્નો</span>
+        <span class="section-badge">ઇન્ટરવ્યૂ Q&A</span>
+      </div>
+
+      <!-- Q1 -->
+      <div class="qa-box">
+        <div class="qa-q">પ્રશ્ન 1: "તમે ડીપ લર્નિંગ ન્યુરલ નેટવર્ક (LSTM) ના બદલે ગણતરી આધારિત મોડેલ કેમ વાપર્યા?"</div>
+        <div class="qa-a">
+          <b>સંરક્ષણ:</b> ડીપ લર્નિંગ મોડેલ 'બ્લેક બોક્સ' હોય છે જે શેરબજારના અવાજમાં ખોટા અનુમાનો કરી શકે છે. Citadel કે Renaissance જેવા મોટા હેજ ફંડ્સ પણ લાઇવ ટ્રેડિંગ માટે બ્લેક-બોક્સ ન્યુરલ નેટવર્ક વાપરતા નથી, કારણ કે તેનું જોખમ ઓડિટ કરી શકાતું નથી. અમારા 5 મોડેલ્સ 100% પારદર્શક, માત્ર 5 મિલીસેકન્ડમાં ગણતરી કરતા અને કોઈ પણ ખોટા અનુમાન વગરના છે.
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="qa-box">
+        <div class="qa-q">પ્રશ્ન 2: "MarketMind માં Gemini AI નું ચોક્કસ કામ શું છે, અને જો Gemini બંધ હોય તો?"</div>
+        <div class="qa-a">
+          <b>સંરક્ષણ:</b> Gemini કોઈ શેરના ભાવ કે ટાર્ગેટની ગણતરી કરતું નથી—બધી ગણતરી અમારા Python બેકએન્ડે પહેલેથી કરી લીધી હોય છે. Gemini નું કામ માત્ર આ આંકડાઓને 35 શબ્દોના સુંદર માનવીય અવાજમાં ફેરવવાનું છે. જો Gemini 2.2 સેકન્ડથી મોડું થાય, તો બેકએન્ડ આપમેળે ઓફલાઇન ટેમ્પલેટમાંથી સીધા જ ભાવ, ટાર્ગેટ અને સ્ટોપલોસ બોલી સંભળાવે છે.
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="qa-box">
+        <div class="qa-q">પ્રશ્ન 3: "અવાજ ઓળખવાની સિસ્ટમ ખોટા સ્પેલિંગ કે ભારતીય લહેકો કેવી રીતે સમજે છે?"</div>
+        <div class="qa-a">
+          <b>સંરક્ષણ:</b> તે વાતચીતના સામાન્ય શબ્દો ("show me", "price") કાઢી નાખે છે અને બાકીના અવાજના અક્ષરોની સરખામણી 270 સત્તાવાર શેરોના નામ સાથે કરે છે. જો મળતાપણું 80% થી વધુ હોય તો તે યોગ્ય શેર પસંદ કરી લે છે (દા.ત. <em>"adacni entirerpice" &rarr; ADANIENT</em>).
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="qa-box">
+        <div class="qa-q">પ્રશ્ન 4: "લેપટોપ સ્પીકરનો અવાજ માઇકમાં પાછો જઈને એલેક્સ પોતાની સાથે જ વાત કેમ નથી કરવા માંડતો?"</div>
+        <div class="qa-a">
+          <b>સંરક્ષણ:</b> એલેક્સ બોલતો હોય ત્યારે `isPlayingAudioRef` ફ્લેગ ચાલુ થાય છે. જો માઇકમાં આવતો અવાજ એલેક્સના પોતાના બોલાતા વાક્ય સાથે મેળ ખાતો હોય તો સિસ્ટમ તેને રોકી દે છે. ઉપરાંત બોલવાનું પૂરું થયા પછી 450ms સુધી માઇક બંધ રાખવામાં આવે છે જેથી ઇકો લૂપ ન બને.
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="qa-box">
+        <div class="qa-q">પ્રશ્ન 5: "સળંગ વાતચીતમાં સર્વનામ (દા.ત. 'તેનો સ્ટોપલોસ') કેવી રીતે યાદ રહે છે?"</div>
+        <div class="qa-a">
+          <b>સંરક્ષણ:</b> સિસ્ટમ તાજેતરની વાતચીત યાદ રાખે છે. જો યુઝર પહેલા પૂછે <em>"રિલાયન્સ કેવો ચાલે છે?"</em> અને પછી પૂછે <em>"તેનો સ્ટોપલોસ શું છે?"</em>, તો સિસ્ટમ હિસ્ટ્રી તપાસીને સમજી જાય છે કે વાત રિલાયન્સની જ છે, જેથી યુઝરે ફરીથી કંપનીનું નામ બોલવું પડતું નથી.
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="qa-box">
+        <div class="qa-q">પ્રશ્ન 6: "બપોરે 3:30 વાગ્યા પછી માર્કેટ બંધ થાય ત્યારે પ્લેટફોર્મ કેવી રીતે કામ કરે છે?"</div>
+        <div class="qa-a">
+          <b>સંરક્ષણ:</b> સિસ્ટમ ભારતીય બજારના સત્તાવાર સમય (સોમ-શુક્ર 09:15 થી 15:30) મુજબ ચાલે છે. બપોરે 3:30 પછી તે આપમેળે <em>POST-MARKET / CLOSED</em> મોડમાં જાય છે, આજના સત્તાવાર બંધ ભાવ લોક કરે છે અને બીજા દિવસના બજાર ખૂલવા માટેની પૂર્વ તૈયારીનું એનાલિસિસ બતાવે છે.
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="qa-box">
+        <div class="qa-q">પ્રશ્ન 7: "ખોટી ટિપ્સ અને ઉધાર લઈને ટ્રેડિંગ કરવાથી બચાવવા કયા નિયમો છે?"</div>
+        <div class="qa-a">
+          <b>સંરક્ષણ:</b> જો કોઈ યુઝર પૂછે કે <em>"1 અઠવાડિયામાં પૈસા બમણા કેવી રીતે કરવા?"</em> કે <em>"લોન લઈને ટ્રેડિંગ કરાય?"</em>, તો SEBI ના નિયમો હેઠળ એલેક્સ નમ્રતાપૂર્વક ના પાડે છે અને સ્પષ્ટ કરે છે કે આ એક શૈક્ષણિક પ્લેટફોર્મ છે જ્યાં કોઈ ગેરંટીડ નફો અપાતો નથી.
+        </div>
+      </div>
+
+      <!-- Final Benchmark Summary -->
+      <div class="card" style="background: #F8FAFC; border-color: #CBD5E1;">
+        <div class="card-title">પ્રોડક્શન પર્ફોર્મન્સ અને ઓડિટ સર્ટિફિકેશન</div>
+        <div class="grid-3" style="margin-top: 2px;">
+          <div style="font-size: 8.5px;"><b>બિલ્ડ સ્પીડ:</b> 460ms (Vite 8.2 પ્રોડક્શન બંડલ)</div>
+          <div style="font-size: 8.5px;"><b>બંડલ સાઈઝ:</b> 339 KB CSS | 361 KB Gzipped JS</div>
+          <div style="font-size: 8.5px;"><b>ઇન-મેમરી શેરો:</b> 270+ લિક્વિડ NSE કંપનીઓ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>MarketMind AI આર્કિટેક્ચર અને વિદ્યાર્થી વાઇવા ડિફેન્સ મેન્યુઅલ</span>
+      <span>ગુપ્ત અને માલિકી હક ધરાવતું · પેજ 5</span>
+    </div>
+  </div>
+
+</body>
+</html>

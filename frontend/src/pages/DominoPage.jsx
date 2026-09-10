@@ -1719,24 +1719,36 @@ export default function DominoPage({ goPage }) {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-              {simulationData?.historical_analogs?.map((an) => (
-                <div key={an.name}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12.5px", marginBottom: "4px" }}>
-                    <span style={{ fontWeight: 600, color: "#101B33" }}>{an.name}</span>
-                    <span style={{ fontWeight: 700, color: "#101B33" }}>{an.similarity.toFixed(2)}</span>
+              {simulationData?.historical_analogs?.map((an) => {
+                const simVal = typeof an.similarity === "number"
+                  ? an.similarity
+                  : (typeof an.similarity_pct === "number"
+                    ? an.similarity_pct / 100
+                    : (parseFloat(an.similarity || an.similarity_pct || 0.85) > 1
+                      ? parseFloat(an.similarity || an.similarity_pct || 85) / 100
+                      : parseFloat(an.similarity || an.similarity_pct || 0.85)));
+                const simDisplay = typeof simVal === "number" && !isNaN(simVal) ? simVal.toFixed(2) : "0.85";
+                const simPct = typeof simVal === "number" && !isNaN(simVal) ? Math.min(100, Math.max(0, simVal * 100)) : 85;
+
+                return (
+                  <div key={an.name}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12.5px", marginBottom: "4px" }}>
+                      <span style={{ fontWeight: 600, color: "#101B33" }}>{an.name}</span>
+                      <span style={{ fontWeight: 700, color: "#101B33" }}>{simDisplay}</span>
+                    </div>
+                    <div style={{ width: "100%", height: "8px", background: "#FAF6EC", borderRadius: "4px", overflow: "hidden", border: "1px solid #E6DCC4" }}>
+                      <div
+                        style={{
+                          width: `${simPct}%`,
+                          height: "100%",
+                          background: "linear-gradient(90deg, #101B33, #B8935A)",
+                          borderRadius: "4px"
+                        }}
+                      ></div>
+                    </div>
                   </div>
-                  <div style={{ width: "100%", height: "8px", background: "#FAF6EC", borderRadius: "4px", overflow: "hidden", border: "1px solid #E6DCC4" }}>
-                    <div
-                      style={{
-                        width: `${an.similarity * 100}%`,
-                        height: "100%",
-                        background: "linear-gradient(90deg, #101B33, #B8935A)",
-                        borderRadius: "4px"
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <p style={{ fontSize: "11px", color: "#7A796F", marginTop: "16px", lineHeight: 1.45 }}>

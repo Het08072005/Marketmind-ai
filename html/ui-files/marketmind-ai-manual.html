@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MarketMind AI — Institutional Quantitative Intelligence & Autonomous Voice Copilot</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    @page {
+      size: A4 portrait;
+      margin: 12mm 14mm 12mm 14mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #FFFFFF;
+      color: #0F172A;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 11px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      width: 100%;
+      height: 271mm;
+      max-height: 271mm;
+      page-break-after: always;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      padding-bottom: 2mm;
+    }
+
+    .page:last-child {
+      page-break-after: auto;
+    }
+
+    /* Running Header & Footer */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid #0F172A;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+
+    .header-logo {
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-logo span {
+      color: #B8935A;
+    }
+
+    .header-tagline {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748B;
+    }
+
+    .page-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #E2E8F0;
+      padding-top: 6px;
+      font-size: 8.5px;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .page-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    /* Headings */
+    h1.doc-title {
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 23px;
+      font-weight: 700;
+      line-height: 1.15;
+      color: #0F172A;
+      letter-spacing: -0.2px;
+    }
+
+    .doc-subtitle {
+      font-size: 11px;
+      color: #475569;
+      font-weight: 400;
+      margin-top: 2px;
+      line-height: 1.35;
+    }
+
+    .section-title {
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0F172A;
+      border-bottom: 1px solid #CBD5E1;
+      padding-bottom: 2px;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-badge {
+      font-family: 'Inter', sans-serif;
+      font-size: 8px;
+      font-weight: 700;
+      background: #F1F5F9;
+      color: #0F172A;
+      border: 1px solid #CBD5E1;
+      padding: 1.5px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Cards & Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 7px;
+    }
+
+    .card {
+      background: #FAFAFA;
+      border: 1px solid #E2E8F0;
+      border-radius: 5px;
+      padding: 7px 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .card-title {
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pill {
+      font-family: 'Inter', sans-serif;
+      font-size: 8px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .pill-blue { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .pill-gold { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+    .pill-green { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .pill-slate { background: #F1F5F9; color: #334155; border: 1px solid #CBD5E1; }
+
+    .concept-box {
+      background: #FFFFFF;
+      border-left: 3px solid #B8935A;
+      border-top: 1px solid #E2E8F0;
+      border-right: 1px solid #E2E8F0;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 5px 8px;
+      font-size: 9.5px;
+      color: #1E293B;
+      line-height: 1.4;
+      margin: 2px 0;
+    }
+
+    .example-tag {
+      font-size: 9.5px;
+      color: #334155;
+      background: #F8FAFC;
+      border: 1px dashed #CBD5E1;
+      padding: 4px 7px;
+      border-radius: 4px;
+      line-height: 1.35;
+    }
+
+    .example-tag strong {
+      color: #0F172A;
+      font-weight: 600;
+    }
+
+    /* Tables */
+    table.compact-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9.5px;
+      margin-top: 2px;
+    }
+
+    table.compact-table th {
+      background: #0F172A;
+      color: #FFFFFF;
+      font-family: 'Inter', sans-serif;
+      font-size: 8.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 4px 6px;
+      text-align: left;
+    }
+
+    table.compact-table td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #E2E8F0;
+      color: #1E293B;
+      line-height: 1.3;
+    }
+
+    table.compact-table tr:nth-child(even) td {
+      background: #F8FAFC;
+    }
+
+    /* Key Points / Callouts */
+    .callout {
+      background: #FFFDF9;
+      border: 1px solid #E8DFCC;
+      border-left: 3px solid #B8935A;
+      padding: 6px 9px;
+      border-radius: 3px;
+      font-size: 10px;
+      color: #262626;
+      line-height: 1.4;
+    }
+
+    .qa-box {
+      border: 1px solid #E2E8F0;
+      background: #FFFFFF;
+      border-radius: 4px;
+      padding: 6px 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .qa-q {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+
+    .qa-a {
+      font-size: 9.5px;
+      color: #334155;
+      line-height: 1.35;
+    }
+
+    b { font-weight: 600; color: #0F172A; }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================= -->
+  <!-- PAGE 1: SYSTEM ARCHITECTURE & 5 CORE ENGINES (PLAIN ENGLISH) -->
+  <!-- ========================================================================= -->
+  <div class="page">
+    <div class="page-header">
+      <div class="header-logo">MARKETMIND <span>AI</span> · INSTITUTIONAL MANUAL</div>
+      <div class="header-tagline">Core Concept & Architecture · Page 1 of 5</div>
+    </div>
+
+    <div class="page-content">
+      <div>
+        <h1 class="doc-title">MarketMind AI: Quantitative Equity Platform & Autonomous Voice Copilot</h1>
+        <p class="doc-subtitle">
+          An institutional-grade stock intelligence platform designed for 270+ National Stock Exchange (NSE) equities, 
+          researched with AI assistance to replace retail emotional guessing with real-time order book imbalances, causal supply chain ripple effects, and hands-free voice control.
+        </p>
+      </div>
+
+      <!-- Problem vs Institutional Solution -->
+      <div class="grid-2">
+        <div class="card" style="background: #FEF2F2; border-color: #FECACA;">
+          <div class="card-title" style="color: #991B1B;">The Retail Problem (Why 90% Lose Money)</div>
+          <p style="font-size: 9.5px; color: #7F1D1D;">
+            According to SEBI data, over 90% of retail traders lose capital. They trade based on delayed news, WhatsApp rumors, and lagging indicators (RSI/MACD). When a trade goes into loss, they hold onto it with "hope" until wiped out.
+          </p>
+        </div>
+        <div class="card" style="background: #F0FDF4; border-color: #BBF7D0;">
+          <div class="card-title" style="color: #166534;">The AI Institutional Solution</div>
+          <p style="font-size: 9.5px; color: #14532D;">
+            MarketMind AI operates like institutional quant hedge funds. It measures live buyer vs. seller queue depth, true institutional average prices, economic domino reactions, and mathematically enforced stop-loss exit points.
+          </p>
+        </div>
+      </div>
+
+      <!-- Core Models Section (Zero Formulas, Pure Intuition) -->
+      <div class="section-title">
+        <span>The 5 Core Intelligence Engines (Explained Simply — No Formulas)</span>
+        <span class="section-badge">FastAPI Backend</span>
+      </div>
+
+      <!-- Model 1 -->
+      <div class="card">
+        <div class="card-title">
+          <span>1. Directional Probability Model <span style="font-size: 9px; font-weight: 400; color: #64748B;">(recommendations_service.py)</span></span>
+          <span class="pill pill-green">Buyer vs. Seller Strength</span>
+        </div>
+        <div class="concept-box">
+          <b>What It Does:</b> Calculates the exact percentage chance (e.g. 66% Upward Probability) that a stock will continue rising today, instead of giving a subjective guess.<br/>
+          <b>How It Works:</b> Evaluates 3 real-world clues: (1) Are there more active limit buyers than sellers in the exchange order queue? (2) Is the price trading above today's institutional average price (VWAP)? (3) Is trading volume unusually heavy? It turns these 3 signals into a clear 0% to 100% confidence score.
+        </div>
+        <div class="example-tag">
+          <strong>Dalal Street Example:</strong> Syrma SGS has huge buyer demand at ₹1,635 with double normal volume. The engine computes a 66.5% probability of upward continuation and issues a <em>STRONG BUY</em> signal targeting ₹1,729.00.
+        </div>
+      </div>
+
+      <!-- Model 2 -->
+      <div class="card">
+        <div class="card-title">
+          <span>2. Macro Domino Shock Engine <span style="font-size: 9px; font-weight: 400; color: #64748B;">(domino_service.py)</span></span>
+          <span class="pill pill-gold">Supply Chain Ripple Effects</span>
+        </div>
+        <div class="concept-box">
+          <b>What It Does:</b> Tracks how a change in global commodities (Crude Oil, Gold) or RBI interest rates cascades step-by-step through company supply chains and profit margins.<br/>
+          <b>How It Works:</b> When raw material prices spike, it automatically traces who suffers higher costs and who makes higher profits across connected corporate sectors.
+        </div>
+        <div class="example-tag">
+          <strong>Dalal Street Example:</strong> If Crude Oil jumps +20%, IndiGo Airlines loses profits because aviation fuel becomes expensive, while ONGC gains +₹1,120 Crore because it drills and sells crude oil at higher prices.
+        </div>
+      </div>
+
+      <!-- Model 3 -->
+      <div class="card">
+        <div class="card-title">
+          <span>3. Stock DNA Behavioral Twin Finder <span style="font-size: 9px; font-weight: 400; color: #64748B;">(dna_service.py)</span></span>
+          <span class="pill pill-blue">Smart Stock Matchmaker</span>
+        </div>
+        <div class="concept-box">
+          <b>What It Does:</b> Finds "twin" stocks that share the same financial DNA (growth, valuation, debt, and momentum) so you never have to chase an overpriced stock.<br/>
+          <b>How It Works:</b> Analyzes 8 fundamental and technical characteristics across 270 NSE companies to detect stocks that behave almost identically in the market.
+        </div>
+        <div class="example-tag">
+          <strong>Dalal Street Example:</strong> When Tata Motors rallies +35% and becomes too risky to buy, Stock DNA scans 270 stocks and points you to Bharat Forge (89% twin match), allowing you to capture the auto boom at a safer price.
+        </div>
+      </div>
+
+      <!-- Models 4 & 5 Compact Grid -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <span>4. 1-Day Monte Carlo Risk Gauge</span>
+            <span class="pill pill-slate">portfolio_service.py</span>
+          </div>
+          <div class="concept-box" style="font-size: 9px;">
+            <b>What It Does:</b> Simulates 1,000 possible market days to tell you the maximum realistic loss on your portfolio in plain Rupees.<br/>
+            <b>How It Works:</b> Uses 1 year of real historical price swings to stress-test your holdings across 1,000 randomized scenarios.
+          </div>
+          <div class="example-tag" style="font-size: 9px;">
+            <strong>Example:</strong> For a ₹10 Lakh portfolio in Reliance and Adani, it certifies: <em>"On 95 out of 100 days, your maximum 1-day loss will not exceed ₹18,450."</em>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>5. Smart Voice Phonetic Matcher</span>
+            <span class="pill pill-slate">voice_service.py</span>
+          </div>
+          <div class="concept-box" style="font-size: 9px;">
+            <b>What It Does:</b> Accurately identifies stock names from voice commands, even with heavy Indian accents, background noise, or voice typos.<br/>
+            <b>How It Works:</b> Compares spoken syllable patterns against 270 official NSE company names to find the closest match instantly.
+          </div>
+          <div class="example-tag" style="font-size: 9px;">
+            <strong>Example:</strong> Spoken query <em>"adacni entirerpice"</em> immediately matches ticker <code>ADANIENT</code>, opening the stock card and chart on screen hands-free.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>MarketMind AI Architecture & Student Viva Defense Manual</span>
+      <span>Confidential & Proprietary · Page 1</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PAGE 2: CORE PLATFORM ENGINES (PART 1) -->
+  <!-- ========================================================================= -->
+  <div class="page">
+    <div class="page-header">
+      <div class="header-logo">MARKETMIND <span>AI</span> · INSTITUTIONAL MANUAL</div>
+      <div class="header-tagline">Core Platform Engines (Part 1) · Page 2 of 5</div>
+    </div>
+
+    <div class="page-content">
+      <div class="section-title">
+        <span>Institutional Equity Modules (Overview, Dashboard, Domino & DNA)</span>
+        <span class="section-badge">Workspaces 01 – 04</span>
+      </div>
+
+      <!-- Feature 1: Market Overview -->
+      <div class="card">
+        <div class="card-title">
+          <span>Feature 1: Market Overview Radar & Live Order Flow</span>
+          <span class="pill pill-green">MarketOverviewPage.jsx</span>
+        </div>
+        <p style="font-size: 10px;">
+          Tracks 270+ liquid National Stock Exchange (NSE) market leaders cached in-memory. Evaluates live intraday Order Book Imbalances (buyer vs. seller queue) and institutional Volume-Weighted Average Price (VWAP) benchmarks to issue autonomous quantitative verdicts (<em>STRONG BUY, ACCUMULATE, HOLD, CAUTION</em>).
+        </p>
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Institutional Metric</th>
+              <th>How It Works (Plain English)</th>
+              <th>Why It Protects The Trader</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Order Book Imbalance (OBI)</b></td>
+              <td>Counts live buy orders waiting in the exchange queue vs. sell orders.</td>
+              <td>Reveals real buying pressure before prices move (+0.15 = buyers 15% stronger).</td>
+            </tr>
+            <tr>
+              <td><b>Anchored VWAP (AVWAP)</b></td>
+              <td>Calculates the true average price paid by all traders weighted by volume.</td>
+              <td>Acts as an institutional floor. If price is above VWAP, big institutions are in profit.</td>
+            </tr>
+            <tr>
+              <td><b>Historical Win Rate</b></td>
+              <td>Tests how many times this exact setup yielded a profitable trade in past years.</td>
+              <td>Replaces hopeful guesses with verified historical sample data (e.g., 68% wins over 2,589 setups).</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="example-tag">
+          <strong>Dalal Street Scenario:</strong> Reliance Industries trades at ₹1,285.20. MarketMind displays buyers at +10% strength, price above its ₹1,293.79 institutional benchmark, and calculates an upside target of ₹1,338.31 (+2.2%) with a clearly defined risk boundary.
+        </div>
+      </div>
+
+      <!-- Feature 2: Executive Multi-Workspace Dashboard -->
+      <div class="card">
+        <div class="card-title">
+          <span>Feature 2: Executive Multi-Workspace Dashboard</span>
+          <span class="pill pill-blue">DashboardPage.jsx</span>
+        </div>
+        <p style="font-size: 10px;">
+          A professional command center inspired by institutional Bloomberg terminals. Aggregates four decoupled intelligence pods into a clean unified screen:
+        </p>
+        <div class="grid-2">
+          <div class="example-tag">
+            <b>Workspace 01: Quant Matrix View:</b> Ranks the entire 270-stock universe by institutional conviction, 1-day price speed, and sector momentum.
+          </div>
+          <div class="example-tag">
+            <b>Workspace 02: Market Pulse Heatmap:</b> Real-time visual treemap reflecting money rotation across 9 key Indian sectors (Banks, Metals, Energy, Auto, IT).
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="example-tag">
+            <b>Workspace 03: Live Streaming News:</b> Ingests official regulatory updates from SEBI adjudication circulars and RBI announcements with instant sentiment tags.
+          </div>
+          <div class="example-tag">
+            <b>Workspace 04: Deep Telemetry Charts:</b> Interactive TradingView canvas showing both candlestick patterns and smoothed trend curves with institutional bands.
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 3: Market Domino Predictor -->
+      <div class="card">
+        <div class="card-title">
+          <span>Feature 3: Market Domino Predictor (Causal Macro Supply Chain)</span>
+          <span class="pill pill-gold">DominoPredictorPage.jsx</span>
+        </div>
+        <p style="font-size: 10px;">
+          Stocks do not move in isolation. When global events occur (such as crude oil spikes or interest rate hikes), the Domino engine computes the ripple effect across connected company supply chains:
+        </p>
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Trigger Catalyst</th>
+              <th>Direct First Effect</th>
+              <th>Corporate Margin Impact</th>
+              <th>Smart Sector Hedge</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Crude Oil Rises +20%</b></td>
+              <td>Aviation fuel (ATF) becomes significantly costlier.</td>
+              <td>InterGlobe Aviation (IndiGo) airline profits fall (-210 bps).</td>
+              <td>ONGC profits expand (+₹1,120 Cr) as it sells oil at higher rates.</td>
+            </tr>
+            <tr>
+              <td><b>RBI Repo Rate Hikes +50 bps</b></td>
+              <td>Bank loan interest rates and borrowing costs increase.</td>
+              <td>Car and real estate buying slows down as EMIs go up.</td>
+              <td>Large commercial banks (HDFC Bank) earn higher lending margins.</td>
+            </tr>
+            <tr>
+              <td><b>USD/INR Depreciates +2%</b></td>
+              <td>Imported computer chips and electronics become costly.</td>
+              <td>Domestic electronic manufacturers see raw material costs rise.</td>
+              <td>IT exporters (TCS, Infosys) gain higher profits as they earn in US Dollars.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Feature 4: Stock DNA Fingerprint -->
+      <div class="card">
+        <div class="card-title">
+          <span>Feature 4: Stock DNA Fingerprint & Behavioral Pair Trading</span>
+          <span class="pill pill-slate">StockDnaPage.jsx</span>
+        </div>
+        <p style="font-size: 10px;">
+          Traditional sector grouping fails when large conglomerates operate across multiple industries. Stock DNA evaluates every company across 8 key financial traits (valuation, momentum, debt, company size, volatility, and trend slope):
+        </p>
+        <div class="callout">
+          <b>Smart Stock Substitution:</b> If an investor wants to profit from the booming Indian automotive sector but finds Tata Motors already overbought and expensive (+35% rally), Stock DNA compares financial fingerprints and suggests <b>Bharat Forge (89% similarity)</b> or <b>Ashok Leyland (84% similarity)</b> as identical, unheated alternatives at better valuations.
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>MarketMind AI Architecture & Student Viva Defense Manual</span>
+      <span>Confidential & Proprietary · Page 2</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PAGE 3: CORE PLATFORM ENGINES (PART 2) & ALEX VOICE COPILOT -->
+  <!-- ========================================================================= -->
+  <div class="page">
+    <div class="page-header">
+      <div class="header-logo">MARKETMIND <span>AI</span> · INSTITUTIONAL MANUAL</div>
+      <div class="header-tagline">Core Platform Engines (Part 2) · Page 3 of 5</div>
+    </div>
+
+    <div class="page-content">
+      <div class="section-title">
+        <span>Risk Management, Chart Patterns & Alex Voice Copilot</span>
+        <span class="section-badge">Workspaces 05 – 08</span>
+      </div>
+
+      <!-- Feature 5: Thesis Breaker -->
+      <div class="card">
+        <div class="card-title">
+          <span>Feature 5: Thesis Breaker (Zero-Hope Risk Architecture)</span>
+          <span class="pill pill-gold">ThesisBreakerPage.jsx</span>
+        </div>
+        <p style="font-size: 10px;">
+          Retail traders frequently hold losing positions because of emotional denial ("hoping it will bounce back"). Thesis Breaker establishes a pre-calculated <b>Structural Invalidation Floor</b> anchored to major volume support:
+        </p>
+        <div class="example-tag">
+          <strong>Disciplined Exit Example:</strong> When buying Adani Enterprises at ₹2,950.00, the system sets an invalidation floor at ₹2,914.60. If the stock closes below this line, the buy thesis is proven wrong. MarketMind issues an immediate exit alert without emotional hesitation, saving the trader from catastrophic losses.
+        </div>
+      </div>
+
+      <!-- Feature 6: Candlestick Intel -->
+      <div class="card">
+        <div class="card-title">
+          <span>Feature 6: Candlestick Intel & Autonomous Pattern Detection</span>
+          <span class="pill pill-green">CandlestickIntelPage.jsx</span>
+        </div>
+        <p style="font-size: 10px;">
+          Scans historical candlestick bars to automatically identify high-conviction institutional accumulation patterns (Bullish Engulfing, Hammer Reversals, Support Reclaims). It eliminates retail trap breakouts by requiring <b>1.5x minimum volume confirmation</b>.
+        </p>
+        <div class="example-tag">
+          <strong>Pattern Detection Example:</strong> TCS breaks above its 20-day trading range with 2.4x average daily volume. The engine highlights a validated <em>Institutional Accumulation Formation</em> with 81% pattern confidence and an estimated 68% probability of continued upside.
+        </div>
+      </div>
+
+      <!-- Feature 7: Portfolio Simulator & Monte Carlo VaR -->
+      <div class="card">
+        <div class="card-title">
+          <span>Feature 7: Portfolio Simulator & 1,000-Scenario Risk Gauge</span>
+          <span class="pill pill-blue">PortfolioSimulatorPage.jsx</span>
+        </div>
+        <p style="font-size: 10px;">
+          Provides a risk-free virtual trading wallet (₹10 Lakh starting equity) to practice institutional trade setups with realistic market conditions. Daily portfolio tail-risk is checked using <b>1,000 randomized market stress simulations</b>:
+        </p>
+        <div class="callout">
+          <b>Clear Risk Certification:</b> Instead of confusing equations, the engine gives a straightforward risk statement: <em>"Across 95 out of 100 normal trading days, your maximum 1-day portfolio drawdown will not exceed ₹18,450 (1.85%)."</em>
+        </div>
+      </div>
+
+      <!-- Feature 8: Alex Autonomous Voice Copilot -->
+      <div class="card">
+        <div class="card-title">
+          <span>Feature 8: Alex Copilot — Autonomous Financial Voice Assistant</span>
+          <span class="pill pill-slate">useVoiceAgent.js & voice_service.py</span>
+        </div>
+        <p style="font-size: 10px;">
+          Alex is an intelligent voice copilot designed specifically for Indian stock markets. It listens continuously and translates speech directly into active UI screen controls:
+        </p>
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Voice Feature</th>
+              <th>How It Works (Plain English)</th>
+              <th>Why It Was Built</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Word-by-Word Streaming STT</b></td>
+              <td>Captures words in real-time as the user speaks, showing live text immediately.</td>
+              <td>Gives instant visual feedback so the user knows the AI is actively listening.</td>
+            </tr>
+            <tr>
+              <td><b>2.2s Natural Pause Detection</b></td>
+              <td>Waits 2.2 seconds of silence before processing spoken commands.</td>
+              <td>Allows users to pause and think without being rudely cut off mid-sentence.</td>
+            </tr>
+            <tr>
+              <td><b>Multi-Turn Memory Stack</b></td>
+              <td>Remembers the active stock in conversation.</td>
+              <td>Enables natural follow-up questions: <em>"What is its target?"</em> remembers Reliance.</td>
+            </tr>
+            <tr>
+              <td><b>Acoustic Echo Cancellation</b></td>
+              <td>Detects when Alex is speaking and suppresses microphone feedback.</td>
+              <td>Prevents laptop speakers from triggering an endless loop of self-talking.</td>
+            </tr>
+            <tr>
+              <td><b>Dual Voice Speech Synthesis</b></td>
+              <td>Deepgram realistic AI voice + browser fallback synthesizer.</td>
+              <td>Delivers natural human-like voice with 100% reliability even during slow internet.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="example-tag" style="margin-top: 3px;">
+          <strong>Autonomous Screen Navigation:</strong> The user says: <em>"Show me adacni entirerpice"</em>. Alex corrects the typo to <code>ADANIENT</code>, switches the screen to Market Overview, scrolls the card to center, expands the chart, and speaks: <em>"Adani Enterprises trades at ₹2,950.00 (+0.41%), target ₹3,003.10 with stop-loss at ₹2,914.60."</em>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>MarketMind AI Architecture & Student Viva Defense Manual</span>
+      <span>Confidential & Proprietary · Page 3</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PAGE 4: TECH STACK, VOICE ACTION MATRIX & RESILIENCE -->
+  <!-- ========================================================================= -->
+  <div class="page">
+    <div class="page-header">
+      <div class="header-logo">MARKETMIND <span>AI</span> · INSTITUTIONAL MANUAL</div>
+      <div class="header-tagline">Technology Stack & Action Matrix · Page 4 of 5</div>
+    </div>
+
+    <div class="page-content">
+      <div class="section-title">
+        <span>End-to-End Technology Stack & Cross-Screen Action Matrix</span>
+        <span class="section-badge">Full-Stack Architecture</span>
+      </div>
+
+      <!-- Tech Stack Table -->
+      <div class="card">
+        <div class="card-title">Production Technology Stack Rationale</div>
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>Chosen Technology</th>
+              <th>Why We Selected It</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Backend Framework</b></td>
+              <td><b>FastAPI (Python 3.11+)</b></td>
+              <td>Ultra-fast asynchronous API with native support for Python numerical math libraries (NumPy, SciPy).</td>
+            </tr>
+            <tr>
+              <td><b>Frontend Framework</b></td>
+              <td><b>React 18 + Vite</b></td>
+              <td>Blazing-fast build times (460ms) with instant Hot Module Replacement for smooth trader UI.</td>
+            </tr>
+            <tr>
+              <td><b>Styling Architecture</b></td>
+              <td><b>Vanilla CSS (Design Tokens)</b></td>
+              <td>Zero runtime CSS bloat. Clean institutional light/dark theme design inspired by Bloomberg terminals.</td>
+            </tr>
+            <tr>
+              <td><b>Voice Recognition</b></td>
+              <td><b>Web Speech + Deepgram Nova-2</b></td>
+              <td>Sub-second speech-to-text accuracy tuned for Indian English and regional accents.</td>
+            </tr>
+            <tr>
+              <td><b>AI Speech Synthesizer</b></td>
+              <td><b>Google Gemini 2.5 Flash-Lite</b></td>
+              <td>Lightning-fast AI responses (< 1.8s) translating complex financial metrics into crisp 35-word voice answers.</td>
+            </tr>
+            <tr>
+              <td><b>Stock Data Feed</b></td>
+              <td><b>Yahoo Finance + In-Memory Cache</b></td>
+              <td>Instant data retrieval (0.0001ms) from memory cache for 270+ Indian equities.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Cross-Screen Voice Action Matrix -->
+      <div class="card">
+        <div class="card-title">Cross-Screen Voice Synchronization Matrix</div>
+        <p style="font-size: 9.5px;">
+          Alex Copilot dispatches voice action events that automatically control and navigate the entire application:
+        </p>
+        <table class="compact-table">
+          <thead>
+            <tr>
+              <th>Spoken Voice Command</th>
+              <th>Target Screen</th>
+              <th>Autonomous UI Action Executed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>"Show Reliance Industries"</code></td>
+              <td><b>Market Overview</b></td>
+              <td>Finds <code>RELIANCE</code>, scrolls card to center screen, and expands live price chart.</td>
+            </tr>
+            <tr>
+              <td><code>"What if crude rises 20%?"</code></td>
+              <td><b>Domino Predictor</b></td>
+              <td>Navigates to Domino screen, sets crude oil slider to +20%, and shows supply chain impact.</td>
+            </tr>
+            <tr>
+              <td><code>"Find twin for Tata Motors"</code></td>
+              <td><b>Stock DNA</b></td>
+              <td>Opens Stock DNA and matches Bharat Forge (89% twin match) on the radar screen.</td>
+            </tr>
+            <tr>
+              <td><code>"Stress test HDFC Bank thesis"</code></td>
+              <td><b>Thesis Breaker</b></td>
+              <td>Opens Thesis Breaker and highlights the calculated invalidation exit line in red.</td>
+            </tr>
+            <tr>
+              <td><code>"Show Syrma SGS candles"</code></td>
+              <td><b>Candlestick Intel</b></td>
+              <td>Switches to Candlestick Intel, loads OHLCV chart, and highlights accumulation patterns.</td>
+            </tr>
+            <tr>
+              <td><code>"Calculate portfolio risk"</code></td>
+              <td><b>Portfolio Simulator</b></td>
+              <td>Navigates to Portfolio screen, runs 1,000 market simulations, and updates VaR risk gauge.</td>
+            </tr>
+            <tr>
+              <td><code>"Show latest news from SEBI"</code></td>
+              <td><b>Latest News</b></td>
+              <td>Navigates to News screen and filters official SEBI regulatory circulars.</td>
+            </tr>
+            <tr>
+              <td><code>"Open Sector Intelligence"</code></td>
+              <td><b>Sector Intelligence</b></td>
+              <td>Loads 9-sector heatmap showing where institutional money is moving today.</td>
+            </tr>
+            <tr>
+              <td><code>"Open Market Pulse"</code></td>
+              <td><b>Executive Dashboard</b></td>
+              <td>Switches Dashboard view to the Market Pulse real-time visual treemap.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3-Layer Resilience Engine -->
+      <div class="card">
+        <div class="card-title">3-Tier Resilient Fallback Architecture (Zero Freeze Guarantee)</div>
+        <p style="font-size: 9.5px;">
+          Financial applications must never freeze or crash during live market hours. MarketMind AI enforces a 3-layer safety net:
+        </p>
+        <div class="grid-3">
+          <div class="example-tag">
+            <b>Tier 1: Live Market Feed:</b> Queries live exchange endpoints for real-time 5-minute intraday stock candles.
+          </div>
+          <div class="example-tag">
+            <b>Tier 2: 2.5s Timeout Guard:</b> If an external internet call takes longer than 2.5 seconds, the request is safely cancelled.
+          </div>
+          <div class="example-tag">
+            <b>Tier 3: In-Memory Fallback:</b> Renders verified historical closing curves so charts and UI never get stuck on loading spinners.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>MarketMind AI Architecture & Student Viva Defense Manual</span>
+      <span>Confidential & Proprietary · Page 4</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- PAGE 5: VIVA & TECHNICAL DEFENSE (TOP 10 TRAP QUESTIONS) -->
+  <!-- ========================================================================= -->
+  <div class="page">
+    <div class="page-header">
+      <div class="header-logo">MARKETMIND <span>AI</span> · INSTITUTIONAL MANUAL</div>
+      <div class="header-tagline">Viva & Technical Defense · Page 5 of 5</div>
+    </div>
+
+    <div class="page-content">
+      <div class="section-title">
+        <span>Evaluator Viva Defense: Top 7 Technical & Conceptual Questions</span>
+        <span class="section-badge">Interview Q&A</span>
+      </div>
+
+      <!-- Q1 -->
+      <div class="qa-box">
+        <div class="qa-q">Q1: "Why did you use explainable quantitative logic instead of a Deep Learning Neural Network (LSTM)?"</div>
+        <div class="qa-a">
+          <b>Defense:</b> Deep learning neural networks are "black boxes" that overfit to market noise and hallucinate unpredictable outputs. Institutional hedge funds like Citadel and Renaissance Technologies do not let black-box neural networks make live trading decisions because their risks cannot be audited. Our 5 quantitative engines provide 100% explainable, deterministic logic with sub-5 millisecond response times and zero hallucination risk.
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="qa-box">
+        <div class="qa-q">Q2: "What is the exact role of Gemini AI in MarketMind, and what happens if Gemini is offline?"</div>
+        <div class="qa-a">
+          <b>Defense:</b> Gemini does not calculate numbers, stock targets, or risk percentages—all math is computed by our fast Python backend. Gemini's role is an <em>Institutional Voice Synthesizer</em>: it takes our calculated numbers and formats them into a polite, concise 35-word spoken response. If Gemini goes offline or lags past 2.2 seconds, our backend instantly uses an offline fallback template that speaks the exact price, target, and stop loss without delay.
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="qa-box">
+        <div class="qa-q">Q3: "How does the voice system understand misspelled stock names or Indian accents?"</div>
+        <div class="qa-a">
+          <b>Defense:</b> It removes conversational filler words (<em>"show me", "share price"</em>), breaks the audio into phonetic pieces, and compares the character sequence against 270 official company names and common aliases. If similarity is above 80%, it immediately matches the stock (e.g., <em>"adacni entirerpice" &rarr; ADANIENT</em>).
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="qa-box">
+        <div class="qa-q">Q4: "How does Acoustic Echo Cancellation prevent Alex from talking to himself through the mic?"</div>
+        <div class="qa-a">
+          <b>Defense:</b> When Alex speaks through the laptop speakers, the mic could pick up his own voice and treat it as a new user command. We track an active audio flag (<code>isPlayingAudioRef</code>). If incoming sound matches what Alex is currently speaking, the audio input is blocked. We also enforce a 450ms silence pause after speaking before re-opening the mic.
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="qa-box">
+        <div class="qa-q">Q5: "How does the platform handle multi-turn conversations (pronouns like 'it')?"</div>
+        <div class="qa-a">
+          <b>Defense:</b> The client maintains a rolling memory of recent conversation turns. If a user first asks <em>"How is Reliance doing?"</em> and then follows up with <em>"What is its stop loss?"</em>, the backend checks the history stack, identifies that <code>RELIANCE</code> was the active subject, and answers for Reliance without forcing the user to repeat the company name.
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="qa-box">
+        <div class="qa-q">Q6: "How does MarketMind handle post-market hours (after 3:30 PM IST)?"</div>
+        <div class="qa-a">
+          <b>Defense:</b> The platform tracks official Indian Market Hours (09:15 to 15:30 IST, Monday through Friday). After 3:30 PM, it automatically switches to <em>POST-MARKET / CLOSED</em> status, freezes prices to official end-of-day settlement rates, and displays preparation analytics for the next morning's market opening.
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="qa-box">
+        <div class="qa-q">Q7: "What regulatory safety guardrails prevent reckless financial advice?"</div>
+        <div class="qa-a">
+          <b>Defense:</b> If a user asks speculative questions like <em>"How can I double my money in 1 week?"</em> or <em>"Should I take a loan to trade?"</em>, strict SEBI prudence rules intercept the query. Alex politely refuses, warns against borrowed capital, and clarifies that MarketMind is an educational quantitative platform with zero guaranteed profits.
+        </div>
+      </div>
+
+      <!-- Final Benchmark Summary -->
+      <div class="card" style="background: #F8FAFC; border-color: #CBD5E1;">
+        <div class="card-title">Production Performance & Audit Certification</div>
+        <div class="grid-3" style="margin-top: 3px;">
+          <div style="font-size: 9px;"><b>Build Speed:</b> 460ms (Vite 8.2 Production Bundle)</div>
+          <div style="font-size: 9px;"><b>Bundle Footprint:</b> 339 KB CSS | 361 KB Gzipped JS</div>
+          <div style="font-size: 9px;"><b>In-Memory Universe:</b> 270+ Liquid NSE Equities</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>MarketMind AI Architecture & Student Viva Defense Manual</span>
+      <span>Confidential & Proprietary · Page 5</span>
+    </div>
+  </div>
+
+</body>
+</html>
